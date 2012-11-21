@@ -177,8 +177,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     ui(new Ui::VideoWidget)
 {
     ui->setupUi(this);
-
-    QObject::connect(this->ui->horizontalScrollBar, SIGNAL(sliderMoved(int)), this, SLOT(SliderMoved(int)));
+    QObject::connect(this->ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(SliderMoved(int)));
 
     this->seq = QSharedPointer<ImageSequence>(new ImageSequence("/home/tim/dev/QtMedia/testseq"));
     this->scene = QSharedPointer<QGraphicsScene>(new QGraphicsScene(this));
