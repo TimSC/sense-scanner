@@ -17,4 +17,5 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     videowidget.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    videowidget.ui

@@ -10,19 +10,6 @@ namespace Ui {
 class MainWindow;
 }
 
-class ImageSequence
-{
-public:
-    ImageSequence(QString targetDir);
-    virtual ~ImageSequence();
-    QSharedPointer<QImage> Get(long long unsigned ti); //in milliseconds
-    long long unsigned Length(); //Get length
-
-protected:
-    int minIndex, maxIndex, maxPackedChars;
-    QString maxPrefix, maxExt, targetDir;
-};
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -33,8 +20,7 @@ public:
     
 private:
     Ui::MainWindow *ui;
-    QGraphicsScene *scene;
-    QGraphicsPixmapItem *item;
+
 };
 
 #endif // MAINWINDOW_H
