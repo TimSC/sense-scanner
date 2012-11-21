@@ -145,6 +145,35 @@ long long unsigned ImageSequence::Length() //Get length
 
 //********************************************************************
 
+ZoomGraphicsView::ZoomGraphicsView(QWidget *parent) : QGraphicsView(parent)
+{
+    this->scaleFactor = 1.;
+
+}
+
+ZoomGraphicsView::~ZoomGraphicsView()
+{
+
+
+}
+
+void ZoomGraphicsView::wheelEvent(QWheelEvent* event)
+{
+    if (event->delta() > 0)
+    {
+        this->scaleFactor = 1.2;
+    }
+    else
+    {
+        this->scaleFactor = 1./1.2;
+    }
+    cout << "Mouse wheel\t" << this->scaleFactor << endl;
+    this->scale(this->scaleFactor,this->scaleFactor);
+    this->update();
+}
+
+//********************************************************************
+
 VideoWidget::VideoWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::VideoWidget)
@@ -156,6 +185,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->seq = QSharedPointer<ImageSequence>(new ImageSequence("/home/tim/dev/QtMedia/testseq"));
 
     this->SetVisibleAtTime(0);
+    this->ui->graphicsView->scale(2.,2.);
     this->ui->horizontalScrollBar->setRange(0, seq->Length()-1);
 }
 

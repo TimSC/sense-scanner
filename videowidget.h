@@ -26,6 +26,20 @@ namespace Ui {
 class VideoWidget;
 }
 
+class ZoomGraphicsView : public QGraphicsView
+{
+    Q_OBJECT
+public:
+    explicit ZoomGraphicsView(QWidget *parent = 0);
+    virtual ~ZoomGraphicsView();
+
+public slots:
+    void wheelEvent(QWheelEvent* event);
+
+protected:
+    float scaleFactor;
+};
+
 class VideoWidget : public QWidget
 {
     Q_OBJECT
