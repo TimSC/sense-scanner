@@ -70,6 +70,7 @@ ImageSequence::ImageSequence(QString targetDir)
     }
 
     //Get lowest value file
+    //TODO this is a much better place to determine if the file name is packed
     for(int i=0;i<=this->maxIndex;i++)
     {
         QString fina;
@@ -96,7 +97,6 @@ ImageSequence::~ImageSequence()
 
 QSharedPointer<QImage> ImageSequence::Get(long long unsigned ti) //in milliseconds
 {
-    //QImage *image = new QImage("/home/tim/dev/QtMedia/test.png");
     ti += this->minIndex;
     QString fina;
     fina.sprintf("%s/%s%03lld.%s", this->targetDir.toLocal8Bit().constData(),
@@ -123,12 +123,14 @@ MainWindow::MainWindow(QWidget *parent) :
     this->scene = new QGraphicsScene(this);
 
     ImageSequence seq("/home/tim/dev/QtMedia/testseq");
-    QSharedPointer<QImage> image = seq.Get(1);
+    QSharedPointer<QImage> image = seq.Get(0);
     assert(!image->isNull());
 
     this->item = new QGraphicsPixmapItem(QPixmap::fromImage(*image));
     this->scene->addItem(item);
     this->ui->graphicsView->setScene(this->scene);
+
+    this->ui->horizontalScrollBar->setRange(0, seq.Length()-1);
 }
 
 MainWindow::~MainWindow()
