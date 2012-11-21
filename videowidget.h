@@ -49,6 +49,9 @@ public:
     ~VideoWidget();
 public slots:
     void SliderMoved(int newValue);
+    void Stop();
+    void Pause();
+    void Play();
 
 protected:
     void SetVisibleAtTime(long long unsigned ti);

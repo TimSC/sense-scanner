@@ -178,6 +178,9 @@ VideoWidget::VideoWidget(QWidget *parent) :
 {
     ui->setupUi(this);
     QObject::connect(this->ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(SliderMoved(int)));
+    QObject::connect(this->ui->stopButton,SIGNAL(clicked()), this, SLOT(Stop()));
+    QObject::connect(this->ui->pauseButton,SIGNAL(clicked()), this, SLOT(Pause()));
+    QObject::connect(this->ui->playButton,SIGNAL(clicked()), this, SLOT(Play()));
 
     this->seq = QSharedPointer<ImageSequence>(new ImageSequence("/home/tim/dev/QtMedia/testseq"));
     this->scene = QSharedPointer<QGraphicsScene>(new QGraphicsScene(this));
@@ -207,3 +210,18 @@ void VideoWidget::SliderMoved(int newValue)
     this->SetVisibleAtTime(newValue);
 }
 
+void VideoWidget::Stop()
+{
+    cout << "stop" << endl;
+
+}
+
+void VideoWidget::Pause()
+{
+    cout << "pause" << endl;
+}
+
+void VideoWidget::Play()
+{
+    cout << "play" << endl;
+}
