@@ -36,7 +36,7 @@ QString GetLeftAlphaChars(QString in)
     return in.left(i);
 }
 
-ImageSequence::ImageSequence(QString targetDir)
+ImageSequence::ImageSequence(QString targetDir, float frameRate)
 {
     QDir directory(targetDir);
     QStringList dirFiles = directory.entryList();
@@ -46,6 +46,7 @@ ImageSequence::ImageSequence(QString targetDir)
     this->numPackedChars = 0;
     this->maxPrefix = "";
     this->maxExt = "";
+    this->frameRate = frameRate;
     int packedChars = 0;
 
     //Get highest value image
@@ -117,10 +118,12 @@ ImageSequence::~ImageSequence()
 
 QSharedPointer<QImage> ImageSequence::Get(long long unsigned ti) //in milliseconds
 {
-    ti += this->minIndex;
+    long long unsigned frameNum = float(ti) * this->frameRate / 1000.;
+    frameNum += this->minIndex;
+    cout << frameNum << endl;
     QString fina;
     fina.sprintf("%s/%s%03lld.%s", this->targetDir.toLocal8Bit().constData(),
-                 this->maxPrefix.toLocal8Bit().constData(), ti,
+                 this->maxPrefix.toLocal8Bit().constData(), frameNum,
                  this->maxExt.toLocal8Bit().constData());
     //cout << fina.toLocal8Bit().constData() << endl;
     QImage *image = new QImage(fina);
@@ -129,9 +132,15 @@ QSharedPointer<QImage> ImageSequence::Get(long long unsigned ti) //in millisecon
     return out;
 }
 
-long long unsigned ImageSequence::Length() //Get length
+long long unsigned ImageSequence::GetNumFrames()
 {
     return this->maxIndex + 1 - this->minIndex;
+}
+
+long long unsigned ImageSequence::Length() //Get length
+{
+    int numFrames = this->GetNumFrames();
+    return numFrames * 1000. / this->frameRate;
 }
 
 //********************************************************************
