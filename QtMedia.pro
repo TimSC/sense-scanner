@@ -11,10 +11,8 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
-    videoarea.cpp
+        mainwindow.cpp
 
-HEADERS  += mainwindow.h \
-    videoarea.h
+HEADERS  += mainwindow.h
 
 FORMS    += mainwindow.ui
