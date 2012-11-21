@@ -1,0 +1,8 @@
+
+QT library, GNU LGPL v2.1
+
+Oxygen icons, LGPLv3
+
+libvlc, LGPLv2.1 or later
+
+
