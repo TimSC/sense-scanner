@@ -17,6 +17,10 @@ public:
     virtual ~ImageSequence();
     QSharedPointer<QImage> Get(long long unsigned ti); //in milliseconds
     long long unsigned Length(); //Get length
+
+protected:
+    int minIndex, maxIndex, maxPackedChars;
+    QString maxPrefix, maxExt, targetDir;
 };
 
 class MainWindow : public QMainWindow
