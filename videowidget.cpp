@@ -43,9 +43,10 @@ ImageSequence::ImageSequence(QString targetDir)
     this->targetDir = targetDir;
     this->maxIndex = 0;
     this->minIndex = 0;
-    this->maxPackedChars = 0;
+    this->numPackedChars = 0;
     this->maxPrefix = "";
     this->maxExt = "";
+    int packedChars = 0;
 
     //Get highest value image
     for (int i = 0; i < dirFiles.size(); ++i)
@@ -57,9 +58,7 @@ ImageSequence::ImageSequence(QString targetDir)
         QString extName = finai.completeSuffix();
         //cout << fina.toLocal8Bit().constData() <<"," << baseName.toLocal8Bit().constData() << endl;
         QString stripName = StripLeftAlphaChars(baseName);
-        int packed = (stripName.left(1).toLocal8Bit().constData())[0] == '0';
-        int packedChars = 0;
-        if(packed) packedChars = stripName.length();
+        packedChars = stripName.length();
         long long unsigned ind = stripName.toInt();
         QString prefix = GetLeftAlphaChars(baseName);
         if(ind > maxIndex)
@@ -67,7 +66,6 @@ ImageSequence::ImageSequence(QString targetDir)
             this->maxIndex = ind;
             this->maxPrefix = prefix;
             this->maxExt = extName;
-            this->maxPackedChars = packedChars;
         }
     }
 
@@ -75,16 +73,36 @@ ImageSequence::ImageSequence(QString targetDir)
     //TODO this is a much better place to determine if the file name is packed
     for(long long unsigned i=0;i<=this->maxIndex;i++)
     {
+        //Test for packed name
+        QString formatStr;
+        formatStr.sprintf("%%s/%%s%%0%illd.%%s", packedChars);
+
         QString fina;
-        fina.sprintf("%s/%s%03lld.%s", this->targetDir.toLocal8Bit().constData(),
+        fina.sprintf(formatStr.toLocal8Bit().constData(),
+                 this->targetDir.toLocal8Bit().constData(),
                  this->maxPrefix.toLocal8Bit().constData(), i,
                  this->maxExt.toLocal8Bit().constData());
         QFile file(fina);
         if(file.exists())
         {
             this->minIndex = i;
+            this->numPackedChars = packedChars;
             break;
         }
+
+        //Test for unpacked name
+        QString fina2;
+        fina2.sprintf("%s/%s%lld.%s", this->targetDir.toLocal8Bit().constData(),
+                 this->maxPrefix.toLocal8Bit().constData(), i,
+                 this->maxExt.toLocal8Bit().constData());
+        QFile file2(fina2);
+        if(file2.exists())
+        {
+            this->minIndex = i;
+            this->numPackedChars = 0;
+            break;
+        }
+
     }
 
     //cout << this->maxPrefix.toLocal8Bit().constData()

@@ -16,7 +16,7 @@ public:
 
 protected:
     long long unsigned minIndex, maxIndex;
-    int maxPackedChars;
+    int numPackedChars;
     QString maxPrefix, maxExt, targetDir;
 };
 
