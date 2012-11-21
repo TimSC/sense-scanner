@@ -25,8 +25,8 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="icons.qrc">
-         <normaloff>:/icons/icons/media-playback-stop.png</normaloff>:/icons/icons/media-playback-stop.png</iconset>
+        <iconset>
+         <normaloff>../../../home/tim/dev/QtMedia/icons/media-playback-stop.png</normaloff>../../../home/tim/dev/QtMedia/icons/media-playback-stop.png</iconset>
        </property>
       </widget>
      </item>
@@ -36,8 +36,8 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="icons.qrc">
-         <normaloff>:/icons/icons/media-playback-pause.png</normaloff>:/icons/icons/media-playback-pause.png</iconset>
+        <iconset>
+         <normaloff>../../../home/tim/dev/QtMedia/icons/media-playback-pause.png</normaloff>../../../home/tim/dev/QtMedia/icons/media-playback-pause.png</iconset>
        </property>
       </widget>
      </item>
@@ -47,8 +47,8 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="icons.qrc">
-         <normaloff>:/icons/icons/media-playback-start.png</normaloff>:/icons/icons/media-playback-start.png</iconset>
+        <iconset>
+         <normaloff>../../../home/tim/dev/QtMedia/icons/media-playback-start.png</normaloff>../../../home/tim/dev/QtMedia/icons/media-playback-start.png</iconset>
        </property>
       </widget>
      </item>
@@ -75,8 +75,6 @@
    <header>videowidget.h</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="icons.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
