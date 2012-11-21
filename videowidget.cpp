@@ -167,9 +167,7 @@ void ZoomGraphicsView::wheelEvent(QWheelEvent* event)
     {
         this->scaleFactor = 1./1.2;
     }
-    cout << "Mouse wheel\t" << this->scaleFactor << endl;
     this->scale(this->scaleFactor,this->scaleFactor);
-    this->update();
 }
 
 //********************************************************************
