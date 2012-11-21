@@ -184,7 +184,6 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->scene = QSharedPointer<QGraphicsScene>(new QGraphicsScene(this));
 
     this->SetVisibleAtTime(0);
-    this->ui->graphicsView->scale(2.,2.);
     this->ui->horizontalScrollBar->setRange(0, seq->Length()-1);
 }
 
