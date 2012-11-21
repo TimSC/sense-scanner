@@ -181,6 +181,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     QObject::connect(this->ui->horizontalScrollBar, SIGNAL(sliderMoved(int)), this, SLOT(SliderMoved(int)));
 
     this->seq = QSharedPointer<ImageSequence>(new ImageSequence("/home/tim/dev/QtMedia/testseq"));
+    this->scene = QSharedPointer<QGraphicsScene>(new QGraphicsScene(this));
 
     this->SetVisibleAtTime(0);
     this->ui->graphicsView->scale(2.,2.);
@@ -198,7 +199,7 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
     assert(!image->isNull());
 
     this->item = QSharedPointer<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap::fromImage(*image)));
-    this->scene = QSharedPointer<QGraphicsScene>(new QGraphicsScene(this));
+    this->scene->clear();
     this->scene->addItem(&*item); //I love pointers
     this->ui->graphicsView->setScene(&*this->scene);
 }
