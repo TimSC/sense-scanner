@@ -15,7 +15,8 @@ public:
     long long unsigned Length(); //Get length
 
 protected:
-    int minIndex, maxIndex, maxPackedChars;
+    long long unsigned minIndex, maxIndex;
+    int maxPackedChars;
     QString maxPrefix, maxExt, targetDir;
 };
 
@@ -30,12 +31,15 @@ class VideoWidget : public QWidget
 public:
     explicit VideoWidget(QWidget *parent = 0);
     ~VideoWidget();
-
+public slots:
     void SliderMoved(int newValue);
 
 protected:
-    QGraphicsScene *scene;
-    QGraphicsPixmapItem *item;
+    void SetVisibleAtTime(long long unsigned ti);
+
+    QSharedPointer<QGraphicsScene> scene;
+    QSharedPointer<QGraphicsPixmapItem> item;
+    QSharedPointer<ImageSequence> seq;
 
 private:
     Ui::VideoWidget *ui;

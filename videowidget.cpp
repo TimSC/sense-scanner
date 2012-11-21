@@ -2,6 +2,7 @@
 #include "ui_videowidget.h"
 #include <QDir>
 #include <QFile>
+#include <QObject>
 #include <iostream>
 #include <assert.h>
 using namespace std;
@@ -40,8 +41,8 @@ ImageSequence::ImageSequence(QString targetDir)
     QDir directory(targetDir);
     QStringList dirFiles = directory.entryList();
     this->targetDir = targetDir;
-    this->maxIndex = -1;
-    this->minIndex = -1;
+    this->maxIndex = 0;
+    this->minIndex = 0;
     this->maxPackedChars = 0;
     this->maxPrefix = "";
     this->maxExt = "";
@@ -59,7 +60,7 @@ ImageSequence::ImageSequence(QString targetDir)
         int packed = (stripName.left(1).toLocal8Bit().constData())[0] == '0';
         int packedChars = 0;
         if(packed) packedChars = stripName.length();
-        int ind = stripName.toInt();
+        long long unsigned ind = stripName.toInt();
         QString prefix = GetLeftAlphaChars(baseName);
         if(ind > maxIndex)
         {
@@ -72,7 +73,7 @@ ImageSequence::ImageSequence(QString targetDir)
 
     //Get lowest value file
     //TODO this is a much better place to determine if the file name is packed
-    for(int i=0;i<=this->maxIndex;i++)
+    for(long long unsigned i=0;i<=this->maxIndex;i++)
     {
         QString fina;
         fina.sprintf("%s/%s%03lld.%s", this->targetDir.toLocal8Bit().constData(),
@@ -123,17 +124,12 @@ VideoWidget::VideoWidget(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    this->scene = new QGraphicsScene(this);
+    QObject::connect(this->ui->horizontalScrollBar, SIGNAL(sliderMoved(int)), this, SLOT(SliderMoved(int)));
 
-    ImageSequence seq("/home/tim/dev/QtMedia/testseq");
-    QSharedPointer<QImage> image = seq.Get(0);
-    assert(!image->isNull());
+    this->seq = QSharedPointer<ImageSequence>(new ImageSequence("/home/tim/dev/QtMedia/testseq"));
 
-    this->item = new QGraphicsPixmapItem(QPixmap::fromImage(*image));
-    this->scene->addItem(item);
-    this->ui->graphicsView->setScene(this->scene);
-
-    this->ui->horizontalScrollBar->setRange(0, seq.Length()-1);
+    this->SetVisibleAtTime(0);
+    this->ui->horizontalScrollBar->setRange(0, seq->Length()-1);
 }
 
 VideoWidget::~VideoWidget()
@@ -141,6 +137,19 @@ VideoWidget::~VideoWidget()
     delete ui;
 }
 
+void VideoWidget::SetVisibleAtTime(long long unsigned ti)
+{
+    QSharedPointer<QImage> image = this->seq->Get(ti);
+    assert(!image->isNull());
 
+    this->item = QSharedPointer<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap::fromImage(*image)));
+    this->scene = QSharedPointer<QGraphicsScene>(new QGraphicsScene(this));
+    this->scene->addItem(&*item); //I love pointers
+    this->ui->graphicsView->setScene(&*this->scene);
+}
 
+void VideoWidget::SliderMoved(int newValue)
+{
+    this->SetVisibleAtTime(newValue);
+}
 

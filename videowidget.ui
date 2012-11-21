@@ -50,24 +50,12 @@
     </layout>
    </item>
   </layout>
+  <action name="actionSliderMoved">
+   <property name="text">
+    <string>SliderMoved</string>
+   </property>
+  </action>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>horizontalScrollBar</sender>
-   <signal>sliderMoved(int)</signal>
-   <receiver>VideoWidget</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>249</x>
-     <y>279</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>199</x>
-     <y>149</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
