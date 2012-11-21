@@ -24,6 +24,10 @@
        <property name="text">
         <string>...</string>
        </property>
+       <property name="icon">
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/icons/media-playback-stop.png</normaloff>:/icons/icons/media-playback-stop.png</iconset>
+       </property>
       </widget>
      </item>
      <item>
@@ -31,12 +35,20 @@
        <property name="text">
         <string>...</string>
        </property>
+       <property name="icon">
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/icons/media-playback-pause.png</normaloff>:/icons/icons/media-playback-pause.png</iconset>
+       </property>
       </widget>
      </item>
      <item>
       <widget class="QToolButton" name="toolButton_3">
        <property name="text">
         <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/icons/media-playback-start.png</normaloff>:/icons/icons/media-playback-start.png</iconset>
        </property>
       </widget>
      </item>
@@ -63,6 +75,8 @@
    <header>videowidget.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

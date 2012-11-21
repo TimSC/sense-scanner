@@ -19,3 +19,8 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui \
     videowidget.ui
+
+OTHER_FILES +=
+
+RESOURCES += \
+    icons.qrc
