@@ -52,6 +52,7 @@ public slots:
     void Stop();
     void Pause();
     void Play();
+    void TimerUpdate();
 
 protected:
     void SetVisibleAtTime(long long unsigned ti);
@@ -59,7 +60,11 @@ protected:
     QSharedPointer<QGraphicsScene> scene;
     QSharedPointer<QGraphicsPixmapItem> item;
     QSharedPointer<ImageSequence> seq;
+    QSharedPointer<QTimer> timer;
 
+    QTime playPressedTime;
+    int playActive;
+    long long unsigned currentTime, playVidStartPos;
 private:
     Ui::VideoWidget *ui;
 };

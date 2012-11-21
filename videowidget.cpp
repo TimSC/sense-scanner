@@ -120,6 +120,9 @@ QSharedPointer<QImage> ImageSequence::Get(long long unsigned ti) //in millisecon
 {
     long long unsigned frameNum = float(ti) * this->frameRate / 1000.;
     frameNum += this->minIndex;
+
+    if (frameNum < this->minIndex) frameNum = this->minIndex;
+    if (frameNum > this->maxIndex) frameNum = this->maxIndex;
     cout << frameNum << endl;
     QString fina;
     fina.sprintf("%s/%s%03lld.%s", this->targetDir.toLocal8Bit().constData(),
@@ -177,6 +180,10 @@ VideoWidget::VideoWidget(QWidget *parent) :
     ui(new Ui::VideoWidget)
 {
     ui->setupUi(this);
+    this->playVidStartPos = 0;
+    this->currentTime = 0;
+    this->playActive = false;
+
     QObject::connect(this->ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(SliderMoved(int)));
     QObject::connect(this->ui->stopButton,SIGNAL(clicked()), this, SLOT(Stop()));
     QObject::connect(this->ui->pauseButton,SIGNAL(clicked()), this, SLOT(Pause()));
@@ -187,6 +194,11 @@ VideoWidget::VideoWidget(QWidget *parent) :
 
     this->SetVisibleAtTime(0);
     this->ui->horizontalScrollBar->setRange(0, seq->Length()-1);
+
+    //Start idle timer to update video when playing
+    this->timer = QSharedPointer<QTimer>(new QTimer(this));
+    QObject::connect(&(*this->timer),SIGNAL(timeout()), this, SLOT(TimerUpdate()));
+    this->timer->start(10);
 }
 
 VideoWidget::~VideoWidget()
@@ -203,6 +215,8 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
     this->scene->clear();
     this->scene->addItem(&*item); //I love pointers
     this->ui->graphicsView->setScene(&*this->scene);
+
+    this->currentTime = ti;
 }
 
 void VideoWidget::SliderMoved(int newValue)
@@ -213,15 +227,43 @@ void VideoWidget::SliderMoved(int newValue)
 void VideoWidget::Stop()
 {
     cout << "stop" << endl;
-
+    playActive = false;
 }
 
 void VideoWidget::Pause()
 {
     cout << "pause" << endl;
+    playActive = false;
 }
 
 void VideoWidget::Play()
 {
     cout << "play" << endl;
+    this->playPressedTime.start();
+
+    //If the video is at the end, start playing from the beginning
+    if(this->currentTime < this->seq->Length()-1)
+        this->playVidStartPos = this->currentTime;
+    else
+        this->playVidStartPos = 0;
+    playActive = true;
+}
+
+void VideoWidget::TimerUpdate()
+{
+    if(this->playActive)
+    {
+        int elapsedMs = this->playPressedTime.elapsed();
+        long long unsigned calcCurrentTime = this->playVidStartPos + elapsedMs;
+
+        //Check if we have reached the end of the video
+        if(calcCurrentTime >= this->seq->Length())
+        {
+            calcCurrentTime = this->seq->Length()-1;
+            this->Stop();
+        }
+
+        //This automatically triggers the video frame refresh
+        this->ui->horizontalScrollBar->setValue(calcCurrentTime);
+    }
 }
