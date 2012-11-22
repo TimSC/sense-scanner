@@ -34,7 +34,6 @@ public:
     ~VideoWidget();
 public slots:
     void SliderMoved(int newValue);
-    void Stop();
     void Pause();
     void Play();
     void TimerUpdate();

@@ -86,12 +86,6 @@ void VideoWidget::SliderMoved(int newValue)
     this->SetVisibleAtTime(newValue);
 }
 
-void VideoWidget::Stop()
-{
-    cout << "stop" << endl;
-    playActive = false;
-}
-
 void VideoWidget::Pause()
 {
     cout << "pause" << endl;
