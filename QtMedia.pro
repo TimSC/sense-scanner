@@ -14,12 +14,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     videowidget.cpp \
     imagesequence.cpp \
-    mediabuffer.cpp
+    mediabuffer.cpp \
+    vlcbackend.cpp
 
 HEADERS  += mainwindow.h \
     videowidget.h \
     imagesequence.h \
-    mediabuffer.h
+    mediabuffer.h \
+    vlcbackend.h
 
 FORMS    += mainwindow.ui \
     videowidget.ui
@@ -27,3 +29,5 @@ FORMS    += mainwindow.ui \
 OTHER_FILES +=
 
 RESOURCES +=
+
+unix|win32: LIBS += -lvlc
