@@ -9,7 +9,8 @@ public:
     VlcBackend();
     ~VlcBackend();
 
-
+	int OpenFile(const char *filename);
+	void Test();
 
     //libvlc smem callback functions
     void AudioPrerender (uint8_t** pp_pcm_buffer , unsigned int size);

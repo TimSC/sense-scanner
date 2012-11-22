@@ -2,13 +2,15 @@
 #include <vlc/vlc.h>
 #include <stdio.h>
 #include <assert.h>
+#include <iostream>
+using namespace std;
 
 //******** libvlc Callbacks ************************
 
 static void cbAudioPrerender (void* p_audio_data, uint8_t** pp_pcm_buffer , unsigned int size)
 {
     VlcBackend *obj = (VlcBackend *)p_audio_data;
-    assert(!obj);
+    assert(obj != NULL);
     obj->AudioPrerender(pp_pcm_buffer, size);
 }
 
@@ -16,14 +18,14 @@ static void cbAudioPostrender(void* p_audio_data, uint8_t* p_pcm_buffer, unsigne
                        unsigned int nb_samples, unsigned int bits_per_sample, unsigned int size, int64_t pts )
 {
     VlcBackend *obj = (VlcBackend *)p_audio_data;
-    assert(!obj);
+    assert(obj != NULL);
     obj->AudioPostrender(p_pcm_buffer, channels, rate, nb_samples, bits_per_sample, size, pts);
 }
 
 static void cbVideoPrerender(void *p_video_data, uint8_t **pp_pixel_buffer, int size)
 {
     VlcBackend *obj = (VlcBackend *)p_video_data;
-    assert(!obj);
+    assert(obj != NULL);
     obj->VideoPrerender(pp_pixel_buffer, size);
 }
 
@@ -31,14 +33,14 @@ static void cbVideoPostrender(void *p_video_data, uint8_t *p_pixel_buffer
       , int width, int height, int pixel_pitch, int size, int64_t pts)
 {
     VlcBackend *obj = (VlcBackend *)p_video_data;
-    assert(!obj);
+    assert(obj != NULL);
     obj->VideoPostrender(p_pixel_buffer, width, height, pixel_pitch, size, pts);
 }
 
 static void handleEvent(const libvlc_event_t* pEvt, void* pUserData)
 {
     VlcBackend *obj = (VlcBackend *)pUserData;
-    assert(!obj);
+    assert(obj != NULL);
     //printf("%s\n", libvlc_event_type_name(pEvt->type));
 
     switch(pEvt->type)
@@ -56,6 +58,7 @@ static void handleEvent(const libvlc_event_t* pEvt, void* pUserData)
 
 VlcBackend::VlcBackend()
 {
+	this->media = NULL;
 
     // VLC options
     char smem_options[1000];
@@ -89,11 +92,7 @@ VlcBackend::VlcBackend()
     libvlc_event_attach(eventManager, libvlc_MediaPlayerTimeChanged, handleEvent, this);
     libvlc_event_attach(eventManager, libvlc_MediaPlayerEndReached, handleEvent, this);
     libvlc_event_attach(eventManager, libvlc_MediaPlayerPositionChanged, handleEvent, this);
-
-    this->media = libvlc_media_new_path(vlcInstance, "test.wav");
-    libvlc_media_player_set_media(media_player, media);
-    //libvlc_media_player_play(media_player);
-
+    
 }
 
 VlcBackend::~VlcBackend()
@@ -101,6 +100,21 @@ VlcBackend::~VlcBackend()
     if(this->media) libvlc_media_release(this->media);
     this->media = NULL;
 }
+
+int VlcBackend::OpenFile(const char *filename)
+{
+    if(this->media) libvlc_media_release(this->media);
+    this->media = libvlc_media_new_path(this->vlcInstance, filename);
+    libvlc_media_player_set_media(this->media_player, this->media);
+	return 1;
+}
+
+void VlcBackend::Test()
+{
+	libvlc_media_player_play(this->media_player);
+}
+
+//*************************************************
 
 void VlcBackend::AudioPrerender (uint8_t** pp_pcm_buffer , unsigned int size)
 {
@@ -125,7 +139,8 @@ void VlcBackend::VideoPostrender(uint8_t *p_pixel_buffer,
 
 void VlcBackend::TimeChanged()
 {
-
+	libvlc_time_t time = libvlc_media_player_get_time(this->media_player);
+    cout << "MediaPlayerTimeChanged "<<(long long)time << endl;
 }
 
 void VlcBackend::EndReached()
