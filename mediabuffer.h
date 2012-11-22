@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QSharedPointer>
 #include <QImage>
+#include <QMap>
 
 class AbstractMedia : public QObject
 {
@@ -11,6 +12,7 @@ class AbstractMedia : public QObject
 public:
     explicit AbstractMedia(QObject *parent = 0) : QObject(parent) {}
     virtual ~AbstractMedia() {}
+
 public slots:
     virtual QSharedPointer<QImage> Get(long long unsigned ti)=0; //in milliseconds
     virtual long long unsigned GetNumFrames()=0;
@@ -23,10 +25,10 @@ class MediaBuffer: public AbstractMedia
 {
     Q_OBJECT
 public:
-    explicit MediaBuffer(QObject *parent = 0);
+    explicit MediaBuffer(QObject *parent, QSharedPointer<AbstractMedia> src);
     virtual ~MediaBuffer();
 
-    void SetSource(QSharedPointer<MediaBuffer> src);
+    void SetSource(QSharedPointer<AbstractMedia> src);
 
     QSharedPointer<QImage> Get(long long unsigned ti); //in milliseconds
     long long unsigned GetNumFrames();
@@ -35,6 +37,9 @@ public:
 
 signals:
     
+protected:
+    QSharedPointer<AbstractMedia> seq;
+    QMap<unsigned long long, int> buffer;
 public slots:
     
 };

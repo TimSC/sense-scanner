@@ -5,7 +5,6 @@
 #include <QtCore>
 #include <QtGui>
 #include <QGraphicsScene>
-#include "imagesequence.h"
 #include "mediabuffer.h"
 
 namespace Ui {
