@@ -1,4 +1,7 @@
 #include "mediabuffer.h"
+#include <iostream>
+#include <assert.h>
+using namespace std;
 
 MediaBuffer::MediaBuffer(QObject *parent, QSharedPointer<AbstractMedia> src) : AbstractMedia(parent)
 {
@@ -23,10 +26,21 @@ QSharedPointer<QImage> MediaBuffer::Get(long long unsigned ti) //in milliseconds
 
     //Get frame from underlying store
     QSharedPointer<QImage> img = this->seq->Get(ti);
-    this->buffer[ti] = img;
+    if(!img->isNull())
+        this->buffer[ti] = img;
 
     //Prevent buffer bloating
-    //TODO
+    unsigned int totalPix = 0;
+    QMapIterator<unsigned long long, QSharedPointer<QImage> > i(this->buffer);
+    while(i.hasNext())
+    {
+        i.next();
+        QSharedPointer<QImage> img = i.value();
+        assert(!img->isNull());
+        unsigned int numPix = img->width() * img->height();
+        totalPix += numPix;
+    }
+    cout << "Buffer size: " << totalPix<<endl;
 
     return img;
 }
