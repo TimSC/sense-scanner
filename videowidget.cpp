@@ -44,7 +44,6 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->playActive = false;
 
     QObject::connect(this->ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(SliderMoved(int)));
-    QObject::connect(this->ui->stopButton,SIGNAL(clicked()), this, SLOT(Stop()));
     QObject::connect(this->ui->pauseButton,SIGNAL(clicked()), this, SLOT(Pause()));
     QObject::connect(this->ui->playButton,SIGNAL(clicked()), this, SLOT(Play()));
 
