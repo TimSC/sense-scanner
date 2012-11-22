@@ -39,7 +39,7 @@ signals:
     
 protected:
     QSharedPointer<AbstractMedia> seq;
-    QMap<unsigned long long, int> buffer;
+    QMap<unsigned long long, QSharedPointer<QImage> > buffer;
 public slots:
     
 };

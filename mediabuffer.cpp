@@ -17,7 +17,18 @@ void MediaBuffer::SetSource(QSharedPointer<AbstractMedia> src)
 
 QSharedPointer<QImage> MediaBuffer::Get(long long unsigned ti) //in milliseconds
 {
-    return this->seq->Get(ti);
+    //Check if frame is in buffer
+    if(this->buffer.contains(ti))
+        return this->buffer[ti];
+
+    //Get frame from underlying store
+    QSharedPointer<QImage> img = this->seq->Get(ti);
+    this->buffer[ti] = img;
+
+    //Prevent buffer bloating
+    //TODO
+
+    return img;
 }
 
 long long unsigned MediaBuffer::GetNumFrames()
