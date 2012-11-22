@@ -143,3 +143,10 @@ long long unsigned ImageSequence::Length() //Get length
     int numFrames = this->GetNumFrames();
     return numFrames * 1000. / this->frameRate;
 }
+
+long long unsigned ImageSequence::GetFrameStartTime(long long unsigned ti)
+{
+    long long unsigned frameNum = float(ti) * this->frameRate / 1000.;
+    long long unsigned startTime = frameNum * 1000. / this->frameRate;
+    return startTime;
+}

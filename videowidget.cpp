@@ -67,15 +67,21 @@ VideoWidget::~VideoWidget()
 
 void VideoWidget::SetVisibleAtTime(long long unsigned ti)
 {
-    QSharedPointer<QImage> image = this->seq->Get(ti);
+    //Round time down to the start of the frame
+    long long unsigned frameStartTime = this->seq->GetFrameStartTime(ti);
+
+    //Get image from sequence
+    QSharedPointer<QImage> image = this->seq->Get(frameStartTime);
     assert(!image->isNull());
 
+    //Add to scene
     this->item = QSharedPointer<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap::fromImage(*image)));
     this->scene->clear();
     this->scene->addItem(&*item); //I love pointers
     this->ui->graphicsView->setScene(&*this->scene);
 
-    this->currentTime = ti;
+    //Update current time
+    this->currentTime = frameStartTime;
 }
 
 void VideoWidget::SliderMoved(int newValue)
@@ -122,7 +128,11 @@ void VideoWidget::TimerUpdate()
             this->Stop();
         }
 
+        //Round time down to the start of the frame
+        long long unsigned frameStartTime = this->seq->GetFrameStartTime(calcCurrentTime);
+
         //This automatically triggers the video frame refresh
-        this->ui->horizontalScrollBar->setValue(calcCurrentTime);
+        if (frameStartTime != this->currentTime)
+            this->ui->horizontalScrollBar->setValue(frameStartTime);
     }
 }

@@ -13,6 +13,7 @@ public:
     QSharedPointer<QImage> Get(long long unsigned ti); //in milliseconds
     long long unsigned GetNumFrames();
     long long unsigned Length(); //Get length (ms)
+    long long unsigned GetFrameStartTime(long long unsigned ti); //in milliseconds
 
 protected:
     long long unsigned minIndex, maxIndex;
