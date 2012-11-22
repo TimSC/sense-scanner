@@ -13,11 +13,13 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     videowidget.cpp \
-    imagesequence.cpp
+    imagesequence.cpp \
+    mediabuffer.cpp
 
 HEADERS  += mainwindow.h \
     videowidget.h \
-    imagesequence.h
+    imagesequence.h \
+    mediabuffer.h
 
 FORMS    += mainwindow.ui \
     videowidget.ui

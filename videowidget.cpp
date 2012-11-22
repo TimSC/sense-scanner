@@ -47,11 +47,9 @@ VideoWidget::VideoWidget(QWidget *parent) :
     QObject::connect(this->ui->pauseButton,SIGNAL(clicked()), this, SLOT(Pause()));
     QObject::connect(this->ui->playButton,SIGNAL(clicked()), this, SLOT(Play()));
 
-    this->seq = QSharedPointer<ImageSequence>(new ImageSequence("/home/tim/dev/QtMedia/testseq"));
     this->scene = QSharedPointer<QGraphicsScene>(new QGraphicsScene(this));
 
     this->SetVisibleAtTime(0);
-    this->ui->horizontalScrollBar->setRange(0, seq->Length());
 
     //Start idle timer to update video when playing
     this->timer = QSharedPointer<QTimer>(new QTimer(this));
@@ -64,8 +62,18 @@ VideoWidget::~VideoWidget()
     delete ui;
 }
 
+void VideoWidget::SetSource(QSharedPointer<AbstractMedia> src)
+{
+    this->seq = src;
+    this->ui->horizontalScrollBar->setRange(0, seq->Length());
+    this->ui->horizontalScrollBar->setValue(0);
+    this->SetVisibleAtTime(0);
+}
+
 void VideoWidget::SetVisibleAtTime(long long unsigned ti)
 {
+    //Check the sequence is valid
+    if(this->seq.isNull()) return;
 
     //Get image from sequence
     QSharedPointer<QImage> image = this->seq->Get(ti);

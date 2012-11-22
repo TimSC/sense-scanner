@@ -34,7 +34,7 @@ QString GetLeftAlphaChars(QString in)
     return in.left(i);
 }
 
-ImageSequence::ImageSequence(QString targetDir, float frameRate)
+ImageSequence::ImageSequence(QObject *parent, QString targetDir, float frameRate) : AbstractMedia(parent)
 {
     QDir directory(targetDir);
     QStringList dirFiles = directory.entryList();

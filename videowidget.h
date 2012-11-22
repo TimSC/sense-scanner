@@ -6,6 +6,7 @@
 #include <QtGui>
 #include <QGraphicsScene>
 #include "imagesequence.h"
+#include "mediabuffer.h"
 
 namespace Ui {
 class VideoWidget;
@@ -31,8 +32,10 @@ class VideoWidget : public QWidget
     
 public:
     explicit VideoWidget(QWidget *parent = 0);
-    ~VideoWidget();
+    virtual ~VideoWidget();
+
 public slots:
+    void SetSource(QSharedPointer<AbstractMedia> src);
     void SliderMoved(int newValue);
     void Pause();
     void Play();
@@ -43,7 +46,7 @@ protected:
 
     QSharedPointer<QGraphicsScene> scene;
     QSharedPointer<QGraphicsPixmapItem> item;
-    QSharedPointer<ImageSequence> seq;
+    QSharedPointer<AbstractMedia> seq;
     QSharedPointer<QTimer> timer;
 
     QTime playPressedTime;

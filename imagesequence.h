@@ -4,11 +4,12 @@
 #include <QWidget>
 #include <QtCore>
 #include <QtGui>
+#include "mediabuffer.h"
 
-class ImageSequence
+class ImageSequence : public AbstractMedia
 {
 public:
-    ImageSequence(QString targetDir, float frameRate = 25.);
+    ImageSequence(QObject *parent, QString targetDir, float frameRate = 25.);
     virtual ~ImageSequence();
     QSharedPointer<QImage> Get(long long unsigned ti); //in milliseconds
     long long unsigned GetNumFrames();
