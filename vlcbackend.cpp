@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <iostream>
+#include <tr1/memory>
 using namespace std;
 
 //******** libvlc Callbacks ************************
@@ -58,6 +59,7 @@ static void handleEvent(const libvlc_event_t* pEvt, void* pUserData)
 
 VlcBackend::VlcBackend()
 {
+    vlcDebugLog.open("vlcdebuglog.txt");
 	this->media = NULL;
 
     // VLC options
@@ -97,6 +99,7 @@ VlcBackend::VlcBackend()
 
 VlcBackend::~VlcBackend()
 {
+    libvlc_media_player_stop(this->media_player);
     if(this->media) libvlc_media_release(this->media);
     this->media = NULL;
 }
@@ -106,6 +109,7 @@ int VlcBackend::OpenFile(const char *filename)
     if(this->media) libvlc_media_release(this->media);
     this->media = libvlc_media_new_path(this->vlcInstance, filename);
     libvlc_media_player_set_media(this->media_player, this->media);
+    vlcDebugLog << "Opened " << filename << endl;
 	return 1;
 }
 
@@ -123,7 +127,8 @@ void VlcBackend::AudioPrerender (uint8_t** pp_pcm_buffer , unsigned int size)
 
 void VlcBackend::AudioPostrender(uint8_t* p_pcm_buffer, unsigned int channels, unsigned int rate, unsigned int nb_samples, unsigned int bits_per_sample, unsigned int size, int64_t pts )
 {
-    delete p_pcm_buffer;
+    std::tr1::shared_ptr<uint8_t> test(p_pcm_buffer);
+    //delete p_pcm_buffer;
 }
 
 void VlcBackend::VideoPrerender(uint8_t **pp_pixel_buffer, int size)
@@ -134,16 +139,17 @@ void VlcBackend::VideoPrerender(uint8_t **pp_pixel_buffer, int size)
 void VlcBackend::VideoPostrender(uint8_t *p_pixel_buffer,
     int width, int height, int pixel_pitch, int size, int64_t pts)
 {
-    delete p_pixel_buffer;
+    std::tr1::shared_ptr<uint8_t> test(p_pixel_buffer);
 }
 
 void VlcBackend::TimeChanged()
 {
 	libvlc_time_t time = libvlc_media_player_get_time(this->media_player);
-    cout << "MediaPlayerTimeChanged "<<(long long)time << endl;
+    //cout << "MediaPlayerTimeChanged "<<(long long)time << endl;
+    vlcDebugLog << "TimeChanged " << (long long)time << endl;
 }
 
 void VlcBackend::EndReached()
 {
-
+    vlcDebugLog << "EndReached " << (long long)time << endl;
 }

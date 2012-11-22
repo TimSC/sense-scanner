@@ -1,6 +1,7 @@
 #ifndef VLCBACKEND_H
 #define VLCBACKEND_H
 
+#include <fstream>
 #include <inttypes.h>
 
 class VlcBackend
@@ -28,6 +29,7 @@ protected:
     class libvlc_media_player_t *media_player;
     class libvlc_event_manager_t *eventManager;
     class libvlc_media_t *media;
+    std::ofstream vlcDebugLog;
 };
 
 #endif // VLCBACKEND_H
