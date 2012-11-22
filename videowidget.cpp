@@ -52,7 +52,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->scene = QSharedPointer<QGraphicsScene>(new QGraphicsScene(this));
 
     this->SetVisibleAtTime(0);
-    this->ui->horizontalScrollBar->setRange(0, seq->Length()-1);
+    this->ui->horizontalScrollBar->setRange(0, seq->Length());
 
     //Start idle timer to update video when playing
     this->timer = QSharedPointer<QTimer>(new QTimer(this));
@@ -67,11 +67,9 @@ VideoWidget::~VideoWidget()
 
 void VideoWidget::SetVisibleAtTime(long long unsigned ti)
 {
-    //Round time down to the start of the frame
-    long long unsigned frameStartTime = this->seq->GetFrameStartTime(ti);
 
     //Get image from sequence
-    QSharedPointer<QImage> image = this->seq->Get(frameStartTime);
+    QSharedPointer<QImage> image = this->seq->Get(ti);
     assert(!image->isNull());
 
     //Add to scene
@@ -81,7 +79,7 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
     this->ui->graphicsView->setScene(&*this->scene);
 
     //Update current time
-    this->currentTime = frameStartTime;
+    this->currentTime = ti;
 }
 
 void VideoWidget::SliderMoved(int newValue)
@@ -107,7 +105,7 @@ void VideoWidget::Play()
     this->playPressedTime.start();
 
     //If the video is at the end, start playing from the beginning
-    if(this->currentTime < this->seq->Length()-1)
+    if(this->currentTime < this->seq->GetFrameStartTime(this->seq->Length()))
         this->playVidStartPos = this->currentTime;
     else
         this->playVidStartPos = 0;
@@ -124,7 +122,7 @@ void VideoWidget::TimerUpdate()
         //Check if we have reached the end of the video
         if(calcCurrentTime >= this->seq->Length())
         {
-            calcCurrentTime = this->seq->Length()-1;
+            calcCurrentTime = this->seq->Length();
             this->Stop();
         }
 
@@ -132,6 +130,7 @@ void VideoWidget::TimerUpdate()
         long long unsigned frameStartTime = this->seq->GetFrameStartTime(calcCurrentTime);
 
         //This automatically triggers the video frame refresh
+
         if (frameStartTime != this->currentTime)
             this->ui->horizontalScrollBar->setValue(frameStartTime);
     }
