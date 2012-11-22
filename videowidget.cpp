@@ -116,7 +116,7 @@ void VideoWidget::TimerUpdate()
         if(calcCurrentTime >= this->seq->Length())
         {
             calcCurrentTime = this->seq->Length();
-            this->Stop();
+            this->Pause();
         }
 
         //Round time down to the start of the frame
