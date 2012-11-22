@@ -12,10 +12,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    videowidget.cpp
+    videowidget.cpp \
+    imagesequence.cpp
 
 HEADERS  += mainwindow.h \
-    videowidget.h
+    videowidget.h \
+    imagesequence.h
 
 FORMS    += mainwindow.ui \
     videowidget.ui
