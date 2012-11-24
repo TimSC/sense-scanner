@@ -12,8 +12,7 @@ AvBinBackend::AvBinBackend()
 
 AvBinBackend::~AvBinBackend()
 {
-    //if(this->fi)
-    //    avbin_close_file(this->fi);
+    this->CloseFile();
 }
 
 int AvBinBackend::OpenFile(const char *filename)
@@ -27,19 +26,79 @@ int AvBinBackend::OpenFile(const char *filename)
 
     for(int32_t i = 0; i<numStreams; i++)
     {
-        AVbinStreamInfo sinfo;
-        info.structure_size = sizeof(AVbinStreamInfo);
-        avbin_stream_info(this->fi, i, &sinfo);
-        this->PrintAVbinStreamInfo(sinfo);
+        AVbinStreamInfo *sinfo = new AVbinStreamInfo;
+        sinfo->structure_size = sizeof(AVbinStreamInfo);
+        avbin_stream_info(this->fi, i, sinfo);
+        this->PrintAVbinStreamInfo(*sinfo);
+        this->streamInfos.push_back(sinfo);
     }
 
     for(int32_t i = 0; i<numStreams; i++)
+    {
         AVbinStream *stream = avbin_open_stream(this->fi, i);
+        this->streams.push_back(stream);
+    }
 
     AVbinPacket packet;
-    AVbinResult res = avbin_read(this->fi, &packet);
+    packet.structure_size = sizeof(packet);
+
+    while (!avbin_read(this->fi, &packet))
+    {
+
+        AVbinTimestamp &timestamp = packet.timestamp;
+        AVbinStreamInfo *sinfo = this->streamInfos[packet.stream_index];
+        AVbinStream *stream = this->streams[packet.stream_index];
+
+        //cout << "Packet of stream " << packet.stream_index << " at " << timestamp
+        //     << " type=" << sinfo->type << endl;
 
 
+        if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO)
+        {
+            uint8_t* buff = new uint8_t[sinfo->video.width*sinfo->video.height*3];
+            if (avbin_decode_video(stream, packet.data, packet.size,buff)<=0)
+                cout << "Error decoding video packet" << endl;
+
+            //TODO stuff
+
+            delete [] buff;
+
+        }
+        if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO)
+        {
+            uint8_t buff[1024*1024];
+            int bytesleft = 1024*1024;
+            int bytesout = bytesleft;
+            int bytesread = 0;
+            uint8_t *cursor = buff;
+            while ((bytesread = avbin_decode_audio(stream, packet.data, packet.size, cursor, &bytesout)) > 0)
+            {
+                packet.data += bytesread;
+                packet.size -= bytesread;
+                cursor += bytesout;
+                bytesleft -= bytesout;
+                bytesout = bytesleft;
+            }
+
+            int totalBytes = cursor-buff;
+            //cout << "Read audio bytes " << totalBytes << endl;
+        }
+    }
+}
+
+void AvBinBackend::CloseFile()
+{
+    for(unsigned int i =0; i < this->streams.size(); i++)
+        avbin_close_stream(this->streams[i]);
+    this->streams.clear();
+
+    for(unsigned int i =0; i < this->streamInfos.size(); i++)
+        delete this->streamInfos[i];
+    this->streamInfos.clear();
+
+    if(this->fi)
+        avbin_close_file(this->fi);
+    this->fi = NULL;
 }
 
 void AvBinBackend::PrintAVbinFileInfo(AVbinFileInfo &info)
