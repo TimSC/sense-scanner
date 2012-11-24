@@ -1,0 +1,1060 @@
+
+;; Function AvBinBackend::AvBinBackend() (_ZN12AvBinBackendC2Ev)
+
+AvBinBackend::AvBinBackend() (struct AvBinBackend * const this)
+{
+  AVbinResult D.2970;
+  AVbinResult res;
+
+  # BLOCK 2
+  # PRED: ENTRY (fallthru)
+  D.2970_1 = avbin_init ();
+  res_2 = D.2970_1;
+  return;
+  # SUCC: EXIT
+
+}
+
+
+
+Partition map 
+
+Partition 1 (D.2970_1 - 1 )
+Partition 2 (res_2 - 2 )
+
+After Coalescing:
+
+Partition map 
+
+Partition 0 (D.2970_1 - 1 )
+Partition 1 (res_2 - 2 )
+
+AvBinBackend::AvBinBackend() (struct AvBinBackend * const this)
+{
+  AVbinResult D.2970;
+  AVbinResult res;
+
+  # BLOCK 2
+  # PRED: ENTRY (fallthru)
+  D.2970_1 = avbin_init ();
+  res_2 = D.2970_1;
+  return;
+  # SUCC: EXIT
+
+}
+
+
+Partition 0: size 4 align 4
+	res_2, offset 0
+
+;; Generating RTL for gimple basic block 2
+
+;; D.2970_1 = avbin_init ();
+
+(call_insn 6 5 7 (set (reg:SI 0 ax)
+        (call (mem:QI (symbol_ref:DI ("_Z10avbin_initv") [flags 0x41]  <function_decl 0x7fc017ab6100 avbin_init>) [0 S1 A8])
+            (const_int 0 [0]))) avbinbackend.cpp:8 -1
+     (nil)
+    (nil))
+
+(insn 7 6 0 (set (reg:SI 59 [ D.2970 ])
+        (reg:SI 0 ax)) avbinbackend.cpp:8 -1
+     (nil))
+
+;; res_2 = D.2970_1;
+
+(insn 8 7 0 (set (mem/c/i:SI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -4 [0xfffffffffffffffc])) [0 res+0 S4 A32])
+        (reg:SI 59 [ D.2970 ])) avbinbackend.cpp:8 -1
+     (nil))
+
+
+;;
+;; Full RTL generated for this function:
+;;
+(note 1 0 4 NOTE_INSN_DELETED)
+
+;; Start of basic block ( 0) -> 2
+;; Pred edge  ENTRY (fallthru)
+(note 4 1 2 2 [bb 2] NOTE_INSN_BASIC_BLOCK)
+
+(insn 2 4 3 2 (set (mem/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -24 [0xffffffffffffffe8])) [0 this+0 S8 A64])
+        (reg:DI 5 di [ this ])) avbinbackend.cpp:6 -1
+     (nil))
+
+(note 3 2 5 2 NOTE_INSN_FUNCTION_BEG)
+;; End of basic block 2 -> ( 3)
+
+;; Succ edge  3 [100.0%]  (fallthru)
+
+;; Start of basic block ( 2) -> 3
+;; Pred edge  2 [100.0%]  (fallthru)
+(note 5 3 6 3 [bb 3] NOTE_INSN_BASIC_BLOCK)
+
+(call_insn 6 5 7 3 (set (reg:SI 0 ax)
+        (call (mem:QI (symbol_ref:DI ("_Z10avbin_initv") [flags 0x41]  <function_decl 0x7fc017ab6100 avbin_init>) [0 S1 A8])
+            (const_int 0 [0]))) avbinbackend.cpp:8 -1
+     (nil)
+    (nil))
+
+(insn 7 6 8 3 (set (reg:SI 59 [ D.2970 ])
+        (reg:SI 0 ax)) avbinbackend.cpp:8 -1
+     (nil))
+
+(insn 8 7 9 3 (set (mem/c/i:SI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -4 [0xfffffffffffffffc])) [0 res+0 S4 A32])
+        (reg:SI 59 [ D.2970 ])) avbinbackend.cpp:8 -1
+     (nil))
+;; End of basic block 3 -> ( 4)
+
+;; Succ edge  4 (fallthru)
+
+;; Start of basic block ( 3) -> 4
+;; Pred edge  3 (fallthru)
+(code_label 9 8 10 4 1 "" [0 uses])
+
+(note 10 9 0 4 [bb 4] NOTE_INSN_BASIC_BLOCK)
+;; End of basic block 4 -> ( 1)
+
+;; Succ edge  EXIT [100.0%]  (fallthru)
+
+
+;; Function AvBinBackend::~AvBinBackend() (_ZN12AvBinBackendD2Ev)
+
+AvBinBackend::~AvBinBackend() (struct AvBinBackend * const this)
+{
+  # BLOCK 2
+  # PRED: ENTRY (fallthru)
+<L0>:
+  return;
+  # SUCC: EXIT
+
+}
+
+
+
+Partition map 
+
+
+After Coalescing:
+
+Partition map 
+
+
+AvBinBackend::~AvBinBackend() (struct AvBinBackend * const this)
+{
+  # BLOCK 2
+  # PRED: ENTRY (fallthru)
+<L0>:
+  return;
+  # SUCC: EXIT
+
+}
+
+
+
+;; Generating RTL for gimple basic block 2
+
+;; <L0>:
+
+(code_label 5 3 6 3 "" [0 uses])
+
+(note 6 5 0 NOTE_INSN_BASIC_BLOCK)
+
+
+;;
+;; Full RTL generated for this function:
+;;
+(note 1 0 4 NOTE_INSN_DELETED)
+
+;; Start of basic block ( 0) -> 2
+;; Pred edge  ENTRY (fallthru)
+(note 4 1 2 2 [bb 2] NOTE_INSN_BASIC_BLOCK)
+
+(insn 2 4 3 2 (set (mem/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -8 [0xfffffffffffffff8])) [0 this+0 S8 A64])
+        (reg:DI 5 di [ this ])) avbinbackend.cpp:12 -1
+     (nil))
+
+(note 3 2 5 2 NOTE_INSN_FUNCTION_BEG)
+;; End of basic block 2 -> ( 3)
+
+;; Succ edge  3 [100.0%]  (fallthru)
+
+;; Start of basic block ( 2) -> 3
+;; Pred edge  2 [100.0%]  (fallthru)
+(code_label 5 3 6 3 3 "" [0 uses])
+
+(note 6 5 7 3 [bb 3] NOTE_INSN_BASIC_BLOCK)
+;; End of basic block 3 -> ( 4)
+
+;; Succ edge  4 (fallthru)
+
+;; Start of basic block ( 3) -> 4
+;; Pred edge  3 (fallthru)
+(code_label 7 6 8 4 2 "" [0 uses])
+
+(note 8 7 0 4 [bb 4] NOTE_INSN_BASIC_BLOCK)
+;; End of basic block 4 -> ( 1)
+
+;; Succ edge  EXIT [100.0%]  (fallthru)
+
+
+;; Function int AvBinBackend::OpenFile(const char*) (_ZN12AvBinBackend8OpenFileEPKc)
+
+int AvBinBackend::OpenFile(const char*) (struct AvBinBackend * const this, const char * filename)
+{
+  AVbinResult D.2969;
+  struct AVbinStream * D.2968;
+  struct AVbinFile * D.2967;
+  struct AVbinStreamInfo info;
+  int32_t i;
+  AVbinResult res;
+  struct AVbinPacket packet;
+  struct AVbinStream * stream;
+  struct AVbinFileInfo info;
+  struct AVbinFile * D.2966;
+  struct AVbinFile * D.2965;
+  struct AVbinFile * D.2964;
+  bool D.2962;
+  struct AVbinFile * D.2958;
+  struct AVbinFile * D.2957;
+
+  # BLOCK 2
+  # PRED: ENTRY (fallthru)
+  D.2967_3 = avbin_open_filename (filename_2(D));
+  D.2957_4 = D.2967_3;
+  this_5(D)->fi = D.2957_4;
+  D.2958_6 = this_5(D)->fi;
+  avbin_file_info (D.2958_6, &info);
+  i_7 = 0;
+  goto <bb 4>;
+  # SUCC: 4 (fallthru)
+
+  # BLOCK 3
+  # PRED: 4 (true)
+  D.2964_9 = this_5(D)->fi;
+  avbin_stream_info (D.2964_9, i_1, &info);
+  i_10 = i_1 + 1;
+  # SUCC: 4 (fallthru)
+
+  # BLOCK 4
+  # PRED: 2 (fallthru) 3 (fallthru)
+  # i_1 = PHI <i_7(2), i_10(3)>
+  D.2962_8 = i_1 <= 9;
+  if (D.2962_8 != 0)
+    goto <bb 3>;
+  else
+    goto <bb 5>;
+  # SUCC: 3 (true) 5 (false)
+
+  # BLOCK 5
+  # PRED: 4 (false)
+  D.2965_11 = this_5(D)->fi;
+  D.2968_12 = avbin_open_stream (D.2965_11, 0);
+  stream_13 = D.2968_12;
+  D.2966_14 = this_5(D)->fi;
+  D.2969_15 = avbin_read (D.2966_14, &packet);
+  res_16 = D.2969_15;
+  return;
+  # SUCC: EXIT
+
+}
+
+
+
+Partition map 
+
+Partition 1 (i_1 - 1 )
+Partition 2 (filename_2(D) - 2 )
+Partition 3 (D.2967_3 - 3 )
+Partition 4 (D.2957_4 - 4 )
+Partition 5 (this_5(D) - 5 )
+Partition 6 (D.2958_6 - 6 )
+Partition 7 (i_7 - 7 )
+Partition 8 (D.2962_8 - 8 )
+Partition 9 (D.2964_9 - 9 )
+Partition 10 (i_10 - 10 )
+Partition 11 (D.2965_11 - 11 )
+Partition 12 (D.2968_12 - 12 )
+Partition 13 (stream_13 - 13 )
+Partition 14 (D.2966_14 - 14 )
+Partition 15 (D.2969_15 - 15 )
+Partition 16 (res_16 - 16 )
+
+
+Partition map 
+
+Partition 0 (i_1 - 1 )
+Partition 1 (filename_2(D) - 2 )
+Partition 2 (this_5(D) - 5 )
+Partition 3 (i_7 - 7 )
+Partition 4 (i_10 - 10 )
+
+
+Live on entry to BB2 : filename_2(D)  this_5(D)  
+
+Live on entry to BB3 : i_1  this_5(D)  
+
+Live on entry to BB4 : this_5(D)  
+
+Live on entry to BB5 : this_5(D)  
+
+Conflict graph:
+
+After sorting:
+Sorted Coalesce list:
+(2147483646) i_1 <-> i_10
+(2147483646) i_1 <-> i_7
+
+Partition map 
+
+Partition 0 (i_1 - 1 )
+Partition 1 (filename_2(D) - 2 )
+Partition 2 (this_5(D) - 5 )
+Partition 3 (i_7 - 7 )
+Partition 4 (i_10 - 10 )
+
+Coalesce list: (1)i_1 & (10)i_10 [map: 0, 4] : Success -> 0
+Coalesce list: (1)i_1 & (7)i_7 [map: 0, 3] : Success -> 0
+Coalesce list: (1)i_1 & (10)i_1: Already Coalesced.
+Coalesce list: (1)i_1 & (7)i_1: Already Coalesced.
+After Coalescing:
+
+Partition map 
+
+Partition 0 (i_1 - 1 7 10 )
+Partition 1 (filename_2(D) - 2 )
+Partition 2 (D.2967_3 - 3 )
+Partition 3 (D.2957_4 - 4 )
+Partition 4 (this_5(D) - 5 )
+Partition 5 (D.2958_6 - 6 )
+Partition 6 (D.2962_8 - 8 )
+Partition 7 (D.2964_9 - 9 )
+Partition 8 (D.2965_11 - 11 )
+Partition 9 (D.2968_12 - 12 )
+Partition 10 (stream_13 - 13 )
+Partition 11 (D.2966_14 - 14 )
+Partition 12 (D.2969_15 - 15 )
+Partition 13 (res_16 - 16 )
+
+int AvBinBackend::OpenFile(const char*) (struct AvBinBackend * const this, const char * filename)
+{
+  AVbinResult D.2969;
+  struct AVbinStream * D.2968;
+  struct AVbinFile * D.2967;
+  struct AVbinStreamInfo info;
+  int32_t i;
+  AVbinResult res;
+  struct AVbinPacket packet;
+  struct AVbinStream * stream;
+  struct AVbinFileInfo info;
+  struct AVbinFile * D.2966;
+  struct AVbinFile * D.2965;
+  struct AVbinFile * D.2964;
+  bool D.2962;
+  struct AVbinFile * D.2958;
+  struct AVbinFile * D.2957;
+
+  # BLOCK 2
+  # PRED: ENTRY (fallthru)
+  D.2967_3 = avbin_open_filename (filename_2(D));
+  D.2957_4 = D.2967_3;
+  this_5(D)->fi = D.2957_4;
+  D.2958_6 = this_5(D)->fi;
+  avbin_file_info (D.2958_6, &info);
+  i_7 = 0;
+  goto <bb 4>;
+  # SUCC: 4 (fallthru)
+
+  # BLOCK 3
+  # PRED: 4 (true)
+  D.2964_9 = this_5(D)->fi;
+  avbin_stream_info (D.2964_9, i_1, &info);
+  i_10 = i_1 + 1;
+  # SUCC: 4 (fallthru)
+
+  # BLOCK 4
+  # PRED: 2 (fallthru) 3 (fallthru)
+  # i_1 = PHI <i_7(2), i_10(3)>
+  D.2962_8 = i_1 <= 9;
+  if (D.2962_8 != 0)
+    goto <bb 3>;
+  else
+    goto <bb 5>;
+  # SUCC: 3 (true) 5 (false)
+
+  # BLOCK 5
+  # PRED: 4 (false)
+  D.2965_11 = this_5(D)->fi;
+  D.2968_12 = avbin_open_stream (D.2965_11, 0);
+  stream_13 = D.2968_12;
+  D.2966_14 = this_5(D)->fi;
+  D.2969_15 = avbin_read (D.2966_14, &packet);
+  res_16 = D.2969_15;
+  return;
+  # SUCC: EXIT
+
+}
+
+
+Partition 2: size 4 align 4
+	res_16, offset 0
+Partition 0: size 4 align 4
+	i_1, offset 0
+Partition 1: size 8 align 8
+	stream_13, offset 0
+Partition 5: size 32 align 16
+	info, offset 0
+Partition 4: size 40 align 16
+	packet, offset 0
+Partition 3: size 2632 align 16
+	info, offset 0
+
+;; Generating RTL for gimple basic block 2
+
+;; D.2967_3 = avbin_open_filename (filename_2(D));
+
+(insn 8 7 9 (set (reg:DI 69)
+        (mem/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2752 [0xfffffffffffff540])) [0 filename+0 S8 A64])) avbinbackend.cpp:20 -1
+     (nil))
+
+(insn 9 8 10 (set (reg:DI 5 di)
+        (reg:DI 69)) avbinbackend.cpp:20 -1
+     (nil))
+
+(call_insn 10 9 11 (set (reg:DI 0 ax)
+        (call (mem:QI (symbol_ref:DI ("_Z19avbin_open_filenamePKc") [flags 0x41]  <function_decl 0x7fc017ab6400 avbin_open_filename>) [0 S1 A8])
+            (const_int 0 [0]))) avbinbackend.cpp:20 -1
+     (nil)
+    (expr_list:REG_DEP_TRUE (use (reg:DI 5 di))
+        (nil)))
+
+(insn 11 10 0 (set (reg/f:DI 59 [ D.2967 ])
+        (reg:DI 0 ax)) avbinbackend.cpp:20 -1
+     (nil))
+
+;; D.2957_4 = D.2967_3;
+
+(insn 12 11 0 (set (reg/f:DI 60 [ D.2957 ])
+        (reg/f:DI 59 [ D.2967 ])) avbinbackend.cpp:20 -1
+     (nil))
+
+;; this_5(D)->fi = D.2957_4;
+
+(insn 13 12 14 (set (reg/f:DI 70)
+        (mem/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2744 [0xfffffffffffff548])) [0 this+0 S8 A64])) avbinbackend.cpp:20 -1
+     (nil))
+
+(insn 14 13 0 (set (mem/s/f/j:DI (reg/f:DI 70) [0 this_5(D)->fi+0 S8 A64])
+        (reg/f:DI 60 [ D.2957 ])) avbinbackend.cpp:20 -1
+     (nil))
+
+;; D.2958_6 = this_5(D)->fi;
+
+(insn 15 14 16 (set (reg/f:DI 71)
+        (mem/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2744 [0xfffffffffffff548])) [0 this+0 S8 A64])) avbinbackend.cpp:22 -1
+     (nil))
+
+(insn 16 15 0 (set (reg/f:DI 61 [ D.2958 ])
+        (mem/s/f/j:DI (reg/f:DI 71) [0 this_5(D)->fi+0 S8 A64])) avbinbackend.cpp:22 -1
+     (nil))
+
+;; avbin_file_info (D.2958_6, &info);
+
+(insn 17 16 18 (parallel [
+            (set (reg:DI 72)
+                (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                    (const_int -2640 [0xfffffffffffff5b0])))
+            (clobber (reg:CC 17 flags))
+        ]) avbinbackend.cpp:22 -1
+     (nil))
+
+(insn 18 17 19 (set (reg:DI 4 si)
+        (reg:DI 72)) avbinbackend.cpp:22 -1
+     (nil))
+
+(insn 19 18 20 (set (reg:DI 5 di)
+        (reg/f:DI 61 [ D.2958 ])) avbinbackend.cpp:22 -1
+     (nil))
+
+(call_insn 20 19 0 (set (reg:SI 0 ax)
+        (call (mem:QI (symbol_ref:DI ("_Z15avbin_file_infoP10_AVbinFileP14_AVbinFileInfo") [flags 0x41]  <function_decl 0x7fc017ab6700 avbin_file_info>) [0 S1 A8])
+            (const_int 0 [0]))) avbinbackend.cpp:22 -1
+     (nil)
+    (expr_list:REG_DEP_TRUE (use (reg:DI 5 di))
+        (expr_list:REG_DEP_TRUE (use (reg:DI 4 si))
+            (nil))))
+
+;; i_7 = 0;
+
+(insn 21 20 0 (set (mem/c/i:SI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2648 [0xfffffffffffff5a8])) [0 i+0 S4 A32])
+        (const_int 0 [0])) avbinbackend.cpp:24 -1
+     (nil))
+
+;; Generating RTL for gimple basic block 3
+
+;; D.2964_9 = this_5(D)->fi;
+
+(insn 25 24 26 (set (reg/f:DI 73)
+        (mem/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2744 [0xfffffffffffff548])) [0 this+0 S8 A64])) avbinbackend.cpp:27 -1
+     (nil))
+
+(insn 26 25 0 (set (reg/f:DI 63 [ D.2964 ])
+        (mem/s/f/j:DI (reg/f:DI 73) [0 this_5(D)->fi+0 S8 A64])) avbinbackend.cpp:27 -1
+     (nil))
+
+;; avbin_stream_info (D.2964_9, i_1, &info);
+
+(insn 27 26 28 (parallel [
+            (set (reg:DI 74)
+                (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                    (const_int -2688 [0xfffffffffffff580])))
+            (clobber (reg:CC 17 flags))
+        ]) avbinbackend.cpp:27 -1
+     (nil))
+
+(insn 28 27 29 (set (reg:SI 75)
+        (mem/c/i:SI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2648 [0xfffffffffffff5a8])) [0 i+0 S4 A32])) avbinbackend.cpp:27 -1
+     (nil))
+
+(insn 29 28 30 (set (reg:DI 1 dx)
+        (reg:DI 74)) avbinbackend.cpp:27 -1
+     (nil))
+
+(insn 30 29 31 (set (reg:SI 4 si)
+        (reg:SI 75)) avbinbackend.cpp:27 -1
+     (nil))
+
+(insn 31 30 32 (set (reg:DI 5 di)
+        (reg/f:DI 63 [ D.2964 ])) avbinbackend.cpp:27 -1
+     (nil))
+
+(call_insn 32 31 0 (set (reg:SI 0 ax)
+        (call (mem:QI (symbol_ref:DI ("_Z17avbin_stream_infoP10_AVbinFileiP16_AVbinStreamInfo") [flags 0x41]  <function_decl 0x7fc017ab6800 avbin_stream_info>) [0 S1 A8])
+            (const_int 0 [0]))) avbinbackend.cpp:27 -1
+     (nil)
+    (expr_list:REG_DEP_TRUE (use (reg:DI 5 di))
+        (expr_list:REG_DEP_TRUE (use (reg:SI 4 si))
+            (expr_list:REG_DEP_TRUE (use (reg:DI 1 dx))
+                (nil)))))
+
+;; i_10 = i_1 + 1;
+
+(insn 33 32 0 (parallel [
+            (set (mem/c/i:SI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                        (const_int -2648 [0xfffffffffffff5a8])) [0 i+0 S4 A32])
+                (plus:SI (mem/c/i:SI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                            (const_int -2648 [0xfffffffffffff5a8])) [0 i+0 S4 A32])
+                    (const_int 1 [0x1])))
+            (clobber (reg:CC 17 flags))
+        ]) avbinbackend.cpp:24 -1
+     (nil))
+
+;; Generating RTL for gimple basic block 4
+
+;; 
+
+(code_label 34 33 35 5 "" [0 uses])
+
+(note 35 34 0 NOTE_INSN_BASIC_BLOCK)
+
+;; D.2962_8 = i_1 <= 9;
+
+(insn 36 35 37 (set (reg:CCGC 17 flags)
+        (compare:CCGC (mem/c/i:SI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                    (const_int -2648 [0xfffffffffffff5a8])) [0 i+0 S4 A32])
+            (const_int 9 [0x9]))) avbinbackend.cpp:24 -1
+     (nil))
+
+(insn 37 36 0 (set (reg:QI 62 [ D.2962 ])
+        (le:QI (reg:CCGC 17 flags)
+            (const_int 0 [0]))) avbinbackend.cpp:24 -1
+     (nil))
+
+;; if (D.2962_8 != 0)
+
+(insn 39 37 40 (set (reg:CCZ 17 flags)
+        (compare:CCZ (reg:QI 62 [ D.2962 ])
+            (const_int 0 [0]))) avbinbackend.cpp:24 -1
+     (nil))
+
+(jump_insn 40 39 0 (set (pc)
+        (if_then_else (ne (reg:CCZ 17 flags)
+                (const_int 0 [0]))
+            (label_ref 38)
+            (pc))) avbinbackend.cpp:24 -1
+     (nil))
+
+;; Generating RTL for gimple basic block 5
+
+;; D.2965_11 = this_5(D)->fi;
+
+(insn 42 41 43 (set (reg/f:DI 76)
+        (mem/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2744 [0xfffffffffffff548])) [0 this+0 S8 A64])) avbinbackend.cpp:30 -1
+     (nil))
+
+(insn 43 42 0 (set (reg/f:DI 64 [ D.2965 ])
+        (mem/s/f/j:DI (reg/f:DI 76) [0 this_5(D)->fi+0 S8 A64])) avbinbackend.cpp:30 -1
+     (nil))
+
+;; D.2968_12 = avbin_open_stream (D.2965_11, 0);
+
+(insn 44 43 45 (set (reg:SI 4 si)
+        (const_int 0 [0])) avbinbackend.cpp:30 -1
+     (nil))
+
+(insn 45 44 46 (set (reg:DI 5 di)
+        (reg/f:DI 64 [ D.2965 ])) avbinbackend.cpp:30 -1
+     (nil))
+
+(call_insn 46 45 47 (set (reg:DI 0 ax)
+        (call (mem:QI (symbol_ref:DI ("_Z17avbin_open_streamP10_AVbinFilei") [flags 0x41]  <function_decl 0x7fc017ab6900 avbin_open_stream>) [0 S1 A8])
+            (const_int 0 [0]))) avbinbackend.cpp:30 -1
+     (nil)
+    (expr_list:REG_DEP_TRUE (use (reg:DI 5 di))
+        (expr_list:REG_DEP_TRUE (use (reg:SI 4 si))
+            (nil))))
+
+(insn 47 46 0 (set (reg/f:DI 65 [ D.2968 ])
+        (reg:DI 0 ax)) avbinbackend.cpp:30 -1
+     (nil))
+
+;; stream_13 = D.2968_12;
+
+(insn 48 47 0 (set (mem/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2656 [0xfffffffffffff5a0])) [0 stream+0 S8 A64])
+        (reg/f:DI 65 [ D.2968 ])) avbinbackend.cpp:30 -1
+     (nil))
+
+;; D.2966_14 = this_5(D)->fi;
+
+(insn 49 48 50 (set (reg/f:DI 77)
+        (mem/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2744 [0xfffffffffffff548])) [0 this+0 S8 A64])) avbinbackend.cpp:33 -1
+     (nil))
+
+(insn 50 49 0 (set (reg/f:DI 66 [ D.2966 ])
+        (mem/s/f/j:DI (reg/f:DI 77) [0 this_5(D)->fi+0 S8 A64])) avbinbackend.cpp:33 -1
+     (nil))
+
+;; D.2969_15 = avbin_read (D.2966_14, &packet);
+
+(insn 51 50 52 (parallel [
+            (set (reg:DI 78)
+                (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                    (const_int -2736 [0xfffffffffffff550])))
+            (clobber (reg:CC 17 flags))
+        ]) avbinbackend.cpp:33 -1
+     (nil))
+
+(insn 52 51 53 (set (reg:DI 4 si)
+        (reg:DI 78)) avbinbackend.cpp:33 -1
+     (nil))
+
+(insn 53 52 54 (set (reg:DI 5 di)
+        (reg/f:DI 66 [ D.2966 ])) avbinbackend.cpp:33 -1
+     (nil))
+
+(call_insn 54 53 55 (set (reg:SI 0 ax)
+        (call (mem:QI (symbol_ref:DI ("_Z10avbin_readP10_AVbinFileP12_AVbinPacket") [flags 0x41]  <function_decl 0x7fc017ab6b00 avbin_read>) [0 S1 A8])
+            (const_int 0 [0]))) avbinbackend.cpp:33 -1
+     (nil)
+    (expr_list:REG_DEP_TRUE (use (reg:DI 5 di))
+        (expr_list:REG_DEP_TRUE (use (reg:DI 4 si))
+            (nil))))
+
+(insn 55 54 0 (set (reg:SI 67 [ D.2969 ])
+        (reg:SI 0 ax)) avbinbackend.cpp:33 -1
+     (nil))
+
+;; res_16 = D.2969_15;
+
+(insn 56 55 0 (set (mem/c/i:SI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2644 [0xfffffffffffff5ac])) [0 res+0 S4 A32])
+        (reg:SI 67 [ D.2969 ])) avbinbackend.cpp:33 -1
+     (nil))
+
+
+;;
+;; Full RTL generated for this function:
+;;
+(note 1 0 6 NOTE_INSN_DELETED)
+
+;; Start of basic block ( 0) -> 2
+;; Pred edge  ENTRY (fallthru)
+(note 6 1 2 2 [bb 2] NOTE_INSN_BASIC_BLOCK)
+
+(insn 2 6 3 2 (set (mem/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2744 [0xfffffffffffff548])) [0 this+0 S8 A64])
+        (reg:DI 5 di [ this ])) avbinbackend.cpp:19 -1
+     (nil))
+
+(insn 3 2 4 2 (set (mem/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2752 [0xfffffffffffff540])) [0 filename+0 S8 A64])
+        (reg:DI 4 si [ filename ])) avbinbackend.cpp:19 -1
+     (nil))
+
+(note 4 3 5 2 NOTE_INSN_FUNCTION_BEG)
+
+(insn 5 4 7 2 (parallel [
+            (set (mem/v/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                        (const_int -8 [0xfffffffffffffff8])) [0 D.2974+0 S8 A64])
+                (unspec:DI [
+                        (const_int 40 [0x28])
+                    ] UNSPEC_SP_TLS_SET))
+            (set (scratch:DI)
+                (const_int 0 [0]))
+            (clobber (reg:CC 17 flags))
+        ]) avbinbackend.cpp:19 -1
+     (nil))
+;; End of basic block 2 -> ( 3)
+
+;; Succ edge  3 [100.0%]  (fallthru)
+
+;; Start of basic block ( 2) -> 3
+;; Pred edge  2 [100.0%]  (fallthru)
+(note 7 5 8 3 [bb 3] NOTE_INSN_BASIC_BLOCK)
+
+(insn 8 7 9 3 (set (reg:DI 69)
+        (mem/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2752 [0xfffffffffffff540])) [0 filename+0 S8 A64])) avbinbackend.cpp:20 -1
+     (nil))
+
+(insn 9 8 10 3 (set (reg:DI 5 di)
+        (reg:DI 69)) avbinbackend.cpp:20 -1
+     (nil))
+
+(call_insn 10 9 11 3 (set (reg:DI 0 ax)
+        (call (mem:QI (symbol_ref:DI ("_Z19avbin_open_filenamePKc") [flags 0x41]  <function_decl 0x7fc017ab6400 avbin_open_filename>) [0 S1 A8])
+            (const_int 0 [0]))) avbinbackend.cpp:20 -1
+     (nil)
+    (expr_list:REG_DEP_TRUE (use (reg:DI 5 di))
+        (nil)))
+
+(insn 11 10 12 3 (set (reg/f:DI 59 [ D.2967 ])
+        (reg:DI 0 ax)) avbinbackend.cpp:20 -1
+     (nil))
+
+(insn 12 11 13 3 (set (reg/f:DI 60 [ D.2957 ])
+        (reg/f:DI 59 [ D.2967 ])) avbinbackend.cpp:20 -1
+     (nil))
+
+(insn 13 12 14 3 (set (reg/f:DI 70)
+        (mem/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2744 [0xfffffffffffff548])) [0 this+0 S8 A64])) avbinbackend.cpp:20 -1
+     (nil))
+
+(insn 14 13 15 3 (set (mem/s/f/j:DI (reg/f:DI 70) [0 this_5(D)->fi+0 S8 A64])
+        (reg/f:DI 60 [ D.2957 ])) avbinbackend.cpp:20 -1
+     (nil))
+
+(insn 15 14 16 3 (set (reg/f:DI 71)
+        (mem/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2744 [0xfffffffffffff548])) [0 this+0 S8 A64])) avbinbackend.cpp:22 -1
+     (nil))
+
+(insn 16 15 17 3 (set (reg/f:DI 61 [ D.2958 ])
+        (mem/s/f/j:DI (reg/f:DI 71) [0 this_5(D)->fi+0 S8 A64])) avbinbackend.cpp:22 -1
+     (nil))
+
+(insn 17 16 18 3 (parallel [
+            (set (reg:DI 72)
+                (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                    (const_int -2640 [0xfffffffffffff5b0])))
+            (clobber (reg:CC 17 flags))
+        ]) avbinbackend.cpp:22 -1
+     (nil))
+
+(insn 18 17 19 3 (set (reg:DI 4 si)
+        (reg:DI 72)) avbinbackend.cpp:22 -1
+     (nil))
+
+(insn 19 18 20 3 (set (reg:DI 5 di)
+        (reg/f:DI 61 [ D.2958 ])) avbinbackend.cpp:22 -1
+     (nil))
+
+(call_insn 20 19 21 3 (set (reg:SI 0 ax)
+        (call (mem:QI (symbol_ref:DI ("_Z15avbin_file_infoP10_AVbinFileP14_AVbinFileInfo") [flags 0x41]  <function_decl 0x7fc017ab6700 avbin_file_info>) [0 S1 A8])
+            (const_int 0 [0]))) avbinbackend.cpp:22 -1
+     (nil)
+    (expr_list:REG_DEP_TRUE (use (reg:DI 5 di))
+        (expr_list:REG_DEP_TRUE (use (reg:DI 4 si))
+            (nil))))
+
+(insn 21 20 22 3 (set (mem/c/i:SI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2648 [0xfffffffffffff5a8])) [0 i+0 S4 A32])
+        (const_int 0 [0])) avbinbackend.cpp:24 -1
+     (nil))
+
+(jump_insn 22 21 23 3 (set (pc)
+        (label_ref 34)) avbinbackend.cpp:24 -1
+     (nil)
+ -> 34)
+;; End of basic block 3 -> ( 5)
+
+;; Succ edge  5
+
+(barrier 23 22 38)
+
+;; Start of basic block ( 5) -> 4
+;; Pred edge  5
+(code_label 38 23 24 4 6 "" [1 uses])
+
+(note 24 38 25 4 [bb 4] NOTE_INSN_BASIC_BLOCK)
+
+(insn 25 24 26 4 (set (reg/f:DI 73)
+        (mem/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2744 [0xfffffffffffff548])) [0 this+0 S8 A64])) avbinbackend.cpp:27 -1
+     (nil))
+
+(insn 26 25 27 4 (set (reg/f:DI 63 [ D.2964 ])
+        (mem/s/f/j:DI (reg/f:DI 73) [0 this_5(D)->fi+0 S8 A64])) avbinbackend.cpp:27 -1
+     (nil))
+
+(insn 27 26 28 4 (parallel [
+            (set (reg:DI 74)
+                (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                    (const_int -2688 [0xfffffffffffff580])))
+            (clobber (reg:CC 17 flags))
+        ]) avbinbackend.cpp:27 -1
+     (nil))
+
+(insn 28 27 29 4 (set (reg:SI 75)
+        (mem/c/i:SI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2648 [0xfffffffffffff5a8])) [0 i+0 S4 A32])) avbinbackend.cpp:27 -1
+     (nil))
+
+(insn 29 28 30 4 (set (reg:DI 1 dx)
+        (reg:DI 74)) avbinbackend.cpp:27 -1
+     (nil))
+
+(insn 30 29 31 4 (set (reg:SI 4 si)
+        (reg:SI 75)) avbinbackend.cpp:27 -1
+     (nil))
+
+(insn 31 30 32 4 (set (reg:DI 5 di)
+        (reg/f:DI 63 [ D.2964 ])) avbinbackend.cpp:27 -1
+     (nil))
+
+(call_insn 32 31 33 4 (set (reg:SI 0 ax)
+        (call (mem:QI (symbol_ref:DI ("_Z17avbin_stream_infoP10_AVbinFileiP16_AVbinStreamInfo") [flags 0x41]  <function_decl 0x7fc017ab6800 avbin_stream_info>) [0 S1 A8])
+            (const_int 0 [0]))) avbinbackend.cpp:27 -1
+     (nil)
+    (expr_list:REG_DEP_TRUE (use (reg:DI 5 di))
+        (expr_list:REG_DEP_TRUE (use (reg:SI 4 si))
+            (expr_list:REG_DEP_TRUE (use (reg:DI 1 dx))
+                (nil)))))
+
+(insn 33 32 34 4 (parallel [
+            (set (mem/c/i:SI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                        (const_int -2648 [0xfffffffffffff5a8])) [0 i+0 S4 A32])
+                (plus:SI (mem/c/i:SI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                            (const_int -2648 [0xfffffffffffff5a8])) [0 i+0 S4 A32])
+                    (const_int 1 [0x1])))
+            (clobber (reg:CC 17 flags))
+        ]) avbinbackend.cpp:24 -1
+     (nil))
+;; End of basic block 4 -> ( 5)
+
+;; Succ edge  5 (fallthru)
+
+;; Start of basic block ( 3 4) -> 5
+;; Pred edge  3
+;; Pred edge  4 (fallthru)
+(code_label 34 33 35 5 5 "" [1 uses])
+
+(note 35 34 36 5 [bb 5] NOTE_INSN_BASIC_BLOCK)
+
+(insn 36 35 37 5 (set (reg:CCGC 17 flags)
+        (compare:CCGC (mem/c/i:SI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                    (const_int -2648 [0xfffffffffffff5a8])) [0 i+0 S4 A32])
+            (const_int 9 [0x9]))) avbinbackend.cpp:24 -1
+     (nil))
+
+(insn 37 36 39 5 (set (reg:QI 62 [ D.2962 ])
+        (le:QI (reg:CCGC 17 flags)
+            (const_int 0 [0]))) avbinbackend.cpp:24 -1
+     (nil))
+
+(insn 39 37 40 5 (set (reg:CCZ 17 flags)
+        (compare:CCZ (reg:QI 62 [ D.2962 ])
+            (const_int 0 [0]))) avbinbackend.cpp:24 -1
+     (nil))
+
+(jump_insn 40 39 41 5 (set (pc)
+        (if_then_else (ne (reg:CCZ 17 flags)
+                (const_int 0 [0]))
+            (label_ref 38)
+            (pc))) avbinbackend.cpp:24 -1
+     (nil)
+ -> 38)
+;; End of basic block 5 -> ( 4 6)
+
+;; Succ edge  4
+;; Succ edge  6 (fallthru)
+
+;; Start of basic block ( 5) -> 6
+;; Pred edge  5 (fallthru)
+(note 41 40 42 6 [bb 6] NOTE_INSN_BASIC_BLOCK)
+
+(insn 42 41 43 6 (set (reg/f:DI 76)
+        (mem/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2744 [0xfffffffffffff548])) [0 this+0 S8 A64])) avbinbackend.cpp:30 -1
+     (nil))
+
+(insn 43 42 44 6 (set (reg/f:DI 64 [ D.2965 ])
+        (mem/s/f/j:DI (reg/f:DI 76) [0 this_5(D)->fi+0 S8 A64])) avbinbackend.cpp:30 -1
+     (nil))
+
+(insn 44 43 45 6 (set (reg:SI 4 si)
+        (const_int 0 [0])) avbinbackend.cpp:30 -1
+     (nil))
+
+(insn 45 44 46 6 (set (reg:DI 5 di)
+        (reg/f:DI 64 [ D.2965 ])) avbinbackend.cpp:30 -1
+     (nil))
+
+(call_insn 46 45 47 6 (set (reg:DI 0 ax)
+        (call (mem:QI (symbol_ref:DI ("_Z17avbin_open_streamP10_AVbinFilei") [flags 0x41]  <function_decl 0x7fc017ab6900 avbin_open_stream>) [0 S1 A8])
+            (const_int 0 [0]))) avbinbackend.cpp:30 -1
+     (nil)
+    (expr_list:REG_DEP_TRUE (use (reg:DI 5 di))
+        (expr_list:REG_DEP_TRUE (use (reg:SI 4 si))
+            (nil))))
+
+(insn 47 46 48 6 (set (reg/f:DI 65 [ D.2968 ])
+        (reg:DI 0 ax)) avbinbackend.cpp:30 -1
+     (nil))
+
+(insn 48 47 49 6 (set (mem/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2656 [0xfffffffffffff5a0])) [0 stream+0 S8 A64])
+        (reg/f:DI 65 [ D.2968 ])) avbinbackend.cpp:30 -1
+     (nil))
+
+(insn 49 48 50 6 (set (reg/f:DI 77)
+        (mem/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2744 [0xfffffffffffff548])) [0 this+0 S8 A64])) avbinbackend.cpp:33 -1
+     (nil))
+
+(insn 50 49 51 6 (set (reg/f:DI 66 [ D.2966 ])
+        (mem/s/f/j:DI (reg/f:DI 77) [0 this_5(D)->fi+0 S8 A64])) avbinbackend.cpp:33 -1
+     (nil))
+
+(insn 51 50 52 6 (parallel [
+            (set (reg:DI 78)
+                (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                    (const_int -2736 [0xfffffffffffff550])))
+            (clobber (reg:CC 17 flags))
+        ]) avbinbackend.cpp:33 -1
+     (nil))
+
+(insn 52 51 53 6 (set (reg:DI 4 si)
+        (reg:DI 78)) avbinbackend.cpp:33 -1
+     (nil))
+
+(insn 53 52 54 6 (set (reg:DI 5 di)
+        (reg/f:DI 66 [ D.2966 ])) avbinbackend.cpp:33 -1
+     (nil))
+
+(call_insn 54 53 55 6 (set (reg:SI 0 ax)
+        (call (mem:QI (symbol_ref:DI ("_Z10avbin_readP10_AVbinFileP12_AVbinPacket") [flags 0x41]  <function_decl 0x7fc017ab6b00 avbin_read>) [0 S1 A8])
+            (const_int 0 [0]))) avbinbackend.cpp:33 -1
+     (nil)
+    (expr_list:REG_DEP_TRUE (use (reg:DI 5 di))
+        (expr_list:REG_DEP_TRUE (use (reg:DI 4 si))
+            (nil))))
+
+(insn 55 54 56 6 (set (reg:SI 67 [ D.2969 ])
+        (reg:SI 0 ax)) avbinbackend.cpp:33 -1
+     (nil))
+
+(insn 56 55 67 6 (set (mem/c/i:SI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                (const_int -2644 [0xfffffffffffff5ac])) [0 res+0 S4 A32])
+        (reg:SI 67 [ D.2969 ])) avbinbackend.cpp:33 -1
+     (nil))
+;; End of basic block 6 -> ( 7)
+
+;; Succ edge  7 (fallthru)
+
+;; Start of basic block ( 6) -> 7
+;; Pred edge  6 (fallthru)
+(note 67 56 59 7 [bb 7] NOTE_INSN_BASIC_BLOCK)
+
+(insn 59 67 60 7 (clobber (reg/i:SI 0 ax)) avbinbackend.cpp:36 -1
+     (nil))
+
+(insn 60 59 57 7 (clobber (reg:SI 68 [ <retval> ])) avbinbackend.cpp:36 -1
+     (nil))
+;; End of basic block 7 -> ( 8)
+
+;; Succ edge  8 (fallthru)
+
+;; Start of basic block ( 7) -> 8
+;; Pred edge  7 (fallthru)
+(code_label 57 60 68 8 4 "" [0 uses])
+
+(note 68 57 58 8 [bb 8] NOTE_INSN_BASIC_BLOCK)
+
+(insn 58 68 61 8 (set (reg/i:SI 0 ax)
+        (reg:SI 68 [ <retval> ])) avbinbackend.cpp:36 -1
+     (nil))
+
+(insn 61 58 62 8 (parallel [
+            (set (reg:CCZ 17 flags)
+                (unspec:CCZ [
+                        (mem/v/f/c/i:DI (plus:DI (reg/f:DI 54 virtual-stack-vars)
+                                (const_int -8 [0xfffffffffffffff8])) [0 D.2974+0 S8 A64])
+                        (const_int 40 [0x28])
+                    ] UNSPEC_SP_TLS_TEST))
+            (clobber (scratch:DI))
+        ]) avbinbackend.cpp:36 -1
+     (nil))
+
+(jump_insn 62 61 69 8 (set (pc)
+        (if_then_else (eq (reg:CCZ 17 flags)
+                (const_int 0 [0]))
+            (label_ref 65)
+            (pc))) avbinbackend.cpp:36 -1
+     (nil)
+ -> 65)
+;; End of basic block 8 -> ( 10 9)
+
+;; Succ edge  10
+;; Succ edge  9 (fallthru)
+
+;; Start of basic block ( 8) -> 9
+;; Pred edge  8 (fallthru)
+(note 69 62 63 9 [bb 9] NOTE_INSN_BASIC_BLOCK)
+
+(call_insn 63 69 64 9 (call (mem:QI (symbol_ref:DI ("__stack_chk_fail") [flags 0x41]  <function_decl 0x7fc017abb600 __stack_chk_fail>) [0 S1 A8])
+        (const_int 0 [0])) avbinbackend.cpp:36 -1
+     (expr_list:REG_NORETURN (const_int 0 [0])
+        (expr_list:REG_EH_REGION (const_int 0 [0])
+            (nil)))
+    (nil))
+;; End of basic block 9 -> ()
+
+
+(barrier 64 63 65)
+
+;; Start of basic block ( 8) -> 10
+;; Pred edge  8
+(code_label 65 64 70 10 7 "" [1 uses])
+
+(note 70 65 66 10 [bb 10] NOTE_INSN_BASIC_BLOCK)
+
+(insn 66 70 0 10 (use (reg/i:SI 0 ax)) avbinbackend.cpp:36 -1
+     (nil))
+;; End of basic block 10 -> ( 1)
+
+;; Succ edge  EXIT [100.0%]  (fallthru)
+

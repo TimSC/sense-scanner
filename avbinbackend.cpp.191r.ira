@@ -1,0 +1,857 @@
+
+;; Function AvBinBackend::AvBinBackend() (_ZN12AvBinBackendC2Ev)
+
+starting the processing of deferred insns
+ending the processing of deferred insns
+df_analyze called
+df_worklist_dataflow_doublequeue:n_basic_blocks 3 n_edges 2 count 3 (    1)
+Building IRA IR
+starting the processing of deferred insns
+ending the processing of deferred insns
+df_analyze called
+
+Pass 0 for finding pseudo/allocno costs
+
+    r59: preferred AREG, alternative GENERAL_REGS, cover GENERAL_REGS
+    a0 (r59,l0) best AREG, cover GENERAL_REGS
+
+  a0(r59,l0) costs: AREG:-1,-1 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:0,0 DIREG:0,0 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:8
+
+   Insn 8(l0): point = 0
+   Insn 7(l0): point = 2
+   Insn 6(l0): point = 4
+   Insn 2(l0): point = 6
+ a0(r59): [1..2]
+Compressing live ranges: from 9 to 2 - 22%
+Ranges after the compression:
+ a0(r59): [0..1]
+  regions=1, blocks=3, points=2
+    allocnos=1 (big 0), copies=0, conflicts=0, ranges=1
+Disposition:
+    0:r59  l0     0
++++Costs: overall -1, reg -1, mem 0, ld 0, st 0, move 0
++++       move loops 0, new jumps 0
+insn=2, live_throughout: 7, dead_or_set: 5
+insn=6, live_throughout: 7, dead_or_set: 0
+insn=7, live_throughout: 7, dead_or_set: 0, 59
+insn=8, live_throughout: 7, dead_or_set: 59
+changing reg in insn 7
+changing reg in insn 8
+deleting insn with uid = 7.
+starting the processing of deferred insns
+ending the processing of deferred insns
+verify found no changes in insn with uid = 6.
+
+
+AvBinBackend::AvBinBackend()
+
+Dataflow summary:
+;;  invalidated by call 	 0 [ax] 1 [dx] 2 [cx] 4 [si] 5 [di] 8 [st] 9 [st(1)] 10 [st(2)] 11 [st(3)] 12 [st(4)] 13 [st(5)] 14 [st(6)] 15 [st(7)] 17 [flags] 18 [fpsr] 19 [fpcr] 21 [xmm0] 22 [xmm1] 23 [xmm2] 24 [xmm3] 25 [xmm4] 26 [xmm5] 27 [xmm6] 28 [xmm7] 29 [mm0] 30 [mm1] 31 [mm2] 32 [mm3] 33 [mm4] 34 [mm5] 35 [mm6] 36 [mm7] 37 [r8] 38 [r9] 39 [r10] 40 [r11] 45 [xmm8] 46 [xmm9] 47 [xmm10] 48 [xmm11] 49 [xmm12] 50 [xmm13] 51 [xmm14] 52 [xmm15]
+;;  hardware regs used 	
+;;  regular block artificial uses 	 6 [bp] 7 [sp]
+;;  eh block artificial uses 	 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;;  entry block defs 	 0 [ax] 1 [dx] 2 [cx] 4 [si] 5 [di] 6 [bp] 7 [sp] 20 [frame] 21 [xmm0] 22 [xmm1] 23 [xmm2] 24 [xmm3] 25 [xmm4] 26 [xmm5] 27 [xmm6] 28 [xmm7] 37 [r8] 38 [r9]
+;;  exit block uses 	 6 [bp] 7 [sp] 20 [frame]
+;;  regs ever live 	 0[ax] 5[di] 6[bp] 7[sp]
+;;  ref usage 	r0={2d,1u} r1={2d} r2={2d} r4={2d} r5={2d,1u} r6={1d,4u} r7={1d,3u} r8={1d} r9={1d} r10={1d} r11={1d} r12={1d} r13={1d} r14={1d} r15={1d} r17={1d} r18={1d} r19={1d} r20={1d,1u} r21={2d} r22={2d} r23={2d} r24={2d} r25={2d} r26={2d} r27={2d} r28={2d} r29={1d} r30={1d} r31={1d} r32={1d} r33={1d} r34={1d} r35={1d} r36={1d} r37={2d} r38={2d} r39={1d} r40={1d} r45={1d} r46={1d} r47={1d} r48={1d} r49={1d} r50={1d} r51={1d} r52={1d} 
+;;    total ref usage 72{62d,10u,0e} in 3{2 regular + 1 call} insns.
+(note 1 0 4 NOTE_INSN_DELETED)
+
+;; Start of basic block ( 0) -> 2
+;; bb 2 artificial_defs: { }
+;; bb 2 artificial_uses: { u-1(6){ }u-1(7){ }}
+;; lr  in  	 5 [di] 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;; lr  use 	 5 [di] 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;; lr  def 	 0 [ax] 1 [dx] 2 [cx] 4 [si] 5 [di] 8 [st] 9 [st(1)] 10 [st(2)] 11 [st(3)] 12 [st(4)] 13 [st(5)] 14 [st(6)] 15 [st(7)] 17 [flags] 18 [fpsr] 19 [fpcr] 21 [xmm0] 22 [xmm1] 23 [xmm2] 24 [xmm3] 25 [xmm4] 26 [xmm5] 27 [xmm6] 28 [xmm7] 29 [mm0] 30 [mm1] 31 [mm2] 32 [mm3] 33 [mm4] 34 [mm5] 35 [mm6] 36 [mm7] 37 [r8] 38 [r9] 39 [r10] 40 [r11] 45 [xmm8] 46 [xmm9] 47 [xmm10] 48 [xmm11] 49 [xmm12] 50 [xmm13] 51 [xmm14] 52 [xmm15] 59
+
+;; Pred edge  ENTRY (fallthru)
+(note 4 1 2 2 [bb 2] NOTE_INSN_BASIC_BLOCK)
+
+(insn 2 4 3 2 (set (mem/f/c/i:DI (plus:DI (reg/f:DI 6 bp)
+                (const_int -24 [0xffffffffffffffe8])) [0 this+0 S8 A64])
+        (reg:DI 5 di [ this ])) avbinbackend.cpp:6 62 {*movdi_internal_rex64}
+     (nil))
+
+(note 3 2 6 2 NOTE_INSN_FUNCTION_BEG)
+
+(call_insn 6 3 8 2 (set (reg:SI 0 ax)
+        (call (mem:QI (symbol_ref:DI ("_Z10avbin_initv") [flags 0x41]  <function_decl 0x7fc017ab6100 avbin_init>) [0 S1 A8])
+            (const_int 0 [0]))) avbinbackend.cpp:8 929 {*call_value_0_rex64}
+     (nil)
+    (nil))
+
+(insn 8 6 11 2 (set (mem/c/i:SI (plus:DI (reg/f:DI 6 bp)
+                (const_int -4 [0xfffffffffffffffc])) [0 res+0 S4 A32])
+        (reg:SI 0 ax [orig:59 D.2970 ] [59])) avbinbackend.cpp:8 64 {*movsi_internal}
+     (nil))
+;; End of basic block 2 -> ( 1)
+;; lr  out 	 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+
+
+;; Succ edge  EXIT [100.0%]  (fallthru)
+
+(note 11 8 0 NOTE_INSN_DELETED)
+
+
+;; Function AvBinBackend::~AvBinBackend() (_ZN12AvBinBackendD2Ev)
+
+starting the processing of deferred insns
+ending the processing of deferred insns
+df_analyze called
+df_worklist_dataflow_doublequeue:n_basic_blocks 3 n_edges 2 count 3 (    1)
+Building IRA IR
+starting the processing of deferred insns
+ending the processing of deferred insns
+df_analyze called
+
+Pass 0 for finding pseudo/allocno costs
+
+
+
+   Insn 2(l0): point = 0
+Compressing live ranges: from 3 to 0 - 0%
+Ranges after the compression:
+  regions=1, blocks=3, points=0
+    allocnos=0 (big 0), copies=0, conflicts=0, ranges=0
+Disposition:
++++Costs: overall 0, reg 0, mem 0, ld 0, st 0, move 0
++++       move loops 0, new jumps 0
+insn=2, live_throughout: 7, dead_or_set: 5
+starting the processing of deferred insns
+ending the processing of deferred insns
+
+
+AvBinBackend::~AvBinBackend()
+
+Dataflow summary:
+;;  invalidated by call 	 0 [ax] 1 [dx] 2 [cx] 4 [si] 5 [di] 8 [st] 9 [st(1)] 10 [st(2)] 11 [st(3)] 12 [st(4)] 13 [st(5)] 14 [st(6)] 15 [st(7)] 17 [flags] 18 [fpsr] 19 [fpcr] 21 [xmm0] 22 [xmm1] 23 [xmm2] 24 [xmm3] 25 [xmm4] 26 [xmm5] 27 [xmm6] 28 [xmm7] 29 [mm0] 30 [mm1] 31 [mm2] 32 [mm3] 33 [mm4] 34 [mm5] 35 [mm6] 36 [mm7] 37 [r8] 38 [r9] 39 [r10] 40 [r11] 45 [xmm8] 46 [xmm9] 47 [xmm10] 48 [xmm11] 49 [xmm12] 50 [xmm13] 51 [xmm14] 52 [xmm15]
+;;  hardware regs used 	
+;;  regular block artificial uses 	 6 [bp] 7 [sp]
+;;  eh block artificial uses 	 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;;  entry block defs 	 0 [ax] 1 [dx] 2 [cx] 4 [si] 5 [di] 6 [bp] 7 [sp] 20 [frame] 21 [xmm0] 22 [xmm1] 23 [xmm2] 24 [xmm3] 25 [xmm4] 26 [xmm5] 27 [xmm6] 28 [xmm7] 37 [r8] 38 [r9]
+;;  exit block uses 	 6 [bp] 7 [sp] 20 [frame]
+;;  regs ever live 	 5[di] 6[bp]
+;;  ref usage 	r0={1d} r1={1d} r2={1d} r4={1d} r5={1d,1u} r6={1d,3u} r7={1d,2u} r20={1d,1u} r21={1d} r22={1d} r23={1d} r24={1d} r25={1d} r26={1d} r27={1d} r28={1d} r37={1d} r38={1d} 
+;;    total ref usage 25{18d,7u,0e} in 1{1 regular + 0 call} insns.
+(note 1 0 4 NOTE_INSN_DELETED)
+
+;; Start of basic block ( 0) -> 2
+;; bb 2 artificial_defs: { }
+;; bb 2 artificial_uses: { u-1(6){ }u-1(7){ }}
+;; lr  in  	 5 [di] 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;; lr  use 	 5 [di] 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;; lr  def 	
+
+;; Pred edge  ENTRY (fallthru)
+(note 4 1 2 2 [bb 2] NOTE_INSN_BASIC_BLOCK)
+
+(insn 2 4 3 2 (set (mem/f/c/i:DI (plus:DI (reg/f:DI 6 bp)
+                (const_int -8 [0xfffffffffffffff8])) [0 this+0 S8 A64])
+        (reg:DI 5 di [ this ])) avbinbackend.cpp:12 62 {*movdi_internal_rex64}
+     (nil))
+
+(note 3 2 9 2 NOTE_INSN_FUNCTION_BEG)
+;; End of basic block 2 -> ( 1)
+;; lr  out 	 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+
+
+;; Succ edge  EXIT [100.0%]  (fallthru)
+
+(note 9 3 0 NOTE_INSN_DELETED)
+
+
+;; Function int AvBinBackend::OpenFile(const char*) (_ZN12AvBinBackend8OpenFileEPKc)
+
+starting the processing of deferred insns
+ending the processing of deferred insns
+df_analyze called
+df_worklist_dataflow_doublequeue:n_basic_blocks 8 n_edges 8 count 8 (    1)
+Building IRA IR
+starting the processing of deferred insns
+ending the processing of deferred insns
+df_analyze called
+
+Pass 0 for finding pseudo/allocno costs
+
+    r78: preferred SIREG, alternative GENERAL_REGS, cover GENERAL_REGS
+    a3 (r78,l0) best SIREG, cover GENERAL_REGS
+    r77: preferred GENERAL_REGS, alternative NO_REGS, cover GENERAL_REGS
+    a4 (r77,l0) best GENERAL_REGS, cover GENERAL_REGS
+    r76: preferred GENERAL_REGS, alternative NO_REGS, cover GENERAL_REGS
+    a7 (r76,l0) best GENERAL_REGS, cover GENERAL_REGS
+    r75: preferred SIREG, alternative GENERAL_REGS, cover GENERAL_REGS
+    a10 (r75,l0) best SIREG, cover GENERAL_REGS
+    r74: preferred DREG, alternative GENERAL_REGS, cover GENERAL_REGS
+    a11 (r74,l0) best DREG, cover GENERAL_REGS
+    r73: preferred GENERAL_REGS, alternative NO_REGS, cover GENERAL_REGS
+    a12 (r73,l0) best GENERAL_REGS, cover GENERAL_REGS
+    r72: preferred SIREG, alternative GENERAL_REGS, cover GENERAL_REGS
+    a14 (r72,l0) best SIREG, cover GENERAL_REGS
+    r71: preferred GENERAL_REGS, alternative NO_REGS, cover GENERAL_REGS
+    a15 (r71,l0) best GENERAL_REGS, cover GENERAL_REGS
+    r70: preferred GENERAL_REGS, alternative NO_REGS, cover GENERAL_REGS
+    a16 (r70,l0) best GENERAL_REGS, cover GENERAL_REGS
+    r69: preferred DIREG, alternative GENERAL_REGS, cover GENERAL_REGS
+    a19 (r69,l0) best DIREG, cover GENERAL_REGS
+    r68: preferred AREG, alternative GENERAL_REGS, cover GENERAL_REGS
+    a0 (r68,l0) best AREG, cover GENERAL_REGS
+    r67: preferred AREG, alternative GENERAL_REGS, cover GENERAL_REGS
+    a1 (r67,l0) best AREG, cover GENERAL_REGS
+    r66: preferred DIREG, alternative GENERAL_REGS, cover GENERAL_REGS
+    a2 (r66,l0) best DIREG, cover GENERAL_REGS
+    r65: preferred AREG, alternative GENERAL_REGS, cover GENERAL_REGS
+    a5 (r65,l0) best AREG, cover GENERAL_REGS
+    r64: preferred DIREG, alternative GENERAL_REGS, cover GENERAL_REGS
+    a6 (r64,l0) best DIREG, cover GENERAL_REGS
+    r63: preferred DIREG, alternative GENERAL_REGS, cover GENERAL_REGS
+    a9 (r63,l0) best DIREG, cover GENERAL_REGS
+    r62: preferred GENERAL_REGS, alternative NO_REGS, cover GENERAL_REGS
+    a8 (r62,l0) best GENERAL_REGS, cover GENERAL_REGS
+    r61: preferred DIREG, alternative GENERAL_REGS, cover GENERAL_REGS
+    a13 (r61,l0) best DIREG, cover GENERAL_REGS
+    r60: preferred GENERAL_REGS, alternative NO_REGS, cover GENERAL_REGS
+    a17 (r60,l0) best GENERAL_REGS, cover GENERAL_REGS
+    r59: preferred AREG, alternative GENERAL_REGS, cover GENERAL_REGS
+    a18 (r59,l0) best AREG, cover GENERAL_REGS
+
+  a0(r68,l0) costs: AREG:-1,-1 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:0,0 DIREG:0,0 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:13,13 SSE_REGS:13,13 MMX_REGS:13,13 MEM:3
+  a1(r67,l0) costs: AREG:-1,-1 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:0,0 DIREG:0,0 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:8
+  a2(r66,l0) costs: AREG:0,0 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:0,0 DIREG:-1,-1 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:7
+  a3(r78,l0) costs: AREG:0,0 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:-1,-1 DIREG:0,0 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:7
+  a4(r77,l0) costs: AREG:0,0 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:0,0 DIREG:0,0 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:8
+  a5(r65,l0) costs: AREG:-1,-1 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:0,0 DIREG:0,0 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:8
+  a6(r64,l0) costs: AREG:0,0 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:0,0 DIREG:-1,-1 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:7
+  a7(r76,l0) costs: AREG:0,0 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:0,0 DIREG:0,0 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:8
+  a8(r62,l0) costs: AREG:0,0 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:0,0 DIREG:0,0 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 MEM:7
+  a9(r63,l0) costs: AREG:0,0 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:0,0 DIREG:-1,-1 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:7
+  a10(r75,l0) costs: AREG:0,0 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:-1,-1 DIREG:0,0 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:7
+  a11(r74,l0) costs: AREG:0,0 DREG:-1,-1 CREG:0,0 BREG:0,0 SIREG:0,0 DIREG:0,0 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:7
+  a12(r73,l0) costs: AREG:0,0 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:0,0 DIREG:0,0 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:8
+  a13(r61,l0) costs: AREG:0,0 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:0,0 DIREG:-1,-1 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:7
+  a14(r72,l0) costs: AREG:0,0 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:-1,-1 DIREG:0,0 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:7
+  a15(r71,l0) costs: AREG:0,0 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:0,0 DIREG:0,0 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:8
+  a16(r70,l0) costs: AREG:0,0 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:0,0 DIREG:0,0 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:8
+  a17(r60,l0) costs: AREG:0,0 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:0,0 DIREG:0,0 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:8
+  a18(r59,l0) costs: AREG:-1,-1 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:0,0 DIREG:0,0 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:7
+  a19(r69,l0) costs: AREG:0,0 DREG:0,0 CREG:0,0 BREG:0,0 SIREG:0,0 DIREG:-1,-1 AD_REGS:0,0 CLOBBERED_REGS:0,0 Q_REGS:0,0 NON_Q_REGS:0,0 LEGACY_REGS:0,0 GENERAL_REGS:0,0 SSE_FIRST_REG:26,26 SSE_REGS:26,26 MMX_REGS:26,26 MEM:7
+
+   Insn 66(l0): point = 0
+   Insn 63(l0): point = 3
+   Insn 62(l0): point = 6
+   Insn 61(l0): point = 8
+   Insn 58(l0): point = 10
+   Insn 60(l0): point = 12
+   Insn 59(l0): point = 14
+   Insn 56(l0): point = 16
+   Insn 55(l0): point = 18
+   Insn 54(l0): point = 20
+   Insn 53(l0): point = 22
+   Insn 52(l0): point = 24
+   Insn 51(l0): point = 26
+   Insn 50(l0): point = 28
+   Insn 49(l0): point = 30
+   Insn 48(l0): point = 32
+   Insn 47(l0): point = 34
+   Insn 46(l0): point = 36
+   Insn 45(l0): point = 38
+   Insn 44(l0): point = 40
+   Insn 43(l0): point = 42
+   Insn 42(l0): point = 44
+   Insn 40(l0): point = 47
+   Insn 39(l0): point = 49
+   Insn 37(l0): point = 51
+   Insn 36(l0): point = 53
+   Insn 33(l0): point = 56
+   Insn 32(l0): point = 58
+   Insn 31(l0): point = 60
+   Insn 30(l0): point = 62
+   Insn 29(l0): point = 64
+   Insn 28(l0): point = 66
+   Insn 27(l0): point = 68
+   Insn 26(l0): point = 70
+   Insn 25(l0): point = 72
+   Insn 71(l0): point = 75
+   Insn 21(l0): point = 77
+   Insn 20(l0): point = 79
+   Insn 19(l0): point = 81
+   Insn 18(l0): point = 83
+   Insn 17(l0): point = 85
+   Insn 16(l0): point = 87
+   Insn 15(l0): point = 89
+   Insn 14(l0): point = 91
+   Insn 13(l0): point = 93
+   Insn 12(l0): point = 95
+   Insn 11(l0): point = 97
+   Insn 10(l0): point = 99
+   Insn 9(l0): point = 101
+   Insn 8(l0): point = 103
+   Insn 5(l0): point = 105
+   Insn 3(l0): point = 107
+   Insn 2(l0): point = 109
+ a0(r68): [11..12]
+ a1(r67): [17..18]
+ a2(r66): [23..28]
+ a3(r78): [25..26]
+ a4(r77): [29..30]
+ a5(r65): [33..34]
+ a6(r64): [39..42]
+ a7(r76): [43..44]
+ a8(r62): [50..51]
+ a9(r63): [61..70]
+ a10(r75): [63..66]
+ a11(r74): [65..68]
+ a12(r73): [71..72]
+ a13(r61): [82..87]
+ a14(r72): [84..85]
+ a15(r71): [88..89]
+ a16(r70): [92..93]
+ a17(r60): [92..95]
+ a18(r59): [96..97]
+ a19(r69): [102..103]
+Compressing live ranges: from 112 to 30 - 26%
+Ranges after the compression:
+ a0(r68): [0..1]
+ a1(r67): [2..3]
+ a2(r66): [4..5]
+ a3(r78): [4..5]
+ a4(r77): [6..7]
+ a5(r65): [8..9]
+ a6(r64): [10..11]
+ a7(r76): [12..13]
+ a8(r62): [14..15]
+ a9(r63): [16..17]
+ a10(r75): [16..17]
+ a11(r74): [16..17]
+ a12(r73): [18..19]
+ a13(r61): [20..21]
+ a14(r72): [20..21]
+ a15(r71): [22..23]
+ a16(r70): [24..25]
+ a17(r60): [24..25]
+ a18(r59): [26..27]
+ a19(r69): [28..29]
+  regions=2, blocks=8, points=30
+    allocnos=20 (big 0), copies=0, conflicts=0, ranges=20
+Disposition:
+   18:r59  l0     0   17:r60  l0     1   13:r61  l0     0    8:r62  l0     0
+    9:r63  l0     0    6:r64  l0     0    5:r65  l0     0    2:r66  l0     0
+    1:r67  l0     0    0:r68  l0     0   19:r69  l0     0   16:r70  l0     0
+   15:r71  l0     0   14:r72  l0     1   12:r73  l0     0   11:r74  l0     1
+   10:r75  l0     2    7:r76  l0     0    4:r77  l0     0    3:r78  l0     1
++++Costs: overall -13, reg -13, mem 0, ld 0, st 0, move 0
++++       move loops 0, new jumps 0
+insn=2, live_throughout: 4, 7, dead_or_set: 5
+insn=3, live_throughout: 7, dead_or_set: 4
+insn=5, live_throughout: 7, dead_or_set: 
+insn=8, live_throughout: 7, dead_or_set: 69
+insn=9, live_throughout: 7, dead_or_set: 5, 69
+insn=10, live_throughout: 7, dead_or_set: 0, 5
+insn=11, live_throughout: 7, dead_or_set: 0, 59
+insn=12, live_throughout: 7, dead_or_set: 59, 60
+insn=13, live_throughout: 7, 60, dead_or_set: 70
+insn=14, live_throughout: 7, dead_or_set: 60, 70
+insn=15, live_throughout: 7, dead_or_set: 71
+insn=16, live_throughout: 7, dead_or_set: 61, 71
+insn=17, live_throughout: 7, 61, dead_or_set: 72
+insn=18, live_throughout: 7, 61, dead_or_set: 4, 72
+insn=19, live_throughout: 4, 7, dead_or_set: 5, 61
+insn=20, live_throughout: 7, dead_or_set: 0, 4, 5
+insn=21, live_throughout: 7, dead_or_set: 
+insn=71, live_throughout: 7, dead_or_set: 
+insn=38, live_throughout: 7, dead_or_set: 
+insn=25, live_throughout: 7, dead_or_set: 73
+insn=26, live_throughout: 7, dead_or_set: 63, 73
+insn=27, live_throughout: 7, 63, dead_or_set: 74
+insn=28, live_throughout: 7, 63, 74, dead_or_set: 75
+insn=29, live_throughout: 7, 63, 75, dead_or_set: 1, 74
+insn=30, live_throughout: 1, 7, 63, dead_or_set: 4, 75
+insn=31, live_throughout: 1, 4, 7, dead_or_set: 5, 63
+insn=32, live_throughout: 7, dead_or_set: 0, 1, 4, 5
+insn=33, live_throughout: 7, dead_or_set: 
+insn=34, live_throughout: 7, dead_or_set: 
+insn=36, live_throughout: 7, dead_or_set: 
+insn=37, live_throughout: 7, dead_or_set: 62
+insn=39, live_throughout: 7, dead_or_set: 62
+insn=40, live_throughout: 7, dead_or_set: 
+insn=42, live_throughout: 7, dead_or_set: 76
+insn=43, live_throughout: 7, dead_or_set: 64, 76
+insn=44, live_throughout: 7, 64, dead_or_set: 4
+insn=45, live_throughout: 4, 7, dead_or_set: 5, 64
+insn=46, live_throughout: 7, dead_or_set: 0, 4, 5
+insn=47, live_throughout: 7, dead_or_set: 0, 65
+insn=48, live_throughout: 7, dead_or_set: 65
+insn=49, live_throughout: 7, dead_or_set: 77
+insn=50, live_throughout: 7, dead_or_set: 66, 77
+insn=51, live_throughout: 7, 66, dead_or_set: 78
+insn=52, live_throughout: 7, 66, dead_or_set: 4, 78
+insn=53, live_throughout: 4, 7, dead_or_set: 5, 66
+insn=54, live_throughout: 7, dead_or_set: 0, 4, 5
+insn=55, live_throughout: 7, dead_or_set: 0, 67
+insn=56, live_throughout: 7, dead_or_set: 67
+insn=59, live_throughout: 7, dead_or_set: 0
+insn=60, live_throughout: 7, dead_or_set: 68
+insn=58, live_throughout: 7, dead_or_set: 0, 68
+insn=61, live_throughout: 0, 7, dead_or_set: 
+insn=62, live_throughout: 0, 7, dead_or_set: 
+insn=63, live_throughout: 7, dead_or_set: 
+insn=65, live_throughout: 0, 7, dead_or_set: 
+insn=66, live_throughout: 0, 7, dead_or_set: 
+changing reg in insn 11
+changing reg in insn 12
+changing reg in insn 12
+changing reg in insn 14
+changing reg in insn 16
+changing reg in insn 19
+changing reg in insn 37
+changing reg in insn 39
+changing reg in insn 26
+changing reg in insn 31
+changing reg in insn 43
+changing reg in insn 45
+changing reg in insn 47
+changing reg in insn 48
+changing reg in insn 50
+changing reg in insn 53
+changing reg in insn 55
+changing reg in insn 56
+changing reg in insn 60
+changing reg in insn 58
+changing reg in insn 8
+changing reg in insn 9
+changing reg in insn 13
+changing reg in insn 14
+changing reg in insn 15
+changing reg in insn 16
+changing reg in insn 17
+changing reg in insn 18
+changing reg in insn 25
+changing reg in insn 26
+changing reg in insn 27
+changing reg in insn 29
+changing reg in insn 28
+changing reg in insn 30
+changing reg in insn 42
+changing reg in insn 43
+changing reg in insn 49
+changing reg in insn 50
+changing reg in insn 51
+changing reg in insn 52
+Spilling for insn 5.
+Using reg 0 for reload 0
+Spilling for insn 61.
+Using reg 1 for reload 0
+
+Reloads for insn # 5
+Reload 0: reload_out (DI) = (scratch:DI)
+	GENERAL_REGS, RELOAD_OTHER (opnum = 2)
+	reload_out_reg: (scratch:DI)
+	reload_reg_rtx: (reg:DI 0 ax)
+
+Reloads for insn # 61
+Reload 0: reload_out (DI) = (scratch:DI)
+	GENERAL_REGS, RELOAD_FOR_OUTPUT (opnum = 3)
+	reload_out_reg: (scratch:DI)
+	reload_reg_rtx: (reg:DI 1 dx)
+deleting insn with uid = 11.
+deleting insn with uid = 29.
+deleting insn with uid = 47.
+deleting insn with uid = 55.
+deleting insn with uid = 60.
+deleting insn with uid = 58.
+starting the processing of deferred insns
+ending the processing of deferred insns
+verify found no changes in insn with uid = 10.
+verify found no changes in insn with uid = 20.
+verify found no changes in insn with uid = 32.
+verify found no changes in insn with uid = 46.
+verify found no changes in insn with uid = 54.
+verify found no changes in insn with uid = 63.
+
+
+int AvBinBackend::OpenFile(const char*)
+
+Dataflow summary:
+;;  invalidated by call 	 0 [ax] 1 [dx] 2 [cx] 4 [si] 5 [di] 8 [st] 9 [st(1)] 10 [st(2)] 11 [st(3)] 12 [st(4)] 13 [st(5)] 14 [st(6)] 15 [st(7)] 17 [flags] 18 [fpsr] 19 [fpcr] 21 [xmm0] 22 [xmm1] 23 [xmm2] 24 [xmm3] 25 [xmm4] 26 [xmm5] 27 [xmm6] 28 [xmm7] 29 [mm0] 30 [mm1] 31 [mm2] 32 [mm3] 33 [mm4] 34 [mm5] 35 [mm6] 36 [mm7] 37 [r8] 38 [r9] 39 [r10] 40 [r11] 45 [xmm8] 46 [xmm9] 47 [xmm10] 48 [xmm11] 49 [xmm12] 50 [xmm13] 51 [xmm14] 52 [xmm15]
+;;  hardware regs used 	
+;;  regular block artificial uses 	 6 [bp] 7 [sp]
+;;  eh block artificial uses 	 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;;  entry block defs 	 0 [ax] 1 [dx] 2 [cx] 4 [si] 5 [di] 6 [bp] 7 [sp] 20 [frame] 21 [xmm0] 22 [xmm1] 23 [xmm2] 24 [xmm3] 25 [xmm4] 26 [xmm5] 27 [xmm6] 28 [xmm7] 37 [r8] 38 [r9]
+;;  exit block uses 	 0 [ax] 6 [bp] 7 [sp] 20 [frame]
+;;  regs ever live 	 0[ax] 1[dx] 2[cx] 4[si] 5[di] 6[bp] 7[sp] 17[flags]
+;;  ref usage 	r0={20d,16u} r1={12d,4u} r2={8d,1u} r4={11d,5u} r5={12d,6u} r6={1d,27u} r7={1d,13u} r8={6d} r9={6d} r10={6d} r11={6d} r12={6d} r13={6d} r14={6d} r15={6d} r17={14d,3u} r18={6d} r19={6d} r20={1d,1u} r21={7d} r22={7d} r23={7d} r24={7d} r25={7d} r26={7d} r27={7d} r28={7d} r29={6d} r30={6d} r31={6d} r32={6d} r33={6d} r34={6d} r35={6d} r36={6d} r37={7d} r38={7d} r39={6d} r40={6d} r45={6d} r46={6d} r47={6d} r48={6d} r49={6d} r50={6d} r51={6d} r52={6d} 
+;;    total ref usage 394{318d,76u,0e} in 47{41 regular + 6 call} insns.
+(note 1 0 6 NOTE_INSN_DELETED)
+
+;; Start of basic block ( 0) -> 2
+;; bb 2 artificial_defs: { }
+;; bb 2 artificial_uses: { u-1(6){ }u-1(7){ }}
+;; lr  in  	 4 [si] 5 [di] 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;; lr  use 	 4 [si] 5 [di] 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;; lr  def 	 0 [ax] 1 [dx] 2 [cx] 4 [si] 5 [di] 8 [st] 9 [st(1)] 10 [st(2)] 11 [st(3)] 12 [st(4)] 13 [st(5)] 14 [st(6)] 15 [st(7)] 17 [flags] 18 [fpsr] 19 [fpcr] 21 [xmm0] 22 [xmm1] 23 [xmm2] 24 [xmm3] 25 [xmm4] 26 [xmm5] 27 [xmm6] 28 [xmm7] 29 [mm0] 30 [mm1] 31 [mm2] 32 [mm3] 33 [mm4] 34 [mm5] 35 [mm6] 36 [mm7] 37 [r8] 38 [r9] 39 [r10] 40 [r11] 45 [xmm8] 46 [xmm9] 47 [xmm10] 48 [xmm11] 49 [xmm12] 50 [xmm13] 51 [xmm14] 52 [xmm15] 59 60 61 69 70 71 72
+
+;; Pred edge  ENTRY (fallthru)
+(note 6 1 2 2 [bb 2] NOTE_INSN_BASIC_BLOCK)
+
+(insn 2 6 3 2 (set (mem/f/c/i:DI (plus:DI (reg/f:DI 6 bp)
+                (const_int -2744 [0xfffffffffffff548])) [0 this+0 S8 A64])
+        (reg:DI 5 di [ this ])) avbinbackend.cpp:19 62 {*movdi_internal_rex64}
+     (nil))
+
+(insn 3 2 4 2 (set (mem/f/c/i:DI (plus:DI (reg/f:DI 6 bp)
+                (const_int -2752 [0xfffffffffffff540])) [0 filename+0 S8 A64])
+        (reg:DI 4 si [ filename ])) avbinbackend.cpp:19 62 {*movdi_internal_rex64}
+     (nil))
+
+(note 4 3 5 2 NOTE_INSN_FUNCTION_BEG)
+
+(insn 5 4 8 2 (parallel [
+            (set (mem/v/f/c/i:DI (plus:DI (reg/f:DI 6 bp)
+                        (const_int -8 [0xfffffffffffffff8])) [0 D.2974+0 S8 A64])
+                (unspec:DI [
+                        (const_int 40 [0x28])
+                    ] UNSPEC_SP_TLS_SET))
+            (set (reg:DI 0 ax)
+                (const_int 0 [0]))
+            (clobber (reg:CC 17 flags))
+        ]) avbinbackend.cpp:19 952 {stack_tls_protect_set_di}
+     (nil))
+
+(insn 8 5 9 2 (set (reg:DI 0 ax [69])
+        (mem/f/c/i:DI (plus:DI (reg/f:DI 6 bp)
+                (const_int -2752 [0xfffffffffffff540])) [0 filename+0 S8 A64])) avbinbackend.cpp:20 62 {*movdi_internal_rex64}
+     (nil))
+
+(insn 9 8 10 2 (set (reg:DI 5 di)
+        (reg:DI 0 ax [69])) avbinbackend.cpp:20 62 {*movdi_internal_rex64}
+     (nil))
+
+(call_insn 10 9 12 2 (set (reg:DI 0 ax)
+        (call (mem:QI (symbol_ref:DI ("_Z19avbin_open_filenamePKc") [flags 0x41]  <function_decl 0x7fc017ab6400 avbin_open_filename>) [0 S1 A8])
+            (const_int 0 [0]))) avbinbackend.cpp:20 929 {*call_value_0_rex64}
+     (nil)
+    (expr_list:REG_DEP_TRUE (use (reg:DI 5 di))
+        (nil)))
+
+(insn 12 10 13 2 (set (reg/f:DI 1 dx [orig:60 D.2957 ] [60])
+        (reg/f:DI 0 ax [orig:59 D.2967 ] [59])) avbinbackend.cpp:20 62 {*movdi_internal_rex64}
+     (nil))
+
+(insn 13 12 14 2 (set (reg/f:DI 0 ax [70])
+        (mem/f/c/i:DI (plus:DI (reg/f:DI 6 bp)
+                (const_int -2744 [0xfffffffffffff548])) [0 this+0 S8 A64])) avbinbackend.cpp:20 62 {*movdi_internal_rex64}
+     (nil))
+
+(insn 14 13 15 2 (set (mem/s/f/j:DI (reg/f:DI 0 ax [70]) [0 this_5(D)->fi+0 S8 A64])
+        (reg/f:DI 1 dx [orig:60 D.2957 ] [60])) avbinbackend.cpp:20 62 {*movdi_internal_rex64}
+     (nil))
+
+(insn 15 14 16 2 (set (reg/f:DI 0 ax [71])
+        (mem/f/c/i:DI (plus:DI (reg/f:DI 6 bp)
+                (const_int -2744 [0xfffffffffffff548])) [0 this+0 S8 A64])) avbinbackend.cpp:22 62 {*movdi_internal_rex64}
+     (nil))
+
+(insn 16 15 17 2 (set (reg/f:DI 0 ax [orig:61 D.2958 ] [61])
+        (mem/s/f/j:DI (reg/f:DI 0 ax [71]) [0 this_5(D)->fi+0 S8 A64])) avbinbackend.cpp:22 62 {*movdi_internal_rex64}
+     (nil))
+
+(insn 17 16 18 2 (parallel [
+            (set (reg:DI 1 dx [72])
+                (plus:DI (reg/f:DI 6 bp)
+                    (const_int -2640 [0xfffffffffffff5b0])))
+            (clobber (reg:CC 17 flags))
+        ]) avbinbackend.cpp:22 253 {*adddi_1}
+     (nil))
+
+(insn 18 17 19 2 (set (reg:DI 4 si)
+        (reg:DI 1 dx [72])) avbinbackend.cpp:22 62 {*movdi_internal_rex64}
+     (nil))
+
+(insn 19 18 20 2 (set (reg:DI 5 di)
+        (reg/f:DI 0 ax [orig:61 D.2958 ] [61])) avbinbackend.cpp:22 62 {*movdi_internal_rex64}
+     (nil))
+
+(call_insn 20 19 21 2 (set (reg:SI 0 ax)
+        (call (mem:QI (symbol_ref:DI ("_Z15avbin_file_infoP10_AVbinFileP14_AVbinFileInfo") [flags 0x41]  <function_decl 0x7fc017ab6700 avbin_file_info>) [0 S1 A8])
+            (const_int 0 [0]))) avbinbackend.cpp:22 929 {*call_value_0_rex64}
+     (nil)
+    (expr_list:REG_DEP_TRUE (use (reg:DI 5 di))
+        (expr_list:REG_DEP_TRUE (use (reg:DI 4 si))
+            (nil))))
+
+(insn 21 20 71 2 (set (mem/c/i:SI (plus:DI (reg/f:DI 6 bp)
+                (const_int -2648 [0xfffffffffffff5a8])) [0 i+0 S4 A32])
+        (const_int 0 [0])) avbinbackend.cpp:24 64 {*movsi_internal}
+     (nil))
+
+(jump_insn 71 21 72 2 (set (pc)
+        (label_ref 34)) avbinbackend.cpp:24 606 {jump}
+     (nil)
+ -> 34)
+;; End of basic block 2 -> ( 4)
+;; lr  out 	 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+
+
+;; Succ edge  4 [100.0%] 
+
+(barrier 72 71 38)
+
+;; Start of basic block ( 4) -> 3
+;; bb 3 artificial_defs: { }
+;; bb 3 artificial_uses: { u-1(6){ }u-1(7){ }}
+;; lr  in  	 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;; lr  use 	 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;; lr  def 	 0 [ax] 1 [dx] 2 [cx] 4 [si] 5 [di] 8 [st] 9 [st(1)] 10 [st(2)] 11 [st(3)] 12 [st(4)] 13 [st(5)] 14 [st(6)] 15 [st(7)] 17 [flags] 18 [fpsr] 19 [fpcr] 21 [xmm0] 22 [xmm1] 23 [xmm2] 24 [xmm3] 25 [xmm4] 26 [xmm5] 27 [xmm6] 28 [xmm7] 29 [mm0] 30 [mm1] 31 [mm2] 32 [mm3] 33 [mm4] 34 [mm5] 35 [mm6] 36 [mm7] 37 [r8] 38 [r9] 39 [r10] 40 [r11] 45 [xmm8] 46 [xmm9] 47 [xmm10] 48 [xmm11] 49 [xmm12] 50 [xmm13] 51 [xmm14] 52 [xmm15] 63 73 74 75
+
+;; Pred edge  4
+(code_label 38 72 24 3 6 "" [1 uses])
+
+(note 24 38 25 3 [bb 3] NOTE_INSN_BASIC_BLOCK)
+
+(insn 25 24 26 3 (set (reg/f:DI 0 ax [73])
+        (mem/f/c/i:DI (plus:DI (reg/f:DI 6 bp)
+                (const_int -2744 [0xfffffffffffff548])) [0 this+0 S8 A64])) avbinbackend.cpp:27 62 {*movdi_internal_rex64}
+     (nil))
+
+(insn 26 25 27 3 (set (reg/f:DI 0 ax [orig:63 D.2964 ] [63])
+        (mem/s/f/j:DI (reg/f:DI 0 ax [73]) [0 this_5(D)->fi+0 S8 A64])) avbinbackend.cpp:27 62 {*movdi_internal_rex64}
+     (nil))
+
+(insn 27 26 28 3 (parallel [
+            (set (reg:DI 1 dx [74])
+                (plus:DI (reg/f:DI 6 bp)
+                    (const_int -2688 [0xfffffffffffff580])))
+            (clobber (reg:CC 17 flags))
+        ]) avbinbackend.cpp:27 253 {*adddi_1}
+     (nil))
+
+(insn 28 27 30 3 (set (reg:SI 2 cx [75])
+        (mem/c/i:SI (plus:DI (reg/f:DI 6 bp)
+                (const_int -2648 [0xfffffffffffff5a8])) [0 i+0 S4 A32])) avbinbackend.cpp:27 64 {*movsi_internal}
+     (nil))
+
+(insn 30 28 31 3 (set (reg:SI 4 si)
+        (reg:SI 2 cx [75])) avbinbackend.cpp:27 64 {*movsi_internal}
+     (nil))
+
+(insn 31 30 32 3 (set (reg:DI 5 di)
+        (reg/f:DI 0 ax [orig:63 D.2964 ] [63])) avbinbackend.cpp:27 62 {*movdi_internal_rex64}
+     (nil))
+
+(call_insn 32 31 33 3 (set (reg:SI 0 ax)
+        (call (mem:QI (symbol_ref:DI ("_Z17avbin_stream_infoP10_AVbinFileiP16_AVbinStreamInfo") [flags 0x41]  <function_decl 0x7fc017ab6800 avbin_stream_info>) [0 S1 A8])
+            (const_int 0 [0]))) avbinbackend.cpp:27 929 {*call_value_0_rex64}
+     (nil)
+    (expr_list:REG_DEP_TRUE (use (reg:DI 5 di))
+        (expr_list:REG_DEP_TRUE (use (reg:SI 4 si))
+            (expr_list:REG_DEP_TRUE (use (reg:DI 1 dx))
+                (nil)))))
+
+(insn 33 32 34 3 (parallel [
+            (set (mem/c/i:SI (plus:DI (reg/f:DI 6 bp)
+                        (const_int -2648 [0xfffffffffffff5a8])) [0 i+0 S4 A32])
+                (plus:SI (mem/c/i:SI (plus:DI (reg/f:DI 6 bp)
+                            (const_int -2648 [0xfffffffffffff5a8])) [0 i+0 S4 A32])
+                    (const_int 1 [0x1])))
+            (clobber (reg:CC 17 flags))
+        ]) avbinbackend.cpp:24 252 {*addsi_1}
+     (nil))
+;; End of basic block 3 -> ( 4)
+;; lr  out 	 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+
+
+;; Succ edge  4 (fallthru)
+
+;; Start of basic block ( 3 2) -> 4
+;; bb 4 artificial_defs: { }
+;; bb 4 artificial_uses: { u-1(6){ }u-1(7){ }}
+;; lr  in  	 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;; lr  use 	 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;; lr  def 	 17 [flags] 62
+
+;; Pred edge  3 (fallthru)
+;; Pred edge  2 [100.0%] 
+(code_label 34 33 35 4 5 "" [1 uses])
+
+(note 35 34 36 4 [bb 4] NOTE_INSN_BASIC_BLOCK)
+
+(insn 36 35 37 4 (set (reg:CCGC 17 flags)
+        (compare:CCGC (mem/c/i:SI (plus:DI (reg/f:DI 6 bp)
+                    (const_int -2648 [0xfffffffffffff5a8])) [0 i+0 S4 A32])
+            (const_int 9 [0x9]))) avbinbackend.cpp:24 6 {*cmpsi_1}
+     (nil))
+
+(insn 37 36 39 4 (set (reg:QI 0 ax [orig:62 D.2962 ] [62])
+        (le:QI (reg:CCGC 17 flags)
+            (const_int 0 [0]))) avbinbackend.cpp:24 585 {*setcc_qi}
+     (nil))
+
+(insn 39 37 40 4 (set (reg:CCZ 17 flags)
+        (compare:CCZ (reg:QI 0 ax [orig:62 D.2962 ] [62])
+            (const_int 0 [0]))) avbinbackend.cpp:24 0 {*cmpqi_ccno_1}
+     (nil))
+
+(jump_insn 40 39 41 4 (set (pc)
+        (if_then_else (ne (reg:CCZ 17 flags)
+                (const_int 0 [0]))
+            (label_ref 38)
+            (pc))) avbinbackend.cpp:24 591 {*jcc_1}
+     (nil)
+ -> 38)
+;; End of basic block 4 -> ( 3 5)
+;; lr  out 	 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+
+
+;; Succ edge  3
+;; Succ edge  5 (fallthru)
+
+;; Start of basic block ( 4) -> 5
+;; bb 5 artificial_defs: { }
+;; bb 5 artificial_uses: { u-1(6){ }u-1(7){ }}
+;; lr  in  	 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;; lr  use 	 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;; lr  def 	 0 [ax] 1 [dx] 2 [cx] 4 [si] 5 [di] 8 [st] 9 [st(1)] 10 [st(2)] 11 [st(3)] 12 [st(4)] 13 [st(5)] 14 [st(6)] 15 [st(7)] 17 [flags] 18 [fpsr] 19 [fpcr] 21 [xmm0] 22 [xmm1] 23 [xmm2] 24 [xmm3] 25 [xmm4] 26 [xmm5] 27 [xmm6] 28 [xmm7] 29 [mm0] 30 [mm1] 31 [mm2] 32 [mm3] 33 [mm4] 34 [mm5] 35 [mm6] 36 [mm7] 37 [r8] 38 [r9] 39 [r10] 40 [r11] 45 [xmm8] 46 [xmm9] 47 [xmm10] 48 [xmm11] 49 [xmm12] 50 [xmm13] 51 [xmm14] 52 [xmm15] 64 65 66 67 68 76 77 78
+
+;; Pred edge  4 (fallthru)
+(note 41 40 42 5 [bb 5] NOTE_INSN_BASIC_BLOCK)
+
+(insn 42 41 43 5 (set (reg/f:DI 0 ax [76])
+        (mem/f/c/i:DI (plus:DI (reg/f:DI 6 bp)
+                (const_int -2744 [0xfffffffffffff548])) [0 this+0 S8 A64])) avbinbackend.cpp:30 62 {*movdi_internal_rex64}
+     (nil))
+
+(insn 43 42 44 5 (set (reg/f:DI 0 ax [orig:64 D.2965 ] [64])
+        (mem/s/f/j:DI (reg/f:DI 0 ax [76]) [0 this_5(D)->fi+0 S8 A64])) avbinbackend.cpp:30 62 {*movdi_internal_rex64}
+     (nil))
+
+(insn 44 43 45 5 (set (reg:SI 4 si)
+        (const_int 0 [0])) avbinbackend.cpp:30 64 {*movsi_internal}
+     (nil))
+
+(insn 45 44 46 5 (set (reg:DI 5 di)
+        (reg/f:DI 0 ax [orig:64 D.2965 ] [64])) avbinbackend.cpp:30 62 {*movdi_internal_rex64}
+     (nil))
+
+(call_insn 46 45 48 5 (set (reg:DI 0 ax)
+        (call (mem:QI (symbol_ref:DI ("_Z17avbin_open_streamP10_AVbinFilei") [flags 0x41]  <function_decl 0x7fc017ab6900 avbin_open_stream>) [0 S1 A8])
+            (const_int 0 [0]))) avbinbackend.cpp:30 929 {*call_value_0_rex64}
+     (nil)
+    (expr_list:REG_DEP_TRUE (use (reg:DI 5 di))
+        (expr_list:REG_DEP_TRUE (use (reg:SI 4 si))
+            (nil))))
+
+(insn 48 46 49 5 (set (mem/f/c/i:DI (plus:DI (reg/f:DI 6 bp)
+                (const_int -2656 [0xfffffffffffff5a0])) [0 stream+0 S8 A64])
+        (reg/f:DI 0 ax [orig:65 D.2968 ] [65])) avbinbackend.cpp:30 62 {*movdi_internal_rex64}
+     (nil))
+
+(insn 49 48 50 5 (set (reg/f:DI 0 ax [77])
+        (mem/f/c/i:DI (plus:DI (reg/f:DI 6 bp)
+                (const_int -2744 [0xfffffffffffff548])) [0 this+0 S8 A64])) avbinbackend.cpp:33 62 {*movdi_internal_rex64}
+     (nil))
+
+(insn 50 49 51 5 (set (reg/f:DI 0 ax [orig:66 D.2966 ] [66])
+        (mem/s/f/j:DI (reg/f:DI 0 ax [77]) [0 this_5(D)->fi+0 S8 A64])) avbinbackend.cpp:33 62 {*movdi_internal_rex64}
+     (nil))
+
+(insn 51 50 52 5 (parallel [
+            (set (reg:DI 1 dx [78])
+                (plus:DI (reg/f:DI 6 bp)
+                    (const_int -2736 [0xfffffffffffff550])))
+            (clobber (reg:CC 17 flags))
+        ]) avbinbackend.cpp:33 253 {*adddi_1}
+     (nil))
+
+(insn 52 51 53 5 (set (reg:DI 4 si)
+        (reg:DI 1 dx [78])) avbinbackend.cpp:33 62 {*movdi_internal_rex64}
+     (nil))
+
+(insn 53 52 54 5 (set (reg:DI 5 di)
+        (reg/f:DI 0 ax [orig:66 D.2966 ] [66])) avbinbackend.cpp:33 62 {*movdi_internal_rex64}
+     (nil))
+
+(call_insn 54 53 56 5 (set (reg:SI 0 ax)
+        (call (mem:QI (symbol_ref:DI ("_Z10avbin_readP10_AVbinFileP12_AVbinPacket") [flags 0x41]  <function_decl 0x7fc017ab6b00 avbin_read>) [0 S1 A8])
+            (const_int 0 [0]))) avbinbackend.cpp:33 929 {*call_value_0_rex64}
+     (nil)
+    (expr_list:REG_DEP_TRUE (use (reg:DI 5 di))
+        (expr_list:REG_DEP_TRUE (use (reg:DI 4 si))
+            (nil))))
+
+(insn 56 54 59 5 (set (mem/c/i:SI (plus:DI (reg/f:DI 6 bp)
+                (const_int -2644 [0xfffffffffffff5ac])) [0 res+0 S4 A32])
+        (reg:SI 0 ax [orig:67 D.2969 ] [67])) avbinbackend.cpp:33 64 {*movsi_internal}
+     (nil))
+
+(insn 59 56 61 5 (clobber (reg/i:SI 0 ax)) avbinbackend.cpp:36 -1
+     (nil))
+
+(insn 61 59 62 5 (parallel [
+            (set (reg:CCZ 17 flags)
+                (unspec:CCZ [
+                        (mem/v/f/c/i:DI (plus:DI (reg/f:DI 6 bp)
+                                (const_int -8 [0xfffffffffffffff8])) [0 D.2974+0 S8 A64])
+                        (const_int 40 [0x28])
+                    ] UNSPEC_SP_TLS_TEST))
+            (clobber (reg:DI 1 dx))
+        ]) avbinbackend.cpp:36 956 {stack_tls_protect_test_di}
+     (nil))
+
+(jump_insn 62 61 69 5 (set (pc)
+        (if_then_else (eq (reg:CCZ 17 flags)
+                (const_int 0 [0]))
+            (label_ref 65)
+            (pc))) avbinbackend.cpp:36 591 {*jcc_1}
+     (nil)
+ -> 65)
+;; End of basic block 5 -> ( 7 6)
+;; lr  out 	 0 [ax] 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+
+
+;; Succ edge  7
+;; Succ edge  6 (fallthru)
+
+;; Start of basic block ( 5) -> 6
+;; bb 6 artificial_defs: { }
+;; bb 6 artificial_uses: { u-1(6){ }u-1(7){ }}
+;; lr  in  	 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;; lr  use 	 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;; lr  def 	 0 [ax] 1 [dx] 2 [cx] 4 [si] 5 [di] 8 [st] 9 [st(1)] 10 [st(2)] 11 [st(3)] 12 [st(4)] 13 [st(5)] 14 [st(6)] 15 [st(7)] 17 [flags] 18 [fpsr] 19 [fpcr] 21 [xmm0] 22 [xmm1] 23 [xmm2] 24 [xmm3] 25 [xmm4] 26 [xmm5] 27 [xmm6] 28 [xmm7] 29 [mm0] 30 [mm1] 31 [mm2] 32 [mm3] 33 [mm4] 34 [mm5] 35 [mm6] 36 [mm7] 37 [r8] 38 [r9] 39 [r10] 40 [r11] 45 [xmm8] 46 [xmm9] 47 [xmm10] 48 [xmm11] 49 [xmm12] 50 [xmm13] 51 [xmm14] 52 [xmm15]
+
+;; Pred edge  5 (fallthru)
+(note 69 62 63 6 [bb 6] NOTE_INSN_BASIC_BLOCK)
+
+(call_insn 63 69 64 6 (call (mem:QI (symbol_ref:DI ("__stack_chk_fail") [flags 0x41]  <function_decl 0x7fc017abb600 __stack_chk_fail>) [0 S1 A8])
+        (const_int 0 [0])) avbinbackend.cpp:36 618 {*call_0}
+     (expr_list:REG_NORETURN (const_int 0 [0])
+        (expr_list:REG_EH_REGION (const_int 0 [0])
+            (nil)))
+    (nil))
+;; End of basic block 6 -> ()
+;; lr  out 	 7 [sp] 16 [argp] 20 [frame]
+
+
+
+(barrier 64 63 65)
+
+;; Start of basic block ( 5) -> 7
+;; bb 7 artificial_defs: { }
+;; bb 7 artificial_uses: { u-1(6){ }u-1(7){ }}
+;; lr  in  	 0 [ax] 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;; lr  use 	 0 [ax] 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+;; lr  def 	
+
+;; Pred edge  5
+(code_label 65 64 70 7 7 "" [1 uses])
+
+(note 70 65 66 7 [bb 7] NOTE_INSN_BASIC_BLOCK)
+
+(insn 66 70 73 7 (use (reg/i:SI 0 ax)) avbinbackend.cpp:36 -1
+     (nil))
+;; End of basic block 7 -> ( 1)
+;; lr  out 	 0 [ax] 6 [bp] 7 [sp] 16 [argp] 20 [frame]
+
+
+;; Succ edge  EXIT [100.0%]  (fallthru)
+
+(note 73 66 0 NOTE_INSN_DELETED)
+
