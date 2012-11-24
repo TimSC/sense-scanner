@@ -20,6 +20,13 @@ public:
     int64_t timestamp;
 };
 
+class FrameGroup
+{
+public:
+    std::vector<std::tr1::shared_ptr<class DecodedFrame> > frames;
+    int64_t start, end;
+};
+
 class AvBinBackend
 {
 public:
@@ -28,8 +35,7 @@ public:
 
     int OpenFile(const char *filename);
     void CloseFile();
-    void GetFrameRange(int64_t startTime, int64_t endTime,
-                       std::vector<std::tr1::shared_ptr<class DecodedFrame> > &videoOut);
+    std::tr1::shared_ptr<class FrameGroup> GetFrameRange(int64_t startTime, int64_t endTime);
     int64_t Length();
 
     void OpenStreams();

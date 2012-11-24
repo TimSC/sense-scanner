@@ -43,10 +43,13 @@ void AvBinBackend::DoOpenFile()
     }
 }
 
-void AvBinBackend::GetFrameRange(int64_t startTime, int64_t endTime,
-    vector<std::tr1::shared_ptr<class DecodedFrame> > &videoOut)
+std::tr1::shared_ptr<class FrameGroup> AvBinBackend::GetFrameRange(int64_t startTime, int64_t endTime)
 {
-    videoOut.clear();
+    std::tr1::shared_ptr<class FrameGroup> out(new class FrameGroup);
+    std::vector<std::tr1::shared_ptr<class DecodedFrame> > videoOut;
+    out->start = startTime;
+    out->end = endTime;
+
     this->CloseFile();
     if(this->fi == NULL) this->DoOpenFile();
     //AVbinResult res = avbin_seek_file(this->fi, 0);
@@ -115,7 +118,7 @@ void AvBinBackend::GetFrameRange(int64_t startTime, int64_t endTime,
                 frame->sample_aspect_den = sinfo->video.sample_aspect_den;
                 frame->frame_rate_num = sinfo->video.frame_rate_num;
                 frame->frame_rate_den = sinfo->video.frame_rate_den;
-                frame->timestamp = timestamp;
+                frame->timestamp = timestamp - this->info.start_time;
                 videoOut.push_back(frame);
             }
 
@@ -143,6 +146,9 @@ void AvBinBackend::GetFrameRange(int64_t startTime, int64_t endTime,
         }
 
     }
+
+    out->frames = videoOut;
+    return out;
 }
 
 void AvBinBackend::OpenStreams()

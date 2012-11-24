@@ -15,15 +15,15 @@ SOURCES += main.cpp\
     videowidget.cpp \
     imagesequence.cpp \
     mediabuffer.cpp \
-    vlcbackend.cpp \
-    avbinbackend.cpp
+    avbinbackend.cpp \
+    avbinmedia.cpp
 
 HEADERS  += mainwindow.h \
     videowidget.h \
     imagesequence.h \
     mediabuffer.h \
-    vlcbackend.h \
-    avbinbackend.h
+    avbinbackend.h \
+    avbinmedia.h
 
 FORMS    += mainwindow.ui \
     videowidget.ui
@@ -32,4 +32,6 @@ OTHER_FILES +=
 
 RESOURCES +=
 
-unix|win32: LIBS += -lvlc
+#unix|win32: LIBS += -lvlc
+unix|win32: LIBS += -lavbin
+unix|win32: LIBS += -lpthread
