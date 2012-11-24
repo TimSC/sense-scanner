@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QtCore>
 #include <QtGui>
+#include <vector>
+#include <tr1/memory>
 #include "mediabuffer.h"
 
 class AvBinMedia : public AbstractMedia
@@ -21,6 +23,7 @@ public slots:
 
 protected:
     class AvBinBackend *backend;
+    std::vector<std::tr1::shared_ptr<class FrameGroup> > groupCache;
 };
 
 
