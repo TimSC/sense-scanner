@@ -1,9 +1,0 @@
-
-;; Function AvBinBackend::AvBinBackend() (_ZN12AvBinBackendC2Ev)
-
-
-;; Function AvBinBackend::~AvBinBackend() (_ZN12AvBinBackendD2Ev)
-
-
-;; Function int AvBinBackend::OpenFile(const char*) (_ZN12AvBinBackend8OpenFileEPKc)
-
