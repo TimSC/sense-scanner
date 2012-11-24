@@ -23,10 +23,21 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
 
     std::tr1::shared_ptr<class DecodedFrame> frame = frames->frames[0];
 
-    cout << frame->height <<","<<  frame->width << endl;
-    //QSharedPointer<QImage> img(new QImage(pix->height, pix->width, QImage::Format_RGB888));
-    QSharedPointer<QImage> img(new QImage(&*frame->buff, frame->width, frame->height, QImage::Format_RGB888));
-    img->save("test.png");
+    cout << frame->width <<","<<  frame->height << endl;
+    QSharedPointer<QImage> img(new QImage(frame->width, frame->height, QImage::Format_RGB888));
+
+    int cursor = 0;
+    for(int j=0;j<frame->height;j++)
+        for(int i=0;i<frame->width;i++)
+        {
+            uint8_t *raw = &*frame->buff;
+            QRgb value = qRgb(raw[cursor], raw[cursor+1], raw[cursor+2]);
+            cursor += 3;
+            img->setPixel(i, j, value);
+        }
+
+    //QSharedPointer<QImage> img(new QImage(&*frame->buff, frame->width, frame->height, QImage::Format_RGB888));
+    //img->save("test.png");
 
     return img;
 }
