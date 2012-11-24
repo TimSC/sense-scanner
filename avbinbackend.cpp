@@ -6,8 +6,9 @@ using namespace std;
 AvBinBackend::AvBinBackend()
 {
     AVbinResult res = avbin_init();
-    assert(!res);
+    assert(res == AVBIN_RESULT_OK);
     this->numStreams = -1;
+    this->fi = NULL;
 }
 
 AvBinBackend::~AvBinBackend()
@@ -15,14 +16,22 @@ AvBinBackend::~AvBinBackend()
     this->CloseFile();
 }
 
-int AvBinBackend::OpenFile(const char *filename)
+int AvBinBackend::OpenFile(const char *filenameIn)
 {
-    this->fi = avbin_open_filename(filename);
-    AVbinFileInfo info;
-    info.structure_size = sizeof(AVbinFileInfo);
-    avbin_file_info(this->fi, &info);
-    //this->PrintAVbinFileInfo(info);
-    this->numStreams = info.n_streams;
+    assert(this->fi == NULL);
+
+    this->filename = filenameIn;
+    this->DoOpenFile();
+}
+
+void AvBinBackend::DoOpenFile()
+{
+    assert(this->fi == NULL);
+    this->fi = avbin_open_filename(this->filename.c_str());
+    this->info.structure_size = sizeof(AVbinFileInfo);
+    avbin_file_info(this->fi, &this->info);
+    //this->PrintAVbinFileInfo(this->info);
+    this->numStreams = this->info.n_streams;
 
     for(int32_t i = 0; i<numStreams; i++)
     {
@@ -32,18 +41,40 @@ int AvBinBackend::OpenFile(const char *filename)
         this->PrintAVbinStreamInfo(*sinfo);
         this->streamInfos.push_back(sinfo);
     }
+}
 
-    for(int32_t i = 0; i<numStreams; i++)
-    {
-        AVbinStream *stream = avbin_open_stream(this->fi, i);
-        this->streams.push_back(stream);
-    }
+void AvBinBackend::GetFrameRange(int64_t startTime, int64_t endTime,
+    vector<std::tr1::shared_ptr<class DecodedFrame> > &videoOut)
+{
+    videoOut.clear();
+    this->CloseFile();
+    if(this->fi == NULL) this->DoOpenFile();
+    //AVbinResult res = avbin_seek_file(this->fi, 0);
 
+    //Remove start offset
+    startTime -= this->info.start_time;
+    endTime -= this->info.start_time;
+
+    //Seek in file
+    //AVbinResult res = avbin_seek_file(this->fi, 0); //Assume that seeking doesn't work
+    //assert(res == AVBIN_RESULT_OK);
+
+    //Decode the packets
     AVbinPacket packet;
     packet.structure_size = sizeof(packet);
+    int done = false;
 
-    while (!avbin_read(this->fi, &packet))
+    vector<int64_t> timestampOfChannel;
+    for(unsigned int chanNum=0;chanNum<this->numStreams;chanNum++)
+        timestampOfChannel.push_back(-1);
+
+    while (!avbin_read(this->fi, &packet) && (!done))
     {
+        if(this->fi == NULL) this->DoOpenFile();
+        if(this->streams.empty())
+        {
+            this->OpenStreams();
+        }
 
         AVbinTimestamp &timestamp = packet.timestamp;
         AVbinStreamInfo *sinfo = this->streamInfos[packet.stream_index];
@@ -52,18 +83,45 @@ int AvBinBackend::OpenFile(const char *filename)
         //cout << "Packet of stream " << packet.stream_index << " at " << timestamp
         //     << " type=" << sinfo->type << endl;
 
+        int inRange = (timestamp >= startTime and timestamp < endTime);
+        //cout <<inRange<< endl;
 
+        //Check that every channel is beyond the end of the stream
+        timestampOfChannel[packet.stream_index] = timestamp;
+        int checkDone = 1;
+        for(unsigned int chanNum = 0;chanNum < this->numStreams;chanNum++)
+        {
+            if(timestampOfChannel[chanNum] < endTime) checkDone = 0;
+        }
+        done = checkDone;
+
+        //Decode video packet
         if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO)
         {
-            uint8_t* buff = new uint8_t[sinfo->video.width*sinfo->video.height*3];
-            if (avbin_decode_video(stream, packet.data, packet.size,buff)<=0)
-                cout << "Error decoding video packet" << endl;
+            std::tr1::shared_ptr<uint8_t> buff (new uint8_t[sinfo->video.width*sinfo->video.height*3]);
+            int32_t loop = 0;
+            if (loop != -1)
+            {
+                loop = avbin_decode_video(stream, packet.data, packet.size, &*buff);
+            }
 
-            //TODO stuff
-
-            delete [] buff;
+            if(inRange)
+            {
+                std::tr1::shared_ptr<class DecodedFrame> frame(new class DecodedFrame);
+                frame->buff = buff;
+                frame->height = sinfo->video.height;
+                frame->width = sinfo->video.width;
+                frame->sample_aspect_num = sinfo->video.sample_aspect_num;
+                frame->sample_aspect_den = sinfo->video.sample_aspect_den;
+                frame->frame_rate_num = sinfo->video.frame_rate_num;
+                frame->frame_rate_den = sinfo->video.frame_rate_den;
+                frame->timestamp = timestamp;
+                videoOut.push_back(frame);
+            }
 
         }
+
+        //Decode audio packet
         if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO)
         {
             uint8_t buff[1024*1024];
@@ -83,14 +141,32 @@ int AvBinBackend::OpenFile(const char *filename)
             int totalBytes = cursor-buff;
             //cout << "Read audio bytes " << totalBytes << endl;
         }
+
     }
 }
 
-void AvBinBackend::CloseFile()
+void AvBinBackend::OpenStreams()
+{
+    assert(this->fi != NULL);
+    this->CloseStreams();
+
+    for(int32_t i = 0; i<numStreams; i++)
+    {
+        AVbinStream *stream = avbin_open_stream(this->fi, i);
+        this->streams.push_back(stream);
+    }
+}
+
+void AvBinBackend::CloseStreams()
 {
     for(unsigned int i =0; i < this->streams.size(); i++)
         avbin_close_stream(this->streams[i]);
     this->streams.clear();
+}
+
+void AvBinBackend::CloseFile()
+{
+    this->CloseStreams();
 
     for(unsigned int i =0; i < this->streamInfos.size(); i++)
         delete this->streamInfos[i];
@@ -99,6 +175,12 @@ void AvBinBackend::CloseFile()
     if(this->fi)
         avbin_close_file(this->fi);
     this->fi = NULL;
+}
+
+int64_t AvBinBackend::Length()
+{
+    assert(this->fi != NULL);
+    return this->info.duration - this->info.start_time;
 }
 
 void AvBinBackend::PrintAVbinFileInfo(AVbinFileInfo &info)
@@ -123,7 +205,7 @@ void AvBinBackend::PrintAVbinStreamInfo(AVbinStreamInfo &sinfo)
         cout << "Video" << endl;
         cout << "Vid size " << sinfo.video.height <<","<<sinfo.video.height<< endl;
         cout << "Vid aspect " << sinfo.video.sample_aspect_num << "/" << sinfo.video.sample_aspect_den << endl;
-        //cout << "Frame rate " << sinfo.video.frame_rate_num << "," << sinfo.video.frame_rate_den << endl;
+        cout << "Frame rate " << sinfo.video.frame_rate_num << "," << sinfo.video.frame_rate_den << endl;
     }
     if(sinfo.type == AVBIN_STREAM_TYPE_AUDIO)
     {
