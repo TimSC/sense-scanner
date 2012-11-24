@@ -61,6 +61,7 @@ VlcBackend::VlcBackend()
 {
     vlcDebugLog.open("vlcdebuglog.txt");
 	this->media = NULL;
+	this->startVlcClock = 0;
 
     // VLC options
     char smem_options[1000];
@@ -109,13 +110,30 @@ int VlcBackend::OpenFile(const char *filename)
     if(this->media) libvlc_media_release(this->media);
     this->media = libvlc_media_new_path(this->vlcInstance, filename);
     libvlc_media_player_set_media(this->media_player, this->media);
-    vlcDebugLog << "Opened " << filename << endl;
+    this->vlcDebugLog << "Opened " << filename << endl;
 	return 1;
 }
+
+static void Test3 (void *opaque, void **planes)
+{
+	cout << "Test3" << endl;
+}
+
 
 void VlcBackend::Test()
 {
 	libvlc_media_player_play(this->media_player);
+	cout << libvlc_get_play_start_time(this->media_player, this->media, this->vlcInstance, (libvlc_video_lock_cb)Test3) << endl;
+	this->startVlcClock = libvlc_clock();
+}
+
+void VlcBackend::Test2(unsigned long long ti)
+{
+	this->vlcDebugLog << "Seek to " << ti << " from " << libvlc_media_player_get_time(this->media_player)<<endl;
+	libvlc_media_player_stop(this->media_player);
+	libvlc_media_player_set_time(this->media_player, ti);
+	libvlc_media_player_play(this->media_player);
+	this->startVlcClock = libvlc_clock();
 }
 
 //*************************************************
@@ -127,8 +145,8 @@ void VlcBackend::AudioPrerender (uint8_t** pp_pcm_buffer , unsigned int size)
 
 void VlcBackend::AudioPostrender(uint8_t* p_pcm_buffer, unsigned int channels, unsigned int rate, unsigned int nb_samples, unsigned int bits_per_sample, unsigned int size, int64_t pts )
 {
-    std::tr1::shared_ptr<uint8_t> test(p_pcm_buffer);
-    //delete p_pcm_buffer;
+    std::tr1::shared_ptr<uint8_t> sndBuffer(p_pcm_buffer);
+    //this->vlcDebugLog << "AudioPostrender " << size << endl;
 }
 
 void VlcBackend::VideoPrerender(uint8_t **pp_pixel_buffer, int size)
@@ -139,17 +157,27 @@ void VlcBackend::VideoPrerender(uint8_t **pp_pixel_buffer, int size)
 void VlcBackend::VideoPostrender(uint8_t *p_pixel_buffer,
     int width, int height, int pixel_pitch, int size, int64_t pts)
 {
-    std::tr1::shared_ptr<uint8_t> test(p_pixel_buffer);
+	//input_clock_ConvertTS is important?
+	//struct block_t in vlc_block.h
+	//cl->ref.i_stream
+	//cl->ref.i_system
+	//decoder_GetDisplayDate
+	//struct image_handler_t
+
+	//libvlc_media_player_get_fps
+	
+    std::tr1::shared_ptr<uint8_t> pixBuffer(p_pixel_buffer);
+    this->vlcDebugLog << "VideoPostrender " << size << " pts="<<(pts - this->startVlcClock)<< " clock=" << libvlc_clock()<<endl;
 }
 
 void VlcBackend::TimeChanged()
 {
 	libvlc_time_t time = libvlc_media_player_get_time(this->media_player);
     //cout << "MediaPlayerTimeChanged "<<(long long)time << endl;
-    vlcDebugLog << "TimeChanged " << (long long)time << endl;
+    this->vlcDebugLog << "TimeChanged " << (long long)time << endl;
 }
 
 void VlcBackend::EndReached()
 {
-    vlcDebugLog << "EndReached " << (long long)time << endl;
+    this->vlcDebugLog << "EndReached " << (long long)time << endl;
 }

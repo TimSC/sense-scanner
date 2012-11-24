@@ -15,13 +15,15 @@ SOURCES += main.cpp\
     videowidget.cpp \
     imagesequence.cpp \
     mediabuffer.cpp \
-    vlcbackend.cpp
+    vlcbackend.cpp \
+    avbinbackend.cpp
 
 HEADERS  += mainwindow.h \
     videowidget.h \
     imagesequence.h \
     mediabuffer.h \
-    vlcbackend.h
+    vlcbackend.h \
+    avbinbackend.h
 
 FORMS    += mainwindow.ui \
     videowidget.ui

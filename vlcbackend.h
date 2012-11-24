@@ -12,6 +12,7 @@ public:
 
 	int OpenFile(const char *filename);
 	void Test();
+	void Test2(unsigned long long ti);
 
     //libvlc smem callback functions
     void AudioPrerender (uint8_t** pp_pcm_buffer , unsigned int size);
@@ -30,6 +31,7 @@ protected:
     class libvlc_event_manager_t *eventManager;
     class libvlc_media_t *media;
     std::ofstream vlcDebugLog;
+	int64_t startVlcClock;
 };
 
 #endif // VLCBACKEND_H
