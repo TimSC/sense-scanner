@@ -24,6 +24,7 @@ public slots:
 protected:
     class AvBinBackend *backend;
     std::vector<std::tr1::shared_ptr<class FrameGroup> > groupCache;
+    class DecodedFrame singleFrame;
 };
 
 

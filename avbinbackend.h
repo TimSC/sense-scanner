@@ -4,21 +4,12 @@
 #include <vector>
 #include <string>
 #include <tr1/memory>
+#include "mediabuffer.h"
 
 extern "C"
 {
 #include <avbin.h>
 }
-
-class DecodedFrame
-{
-public:
-    std::tr1::shared_ptr<uint8_t> buff;
-    unsigned int height, width;
-    unsigned int sample_aspect_num, sample_aspect_den;
-    unsigned int frame_rate_num, frame_rate_den;
-    int64_t timestamp;
-};
 
 class FrameGroup
 {
@@ -36,6 +27,7 @@ public:
     int OpenFile(const char *filename);
     void CloseFile();
     std::tr1::shared_ptr<class FrameGroup> GetFrameRange(int64_t startTime, int64_t endTime);
+    int GetFrame(int64_t time, class DecodedFrame &out);
     int64_t Length();
 
     void OpenStreams();

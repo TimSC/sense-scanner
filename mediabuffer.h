@@ -5,6 +5,22 @@
 #include <QSharedPointer>
 #include <QImage>
 #include <QMap>
+#include <inttypes.h>
+#include <tr1/memory>
+
+class DecodedFrame
+{
+public:
+    uint8_t *buff;
+    int buffSize;
+    unsigned int height, width;
+    unsigned int sample_aspect_num, sample_aspect_den;
+    unsigned int frame_rate_num, frame_rate_den;
+    int64_t timestamp;
+
+    DecodedFrame() {buffSize = 0; buff = NULL;}
+    ~DecodedFrame() {if(buff!=NULL) delete [] buff; buff = 0; buffSize = 0;}
+};
 
 class AbstractMedia : public QObject
 {
@@ -15,6 +31,8 @@ public:
 
 public slots:
     virtual QSharedPointer<QImage> Get(long long unsigned ti)=0; //in milliseconds
+    int GetFrame(int64_t time, class DecodedFrame &out) {return 0;}
+
     virtual long long unsigned GetNumFrames()=0;
     virtual long long unsigned Length()=0; //Get length (ms)
     virtual long long unsigned GetFrameStartTime(long long unsigned ti)=0; //in milliseconds

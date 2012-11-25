@@ -18,11 +18,11 @@ AvBinMedia::~AvBinMedia()
 
 QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
 {
-    std::tr1::shared_ptr<class FrameGroup> frames;
+    //std::tr1::shared_ptr<class FrameGroup> frames;
 
     //Check if time is in cache
     int cacheHit = 0;
-    for(unsigned int i=0;i<this->groupCache.size();i++)
+    /*for(unsigned int i=0;i<this->groupCache.size();i++)
     {
         std::tr1::shared_ptr<class FrameGroup> &cachedGroup = this->groupCache[i];
         if(ti * 1000 >= cachedGroup->start && ti * 1000 < cachedGroup->end)
@@ -31,13 +31,16 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
             frames = cachedGroup;
             cacheHit = 1;
         }
-    }
-
+    }*/
+    class DecodedFrame &frame = this->singleFrame;
     if(!cacheHit)
     {
         //Get frames from source
-        frames = this->backend->GetFrameRange(ti * 1000, (ti + 1000) * 1000);
-        groupCache.push_back(frames);
+        //frames = this->backend->GetFrameRange(ti * 1000, (ti + 100) * 1000);
+        //groupCache.push_back(frames);
+
+        this->backend->GetFrame(ti * 1000, frame);
+
     }
 
     //Find frame before requested time
@@ -56,27 +59,40 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
         }
     }
     std::tr1::shared_ptr<class DecodedFrame> &frame = frames->frames[bestIndex];*/
-    if(frames->frames.size()==0)
+    /*if(frames->frames.size()==0)
     {
         QSharedPointer<QImage> img(new QImage(100, 100, QImage::Format_RGB888));
         return img;
-    }
+    }*/
 
-    std::tr1::shared_ptr<class DecodedFrame> &frame = frames->frames[0];
+    //std::tr1::shared_ptr<class DecodedFrame> &frame = frames->frames[0];
 
-    cout << frame->width <<","<<  frame->height << endl;
-    QSharedPointer<QImage> img(new QImage(frame->width, frame->height, QImage::Format_RGB888));
+    cout << frame.width <<","<<  frame.height << endl;
+    QSharedPointer<QImage> img(new QImage(frame.width, frame.height, QImage::Format_RGB888));
 
     cout << "frame time " << ti << endl;
+    assert(frame.buffSize > 0);
+    uint8_t *raw = &*frame.buff;
+    cout << (unsigned long long)raw << endl;
     int cursor = 0;
-    for(int j=0;j<frame->height;j++)
-        for(int i=0;i<frame->width;i++)
+    for(int j=0;j<frame.height;j++)
+        for(int i=0;i<frame.width;i++)
         {
-            uint8_t *raw = &*frame->buff;
+            cursor = i * 3 + (j * i * 3);
+            uint8_t *raw = &*frame.buff;
+            if(cursor + 3 >= frame.buffSize)
+            {
+                cout << "c"<<cursor << "," << frame.buffSize<< endl;
+                cout << frame.height << "," << frame.width << endl;
+            }
+            assert(cursor >= 0);
+            assert(cursor + 3 < frame.buffSize);
+
             QRgb value = qRgb(raw[cursor], raw[cursor+1], raw[cursor+2]);
-            cursor += 3;
+            //cursor += 3;
             img->setPixel(i, j, value);
         }
+
 
     //QSharedPointer<QImage> img(new QImage(&*frame->buff, frame->width, frame->height, QImage::Format_RGB888));
     //img->save("test.png");
