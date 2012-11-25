@@ -50,8 +50,8 @@ std::tr1::shared_ptr<class FrameGroup> AvBinBackend::GetFrameRange(int64_t start
     out->start = startTime;
     out->end = endTime;
 
-    this->CloseFile();
-    if(this->fi == NULL) this->DoOpenFile();
+    //this->CloseFile();
+    //if(this->fi == NULL) this->DoOpenFile();
     //AVbinResult res = avbin_seek_file(this->fi, 0);
 
     //Remove start offset
@@ -59,8 +59,8 @@ std::tr1::shared_ptr<class FrameGroup> AvBinBackend::GetFrameRange(int64_t start
     endTime -= this->info.start_time;
 
     //Seek in file
-    //AVbinResult res = avbin_seek_file(this->fi, 0); //Assume that seeking doesn't work
-    //assert(res == AVBIN_RESULT_OK);
+    AVbinResult res = avbin_seek_file(this->fi, startTime);
+    assert(res == AVBIN_RESULT_OK);
 
     //Decode the packets
     AVbinPacket packet;
@@ -70,6 +70,8 @@ std::tr1::shared_ptr<class FrameGroup> AvBinBackend::GetFrameRange(int64_t start
     vector<int64_t> timestampOfChannel;
     for(unsigned int chanNum=0;chanNum<this->numStreams;chanNum++)
         timestampOfChannel.push_back(-1);
+
+	int debug = 0;
 
     while (!avbin_read(this->fi, &packet) && (!done))
     {
@@ -145,8 +147,11 @@ std::tr1::shared_ptr<class FrameGroup> AvBinBackend::GetFrameRange(int64_t start
             //cout << "Read audio bytes " << totalBytes << endl;
         }
 
-    }
+		debug ++;
+		//if (debug > 100) break;
 
+    }
+    cout << "videoOut" << videoOut.size() << endl;
     out->frames = videoOut;
     return out;
 }

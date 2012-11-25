@@ -56,6 +56,12 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
         }
     }
     std::tr1::shared_ptr<class DecodedFrame> &frame = frames->frames[bestIndex];*/
+    if(frames->frames.size()==0)
+    {
+        QSharedPointer<QImage> img(new QImage(100, 100, QImage::Format_RGB888));
+        return img;
+    }
+
     std::tr1::shared_ptr<class DecodedFrame> &frame = frames->frames[0];
 
     cout << frame->width <<","<<  frame->height << endl;
