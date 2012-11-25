@@ -43,9 +43,9 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->currentTime = 0;
     this->playActive = false;
 
-    QObject::connect(this->ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(SliderMoved(int)));
-    QObject::connect(this->ui->pauseButton,SIGNAL(clicked()), this, SLOT(Pause()));
-    QObject::connect(this->ui->playButton,SIGNAL(clicked()), this, SLOT(Play()));
+    //QObject::connect(this->ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(SliderMoved(int)));
+    //QObject::connect(this->ui->pauseButton,SIGNAL(clicked()), this, SLOT(Pause()));
+    //QObject::connect(this->ui->playButton,SIGNAL(clicked()), this, SLOT(Play()));
 
     this->scene = QSharedPointer<QGraphicsScene>(new QGraphicsScene(this));
 

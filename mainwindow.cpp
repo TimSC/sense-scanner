@@ -26,3 +26,9 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+void MainWindow::ImportVideo()
+{
+
+
+}

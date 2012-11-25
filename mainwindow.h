@@ -21,6 +21,9 @@ public:
 private:
     Ui::MainWindow *ui;
 
+public slots:
+    void ImportVideo();
+
 };
 
 #endif // MAINWINDOW_H
