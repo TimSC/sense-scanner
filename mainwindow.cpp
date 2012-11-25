@@ -5,6 +5,9 @@
 #include "mediabuffer.h"
 #include "imagesequence.h"
 #include "avbinmedia.h"
+#include <QFileDialog>
+#include <iostream>
+using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -29,6 +32,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::ImportVideo()
 {
+    QString fileName = QFileDialog::getOpenFileName(this,
+      tr("Import Video"), "", tr("Video Files (*.avi *.mov *.mkv *.wmf, *.webm, *.flv, *.mp4, *.rm, *.asf)"));
+    QSharedPointer<AvBinMedia> avbin (new class AvBinMedia(this,
+            fileName.toLocal8Bit().constData()));
+    cout << "Opening " << fileName.toLocal8Bit().constData() << endl;
+    QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(avbin);
 
-
+    this->ui->widget->SetSource(buff);
 }
