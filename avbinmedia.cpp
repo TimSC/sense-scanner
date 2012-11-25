@@ -41,7 +41,7 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
     }
 
     //Find frame before requested time
-    int bestIndex = 0; //Default to first frame
+    /*int bestIndex = 0; //Default to first frame
     int64_t score = -1;
     for (unsigned int i=0;i<frames->frames.size();i++)
     {
@@ -55,7 +55,8 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
             bestIndex = i;
         }
     }
-    std::tr1::shared_ptr<class DecodedFrame> &frame = frames->frames[bestIndex];
+    std::tr1::shared_ptr<class DecodedFrame> &frame = frames->frames[bestIndex];*/
+    std::tr1::shared_ptr<class DecodedFrame> &frame = frames->frames[0];
 
     cout << frame->width <<","<<  frame->height << endl;
     QSharedPointer<QImage> img(new QImage(frame->width, frame->height, QImage::Format_RGB888));
