@@ -12,7 +12,7 @@ AvBinMedia::AvBinMedia(QObject *parent, QString fina) : AbstractMedia(parent)
 
 AvBinMedia::~AvBinMedia()
 {
-    delete this->backend;
+    if(this->backend) delete this->backend;
     this->backend = NULL;
 }
 
@@ -32,7 +32,8 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
             cacheHit = 1;
         }
     }*/
-    class DecodedFrame &frame = this->singleFrame;
+    //class DecodedFrame &frame = this->singleFrame;
+    class DecodedFrame frame;
     if(!cacheHit)
     {
         //Get frames from source
@@ -64,35 +65,32 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
         QSharedPointer<QImage> img(new QImage(100, 100, QImage::Format_RGB888));
         return img;
     }*/
+    //QSharedPointer<QImage> img(new QImage(100, 100, QImage::Format_RGB888));
 
     //std::tr1::shared_ptr<class DecodedFrame> &frame = frames->frames[0];
 
-    cout << frame.width <<","<<  frame.height << endl;
+
     QSharedPointer<QImage> img(new QImage(frame.width, frame.height, QImage::Format_RGB888));
 
     cout << "frame time " << ti << endl;
     assert(frame.buffSize > 0);
+    cout << frame.width <<","<<  frame.height << endl;
     uint8_t *raw = &*frame.buff;
     cout << (unsigned long long)raw << endl;
     int cursor = 0;
+    int maxv = 0;
     for(int j=0;j<frame.height;j++)
         for(int i=0;i<frame.width;i++)
         {
-            cursor = i * 3 + (j * i * 3);
+            cursor = i * 3 + (j * frame.width * 3);
             uint8_t *raw = &*frame.buff;
-            if(cursor + 3 >= frame.buffSize)
-            {
-                cout << "c"<<cursor << "," << frame.buffSize<< endl;
-                cout << frame.height << "," << frame.width << endl;
-            }
             assert(cursor >= 0);
-            assert(cursor + 3 < frame.buffSize);
+            assert(cursor + 2 < frame.buffSize);
 
+            //QRgb value = qRgb(raw[cursor], raw[cursor+1], raw[cursor+2]);
             QRgb value = qRgb(raw[cursor], raw[cursor+1], raw[cursor+2]);
-            //cursor += 3;
             img->setPixel(i, j, value);
         }
-
 
     //QSharedPointer<QImage> img(new QImage(&*frame->buff, frame->width, frame->height, QImage::Format_RGB888));
     //img->save("test.png");

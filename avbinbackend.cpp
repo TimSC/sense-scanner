@@ -210,20 +210,30 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
         if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO)
         {
             assert(out.buffSize>0);
-            int32_t loop = 0;
-            if (loop != -1)
-                loop = avbin_decode_video(stream, packet.data, packet.size, &*out.buff);
 
-            out.height = sinfo->video.height;
-            out.width = sinfo->video.width;
-            out.sample_aspect_num = sinfo->video.sample_aspect_num;
-            out.sample_aspect_den = sinfo->video.sample_aspect_den;
-            out.frame_rate_num = sinfo->video.frame_rate_num;
-            out.frame_rate_den = sinfo->video.frame_rate_den;
-            out.timestamp = timestamp - this->info.start_time;
+            int32_t ret = avbin_decode_video(stream, packet.data, packet.size, &*out.buff);
+            int error = (ret == -1);
 
-            done = 1;
+            if(!error)
+            {
+                /*for(int j=0;j<out.height;j++)
+                    for(int i=0;i<out.width;i++)
+                    {
+                        int cursor = i * 3 + (j * out.width * 3);
+                        cout << (int)(out.buff[cursor]) << endl;
+                    }*/
+                //cout << "test1:" << out.buff[0] << endl;
 
+                out.height = sinfo->video.height;
+                out.width = sinfo->video.width;
+                out.sample_aspect_num = sinfo->video.sample_aspect_num;
+                out.sample_aspect_den = sinfo->video.sample_aspect_den;
+                out.frame_rate_num = sinfo->video.frame_rate_num;
+                out.frame_rate_den = sinfo->video.frame_rate_den;
+                out.timestamp = timestamp - this->info.start_time;
+
+                done = 1;
+            }
         }
 
         //Decode audio packet
