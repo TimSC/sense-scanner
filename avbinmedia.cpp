@@ -18,57 +18,9 @@ AvBinMedia::~AvBinMedia()
 
 QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
 {
-    //std::tr1::shared_ptr<class FrameGroup> frames;
 
-    //Check if time is in cache
-    int cacheHit = 0;
-    /*for(unsigned int i=0;i<this->groupCache.size();i++)
-    {
-        std::tr1::shared_ptr<class FrameGroup> &cachedGroup = this->groupCache[i];
-        if(ti * 1000 >= cachedGroup->start && ti * 1000 < cachedGroup->end)
-        {
-            cout << ti * 1000 << "within" << cachedGroup->start << "," << cachedGroup->end<< endl;
-            frames = cachedGroup;
-            cacheHit = 1;
-        }
-    }*/
-    //class DecodedFrame &frame = this->singleFrame;
-    class DecodedFrame frame;
-    if(!cacheHit)
-    {
-        //Get frames from source
-        //frames = this->backend->GetFrameRange(ti * 1000, (ti + 100) * 1000);
-        //groupCache.push_back(frames);
-
-        this->backend->GetFrame(ti * 1000, frame);
-
-    }
-
-    //Find frame before requested time
-    /*int bestIndex = 0; //Default to first frame
-    int64_t score = -1;
-    for (unsigned int i=0;i<frames->frames.size();i++)
-    {
-        std::tr1::shared_ptr<class DecodedFrame> &testFrame = frames->frames[i];
-        if(testFrame->timestamp > ti * 1000.) continue; //Frame is too late
-        int64_t diff = ti * 1000. - testFrame->timestamp;
-        cout << i << ","<<ti*1000<<","<< testFrame->timestamp << "," << diff << endl;
-        if(score < 0 || diff < score)
-        {
-            score = diff;
-            bestIndex = i;
-        }
-    }
-    std::tr1::shared_ptr<class DecodedFrame> &frame = frames->frames[bestIndex];*/
-    /*if(frames->frames.size()==0)
-    {
-        QSharedPointer<QImage> img(new QImage(100, 100, QImage::Format_RGB888));
-        return img;
-    }*/
-    //QSharedPointer<QImage> img(new QImage(100, 100, QImage::Format_RGB888));
-
-    //std::tr1::shared_ptr<class DecodedFrame> &frame = frames->frames[0];
-
+    class DecodedFrame &frame = this->singleFrame;
+    this->backend->GetFrame(ti * 1000, frame);
 
     QSharedPointer<QImage> img(new QImage(frame.width, frame.height, QImage::Format_RGB888));
 
@@ -78,7 +30,6 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
     uint8_t *raw = &*frame.buff;
     cout << (unsigned long long)raw << endl;
     int cursor = 0;
-    int maxv = 0;
     for(int j=0;j<frame.height;j++)
         for(int i=0;i<frame.width;i++)
         {
@@ -87,7 +38,6 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
             assert(cursor >= 0);
             assert(cursor + 2 < frame.buffSize);
 
-            //QRgb value = qRgb(raw[cursor], raw[cursor+1], raw[cursor+2]);
             QRgb value = qRgb(raw[cursor], raw[cursor+1], raw[cursor+2]);
             img->setPixel(i, j, value);
         }

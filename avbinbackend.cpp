@@ -176,6 +176,7 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
         timestampOfChannel.push_back(-1);
 
     int debug = 0;
+    int foundAFrame = 0;
 
     while (!avbin_read(this->fi, &packet) && (!done))
     {
@@ -196,13 +197,15 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
         cout << endl;
 
         //Allocate video buffer
-        if(out.buff == NULL && sinfo->type == AVBIN_STREAM_TYPE_VIDEO)
+        unsigned requiredBuffSize = sinfo->video.width*sinfo->video.height*3;
+        if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO && requiredBuffSize > out.buffSize)
         {
-            out.buffSize = sinfo->video.width*sinfo->video.height*3;
-            uint8_t *buff = new uint8_t[out.buffSize];
+            out.buffSize = requiredBuffSize;
+            uint8_t *buff = new uint8_t[requiredBuffSize];
             cout << "Creating buffer at " << (unsigned long long) &*buff <<
                     " of size " << out.buffSize<<endl;
-            cout << sinfo->video.width <<","<<sinfo->video.height << endl;
+            //cout << sinfo->video.width <<","<<sinfo->video.height << endl;
+            if(out.buff!=NULL) delete [] out.buff;
             out.buff = buff;
         }
 
@@ -216,6 +219,12 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
 
             if(!error)
             {
+                if(timestamp > time && foundAFrame)
+                {
+                    cout << "overshot" << endl;
+                    done = 1;
+                    continue;
+                }
                 /*for(int j=0;j<out.height;j++)
                     for(int i=0;i<out.width;i++)
                     {
@@ -231,8 +240,7 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
                 out.frame_rate_num = sinfo->video.frame_rate_num;
                 out.frame_rate_den = sinfo->video.frame_rate_den;
                 out.timestamp = timestamp - this->info.start_time;
-
-                done = 1;
+                foundAFrame = 1;
             }
         }
 
