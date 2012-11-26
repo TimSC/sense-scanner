@@ -18,7 +18,7 @@ public:
     unsigned int frame_rate_num, frame_rate_den;
     int64_t timestamp;
 
-    DecodedFrame() {buffSize = 0; buff = NULL;}
+    DecodedFrame() {buffSize = 0; buff = NULL; height = 0; width = 0;}
     ~DecodedFrame() {if(buff!=NULL) delete [] buff; buff = 0; buffSize = 0;}
 };
 

@@ -7,6 +7,7 @@
 #include <tr1/functional>
 #include "mediabuffer.h"
 #include "eventloop.h"
+#include <sstream>
 
 extern "C"
 {

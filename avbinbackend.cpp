@@ -53,7 +53,7 @@ std::tr1::shared_ptr<class FrameGroup> AvBinBackend::GetFrameRange(int64_t start
 int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
 {
     assert(this->fi != NULL);
-
+    cout << "a" << time << endl;
     //Remove start offset
     assert(time >= 0);
     time += this->info.start_time;
@@ -285,8 +285,6 @@ int AvBinBackend::PlayUpdate()
 
 void AvBinBackend::HandleEvent(class Event &ev)
 {
-    cout << "ev.type" << ev.type << endl;
-
     if(ev.type=="AVBIN_OPEN_FILE")
     {
         this->OpenFile(ev.data.c_str());
@@ -301,7 +299,11 @@ void AvBinBackend::HandleEvent(class Event &ev)
     }
     if(ev.type=="AVBIN_GET_FRAME")
     {
-
+        unsigned long long ti = std::strtoull(ev.data.c_str(),NULL,10);
+        class DecodedFrame decodedFrame;
+        this->GetFrame(ti, decodedFrame);
+        class Event response("AVBIN_FRAME_RESPONSE", ev.id);
+        this->eventLoop->SendEvent(response);
     }
 }
 

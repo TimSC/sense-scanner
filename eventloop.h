@@ -15,7 +15,13 @@ public:
 
     std::string type;
     unsigned long long id;
+
+    //String data
     std::string data;
+
+    //Raw binary data
+    uint8_t *raw;
+    unsigned long long rawSize;
 };
 
 class EventReceiver

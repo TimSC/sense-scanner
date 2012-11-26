@@ -31,15 +31,22 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
     //Get the frame from the backend thread
     assert(!this->eventLoop.isNull());
     unsigned long long id = this->eventLoop->GetId();
-    this->eventLoop->SendEvent(Event("AVBIN_GET_FRAME", id));
-    //this->backend->GetFrame(ti * 1000, frame);
+    class Event getFrameEvent = Event("AVBIN_GET_FRAME", id);
+    std::ostringstream tmp;
+    tmp << ti;
+    getFrameEvent.data = tmp.str();
+    this->eventLoop->SendEvent(getFrameEvent);
+    class Event frameResponse = this->eventReceiver.WaitForEventId(id);
+    assert(frameResponse.type == "AVBIN_FRAME_RESPONSE");
+    assert(frameResponse.raw != NULL);
+
 
     //Convert raw image format to QImage
     //QSharedPointer<QImage> img(new QImage(frame.width, frame.height, QImage::Format_RGB888));
     QSharedPointer<QImage> img(new QImage(100, 100, QImage::Format_RGB888));
 
     cout << "frame time " << ti << endl;
-    assert(frame.buffSize > 0);
+    //assert(frame.buffSize > 0);
     uint8_t *raw = &*frame.buff;
     int cursor = 0;
     for(int j=0;j<frame.height;j++)
@@ -82,6 +89,7 @@ void AvBinMedia::SetEventLoop(QSharedPointer<class EventLoop> &eventLoopIn)
 {
     this->eventLoop = eventLoopIn;
     this->eventLoop->AddListener("AVBIN_DURATION_RESPONSE", this->eventReceiver);
+    this->eventLoop->AddListener("AVBIN_FRAME_RESPONSE", this->eventReceiver);
 }
 
 //************************************
@@ -120,7 +128,7 @@ void AvBinThread::run()
         this->avBinBackend.PlayUpdate();
 
         if(!foundEvent)
-            msleep(200);
+            msleep(10);
     }
 
     this->eventLoop->SendEvent(Event("THREAD_STOPPING"));

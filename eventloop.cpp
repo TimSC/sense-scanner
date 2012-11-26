@@ -12,12 +12,16 @@ Event::Event()
 {
     this->type = "UNKNOWN";
     this->id = 0;
+    this->raw = 0;
+    this->rawSize = 0;
 }
 
 Event::Event(std::string typeIn, unsigned long long idIn)
 {
     this->type = typeIn;
     this->id = idIn;
+    this->raw = 0;
+    this->rawSize = 0;
 }
 
 Event::Event(const Event& other)
@@ -25,6 +29,8 @@ Event::Event(const Event& other)
     this->type = other.type;
     this->id = other.id;
     this->data = other.data;
+    //this->raw is not modified and is shared while the message exists
+    this->rawSize = other.rawSize;
 }
 
 //************************************************
@@ -100,7 +106,7 @@ EventLoop::EventLoop()
 
 void EventLoop::SendEvent(const class Event &event)
 {
-    cout << event.type << endl;
+    cout << "Sent event "<< event.type << endl;
     //Get a local copy of listeners
     this->mutex.lock();
     std::map<std::string, std::vector<EventReceiver *> >::iterator it =
