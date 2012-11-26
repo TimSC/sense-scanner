@@ -9,7 +9,7 @@
 class ImageSequence : public AbstractMedia
 {
 public:
-    ImageSequence(QObject *parent, QString targetDir, float frameRate = 25.);
+    ImageSequence(QString targetDir, float frameRate = 25.);
     virtual ~ImageSequence();
     QSharedPointer<QImage> Get(long long unsigned ti); //in milliseconds
     long long unsigned GetNumFrames();

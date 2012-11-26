@@ -20,7 +20,7 @@ DecodedFrame::~DecodedFrame()
 
 //**************************************
 
-MediaBuffer::MediaBuffer(QObject *parent, QSharedPointer<AbstractMedia> src) : AbstractMedia(parent)
+MediaBuffer::MediaBuffer(QSharedPointer<AbstractMedia> src) : AbstractMedia()
 {
     this->seq = src;
 }

@@ -13,12 +13,10 @@
 
 class AvBinMedia : public AbstractMedia
 {
-    Q_OBJECT
 public:
-    explicit AvBinMedia(QObject *parent);
+    explicit AvBinMedia();
     virtual ~AvBinMedia();
 
-public slots:
     virtual QSharedPointer<QImage> Get(long long unsigned ti); //in milliseconds
     virtual long long unsigned GetNumFrames();
     virtual long long unsigned Length(); //Get length (ms)

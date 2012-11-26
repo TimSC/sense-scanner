@@ -22,28 +22,24 @@ public:
     virtual ~DecodedFrame();
 };
 
-class AbstractMedia : public QObject
+class AbstractMedia
 {
-    Q_OBJECT
 public:
-    explicit AbstractMedia(QObject *parent = 0) : QObject(parent) {}
+    explicit AbstractMedia() {}
     virtual ~AbstractMedia() {}
 
-public slots:
     virtual QSharedPointer<QImage> Get(long long unsigned ti)=0; //in milliseconds
     int GetFrame(int64_t time, class DecodedFrame &out) {return 0;}
 
     virtual long long unsigned GetNumFrames()=0;
     virtual long long unsigned Length()=0; //Get length (ms)
     virtual long long unsigned GetFrameStartTime(long long unsigned ti)=0; //in milliseconds
-
 };
 
 class MediaBuffer: public AbstractMedia
 {
-    Q_OBJECT
 public:
-    explicit MediaBuffer(QObject *parent, QSharedPointer<AbstractMedia> src);
+    explicit MediaBuffer(QSharedPointer<AbstractMedia> src);
     virtual ~MediaBuffer();
 
     void SetSource(QSharedPointer<AbstractMedia> src);

@@ -30,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(
     //    new MediaBuffer(this, QSharedPointer<AbstractMedia>(
     //        new ImageSequence(this,"/home/tim/dev/QtMedia/testseq"))));
-    QSharedPointer<AvBinMedia> avbin (new class AvBinMedia(this));
+    QSharedPointer<AvBinMedia> avbin (new class AvBinMedia());
     avbin->SetEventLoop(&*this->eventLoop);
     avbin->OpenFile("/home/tim/Downloads/Massive Attack Mezzanine Live.mp4");
 
@@ -81,7 +81,7 @@ void MainWindow::ImportVideo()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
       tr("Import Video"), "", tr("Video Files (*.avi *.mov *.mkv *.wmf, *.webm, *.flv, *.mp4, *.rm, *.asf)"));
-    QSharedPointer<AvBinMedia> avbin (new class AvBinMedia(this));
+    QSharedPointer<AvBinMedia> avbin (new class AvBinMedia());
     avbin->OpenFile(fileName.toLocal8Bit().constData());
 
     cout << "Opening " << fileName.toLocal8Bit().constData() << endl;

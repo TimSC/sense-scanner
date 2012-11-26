@@ -6,7 +6,7 @@
 using namespace std;
 
 
-AvBinMedia::AvBinMedia(QObject *parent) : AbstractMedia(parent)
+AvBinMedia::AvBinMedia() : AbstractMedia()
 {
 
 }
