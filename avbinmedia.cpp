@@ -24,7 +24,9 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
     class DecodedFrame &frame = this->singleFrame;
 
     //Get the frame from the backend thread
-    //this->eventLoop->SendEvent(Event("GET_FRAME"));
+    assert(!this->eventLoop.isNull());
+    this->eventLoop->SendEvent(Event("GET_FRAME"));
+    assert(this->backend != NULL);
     this->backend->GetFrame(ti * 1000, frame);
 
     //Convert raw image format to QImage

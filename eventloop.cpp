@@ -54,7 +54,7 @@ class Event EventReceiver::PopEvent()
 
 EventLoop::EventLoop()
 {
-
+    cout << "EventLoop::EventLoop()" << (unsigned long long)this << endl;
 }
 
 void EventLoop::SendEvent(const class Event &event)

@@ -19,19 +19,20 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     this->threadCount = 0;
 
+    //Create inter thread message system
+    this->eventLoop = QSharedPointer<class EventLoop>(new class EventLoop);
+    this->eventLoop->AddListener("THREAD_STARTING",eventReceiver);
+    this->eventLoop->AddListener("THREAD_STOPPING",eventReceiver);
+
     //QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(
     //    new MediaBuffer(this, QSharedPointer<AbstractMedia>(
     //        new ImageSequence(this,"/home/tim/dev/QtMedia/testseq"))));
     QSharedPointer<AvBinMedia> avbin (new class AvBinMedia(this,
             "/home/tim/Downloads/Massive Attack Mezzanine Live.mp4"));
 
+    avbin->SetEventLoop(this->eventLoop);
     QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(avbin);
     this->ui->widget->SetSource(buff);
-
-    //Create inter thread message system
-    this->eventLoop = QSharedPointer<class EventLoop>(new class EventLoop);
-    this->eventLoop->AddListener("THREAD_STARTING",eventReceiver);
-    this->eventLoop->AddListener("THREAD_STOPPING",eventReceiver);
 
     //Create file reader worker thread
     this->readInputThread = new AvBinThread(this->eventLoop);
@@ -81,7 +82,7 @@ void MainWindow::ImportVideo()
       tr("Import Video"), "", tr("Video Files (*.avi *.mov *.mkv *.wmf, *.webm, *.flv, *.mp4, *.rm, *.asf)"));
     QSharedPointer<AvBinMedia> avbin (new class AvBinMedia(this,
             fileName.toLocal8Bit().constData()));
-    avbin->SetEventLoop(this->eventLoop);
+
     cout << "Opening " << fileName.toLocal8Bit().constData() << endl;
     QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(avbin);
 
