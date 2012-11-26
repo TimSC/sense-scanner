@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <tr1/memory>
+#include <tr1/functional>
 #include "mediabuffer.h"
 
 extern "C"
@@ -18,6 +19,8 @@ public:
     int64_t start, end;
 };
 
+typedef std::tr1::function<void (const class DecodedFrame&)> FrameCallback;
+
 class AvBinBackend
 {
 public:
@@ -26,9 +29,16 @@ public:
 
     int OpenFile(const char *filename);
     void CloseFile();
+    int64_t Length();
+
+    //Frame based retrieval
     std::tr1::shared_ptr<class FrameGroup> GetFrameRange(int64_t startTime, int64_t endTime);
     int GetFrame(int64_t time, class DecodedFrame &out);
-    int64_t Length();
+
+    //Replay retrieval
+    int Play(int64_t startTime, FrameCallback &frame);
+    int Pause();
+    int Stop();
 
     void OpenStreams();
     void CloseStreams();
