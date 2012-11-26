@@ -44,8 +44,8 @@ class Event EventReceiver::PopEvent()
         this->mutex.unlock();
         throw std::runtime_error("Buffer is empty");
     }
-    class Event ev = this->eventBuffer[this->eventBuffer.size()-1];
-    this->eventBuffer.erase(this->eventBuffer.end()-1);
+    class Event ev = this->eventBuffer[0]; //Get the first in buffer FIFO
+    this->eventBuffer.erase(this->eventBuffer.begin());
     this->mutex.unlock();
     return ev;
 }

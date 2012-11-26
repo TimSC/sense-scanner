@@ -158,6 +158,8 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
     return 1;
 }
 
+
+
 //***************************************************************
 
 //Replay retrieval
@@ -255,6 +257,12 @@ int AvBinBackend::Pause()
 int AvBinBackend::Stop()
 {
 
+}
+
+
+void AvBinBackend::SetEventLoop(QSharedPointer<class EventLoop> &eventLoopIn)
+{
+    this->eventLoop = eventLoopIn;
 }
 
 //***************************************************************

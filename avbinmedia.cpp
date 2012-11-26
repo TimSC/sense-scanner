@@ -1,5 +1,4 @@
 #include "avbinmedia.h"
-#include "avbinbackend.h"
 #include <assert.h>
 #include <iostream>
 #include <exception>
@@ -7,16 +6,19 @@
 using namespace std;
 
 
-AvBinMedia::AvBinMedia(QObject *parent, QString fina) : AbstractMedia(parent)
+AvBinMedia::AvBinMedia(QObject *parent) : AbstractMedia(parent)
 {
-    this->backend = new AvBinBackend;
-    this->backend->OpenFile(fina.toLocal8Bit().constData());
+
 }
 
 AvBinMedia::~AvBinMedia()
 {
-    if(this->backend) delete this->backend;
-    this->backend = NULL;
+
+}
+
+int AvBinMedia::OpenFile(QString fina)
+{
+    this->eventLoop->SendEvent(Event("AVBIN_OPEN_FILE"));
 }
 
 QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
@@ -25,12 +27,12 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
 
     //Get the frame from the backend thread
     assert(!this->eventLoop.isNull());
-    this->eventLoop->SendEvent(Event("GET_FRAME"));
-    assert(this->backend != NULL);
-    this->backend->GetFrame(ti * 1000, frame);
+    this->eventLoop->SendEvent(Event("AVBIN_GET_FRAME"));
+    //this->backend->GetFrame(ti * 1000, frame);
 
     //Convert raw image format to QImage
-    QSharedPointer<QImage> img(new QImage(frame.width, frame.height, QImage::Format_RGB888));
+    //QSharedPointer<QImage> img(new QImage(frame.width, frame.height, QImage::Format_RGB888));
+    QSharedPointer<QImage> img(new QImage(100, 100, QImage::Format_RGB888));
 
     cout << "frame time " << ti << endl;
     assert(frame.buffSize > 0);
@@ -58,7 +60,9 @@ long long unsigned AvBinMedia::GetNumFrames()
 
 long long unsigned AvBinMedia::Length() //Get length (ms)
 {
-    return this->backend->Length() / 1000.;
+    this->eventLoop->SendEvent(Event("AVBIN_GET_DURATION"));
+    assert(0);
+    //return this->backend->Length() / 1000.;
 }
 
 long long unsigned AvBinMedia::GetFrameStartTime(long long unsigned ti) //in milliseconds
@@ -117,4 +121,9 @@ void AvBinThread::HandleEvent(class Event &ev)
 
     }
 
+}
+
+void AvBinThread::SetEventLoop(QSharedPointer<class EventLoop> &eventLoopIn)
+{
+    this->avBinBackend.SetEventLoop(eventLoopIn);
 }

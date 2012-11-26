@@ -6,6 +6,7 @@
 #include <tr1/memory>
 #include <tr1/functional>
 #include "mediabuffer.h"
+#include "eventloop.h"
 
 extern "C"
 {
@@ -45,6 +46,8 @@ public:
     void DoOpenFile();
     void PrintAVbinFileInfo(AVbinFileInfo &info);
     void PrintAVbinStreamInfo(AVbinStreamInfo &info);
+    void SetEventLoop(QSharedPointer<class EventLoop> &eventLoopIn);
+
 protected:
     AVbinFile *fi;
     int32_t numStreams;
@@ -52,6 +55,8 @@ protected:
     std::vector<AVbinStream *> streams;
     AVbinFileInfo info;
     std::string filename;
+    class EventReceiver eventReceiver;
+    QSharedPointer<class EventLoop> eventLoop;
 
 };
 
