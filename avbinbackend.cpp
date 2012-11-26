@@ -285,7 +285,7 @@ int AvBinBackend::PlayUpdate()
 
 void AvBinBackend::HandleEvent(class Event &ev)
 {
-    if(ev.type=="AVBIN_OPEN_FILE")
+    /*if(ev.type=="AVBIN_OPEN_FILE")
     {
         this->OpenFile(ev.data.c_str());
     }
@@ -304,7 +304,7 @@ void AvBinBackend::HandleEvent(class Event &ev)
         this->GetFrame(ti, decodedFrame);
         class Event response("AVBIN_FRAME_RESPONSE", ev.id);
         this->eventLoop->SendEvent(response);
-    }
+    }*/
 }
 
 //***************************************************************

@@ -5,6 +5,7 @@
 #include <QObject>
 #include <iostream>
 #include <assert.h>
+#include <stdexcept>
 using namespace std;
 
 ZoomGraphicsView::ZoomGraphicsView(QWidget *parent) : QGraphicsView(parent)
@@ -65,7 +66,17 @@ VideoWidget::~VideoWidget()
 void VideoWidget::SetSource(QSharedPointer<AbstractMedia> src)
 {
     this->seq = src;
-    this->ui->horizontalScrollBar->setRange(0, seq->Length());
+    int len = 1000;
+    try
+    {
+        //len = seq->Length();
+    }
+    catch (std::runtime_error &e)
+    {
+        //cout << "Warning: could not determine length of video" << endl;
+    }
+
+    this->ui->horizontalScrollBar->setRange(0, len);
     this->ui->horizontalScrollBar->setValue(0);
     this->SetVisibleAtTime(0);
 }

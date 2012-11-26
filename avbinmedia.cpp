@@ -1,7 +1,7 @@
 #include "avbinmedia.h"
 #include <assert.h>
 #include <iostream>
-#include <exception>
+#include <stdexcept>
 #include "eventloop.h"
 using namespace std;
 
@@ -36,9 +36,17 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
     tmp << ti;
     getFrameEvent.data = tmp.str();
     this->eventLoop->SendEvent(getFrameEvent);
-    class Event frameResponse = this->eventReceiver.WaitForEventId(id);
-    assert(frameResponse.type == "AVBIN_FRAME_RESPONSE");
-    assert(frameResponse.raw != NULL);
+    try
+    {
+        class Event frameResponse = this->eventReceiver.WaitForEventId(id);
+        assert(frameResponse.type == "AVBIN_FRAME_RESPONSE");
+        assert(frameResponse.raw != NULL);
+
+    }
+    catch(std::runtime_error &err)
+    {
+
+    }
 
 
     //Convert raw image format to QImage
