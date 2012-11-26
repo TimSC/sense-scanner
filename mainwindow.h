@@ -5,6 +5,7 @@
 #include <QtCore>
 #include <QtGui>
 #include <QGraphicsScene>
+#include <QThread>
 
 namespace Ui {
 class MainWindow;
@@ -20,6 +21,7 @@ public:
     
 private:
     Ui::MainWindow *ui;
+    QThread *readInputThread;
 
 public slots:
     void ImportVideo();

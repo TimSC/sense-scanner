@@ -4,6 +4,7 @@
 #include <iostream>
 using namespace std;
 
+
 AvBinMedia::AvBinMedia(QObject *parent, QString fina) : AbstractMedia(parent)
 {
     this->backend = new AvBinBackend;
@@ -61,4 +62,16 @@ long long unsigned AvBinMedia::Length() //Get length (ms)
 long long unsigned AvBinMedia::GetFrameStartTime(long long unsigned ti) //in milliseconds
 {
     return ti;
+}
+
+
+//************************************
+
+void MyThread::run()
+{
+    while(1)
+    {
+        cout << "x" << endl;
+        msleep(200);
+    }
 }

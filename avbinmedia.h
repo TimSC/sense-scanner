@@ -4,9 +4,17 @@
 #include <QWidget>
 #include <QtCore>
 #include <QtGui>
+#include <QThread>
 #include <vector>
 #include <tr1/memory>
 #include "mediabuffer.h"
+
+class MyThread : public QThread
+{
+public:
+    void run();
+};
+
 
 class AvBinMedia : public AbstractMedia
 {

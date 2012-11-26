@@ -18,11 +18,14 @@ MainWindow::MainWindow(QWidget *parent) :
     //    new MediaBuffer(this, QSharedPointer<AbstractMedia>(
     //        new ImageSequence(this,"/home/tim/dev/QtMedia/testseq"))));
     QSharedPointer<AvBinMedia> avbin (new class AvBinMedia(this,
-            "/home/tim/Desktop/SurreyHeadPoseDatabase/SANY0012.MP4"));
+            "/home/tim/Downloads/Massive Attack Mezzanine Live.mp4"));
 
     QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(avbin);
 
     this->ui->widget->SetSource(buff);
+
+    this->readInputThread = new MyThread();
+    this->readInputThread->start();
 }
 
 MainWindow::~MainWindow()
