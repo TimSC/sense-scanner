@@ -16,13 +16,16 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
     this->threadCount = 0;
 
     //Create inter thread message system
     this->eventLoop = QSharedPointer<class EventLoop>(new class EventLoop);
     this->eventLoop->AddListener("THREAD_STARTING",eventReceiver);
     this->eventLoop->AddListener("THREAD_STOPPING",eventReceiver);
+
+    //Create file reader worker thread
+    this->readInputThread = new AvBinThread(this->eventLoop);
+    this->readInputThread->start();
 
     //QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(
     //    new MediaBuffer(this, QSharedPointer<AbstractMedia>(
@@ -32,16 +35,14 @@ MainWindow::MainWindow(QWidget *parent) :
     avbin->OpenFile("/home/tim/Downloads/Massive Attack Mezzanine Live.mp4");
 
     QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(avbin);
-    this->ui->widget->SetSource(buff);
-
-    //Create file reader worker thread
-    this->readInputThread = new AvBinThread(this->eventLoop);
-    this->readInputThread->start();
 
     //Start event buffer timer
     this->timer = new QTimer();
     QObject::connect(this->timer, SIGNAL(timeout()), this, SLOT(Update()));
     this->timer->start(10); //in millisec
+
+    ui->setupUi(this);
+    this->ui->widget->SetSource(buff);
 }
 
 MainWindow::~MainWindow()

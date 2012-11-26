@@ -40,6 +40,8 @@ public:
     int Play(int64_t startTime, FrameCallback &frame);
     int Pause();
     int Stop();
+    int PlayUpdate(); //Returns true if playing is active
+    void HandleEvent(class Event &ev);
 
     void OpenStreams();
     void CloseStreams();

@@ -27,6 +27,7 @@ public slots:
     int OpenFile(QString fina);
 
 protected:
+    class EventReceiver eventReceiver;
     std::vector<std::tr1::shared_ptr<class FrameGroup> > groupCache;
     class DecodedFrame singleFrame;
     QSharedPointer<class EventLoop> eventLoop;
@@ -39,7 +40,6 @@ public:
     virtual ~AvBinThread();
     void run();
     void HandleEvent(class Event &ev);
-    void SetEventLoop(QSharedPointer<class EventLoop> &eventLoopIn);
 
 protected:
     class EventReceiver eventReceiver;

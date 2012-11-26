@@ -1,6 +1,7 @@
 #include "avbinbackend.h"
 #include <iostream>
 #include <assert.h>
+#include <sstream>
 using namespace std;
 
 AvBinBackend::AvBinBackend()
@@ -263,6 +264,45 @@ int AvBinBackend::Stop()
 void AvBinBackend::SetEventLoop(QSharedPointer<class EventLoop> &eventLoopIn)
 {
     this->eventLoop = eventLoopIn;
+    this->eventLoop->AddListener("AVBIN_OPEN_FILE", this->eventReceiver);
+    this->eventLoop->AddListener("AVBIN_GET_DURATION", this->eventReceiver);
+    this->eventLoop->AddListener("AVBIN_GET_FRAME", this->eventReceiver);
+}
+
+int AvBinBackend::PlayUpdate()
+{
+    int foundEvent = 0;
+    try
+    {
+        class Event ev = this->eventReceiver.PopEvent();
+        cout << "Event type " << ev.type << endl;
+        foundEvent = 1;
+        this->HandleEvent(ev);
+    }
+    catch(std::runtime_error e) {}
+
+}
+
+void AvBinBackend::HandleEvent(class Event &ev)
+{
+    cout << "ev.type" << ev.type << endl;
+
+    if(ev.type=="AVBIN_OPEN_FILE")
+    {
+        this->OpenFile(ev.data.c_str());
+    }
+    if(ev.type=="AVBIN_GET_DURATION")
+    {
+        class Event response("AVBIN_DURATION_RESPONSE", ev.id);
+        std::ostringstream tmp;
+        tmp << this->Length();
+        response.data = tmp.str();
+        this->eventLoop->SendEvent(response);
+    }
+    if(ev.type=="AVBIN_GET_FRAME")
+    {
+
+    }
 }
 
 //***************************************************************

@@ -18,7 +18,10 @@ AvBinMedia::~AvBinMedia()
 
 int AvBinMedia::OpenFile(QString fina)
 {
-    this->eventLoop->SendEvent(Event("AVBIN_OPEN_FILE"));
+    unsigned long long id = this->eventLoop->GetId();
+    class Event openEv = Event("AVBIN_OPEN_FILE", id);
+    openEv.data = fina.toLocal8Bit().constData();
+    this->eventLoop->SendEvent(openEv);
 }
 
 QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
@@ -27,7 +30,8 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
 
     //Get the frame from the backend thread
     assert(!this->eventLoop.isNull());
-    this->eventLoop->SendEvent(Event("AVBIN_GET_FRAME"));
+    unsigned long long id = this->eventLoop->GetId();
+    this->eventLoop->SendEvent(Event("AVBIN_GET_FRAME", id));
     //this->backend->GetFrame(ti * 1000, frame);
 
     //Convert raw image format to QImage
@@ -60,8 +64,12 @@ long long unsigned AvBinMedia::GetNumFrames()
 
 long long unsigned AvBinMedia::Length() //Get length (ms)
 {
-    this->eventLoop->SendEvent(Event("AVBIN_GET_DURATION"));
-    assert(0);
+    unsigned long long id = this->eventLoop->GetId();
+    this->eventLoop->SendEvent(Event("AVBIN_GET_DURATION", id));
+    class Event ev = this->eventReceiver.WaitForEventId(id);
+    assert(ev.type == "AVBIN_DURATION_RESPONSE");
+    return std::strtoull(ev.data.c_str(),NULL,10);
+
     //return this->backend->Length() / 1000.;
 }
 
@@ -73,6 +81,7 @@ long long unsigned AvBinMedia::GetFrameStartTime(long long unsigned ti) //in mil
 void AvBinMedia::SetEventLoop(QSharedPointer<class EventLoop> &eventLoopIn)
 {
     this->eventLoop = eventLoopIn;
+    this->eventLoop->AddListener("AVBIN_DURATION_RESPONSE", this->eventReceiver);
 }
 
 //************************************
@@ -82,6 +91,7 @@ AvBinThread::AvBinThread(QSharedPointer<class EventLoop> &eventLoopIn)
     this->eventLoop = eventLoopIn;
     this->eventLoop->AddListener("STOP_THREADS", eventReceiver);
     this->stopThreads = 0;
+    this->avBinBackend.SetEventLoop(eventLoopIn);
 }
 
 AvBinThread::~AvBinThread()
@@ -105,6 +115,10 @@ void AvBinThread::run()
             this->HandleEvent(ev);
         }
         catch(std::runtime_error e) {}
+
+        //Update the backend to actually do something useful
+        this->avBinBackend.PlayUpdate();
+
         if(!foundEvent)
             msleep(200);
     }
@@ -116,14 +130,9 @@ void AvBinThread::run()
 void AvBinThread::HandleEvent(class Event &ev)
 {
     if(ev.type == "STOP_THREADS")
-    {
         this->stopThreads = 1;
+    //if(ev.type == "AVBIN_GET_DURATION")
 
-    }
 
 }
 
-void AvBinThread::SetEventLoop(QSharedPointer<class EventLoop> &eventLoopIn)
-{
-    this->avBinBackend.SetEventLoop(eventLoopIn);
-}
