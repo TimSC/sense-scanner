@@ -9,17 +9,6 @@
 class Event
 {
 public:
-
-    /*enum Type
-    {
-        UNKNOWN = 0,
-        GET_FRAME = 1,
-        FOUND_FRAME = 10,
-        STOP_THREADS = 100,
-        THREAD_STARTING = 101,
-        THREAD_STOPPING = 102
-    };*/
-
     Event();
     Event(std::string typeIn);
 
