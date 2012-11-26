@@ -37,11 +37,13 @@ public slots:
     virtual long long unsigned GetNumFrames();
     virtual long long unsigned Length(); //Get length (ms)
     virtual long long unsigned GetFrameStartTime(long long unsigned ti); //in milliseconds
+    void SetEventLoop(QSharedPointer<class EventLoop> &eventLoopIn);
 
 protected:
     class AvBinBackend *backend;
     std::vector<std::tr1::shared_ptr<class FrameGroup> > groupCache;
     class DecodedFrame singleFrame;
+    QSharedPointer<class EventLoop> eventLoop;
 };
 
 

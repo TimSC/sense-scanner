@@ -81,6 +81,7 @@ void MainWindow::ImportVideo()
       tr("Import Video"), "", tr("Video Files (*.avi *.mov *.mkv *.wmf, *.webm, *.flv, *.mp4, *.rm, *.asf)"));
     QSharedPointer<AvBinMedia> avbin (new class AvBinMedia(this,
             fileName.toLocal8Bit().constData()));
+    avbin->SetEventLoop(this->eventLoop);
     cout << "Opening " << fileName.toLocal8Bit().constData() << endl;
     QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(avbin);
 
