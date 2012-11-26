@@ -8,11 +8,20 @@
 #include <vector>
 #include <tr1/memory>
 #include "mediabuffer.h"
+#include "eventloop.h"
 
-class MyThread : public QThread
+class AvBinThread : public QThread
 {
 public:
+    AvBinThread(QSharedPointer<class EventLoop> &eventLoopIn);
+    virtual ~AvBinThread();
     void run();
+    void HandleEvent(class Event &ev);
+
+protected:
+    QSharedPointer<class EventLoop> eventLoop;
+    class EventReceiver eventReceiver;
+    int stopThreads;
 };
 
 

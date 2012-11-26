@@ -2,6 +2,7 @@
 #include "avbinbackend.h"
 #include <assert.h>
 #include <iostream>
+#include <exception>
 using namespace std;
 
 
@@ -67,11 +68,48 @@ long long unsigned AvBinMedia::GetFrameStartTime(long long unsigned ti) //in mil
 
 //************************************
 
-void MyThread::run()
+AvBinThread::AvBinThread(QSharedPointer<class EventLoop> &eventLoopIn)
 {
-    while(1)
+    this->eventLoop = eventLoopIn;
+    this->eventLoop->AddListener(Event::EVENT_STOP_THREADS, eventReceiver);
+    this->stopThreads = 0;
+}
+
+AvBinThread::~AvBinThread()
+{
+
+}
+
+void AvBinThread::run()
+{
+    while(!this->stopThreads)
     {
-        cout << "x" << endl;
-        msleep(200);
+        //cout << "x" << this->eventReceiver.BufferSize() << endl;
+        int foundEvent = 0;
+        try
+        {
+            class Event ev = this->eventReceiver.PopEvent();
+            cout << "Event type" << ev.type << endl;
+            foundEvent = 1;
+            this->HandleEvent(ev);
+        }
+        catch(std::runtime_error e) {}
+        if(!foundEvent)
+            msleep(200);
     }
+
+    class Event stopEvent;
+    stopEvent.type = Event::EVENT_THREAD_STOPPING;
+    this->eventLoop->SendEvent(stopEvent);
+    cout << "Stopping AvBinThread" << endl;
+}
+
+void AvBinThread::HandleEvent(class Event &ev)
+{
+    if(ev.type == Event::EVENT_STOP_THREADS)
+    {
+        this->stopThreads = 1;
+
+    }
+
 }

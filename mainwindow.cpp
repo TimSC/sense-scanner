@@ -5,7 +5,9 @@
 #include "mediabuffer.h"
 #include "imagesequence.h"
 #include "avbinmedia.h"
+#include "eventloop.h"
 #include <QFileDialog>
+#include <QThread>
 #include <iostream>
 using namespace std;
 
@@ -21,16 +23,22 @@ MainWindow::MainWindow(QWidget *parent) :
             "/home/tim/Downloads/Massive Attack Mezzanine Live.mp4"));
 
     QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(avbin);
+    this->eventLoop = QSharedPointer<class EventLoop>(new class EventLoop);
 
     this->ui->widget->SetSource(buff);
 
-    this->readInputThread = new MyThread();
+    this->readInputThread = new AvBinThread(this->eventLoop);
     this->readInputThread->start();
 }
 
 MainWindow::~MainWindow()
 {
+    class Event event;
+    event.type = event.EVENT_STOP_THREADS;
+    this->eventLoop->SendEvent(event);
+
     delete ui;
+    sleep(1);
 }
 
 void MainWindow::ImportVideo()

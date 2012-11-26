@@ -8,7 +8,7 @@ QT       += core gui
 
 TARGET = QtMedia
 TEMPLATE = app
-
+QMAKE_CXXFLAGS += -std=c++0x
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -16,14 +16,16 @@ SOURCES += main.cpp\
     imagesequence.cpp \
     mediabuffer.cpp \
     avbinbackend.cpp \
-    avbinmedia.cpp
+    avbinmedia.cpp \
+    eventloop.cpp
 
 HEADERS  += mainwindow.h \
     videowidget.h \
     imagesequence.h \
     mediabuffer.h \
     avbinbackend.h \
-    avbinmedia.h
+    avbinmedia.h \
+    eventloop.h
 
 FORMS    += mainwindow.ui \
     videowidget.ui
