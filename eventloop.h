@@ -4,25 +4,26 @@
 #include <vector>
 #include <map>
 #include <mutex>
+#include <string>
 
 class Event
 {
 public:
 
-    enum Type
+    /*enum Type
     {
-        EVENT_UNKNOWN = 0,
-        EVENT_GET_FRAME = 1,
-        EVENT_FOUND_FRAME = 10,
-        EVENT_STOP_THREADS = 100,
-        EVENT_THREAD_STARTING = 101,
-        EVENT_THREAD_STOPPING = 102
-    };
+        UNKNOWN = 0,
+        GET_FRAME = 1,
+        FOUND_FRAME = 10,
+        STOP_THREADS = 100,
+        THREAD_STARTING = 101,
+        THREAD_STOPPING = 102
+    };*/
 
     Event();
-    Event(Event::Type typeIn);
+    Event(std::string typeIn);
 
-    Type type;
+    std::string type;
 };
 
 class EventReceiver
@@ -44,10 +45,10 @@ class EventLoop
 public:
     EventLoop();
     void SendEvent(const class Event &event);
-    void AddListener(Event::Type type, class EventReceiver &rx);
+    void AddListener(std::string type, class EventReceiver &rx);
 
 protected:
-    std::map<Event::Type, std::vector<EventReceiver *> > eventReceivers;
+    std::map<std::string, std::vector<EventReceiver *> > eventReceivers;
 
 };
 

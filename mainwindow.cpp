@@ -30,8 +30,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Create inter thread message system
     this->eventLoop = QSharedPointer<class EventLoop>(new class EventLoop);
-    this->eventLoop->AddListener(Event::EVENT_THREAD_STARTING,eventReceiver);
-    this->eventLoop->AddListener(Event::EVENT_THREAD_STOPPING,eventReceiver);
+    this->eventLoop->AddListener("THREAD_STARTING",eventReceiver);
+    this->eventLoop->AddListener("THREAD_STOPPING",eventReceiver);
 
     //Create file reader worker thread
     this->readInputThread = new AvBinThread(this->eventLoop);
@@ -54,7 +54,7 @@ MainWindow::~MainWindow()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     //Signal worker threads to stop
-    this->eventLoop->SendEvent(Event::EVENT_STOP_THREADS);
+    this->eventLoop->SendEvent(Event("STOP_THREADS"));
 
     //Stop the timer and handle messages in this function
     this->timer->stop();
@@ -95,13 +95,13 @@ void MainWindow::Update()
     try
     {
         class Event ev = this->eventReceiver.PopEvent();
-        cout << "Event type" << ev.type << endl;
+        cout << "Event type " << ev.type << endl;
 
-        if(ev.type==Event::EVENT_THREAD_STARTING)
+        if(ev.type=="THREAD_STARTING")
         {
             this->threadCount ++;
         }
-        if(ev.type==Event::EVENT_THREAD_STOPPING)
+        if(ev.type=="THREAD_STOPPING")
         {
             assert(this->threadCount > 0);
             this->threadCount --;

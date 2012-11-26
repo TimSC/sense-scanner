@@ -71,7 +71,7 @@ long long unsigned AvBinMedia::GetFrameStartTime(long long unsigned ti) //in mil
 AvBinThread::AvBinThread(QSharedPointer<class EventLoop> &eventLoopIn)
 {
     this->eventLoop = eventLoopIn;
-    this->eventLoop->AddListener(Event::EVENT_STOP_THREADS, eventReceiver);
+    this->eventLoop->AddListener("STOP_THREADS", eventReceiver);
     this->stopThreads = 0;
 }
 
@@ -82,7 +82,7 @@ AvBinThread::~AvBinThread()
 
 void AvBinThread::run()
 {
-    this->eventLoop->SendEvent(Event(Event::EVENT_THREAD_STARTING));
+    this->eventLoop->SendEvent(Event("THREAD_STARTING"));
 
     while(!this->stopThreads)
     {
@@ -91,7 +91,7 @@ void AvBinThread::run()
         try
         {
             class Event ev = this->eventReceiver.PopEvent();
-            cout << "Event type" << ev.type << endl;
+            cout << "Event type " << ev.type << endl;
             foundEvent = 1;
             this->HandleEvent(ev);
         }
@@ -100,13 +100,13 @@ void AvBinThread::run()
             msleep(200);
     }
 
-    this->eventLoop->SendEvent(Event(Event::EVENT_THREAD_STOPPING));
+    this->eventLoop->SendEvent(Event("THREAD_STOPPING"));
     cout << "Stopping AvBinThread" << endl;
 }
 
 void AvBinThread::HandleEvent(class Event &ev)
 {
-    if(ev.type == Event::EVENT_STOP_THREADS)
+    if(ev.type == "STOP_THREADS")
     {
         this->stopThreads = 1;
 

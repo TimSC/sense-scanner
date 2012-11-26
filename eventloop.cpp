@@ -6,10 +6,10 @@ using namespace std;
 
 Event::Event()
 {
-    this->type = EVENT_UNKNOWN;
+    this->type = "UNKNOWN";
 }
 
-Event::Event(Event::Type typeIn)
+Event::Event(std::string typeIn)
 {
     this->type = typeIn;
 }
@@ -59,7 +59,7 @@ EventLoop::EventLoop()
 
 void EventLoop::SendEvent(const class Event &event)
 {
-    std::map<Event::Type, std::vector<EventReceiver *> >::iterator it =
+    std::map<std::string, std::vector<EventReceiver *> >::iterator it =
             this->eventReceivers.find(event.type);
     if(it == this->eventReceivers.end()) return; //No listeners found
 
@@ -69,9 +69,9 @@ void EventLoop::SendEvent(const class Event &event)
     }
 }
 
-void EventLoop::AddListener(Event::Type type, class EventReceiver &rx)
+void EventLoop::AddListener(std::string type, class EventReceiver &rx)
 {
-    std::map<Event::Type, std::vector<EventReceiver *> >::iterator it = this->eventReceivers.find(type);
+    std::map<std::string, std::vector<EventReceiver *> >::iterator it = this->eventReceivers.find(type);
     if(it == this->eventReceivers.end())
         this->eventReceivers[type] = std::vector<EventReceiver *> ();
     it = this->eventReceivers.find(type);
