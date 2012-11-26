@@ -6,6 +6,7 @@
 #include <QtGui>
 #include <QGraphicsScene>
 #include <QThread>
+#include <QTimer>
 #include "avbinmedia.h"
 
 namespace Ui {
@@ -24,10 +25,14 @@ private:
     Ui::MainWindow *ui;
     AvBinThread *readInputThread;
     QSharedPointer<class EventLoop> eventLoop;
+    class EventReceiver eventReceiver;
+    QTimer *timer;
+    int threadCount;
 
 public slots:
     void ImportVideo();
-
+    void Update();
+    void closeEvent(QCloseEvent *event);
 };
 
 #endif // MAINWINDOW_H

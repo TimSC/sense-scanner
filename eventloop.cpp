@@ -1,12 +1,18 @@
 #include "eventloop.h"
 #include <assert.h>
 #include <exception>
+#include <iostream>
+using namespace std;
 
 Event::Event()
 {
     this->type = EVENT_UNKNOWN;
 }
 
+Event::Event(Event::Type typeIn)
+{
+    this->type = typeIn;
+}
 
 //************************************************
 

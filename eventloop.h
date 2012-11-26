@@ -8,7 +8,6 @@
 class Event
 {
 public:
-    Event();
 
     enum Type
     {
@@ -16,8 +15,12 @@ public:
         EVENT_GET_FRAME = 1,
         EVENT_FOUND_FRAME = 10,
         EVENT_STOP_THREADS = 100,
-        EVENT_THREAD_STOPPING = 101
+        EVENT_THREAD_STARTING = 101,
+        EVENT_THREAD_STOPPING = 102
     };
+
+    Event();
+    Event(Event::Type typeIn);
 
     Type type;
 };

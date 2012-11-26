@@ -82,6 +82,8 @@ AvBinThread::~AvBinThread()
 
 void AvBinThread::run()
 {
+    this->eventLoop->SendEvent(Event(Event::EVENT_THREAD_STARTING));
+
     while(!this->stopThreads)
     {
         //cout << "x" << this->eventReceiver.BufferSize() << endl;
@@ -98,9 +100,7 @@ void AvBinThread::run()
             msleep(200);
     }
 
-    class Event stopEvent;
-    stopEvent.type = Event::EVENT_THREAD_STOPPING;
-    this->eventLoop->SendEvent(stopEvent);
+    this->eventLoop->SendEvent(Event(Event::EVENT_THREAD_STOPPING));
     cout << "Stopping AvBinThread" << endl;
 }
 
