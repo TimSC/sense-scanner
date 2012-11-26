@@ -260,8 +260,7 @@ int AvBinBackend::Stop()
 
 }
 
-
-void AvBinBackend::SetEventLoop(QSharedPointer<class EventLoop> &eventLoopIn)
+void AvBinBackend::SetEventLoop(class EventLoop *eventLoopIn)
 {
     this->eventLoop = eventLoopIn;
     this->eventLoop->AddListener("AVBIN_OPEN_FILE", this->eventReceiver);

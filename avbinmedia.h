@@ -23,20 +23,20 @@ public slots:
     virtual long long unsigned GetNumFrames();
     virtual long long unsigned Length(); //Get length (ms)
     virtual long long unsigned GetFrameStartTime(long long unsigned ti); //in milliseconds
-    void SetEventLoop(QSharedPointer<class EventLoop> &eventLoopIn);
+    void SetEventLoop(class EventLoop *eventLoopIn);
     int OpenFile(QString fina);
 
 protected:
     class EventReceiver eventReceiver;
     std::vector<std::tr1::shared_ptr<class FrameGroup> > groupCache;
     class DecodedFrame singleFrame;
-    QSharedPointer<class EventLoop> eventLoop;
+    class EventLoop *eventLoop;
 };
 
 class AvBinThread : public QThread
 {
 public:
-    AvBinThread(QSharedPointer<class EventLoop> &eventLoopIn);
+    AvBinThread(class EventLoop *eventLoopIn);
     virtual ~AvBinThread();
     void run();
     void HandleEvent(class Event &ev);
@@ -45,7 +45,7 @@ protected:
     class EventReceiver eventReceiver;
     int stopThreads;
     class AvBinBackend avBinBackend;
-    QSharedPointer<class EventLoop> eventLoop;
+    class EventLoop *eventLoop;
 };
 
 #endif // AVBINMEDIA_H

@@ -24,14 +24,14 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("THREAD_STOPPING",eventReceiver);
 
     //Create file reader worker thread
-    this->readInputThread = new AvBinThread(this->eventLoop);
+    this->readInputThread = new AvBinThread(&*this->eventLoop);
     this->readInputThread->start();
 
     //QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(
     //    new MediaBuffer(this, QSharedPointer<AbstractMedia>(
     //        new ImageSequence(this,"/home/tim/dev/QtMedia/testseq"))));
     QSharedPointer<AvBinMedia> avbin (new class AvBinMedia(this));
-    avbin->SetEventLoop(this->eventLoop);
+    avbin->SetEventLoop(&*this->eventLoop);
     avbin->OpenFile("/home/tim/Downloads/Massive Attack Mezzanine Live.mp4");
 
     QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(avbin);

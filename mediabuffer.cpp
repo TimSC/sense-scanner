@@ -3,6 +3,23 @@
 #include <assert.h>
 using namespace std;
 
+DecodedFrame::DecodedFrame()
+{
+    buffSize = 0;
+    buff = NULL;
+    height = 0;
+    width = 0;
+}
+
+DecodedFrame::~DecodedFrame()
+{
+    if(buff!=NULL) delete [] buff;
+    buff = 0;
+    buffSize = 0;
+}
+
+//**************************************
+
 MediaBuffer::MediaBuffer(QObject *parent, QSharedPointer<AbstractMedia> src) : AbstractMedia(parent)
 {
     this->seq = src;

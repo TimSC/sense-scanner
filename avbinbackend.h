@@ -49,7 +49,7 @@ public:
     void DoOpenFile();
     void PrintAVbinFileInfo(AVbinFileInfo &info);
     void PrintAVbinStreamInfo(AVbinStreamInfo &info);
-    void SetEventLoop(QSharedPointer<class EventLoop> &eventLoopIn);
+    void SetEventLoop(class EventLoop *eventLoopIn);
 
 protected:
     AVbinFile *fi;
@@ -59,7 +59,7 @@ protected:
     AVbinFileInfo info;
     std::string filename;
     class EventReceiver eventReceiver;
-    QSharedPointer<class EventLoop> eventLoop;
+    class EventLoop *eventLoop;
 
 };
 

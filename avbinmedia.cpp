@@ -29,7 +29,7 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
     class DecodedFrame &frame = this->singleFrame;
 
     //Get the frame from the backend thread
-    assert(!this->eventLoop.isNull());
+    assert(this->eventLoop != NULL);
     unsigned long long id = this->eventLoop->GetId();
     class Event getFrameEvent = Event("AVBIN_GET_FRAME", id);
     std::ostringstream tmp;
@@ -93,7 +93,7 @@ long long unsigned AvBinMedia::GetFrameStartTime(long long unsigned ti) //in mil
     return ti;
 }
 
-void AvBinMedia::SetEventLoop(QSharedPointer<class EventLoop> &eventLoopIn)
+void AvBinMedia::SetEventLoop(class EventLoop *eventLoopIn)
 {
     this->eventLoop = eventLoopIn;
     this->eventLoop->AddListener("AVBIN_DURATION_RESPONSE", this->eventReceiver);
@@ -102,7 +102,7 @@ void AvBinMedia::SetEventLoop(QSharedPointer<class EventLoop> &eventLoopIn)
 
 //************************************
 
-AvBinThread::AvBinThread(QSharedPointer<class EventLoop> &eventLoopIn)
+AvBinThread::AvBinThread(class EventLoop *eventLoopIn)
 {
     this->eventLoop = eventLoopIn;
     this->eventLoop->AddListener("STOP_THREADS", eventReceiver);
