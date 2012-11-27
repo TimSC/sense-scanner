@@ -60,6 +60,7 @@ protected:
     std::string filename;
     class EventReceiver eventReceiver;
     class EventLoop *eventLoop;
+    unsigned height, width;
 
 };
 

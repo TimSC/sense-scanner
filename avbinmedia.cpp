@@ -48,10 +48,13 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
         if (frameResponse->type == "AVBIN_FRAME_FAILED")
         {
             std::ostringstream tmp;
-            tmp << "Getting frame from media backend failed at ";
+            tmp << "Warning: getting frame from media backend failed at ";
             tmp << ti;
             throw runtime_error(tmp.str());
         }
+
+        if(frameResponse->type != "AVBIN_FRAME_RESPONSE")
+            throw runtime_error("Warning: incorrect response type");
 
         assert(frameResponse->type == "AVBIN_FRAME_RESPONSE");
         assert(frameResponse->raw != NULL);

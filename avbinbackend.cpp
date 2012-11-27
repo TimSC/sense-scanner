@@ -10,6 +10,8 @@ AvBinBackend::AvBinBackend()
     assert(res == AVBIN_RESULT_OK);
     this->numStreams = -1;
     this->fi = NULL;
+    this->height = 0;
+    this->width = 0;
 }
 
 AvBinBackend::~AvBinBackend()
@@ -84,11 +86,11 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
         AVbinStreamInfo *sinfo = this->streamInfos[packet.stream_index];
         AVbinStream *stream = this->streams[packet.stream_index];
 
-        //cout << "Packet of stream " << packet.stream_index << " at " << timestamp
-        //     << " type=" << sinfo->type;
-        //if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO) cout << " video";
-        //if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO) cout << " audio";
-        //cout << endl;
+        cout << "Packet of stream " << packet.stream_index << " at " << timestamp
+             << " type=" << sinfo->type;
+        if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO) cout << " video";
+        if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO) cout << " audio";
+        cout << endl;
 
         //Allocate video buffer
         unsigned requiredBuffSize = sinfo->video.width*sinfo->video.height*3;
@@ -126,6 +128,8 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
                 out.frame_rate_num = sinfo->video.frame_rate_num;
                 out.frame_rate_den = sinfo->video.frame_rate_den;
                 out.timestamp = timestamp - this->info.start_time;
+                this->height = out.height;
+                this->width = out.width;
                 foundAFrame = 1;
             }
         }
@@ -313,9 +317,22 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         }
         else
         {
+            if(this->width==0 || this->height==0)
+            {
             //Something went wrong, so a failure event is generated
             std::tr1::shared_ptr<class Event> fail(new Event("AVBIN_FRAME_FAILED", ev->id));
             this->eventLoop->SendEvent(fail);
+            }
+
+            //Return a placeholder image
+            unsigned buffSize = this->height*this->width*3;
+            decodedFrame->AllocateSize(buffSize);
+            decodedFrame->height = this->height;
+            decodedFrame->width = this->width;
+            assert(decodedFrame->width > 0);
+            assert(decodedFrame->height > 0);
+            response->rawSize = sizeof(class DecodedFrame);
+            this->eventLoop->SendEvent(response);
         }
     }
 }
