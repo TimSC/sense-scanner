@@ -43,6 +43,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->playVidStartPos = 0;
     this->currentTime = 0;
     this->playActive = false;
+    this->mediaLength = 0;
 
     //QObject::connect(this->ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(SliderMoved(int)));
     //QObject::connect(this->ui->pauseButton,SIGNAL(clicked()), this, SLOT(Pause()));
@@ -66,17 +67,20 @@ VideoWidget::~VideoWidget()
 void VideoWidget::SetSource(QSharedPointer<AbstractMedia> src)
 {
     this->seq = src;
-    int len = 1000;
+    this->mediaLength = 0;
     try
     {
-        len = seq->Length();
+        this->mediaLength = src->Length();
     }
     catch (std::runtime_error &e)
     {
         cout << "Warning: could not determine length of video" << endl;
     }
 
-    this->ui->horizontalScrollBar->setRange(0, len);
+    if(this->mediaLength > 0)
+        this->ui->horizontalScrollBar->setRange(0, this->mediaLength);
+    else
+        this->ui->horizontalScrollBar->setRange(0, 1000);
     this->ui->horizontalScrollBar->setValue(0);
     this->SetVisibleAtTime(0);
 }
@@ -87,17 +91,26 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
     if(this->seq.isNull()) return;
 
     //Get image from sequence
-    QSharedPointer<QImage> image = this->seq->Get(ti);
-    assert(!image->isNull());
+    try
+    {
+        QSharedPointer<QImage> image = this->seq->Get(ti);
 
-    //Add to scene
-    this->item = QSharedPointer<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap::fromImage(*image)));
-    this->scene->clear();
-    this->scene->addItem(&*item); //I love pointers
-    this->ui->graphicsView->setScene(&*this->scene);
+        assert(!image->isNull());
 
-    //Update current time
-    this->currentTime = ti;
+        //Add to scene
+        this->item = QSharedPointer<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap::fromImage(*image)));
+        this->scene->clear();
+        this->scene->addItem(&*item); //I love pointers
+        this->ui->graphicsView->setScene(&*this->scene);
+
+        //Update current time
+        this->currentTime = ti;
+    }
+    catch(std::runtime_error &err)
+    {
+        cout << "Warning: failed to update to requested frame" << endl;
+    }
+
 }
 
 void VideoWidget::SliderMoved(int newValue)
@@ -117,7 +130,7 @@ void VideoWidget::Play()
     this->playPressedTime.start();
 
     //If the video is at the end, start playing from the beginning
-    if(this->currentTime < this->seq->GetFrameStartTime(this->seq->Length()))
+    if(this->currentTime < this->seq->GetFrameStartTime(this->mediaLength))
         this->playVidStartPos = this->currentTime;
     else
         this->playVidStartPos = 0;
@@ -132,9 +145,9 @@ void VideoWidget::TimerUpdate()
         long long unsigned calcCurrentTime = this->playVidStartPos + elapsedMs;
 
         //Check if we have reached the end of the video
-        if(calcCurrentTime >= this->seq->Length())
+        if(calcCurrentTime >= this->mediaLength)
         {
-            calcCurrentTime = this->seq->Length();
+            calcCurrentTime = this->mediaLength;
             this->Pause();
         }
 

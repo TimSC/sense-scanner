@@ -44,36 +44,35 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
         assert(frameResponse->type == "AVBIN_FRAME_RESPONSE");
         assert(frameResponse->raw != NULL);
         frame2 = (DecodedFrame *)frameResponse->raw;
+
+        assert(frame2 != NULL);
+        DecodedFrame &frame = *frame2;
+        QSharedPointer<QImage> img(new QImage(frame.width, frame.height, QImage::Format_RGB888));
+
+        assert(frame.buff != NULL);
+        assert(frame.buffSize > 0);
+        uint8_t *raw = &*frame.buff;
+        int cursor = 0;
+        for(int j=0;j<frame.height;j++)
+            for(int i=0;i<frame.width;i++)
+            {
+                cursor = i * 3 + (j * frame.width * 3);
+                assert(cursor >= 0);
+                assert(cursor + 2 < frame.buffSize);
+
+                QRgb value = qRgb(raw[cursor], raw[cursor+1], raw[cursor+2]);
+                img->setPixel(i, j, value);
+            }
+        return img;
     }
     catch(std::runtime_error &err)
     {
-
     }
 
-    assert(frame2 != NULL);
-    DecodedFrame &frame = *frame2;
-
-    //Convert raw image format to QImage
-    QSharedPointer<QImage> img(new QImage(frame.width, frame.height, QImage::Format_RGB888));
-    //QSharedPointer<QImage> img(new QImage(100, 100, QImage::Format_RGB888));
-
-    cout << "frame time " << ti << endl;
-    assert(frame.buff != NULL);
-    assert(frame.buffSize > 0);
-    uint8_t *raw = &*frame.buff;
-    int cursor = 0;
-    for(int j=0;j<frame.height;j++)
-        for(int i=0;i<frame.width;i++)
-        {
-            cursor = i * 3 + (j * frame.width * 3);
-            assert(cursor >= 0);
-            assert(cursor + 2 < frame.buffSize);
-
-            QRgb value = qRgb(raw[cursor], raw[cursor+1], raw[cursor+2]);
-            img->setPixel(i, j, value);
-        }
-
+    //Return something if things fail
+    QSharedPointer<QImage> img(new QImage(100, 100, QImage::Format_RGB888));
     return img;
+
 }
 
 long long unsigned AvBinMedia::GetNumFrames()

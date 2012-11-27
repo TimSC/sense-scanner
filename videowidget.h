@@ -51,6 +51,7 @@ protected:
     QTime playPressedTime;
     int playActive;
     long long unsigned currentTime, playVidStartPos;
+    long long unsigned mediaLength;
 private:
     Ui::VideoWidget *ui;
 };
