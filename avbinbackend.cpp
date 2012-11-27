@@ -53,7 +53,6 @@ std::tr1::shared_ptr<class FrameGroup> AvBinBackend::GetFrameRange(int64_t start
 int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
 {
     assert(this->fi != NULL);
-    cout << "a" << time << endl;
     //Remove start offset
     assert(time >= 0);
     time += this->info.start_time;
@@ -85,19 +84,19 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
         AVbinStreamInfo *sinfo = this->streamInfos[packet.stream_index];
         AVbinStream *stream = this->streams[packet.stream_index];
 
-        cout << "Packet of stream " << packet.stream_index << " at " << timestamp
-             << " type=" << sinfo->type;
-        if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO) cout << " video";
-        if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO) cout << " audio";
-        cout << endl;
+        //cout << "Packet of stream " << packet.stream_index << " at " << timestamp
+        //     << " type=" << sinfo->type;
+        //if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO) cout << " video";
+        //if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO) cout << " audio";
+        //cout << endl;
 
         //Allocate video buffer
         unsigned requiredBuffSize = sinfo->video.width*sinfo->video.height*3;
         if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO && ((out.buff)==NULL || requiredBuffSize > out.buffSize))
         {
             out.AllocateSize(requiredBuffSize);
-            cout << "Creating buffer at " << (unsigned long long) &*out.buff <<
-                    " of size " << out.buffSize<<endl;
+            //cout << "Creating buffer at " << (unsigned long long) &*out.buff <<
+            //        " of size " << out.buffSize<<endl;
             //cout << sinfo->video.width <<","<<sinfo->video.height << endl;
         }
 
@@ -273,7 +272,7 @@ int AvBinBackend::PlayUpdate()
     try
     {
         std::tr1::shared_ptr<class Event> ev = this->eventReceiver.PopEvent();
-        cout << "Event type " << ev->type << endl;
+        //cout << "Event type " << ev->type << endl;
         foundEvent = 1;
         this->HandleEvent(ev);
     }

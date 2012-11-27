@@ -34,7 +34,6 @@ Event::Event(const Event& other)
 
 Event::~Event()
 {
-    cout << "Event::~Event()" << endl;
     if(this->raw)
         delete (class DecodedFrame *)raw;
     raw = 0;
@@ -113,7 +112,7 @@ EventLoop::EventLoop()
 
 void EventLoop::SendEvent(std::tr1::shared_ptr<class Event> event)
 {
-    cout << "Sent event "<< event->type << endl;
+    //cout << "Sent event "<< event->type << endl;
     //Get a local copy of listeners
     this->mutex.lock();
     std::map<std::string, std::vector<EventReceiver *> >::iterator it =

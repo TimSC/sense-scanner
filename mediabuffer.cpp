@@ -5,7 +5,7 @@ using namespace std;
 
 DecodedFrame::DecodedFrame() : Deletable()
 {
-    cout << "DecodedFrame::DecodedFrame()" << endl;
+    //cout << "DecodedFrame::DecodedFrame()" << endl;
     height = 0;
     width = 0;
     sample_aspect_num = 0;
@@ -20,8 +20,7 @@ DecodedFrame::DecodedFrame() : Deletable()
 
 DecodedFrame::DecodedFrame(const DecodedFrame &other)
 {
-    assert(0);
-    cout << "DecodedFrame::DecodedFrame(other)" << endl;
+    //cout << "DecodedFrame::DecodedFrame(other)" << endl;
     height = other.height;
     width = other.width;
     sample_aspect_num = other.sample_aspect_num;
@@ -36,7 +35,7 @@ DecodedFrame::DecodedFrame(const DecodedFrame &other)
 
 DecodedFrame::~DecodedFrame()
 {
-    cout << "DecodedFrame::~DecodedFrame()" << endl;
+    //cout << "DecodedFrame::~DecodedFrame()" << endl;
     if(this->buff != NULL) delete [] this->buff;
     this->buffSize = 0;
 }
