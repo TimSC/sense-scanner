@@ -111,14 +111,18 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
             int32_t ret = avbin_decode_video(stream, packet.data, packet.size, out.buff);
             int error = (ret == -1);
 
+            if(timestamp > time && foundAFrame)
+            {
+                done = 1;
+                continue;
+            }
+            else
+            {
+                out.timestamp = timestamp - this->info.start_time;
+            }
+
             if(!error)
             {
-                if(timestamp > time && foundAFrame)
-                {
-                    done = 1;
-                    continue;
-                }
-
                 assert(sinfo->video.height > 0);
                 assert(sinfo->video.width > 0);
                 out.height = sinfo->video.height;
@@ -127,11 +131,11 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
                 out.sample_aspect_den = sinfo->video.sample_aspect_den;
                 out.frame_rate_num = sinfo->video.frame_rate_num;
                 out.frame_rate_den = sinfo->video.frame_rate_den;
-                out.timestamp = timestamp - this->info.start_time;
                 this->height = out.height;
                 this->width = out.width;
                 foundAFrame = 1;
             }
+
         }
 
         //Decode audio packet

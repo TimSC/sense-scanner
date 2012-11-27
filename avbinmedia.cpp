@@ -117,6 +117,7 @@ long long unsigned AvBinMedia::GetFrameStartTime(long long unsigned ti) //in mil
 {
     long long unsigned outFrameTi = 0;
     QSharedPointer<QImage> out = this->Get(ti, outFrameTi);
+    cout << "Frame start" << outFrameTi << endl;
     return outFrameTi;
 }
 
