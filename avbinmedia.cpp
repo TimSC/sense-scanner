@@ -26,6 +26,29 @@ int AvBinMedia::OpenFile(QString fina)
     this->eventLoop->SendEvent(openEv);
 }
 
+void RawImgToQImage(DecodedFrame *frame, QImage &img)
+{
+    assert(frame != NULL);
+    assert(frame->width > 0);
+    assert(frame->height > 0);
+    assert(frame->buff != NULL);
+    assert(frame->buffSize > 0);
+
+    uint8_t *raw = &*frame->buff;
+    int cursor = 0;
+    for(int j=0;j<frame->height;j++)
+        for(int i=0;i<frame->width;i++)
+        {
+            cursor = i * 3 + (j * frame->width * 3);
+            assert(cursor >= 0);
+            assert(cursor + 2 < frame->buffSize);
+
+            QRgb value = qRgb(raw[cursor], raw[cursor+1], raw[cursor+2]);
+            img.setPixel(i, j, value);
+        }
+}
+
+
 QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
                                        long long unsigned &outFrameTi) //in milliseconds
 {
@@ -60,29 +83,12 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
         assert(frameResponse->raw != NULL);
         DecodedFrame *frame = (DecodedFrame *)frameResponse->raw;
 
-        assert(frame != NULL);
-
-        assert(frame->width > 0);
-        assert(frame->height > 0);
-
         //Convert to a QImage object
         QSharedPointer<QImage> img(new QImage(frame->width, frame->height,
                                               QImage::Format_RGB888));
-        assert(frame->buff != NULL);
-        assert(frame->buffSize > 0);
-        uint8_t *raw = &*frame->buff;
+        RawImgToQImage(frame, *img);
         outFrameTi = frame->timestamp / 1000;
-        int cursor = 0;
-        for(int j=0;j<frame->height;j++)
-            for(int i=0;i<frame->width;i++)
-            {
-                cursor = i * 3 + (j * frame->width * 3);
-                assert(cursor >= 0);
-                assert(cursor + 2 < frame->buffSize);
 
-                QRgb value = qRgb(raw[cursor], raw[cursor+1], raw[cursor+2]);
-                img->setPixel(i, j, value);
-            }
         assert(!img->isNull());
         return img;
     }
@@ -127,6 +133,55 @@ void AvBinMedia::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("AVBIN_DURATION_RESPONSE", this->eventReceiver);
     this->eventLoop->AddListener("AVBIN_FRAME_RESPONSE", this->eventReceiver);
     this->eventLoop->AddListener("AVBIN_FRAME_FAILED", this->eventReceiver);
+}
+
+//*******************************************
+
+int AvBinMedia::RequestFrame(long long unsigned ti) //in milliseconds
+{
+    //Request the frame from the backend thread
+    assert(this->eventLoop != NULL);
+    unsigned long long id = this->eventLoop->GetId();
+    std::tr1::shared_ptr<class Event> getFrameEvent(new Event("AVBIN_GET_FRAME", id));
+    std::ostringstream tmp;
+    tmp << ti * 1000;
+    getFrameEvent->data = tmp.str();
+    this->eventLoop->SendEvent(getFrameEvent);
+    return id;
+}
+
+void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long timestamp, void *raw), void *raw)
+{
+    //Check for new frames from media backend.
+    int checking = 1;
+    while(checking)
+    {
+        try
+        {
+            std::tr1::shared_ptr<class Event> ev = this->eventReceiver.PopEvent();
+            cout << "z" << ev->type << endl;
+            if(ev->type == "AVBIN_FRAME_RESPONSE")
+            {
+                DecodedFrame *frame = (DecodedFrame *)ev->raw;
+
+                //Convert to a QImage object
+                QSharedPointer<QImage> img(new QImage(frame->width, frame->height,
+                                                      QImage::Format_RGB888));
+                RawImgToQImage(frame, *img);
+                assert(!img->isNull());
+
+                //Return image to calling object by callback
+                frameCallback(*img, frame->timestamp / 1000, raw);
+            }
+
+        }
+        catch(runtime_error &err)
+        {
+            //This is normal, no messages found
+            checking = 0;
+        }
+    }
+
 }
 
 //************************************

@@ -39,6 +39,7 @@ public slots:
     void Pause();
     void Play();
     void TimerUpdate();
+    void AsyncFrameReceived(QImage& fr, unsigned long long timestamp);
 
 protected:
     void SetVisibleAtTime(long long unsigned ti);

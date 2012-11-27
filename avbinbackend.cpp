@@ -86,11 +86,11 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
         AVbinStreamInfo *sinfo = this->streamInfos[packet.stream_index];
         AVbinStream *stream = this->streams[packet.stream_index];
 
-        cout << "Packet of stream " << packet.stream_index << " at " << timestamp
-             << " type=" << sinfo->type;
-        if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO) cout << " video";
-        if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO) cout << " audio";
-        cout << endl;
+        //cout << "Packet of stream " << packet.stream_index << " at " << timestamp
+        //     << " type=" << sinfo->type;
+        //if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO) cout << " video";
+        //if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO) cout << " audio";
+        //cout << endl;
 
         //Allocate video buffer
         unsigned requiredBuffSize = sinfo->video.width*sinfo->video.height*3;
@@ -166,8 +166,6 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
 
     return foundAFrame;
 }
-
-
 
 //***************************************************************
 

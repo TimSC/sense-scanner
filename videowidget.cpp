@@ -95,7 +95,9 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
     try
     {
         unsigned long long actualTi = 0;
-        QSharedPointer<QImage> image = this->seq->Get(ti, actualTi);
+        //QSharedPointer<QImage> image = this->seq->Get(ti, actualTi);
+        this->seq->RequestFrame(ti);
+/*
         //cout << "Requested:"<<ti << " Got:"<< actualTi << endl;
 
         assert(!image->isNull());
@@ -107,7 +109,7 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
         this->ui->graphicsView->setScene(&*this->scene);
 
         //Update current time
-        this->currentTime = actualTi;
+        this->currentTime = actualTi;*/
     }
     catch(std::runtime_error &err)
     {
@@ -141,10 +143,21 @@ void VideoWidget::Play()
     playActive = true;
 }
 
+void FrameCallbackTest(QImage& fr, unsigned long long timestamp, void *raw)
+{
+    VideoWidget *widget = (VideoWidget *)raw;
+    widget->AsyncFrameReceived(fr, timestamp);
+}
+
 void VideoWidget::TimerUpdate()
 {
     if(this->seq.isNull())
+    {
         this->Pause();
+    }
+
+    //Check if any async messages are waiting from the source media
+    if(!this->seq.isNull()) this->seq->Update(FrameCallbackTest, (void *)this);
 
     if(this->playActive)
     {
@@ -161,4 +174,19 @@ void VideoWidget::TimerUpdate()
         //This automatically triggers the video frame refresh
         this->ui->horizontalScrollBar->setValue(calcCurrentTime);
     }
+}
+
+void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)
+{
+      cout << "Got:"<< timestamp << endl;
+
+      //Add to scene
+      this->item = QSharedPointer<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap::fromImage(fr)));
+      this->scene->clear();
+      this->scene->addItem(&*item); //I love pointers
+      this->ui->graphicsView->setScene(&*this->scene);
+
+      //Update current time
+      this->currentTime = timestamp;
+
 }

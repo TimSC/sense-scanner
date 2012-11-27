@@ -25,6 +25,9 @@ public:
     void SetEventLoop(class EventLoop *eventLoopIn);
     int OpenFile(QString fina);
 
+    int RequestFrame(long long unsigned ti);
+    void Update(void (*frameCallback)(QImage& fr, unsigned long long timestamp, void *raw), void *raw);
+
 protected:
     class EventReceiver eventReceiver;
     class EventLoop *eventLoop;

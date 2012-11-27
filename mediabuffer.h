@@ -7,6 +7,7 @@
 #include <QMap>
 #include <inttypes.h>
 #include <tr1/memory>
+#include <tr1/functional>
 #include "eventloop.h"
 
 class DecodedFrame : public Deletable
@@ -26,6 +27,8 @@ public:
     void AllocateSize(unsigned int size);
 };
 
+typedef std::tr1::function<void (const class DecodedFrame&)> FrameCallback;
+
 class AbstractMedia
 {
 public:
@@ -39,6 +42,9 @@ public:
     virtual long long unsigned GetNumFrames()=0;
     virtual long long unsigned Length()=0; //Get length (ms)
     virtual long long unsigned GetFrameStartTime(long long unsigned ti)=0; //in milliseconds
+
+    virtual int RequestFrame(long long unsigned ti) {return 0;};
+    virtual void Update(void (*frameCallback)(QImage& fr, unsigned long long timestamp, void *raw), void *raw) {};
 };
 
 class MediaBuffer: public AbstractMedia

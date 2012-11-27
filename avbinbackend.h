@@ -4,7 +4,6 @@
 #include <vector>
 #include <string>
 #include <tr1/memory>
-#include <tr1/functional>
 #include "mediabuffer.h"
 #include "eventloop.h"
 #include <sstream>
@@ -20,8 +19,6 @@ public:
     std::vector<std::tr1::shared_ptr<class DecodedFrame> > frames;
     int64_t start, end;
 };
-
-typedef std::tr1::function<void (const class DecodedFrame&)> FrameCallback;
 
 class AvBinBackend
 {
