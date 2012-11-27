@@ -55,6 +55,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    //Disconnect video widget from source
+    QSharedPointer<AbstractMedia> nullSrc;
+    this->ui->widget->SetSource(nullSrc);
+
     //Signal worker threads to stop
     std::tr1::shared_ptr<class Event> stopEvent(new Event("STOP_THREADS"));
     this->eventLoop->SendEvent(stopEvent);

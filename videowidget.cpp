@@ -68,7 +68,8 @@ void VideoWidget::SetSource(QSharedPointer<AbstractMedia> src)
 {
     this->seq = src;
     this->mediaLength = 0;
-    try
+
+    if(!this->seq.isNull())try
     {
         this->mediaLength = src->Length();
     }
@@ -139,6 +140,9 @@ void VideoWidget::Play()
 
 void VideoWidget::TimerUpdate()
 {
+    if(this->seq.isNull())
+        this->Pause();
+
     if(this->playActive)
     {
         int elapsedMs = this->playPressedTime.elapsed();
