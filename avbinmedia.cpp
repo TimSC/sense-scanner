@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include "eventloop.h"
 #include "mediabuffer.h"
+#include <sstream>
 using namespace std;
 
 
@@ -45,7 +46,12 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
         frameResponse = this->eventReceiver.WaitForEventId(id);
 
         if (frameResponse->type == "AVBIN_FRAME_FAILED")
-            throw runtime_error("Getting frame from media backend failed");
+        {
+            std::ostringstream tmp;
+            tmp << "Getting frame from media backend failed at ";
+            tmp << ti;
+            throw runtime_error(tmp.str());
+        }
 
         assert(frameResponse->type == "AVBIN_FRAME_RESPONSE");
         assert(frameResponse->raw != NULL);
@@ -79,6 +85,8 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
     }
     catch(std::runtime_error &err)
     {
+        cout << "Warning: wait for frame response encountered an error" << endl;
+        cout << err.what() << endl;
     }
 
     //Return something if things fail
@@ -104,7 +112,7 @@ long long unsigned AvBinMedia::Length() //Get length (ms)
 
 long long unsigned AvBinMedia::GetFrameStartTime(long long unsigned ti) //in milliseconds
 {
-    long long unsigned outFrameTi;
+    long long unsigned outFrameTi = 0;
     QSharedPointer<QImage> out = this->Get(ti, outFrameTi);
     return outFrameTi;
 }
