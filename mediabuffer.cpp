@@ -71,7 +71,8 @@ QSharedPointer<QImage> MediaBuffer::Get(long long unsigned ti) //in milliseconds
         return this->buffer[ti];
 
     //Get frame from underlying store
-    QSharedPointer<QImage> img = this->seq->Get(ti);
+    unsigned long long tiActual = 0;
+    QSharedPointer<QImage> img = this->seq->Get(ti, tiActual);
     if(!img->isNull())
         this->buffer[ti] = img;
 

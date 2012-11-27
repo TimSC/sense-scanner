@@ -11,7 +11,8 @@ class ImageSequence : public AbstractMedia
 public:
     ImageSequence(QString targetDir, float frameRate = 25.);
     virtual ~ImageSequence();
-    QSharedPointer<QImage> Get(long long unsigned ti); //in milliseconds
+    QSharedPointer<QImage> Get(long long unsigned ti,
+                               long long unsigned &outFrameTi); //in milliseconds
     long long unsigned GetNumFrames();
     long long unsigned Length(); //Get length (ms)
     long long unsigned GetFrameStartTime(long long unsigned ti); //in milliseconds

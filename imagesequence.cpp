@@ -114,9 +114,11 @@ ImageSequence::~ImageSequence()
 
 }
 
-QSharedPointer<QImage> ImageSequence::Get(long long unsigned ti) //in milliseconds
+QSharedPointer<QImage> ImageSequence::Get(long long unsigned ti,
+                                          long long unsigned &outFrameTi) //in milliseconds
 {
     long long unsigned frameNum = float(ti) * this->frameRate / 1000.;
+    outFrameTi = frameNum * 1000 / this->frameRate;
     frameNum += this->minIndex;
 
     if (frameNum < this->minIndex) frameNum = this->minIndex;

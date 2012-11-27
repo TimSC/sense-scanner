@@ -17,7 +17,8 @@ public:
     explicit AvBinMedia();
     virtual ~AvBinMedia();
 
-    virtual QSharedPointer<QImage> Get(long long unsigned ti); //in milliseconds
+    virtual QSharedPointer<QImage> Get(long long unsigned ti,
+                                       long long unsigned &outFrameTi); //in milliseconds
     virtual long long unsigned GetNumFrames();
     virtual long long unsigned Length(); //Get length (ms)
     virtual long long unsigned GetFrameStartTime(long long unsigned ti); //in milliseconds

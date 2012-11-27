@@ -94,7 +94,9 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
     //Get image from sequence
     try
     {
-        QSharedPointer<QImage> image = this->seq->Get(ti);
+        unsigned long long actualTi = 0;
+        QSharedPointer<QImage> image = this->seq->Get(ti, actualTi);
+        cout << "Requested:"<<ti << " Got:"<< actualTi << endl;
 
         assert(!image->isNull());
 
@@ -105,7 +107,7 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
         this->ui->graphicsView->setScene(&*this->scene);
 
         //Update current time
-        this->currentTime = ti;
+        this->currentTime = actualTi;
     }
     catch(std::runtime_error &err)
     {
@@ -155,12 +157,7 @@ void VideoWidget::TimerUpdate()
             this->Pause();
         }
 
-        //Round time down to the start of the frame
-        long long unsigned frameStartTime = this->seq->GetFrameStartTime(calcCurrentTime);
-
         //This automatically triggers the video frame refresh
-
-        if (frameStartTime != this->currentTime)
-            this->ui->horizontalScrollBar->setValue(frameStartTime);
+        this->ui->horizontalScrollBar->setValue(calcCurrentTime);
     }
 }

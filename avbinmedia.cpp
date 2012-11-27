@@ -25,8 +25,10 @@ int AvBinMedia::OpenFile(QString fina)
     this->eventLoop->SendEvent(openEv);
 }
 
-QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
+QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
+                                       long long unsigned &outFrameTi) //in milliseconds
 {
+    outFrameTi = 0;
 
     //Request the frame from the backend thread
     assert(this->eventLoop != NULL);
@@ -60,6 +62,7 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
         assert(frame->buff != NULL);
         assert(frame->buffSize > 0);
         uint8_t *raw = &*frame->buff;
+        outFrameTi = frame->timestamp / 1000;
         int cursor = 0;
         for(int j=0;j<frame->height;j++)
             for(int i=0;i<frame->width;i++)
@@ -101,7 +104,9 @@ long long unsigned AvBinMedia::Length() //Get length (ms)
 
 long long unsigned AvBinMedia::GetFrameStartTime(long long unsigned ti) //in milliseconds
 {
-    return ti;
+    long long unsigned outFrameTi;
+    QSharedPointer<QImage> out = this->Get(ti, outFrameTi);
+    return outFrameTi;
 }
 
 void AvBinMedia::SetEventLoop(class EventLoop *eventLoopIn)

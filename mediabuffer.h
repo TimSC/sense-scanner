@@ -32,7 +32,8 @@ public:
     explicit AbstractMedia() {}
     virtual ~AbstractMedia() {}
 
-    virtual QSharedPointer<QImage> Get(long long unsigned ti)=0; //in milliseconds
+    virtual QSharedPointer<QImage> Get(long long unsigned ti,
+                                       long long unsigned &outFrameTi)=0; //in milliseconds
     int GetFrame(int64_t time, class DecodedFrame &out) {return 0;}
 
     virtual long long unsigned GetNumFrames()=0;
