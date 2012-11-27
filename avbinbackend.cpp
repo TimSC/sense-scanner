@@ -118,6 +118,8 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
                     continue;
                 }
 
+                assert(sinfo->video.height > 0);
+                assert(sinfo->video.width > 0);
                 out.height = sinfo->video.height;
                 out.width = sinfo->video.width;
                 out.sample_aspect_num = sinfo->video.sample_aspect_num;
@@ -154,7 +156,8 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
         //if (debug > 100) break;
 
     }
-    return 1;
+
+    return foundAFrame;
 }
 
 
@@ -298,11 +301,23 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         std::tr1::shared_ptr<class Event> response(new Event("AVBIN_FRAME_RESPONSE", ev->id));
         class DecodedFrame* decodedFrame = new DecodedFrame();
         response->raw = (uint8_t*) decodedFrame;
-        this->GetFrame(ti, *decodedFrame);
-        assert(decodedFrame->buff != NULL);
-        assert(decodedFrame->buffSize > 0);
-        response->rawSize = sizeof(class DecodedFrame);
-        this->eventLoop->SendEvent(response);
+        int found = this->GetFrame(ti, *decodedFrame);
+        if(found)
+        {
+            //Send decoded image as event
+            assert(decodedFrame->buff != NULL);
+            assert(decodedFrame->buffSize > 0);
+            assert(decodedFrame->width > 0);
+            assert(decodedFrame->height > 0);
+            response->rawSize = sizeof(class DecodedFrame);
+            this->eventLoop->SendEvent(response);
+        }
+        else
+        {
+            //Something went wrong, so a failure event is generated
+            std::tr1::shared_ptr<class Event> fail(new Event("AVBIN_FRAME_FAILED", ev->id));
+            this->eventLoop->SendEvent(fail);
+        }
     }
 }
 
