@@ -295,12 +295,12 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type=="AVBIN_GET_FRAME")
     {
         unsigned long long ti = std::strtoull(ev->data.c_str(),NULL,10);
-        class DecodedFrame decodedFrame;
-        this->GetFrame(ti, decodedFrame);
-        assert(decodedFrame.buff != NULL);
-        assert(decodedFrame.buffSize > 0);
         std::tr1::shared_ptr<class Event> response(new Event("AVBIN_FRAME_RESPONSE", ev->id));
-        response->raw = (uint8_t*)new DecodedFrame(decodedFrame);
+        class DecodedFrame* decodedFrame = new DecodedFrame();
+        response->raw = (uint8_t*) decodedFrame;
+        this->GetFrame(ti, *decodedFrame);
+        assert(decodedFrame->buff != NULL);
+        assert(decodedFrame->buffSize > 0);
         response->rawSize = sizeof(class DecodedFrame);
         this->eventLoop->SendEvent(response);
     }

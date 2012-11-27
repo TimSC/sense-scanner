@@ -4,8 +4,6 @@
 #include <iostream>
 using namespace std;
 
-
-
 //***********************************************
 
 Event::Event()
@@ -29,13 +27,13 @@ Event::Event(const Event& other)
     this->type = other.type;
     this->id = other.id;
     this->data = other.data;
-
+    this->raw = other.raw; //Note: this is a raw pointer
     this->rawSize = other.rawSize;
 }
 
 Event::~Event()
 {
-
+    cout << "Event::~Event()" << endl;
 }
 
 //************************************************
