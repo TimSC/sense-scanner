@@ -7,8 +7,9 @@
 #include <QMap>
 #include <inttypes.h>
 #include <tr1/memory>
+#include "eventloop.h"
 
-class DecodedFrame
+class DecodedFrame : public Deletable
 {
 public:
     uint8_t *buff;

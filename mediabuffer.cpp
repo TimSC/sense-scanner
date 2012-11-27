@@ -3,7 +3,7 @@
 #include <assert.h>
 using namespace std;
 
-DecodedFrame::DecodedFrame()
+DecodedFrame::DecodedFrame() : Deletable()
 {
     cout << "DecodedFrame::DecodedFrame()" << endl;
     height = 0;

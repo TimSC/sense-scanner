@@ -7,6 +7,13 @@
 #include <string>
 #include <tr1/memory>
 
+class Deletable
+{
+public:
+    Deletable() {};
+    virtual ~Deletable() {};
+};
+
 class Event
 {
 public:

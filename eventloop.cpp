@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <exception>
 #include <iostream>
+#include "mediabuffer.h"
 using namespace std;
 
 //***********************************************
@@ -34,6 +35,9 @@ Event::Event(const Event& other)
 Event::~Event()
 {
     cout << "Event::~Event()" << endl;
+    if(this->raw)
+        delete (class DecodedFrame *)raw;
+    raw = 0;
 }
 
 //************************************************
