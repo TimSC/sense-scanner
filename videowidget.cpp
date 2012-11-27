@@ -69,11 +69,11 @@ void VideoWidget::SetSource(QSharedPointer<AbstractMedia> src)
     int len = 1000;
     try
     {
-        //len = seq->Length();
+        len = seq->Length();
     }
     catch (std::runtime_error &e)
     {
-        //cout << "Warning: could not determine length of video" << endl;
+        cout << "Warning: could not determine length of video" << endl;
     }
 
     this->ui->horizontalScrollBar->setRange(0, len);

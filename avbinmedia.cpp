@@ -88,8 +88,6 @@ long long unsigned AvBinMedia::Length() //Get length (ms)
     std::tr1::shared_ptr<class Event> ev = this->eventReceiver.WaitForEventId(id);
     assert(ev->type == "AVBIN_DURATION_RESPONSE");
     return std::strtoull(ev->data.c_str(),NULL,10);
-
-    //return this->backend->Length() / 1000.;
 }
 
 long long unsigned AvBinMedia::GetFrameStartTime(long long unsigned ti) //in milliseconds
