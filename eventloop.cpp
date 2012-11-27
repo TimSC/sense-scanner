@@ -29,8 +29,13 @@ Event::Event(const Event& other)
     this->type = other.type;
     this->id = other.id;
     this->data = other.data;
-    //this->raw is not modified and is shared while the message exists
+
     this->rawSize = other.rawSize;
+}
+
+Event::~Event()
+{
+
 }
 
 //************************************************

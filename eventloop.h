@@ -12,6 +12,7 @@ public:
     Event();
     Event(std::string typeIn, unsigned long long idIn = 0);
     Event(const Event& other);
+    virtual ~Event();
 
     std::string type;
     unsigned long long id;

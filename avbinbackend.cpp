@@ -93,23 +93,20 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
 
         //Allocate video buffer
         unsigned requiredBuffSize = sinfo->video.width*sinfo->video.height*3;
-        if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO && requiredBuffSize > out.buffSize)
+        if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO && ((out.raw)==NULL || requiredBuffSize > out.raw->buffSize))
         {
-            out.buffSize = requiredBuffSize;
-            uint8_t *buff = new uint8_t[requiredBuffSize];
-            cout << "Creating buffer at " << (unsigned long long) &*buff <<
-                    " of size " << out.buffSize<<endl;
+            out.AllocateSize(requiredBuffSize);
+            cout << "Creating buffer at " << (unsigned long long) &*out.raw->buff <<
+                    " of size " << out.raw->buffSize<<endl;
             //cout << sinfo->video.width <<","<<sinfo->video.height << endl;
-            if(out.buff!=NULL) delete [] out.buff;
-            out.buff = buff;
         }
 
         //Decode video packet
         if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO)
         {
-            assert(out.buffSize>0);
+            assert(out.raw && out.raw->buffSize > 0);
 
-            int32_t ret = avbin_decode_video(stream, packet.data, packet.size, &*out.buff);
+            int32_t ret = avbin_decode_video(stream, packet.data, packet.size, out.raw->buff);
             int error = (ret == -1);
 
             if(!error)
@@ -192,23 +189,20 @@ int AvBinBackend::Play(int64_t time, FrameCallback &frameFunc)
 
         //Allocate video buffer
         unsigned requiredBuffSize = sinfo->video.width*sinfo->video.height*3;
-        if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO && requiredBuffSize > out.buffSize)
+        if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO && ((out.raw)==NULL || requiredBuffSize > out.raw->buffSize))
         {
-            out.buffSize = requiredBuffSize;
-            uint8_t *buff = new uint8_t[requiredBuffSize];
-            cout << "Creating buffer at " << (unsigned long long) &*buff <<
-                    " of size " << out.buffSize<<endl;
+            out.AllocateSize(requiredBuffSize);
+            cout << "Creating buffer at " << (unsigned long long) &*out.raw->buff <<
+                    " of size " << out.raw->buffSize<<endl;
             //cout << sinfo->video.width <<","<<sinfo->video.height << endl;
-            if(out.buff!=NULL) delete [] out.buff;
-            out.buff = buff;
         }
 
         //Decode video packet
         if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO)
         {
-            assert(out.buffSize>0);
+            assert(out.raw && out.raw->buffSize > 0);
 
-            int32_t ret = avbin_decode_video(stream, packet.data, packet.size, &*out.buff);
+            int32_t ret = avbin_decode_video(stream, packet.data, packet.size, out.raw->buff);
             int error = (ret == -1);
 
             if(!error)
@@ -284,7 +278,7 @@ int AvBinBackend::PlayUpdate()
 
 void AvBinBackend::HandleEvent(class Event &ev)
 {
-    /*if(ev.type=="AVBIN_OPEN_FILE")
+    if(ev.type=="AVBIN_OPEN_FILE")
     {
         this->OpenFile(ev.data.c_str());
     }
@@ -301,9 +295,13 @@ void AvBinBackend::HandleEvent(class Event &ev)
         unsigned long long ti = std::strtoull(ev.data.c_str(),NULL,10);
         class DecodedFrame decodedFrame;
         this->GetFrame(ti, decodedFrame);
+        assert(decodedFrame.raw != NULL);
+        assert(decodedFrame.raw->buffSize > 0);
         class Event response("AVBIN_FRAME_RESPONSE", ev.id);
+        response.raw = (uint8_t*)new DecodedFrame(decodedFrame);
+        response.rawSize = sizeof(class DecodedFrame);
         this->eventLoop->SendEvent(response);
-    }*/
+    }
 }
 
 //***************************************************************

@@ -26,8 +26,6 @@ public:
 
 protected:
     class EventReceiver eventReceiver;
-    std::vector<std::tr1::shared_ptr<class FrameGroup> > groupCache;
-    class DecodedFrame singleFrame;
     class EventLoop *eventLoop;
 };
 

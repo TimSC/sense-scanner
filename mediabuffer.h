@@ -8,18 +8,30 @@
 #include <inttypes.h>
 #include <tr1/memory>
 
+class RawDataContainer
+{
+public:
+    RawDataContainer();
+    RawDataContainer(const RawDataContainer &other);
+    virtual ~RawDataContainer();
+
+    uint8_t *buff;
+    int buffSize;
+};
+
 class DecodedFrame
 {
 public:
-    uint8_t *buff;
-    int buffSize;
+    std::tr1::shared_ptr<class RawDataContainer> raw;
     unsigned int height, width;
     unsigned int sample_aspect_num, sample_aspect_den;
     unsigned int frame_rate_num, frame_rate_den;
     int64_t timestamp;
 
     DecodedFrame();
+    DecodedFrame(const DecodedFrame &other);
     virtual ~DecodedFrame();
+    void AllocateSize(unsigned int size);
 };
 
 class AbstractMedia
