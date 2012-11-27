@@ -33,7 +33,7 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti) //in milliseconds
     unsigned long long id = this->eventLoop->GetId();
     std::tr1::shared_ptr<class Event> getFrameEvent(new Event("AVBIN_GET_FRAME", id));
     std::ostringstream tmp;
-    tmp << ti;
+    tmp << ti * 1000;
     getFrameEvent->data = tmp.str();
     this->eventLoop->SendEvent(getFrameEvent);
     DecodedFrame *frame2 = NULL;
@@ -87,7 +87,7 @@ long long unsigned AvBinMedia::Length() //Get length (ms)
     this->eventLoop->SendEvent(durationEvent);
     std::tr1::shared_ptr<class Event> ev = this->eventReceiver.WaitForEventId(id);
     assert(ev->type == "AVBIN_DURATION_RESPONSE");
-    return std::strtoull(ev->data.c_str(),NULL,10);
+    return std::strtoull(ev->data.c_str(),NULL,10) / 1000;
 }
 
 long long unsigned AvBinMedia::GetFrameStartTime(long long unsigned ti) //in milliseconds
