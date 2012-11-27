@@ -42,7 +42,7 @@ public:
     int Pause();
     int Stop();
     int PlayUpdate(); //Returns true if playing is active
-    void HandleEvent(class Event &ev);
+    void HandleEvent(std::tr1::shared_ptr<class Event> ev);
 
     void OpenStreams();
     void CloseStreams();

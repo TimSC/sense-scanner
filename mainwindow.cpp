@@ -56,7 +56,8 @@ MainWindow::~MainWindow()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     //Signal worker threads to stop
-    this->eventLoop->SendEvent(Event("STOP_THREADS"));
+    std::tr1::shared_ptr<class Event> stopEvent(new Event("STOP_THREADS"));
+    this->eventLoop->SendEvent(stopEvent);
 
     //Stop the timer and handle messages in this function
     this->timer->stop();
@@ -97,14 +98,15 @@ void MainWindow::Update()
     while(flushing)
     try
     {
-        class Event ev = this->eventReceiver.PopEvent();
-        cout << "Event type " << ev.type << endl;
+        std::tr1::shared_ptr<class Event> ev = this->eventReceiver.PopEvent();
+        assert(ev != NULL);
+        cout << "Event type " << ev->type << endl;
 
-        if(ev.type=="THREAD_STARTING")
+        if(ev->type=="THREAD_STARTING")
         {
             this->threadCount ++;
         }
-        if(ev.type=="THREAD_STOPPING")
+        if(ev->type=="THREAD_STOPPING")
         {
             assert(this->threadCount > 0);
             this->threadCount --;

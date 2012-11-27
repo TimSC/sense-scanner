@@ -45,7 +45,7 @@ EventReceiver::EventReceiver()
 
 }
 
-void EventReceiver::AddMessage(const class Event &event)
+void EventReceiver::AddMessage(std::tr1::shared_ptr<class Event> event)
 {
     this->mutex.lock();
     this->eventBuffer.push_back(event);
@@ -60,7 +60,7 @@ int EventReceiver::BufferSize()
     return s;
 }
 
-class Event EventReceiver::PopEvent()
+std::tr1::shared_ptr<class Event> EventReceiver::PopEvent()
 {
     this->mutex.lock();
     if(this->eventBuffer.size() == 0)
@@ -68,13 +68,13 @@ class Event EventReceiver::PopEvent()
         this->mutex.unlock();
         throw std::runtime_error("Buffer is empty");
     }
-    class Event ev = this->eventBuffer[0]; //Get the first in buffer FIFO
+    std::tr1::shared_ptr<class Event> ev = this->eventBuffer[0]; //Get the first in buffer FIFO
     this->eventBuffer.erase(this->eventBuffer.begin());
     this->mutex.unlock();
     return ev;
 }
 
-class Event EventReceiver::WaitForEventId(unsigned long long idIn,
+std::tr1::shared_ptr<class Event> EventReceiver::WaitForEventId(unsigned long long idIn,
                                           unsigned timeOutMs)
 {
     unsigned waitingTime = 0;
@@ -83,10 +83,10 @@ class Event EventReceiver::WaitForEventId(unsigned long long idIn,
         this->mutex.lock();
         for(unsigned i=0; i<this->eventBuffer.size(); i++)
         {
-            class Event &ev = this->eventBuffer[i];
-            if(ev.id == idIn)
+            std::tr1::shared_ptr<class Event> ev = this->eventBuffer[i];
+            if(ev->id == idIn)
             {
-                class Event out = this->eventBuffer[i];
+                std::tr1::shared_ptr<class Event> out = this->eventBuffer[i];
                 this->eventBuffer.erase(this->eventBuffer.begin()+i);
                 this->mutex.unlock();
                 return out;
@@ -109,13 +109,13 @@ EventLoop::EventLoop()
 
 }
 
-void EventLoop::SendEvent(const class Event &event)
+void EventLoop::SendEvent(std::tr1::shared_ptr<class Event> event)
 {
-    cout << "Sent event "<< event.type << endl;
+    cout << "Sent event "<< event->type << endl;
     //Get a local copy of listeners
     this->mutex.lock();
     std::map<std::string, std::vector<EventReceiver *> >::iterator it =
-            this->eventReceivers.find(event.type);
+            this->eventReceivers.find(event->type);
     if(it == this->eventReceivers.end())
     {
         //No listeners found

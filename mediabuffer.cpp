@@ -3,26 +3,6 @@
 #include <assert.h>
 using namespace std;
 
-RawDataContainer::RawDataContainer()
-{
-    this->buff = NULL;
-    this->buffSize = 0;
-}
-
-RawDataContainer::RawDataContainer(const RawDataContainer &other)
-{
-    this->buff = other.buff;
-    this->buffSize = other.buffSize;
-}
-
-RawDataContainer::~RawDataContainer()
-{
-    if(this->buff) delete [] this->buff;
-    this->buff = NULL;
-}
-
-//*****************************************************
-
 DecodedFrame::DecodedFrame()
 {
     height = 0;
@@ -32,11 +12,13 @@ DecodedFrame::DecodedFrame()
     frame_rate_num = 0;
     frame_rate_den = 0;
     timestamp = 0;
+
+    buff = NULL;
+    buffSize = 0;
 }
 
 DecodedFrame::DecodedFrame(const DecodedFrame &other)
 {
-    raw = other.raw;
     height = other.height;
     width = other.width;
     sample_aspect_num = other.sample_aspect_num;
@@ -44,6 +26,9 @@ DecodedFrame::DecodedFrame(const DecodedFrame &other)
     frame_rate_num = other.frame_rate_num;
     frame_rate_den = other.frame_rate_den;
     timestamp = other.timestamp;
+
+    buff = other.buff;
+    buffSize = other.buffSize;
 }
 
 DecodedFrame::~DecodedFrame()
@@ -53,9 +38,9 @@ DecodedFrame::~DecodedFrame()
 
 void DecodedFrame::AllocateSize(unsigned int size)
 {
-    this->raw = std::tr1::shared_ptr<class RawDataContainer>(new RawDataContainer);
-    this->raw->buffSize = size;
-    this->raw->buff = new uint8_t[size];
+    if(this->buff) delete [] this->buff;
+    this->buff = new uint8_t[size];
+    this->buffSize = size;
 }
 
 //**************************************

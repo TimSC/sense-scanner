@@ -5,6 +5,7 @@
 #include <map>
 #include <mutex>
 #include <string>
+#include <tr1/memory>
 
 class Event
 {
@@ -29,14 +30,14 @@ class EventReceiver
 {
 public:
     EventReceiver();
-    void AddMessage(const class Event &event);
+    void AddMessage(std::tr1::shared_ptr<class Event> event);
     int BufferSize();
-    class Event PopEvent();
-    class Event WaitForEventId(unsigned long long id,
+    std::tr1::shared_ptr<class Event> PopEvent();
+    std::tr1::shared_ptr<class Event> WaitForEventId(unsigned long long id,
                                unsigned timeOutMs = 5000);
 
 protected:
-    std::vector<class Event> eventBuffer;
+    std::vector<std::tr1::shared_ptr<class Event> > eventBuffer;
     std::mutex mutex;
 };
 
@@ -45,7 +46,7 @@ class EventLoop
 {
 public:
     EventLoop();
-    void SendEvent(const class Event &event);
+    void SendEvent(std::tr1::shared_ptr<class Event> event);
     void AddListener(std::string type, class EventReceiver &rx);
     unsigned long long GetId();
 

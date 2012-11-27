@@ -35,7 +35,7 @@ public:
     AvBinThread(class EventLoop *eventLoopIn);
     virtual ~AvBinThread();
     void run();
-    void HandleEvent(class Event &ev);
+    void HandleEvent(std::tr1::shared_ptr<class Event> ev);
 
 protected:
     class EventReceiver eventReceiver;
