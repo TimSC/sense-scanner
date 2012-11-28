@@ -60,7 +60,7 @@ protected:
     class EventLoop *eventLoop;
     unsigned height, width;
     int firstVideoStream, firstAudioStream;
-    std::vector<int64_t> timestampOfChannel;
+    //std::vector<int64_t> timestampOfChannel;
 
 };
 

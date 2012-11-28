@@ -48,14 +48,14 @@ void AvBinBackend::DoOpenFile()
         this->PrintAVbinStreamInfo(*sinfo);
         this->streamInfos.push_back(sinfo);
 
-        /*if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO && this->firstVideoStream == -1)
+        if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO && this->firstVideoStream == -1)
         {
             this->firstVideoStream = i;
         }
         if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO && this->firstAudioStream == -1)
         {
             this->firstAudioStream = i;
-        }*/
+        }
     }
 
     //this->timestampOfChannel.clear();
