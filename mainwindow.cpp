@@ -88,7 +88,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 
     //If threads still running, terminate them
-    cout << "If threads still running, terminate them" << endl;
+    cout << "If threads still running, attempting to terminate them" << endl;
     if(this->readInputThread->isRunning())
         this->readInputThread->terminate();
 
