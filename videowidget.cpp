@@ -184,7 +184,7 @@ void VideoWidget::TimerUpdate()
 
 void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)
 {
-      cout << "Got:"<< timestamp << endl;
+      //cout << "Got:"<< timestamp << endl;
 
       //Add to scene
       this->item = QSharedPointer<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap::fromImage(fr)));

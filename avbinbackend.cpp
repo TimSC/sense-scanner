@@ -90,12 +90,14 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
     //so that seeking is unnecessary
     uint64_t currentVidTime = this->timestampOfChannel[this->firstVideoStream];
     int doSeek = 1;
+
+    //If current currentVidTime is zero, that is an unknown position so we always seek
     if(currentVidTime > 0 && time > currentVidTime)
     {
         uint64_t diff = time - currentVidTime;
-        cout << "diff " << diff << endl;
         if(diff < 1000000) doSeek = 0;
     }
+    cout <<"doSeek "<< doSeek<< endl;
 
     if(doSeek)
     {
@@ -134,51 +136,46 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
 
         this->timestampOfChannel[packet.stream_index] = timestamp;
 
-        //Allocate video buffer
-        unsigned requiredBuffSize = sinfo->video.width*sinfo->video.height*3;
-        if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO && ((out.buff)==NULL || requiredBuffSize > out.buffSize))
-        {
-            out.AllocateSize(requiredBuffSize);
-            //cout << "Creating buffer at " << (unsigned long long) &*out.buff <<
-            //        " of size " << out.buffSize<<endl;
-            //cout << sinfo->video.width <<","<<sinfo->video.height << endl;
-        }
-
         //Decode video packet
         if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO &&
                 packet.stream_index == this->firstVideoStream)
         {
+            //Allocate video buffer
+            unsigned requiredBuffSize = sinfo->video.width*sinfo->video.height*3;
+            if ((out.buff)==NULL || requiredBuffSize > out.buffSize)
+                out.AllocateSize(requiredBuffSize);
+            if ((this->currentFrame.buff)==NULL || requiredBuffSize > this->currentFrame.buffSize)
+                this->currentFrame.AllocateSize(requiredBuffSize);
+
             assert(out.buff);
             assert(out.buffSize > 0);
+            assert(this->currentFrame.buff);
+            assert(this->currentFrame.buffSize > 0);
 
-            int32_t ret = avbin_decode_video(stream, packet.data, packet.size, out.buff);
+            int32_t ret = avbin_decode_video(stream, packet.data, packet.size, this->currentFrame.buff);
             int error = (ret == -1);
 
             if(timestamp > time && foundAFrame)
             {
+                out = this->currentFrame;
                 done = 1;
-                continue;
-            }
-            else
-            {
-                out.timestamp = timestamp - this->info.start_time;
             }
 
             if(!error)
             {
                 assert(sinfo->video.height > 0);
                 assert(sinfo->video.width > 0);
-                out.height = sinfo->video.height;
-                out.width = sinfo->video.width;
-                out.sample_aspect_num = sinfo->video.sample_aspect_num;
-                out.sample_aspect_den = sinfo->video.sample_aspect_den;
-                out.frame_rate_num = sinfo->video.frame_rate_num;
-                out.frame_rate_den = sinfo->video.frame_rate_den;
+                this->currentFrame.height = sinfo->video.height;
+                this->currentFrame.width = sinfo->video.width;
+                this->currentFrame.sample_aspect_num = sinfo->video.sample_aspect_num;
+                this->currentFrame.sample_aspect_den = sinfo->video.sample_aspect_den;
+                this->currentFrame.frame_rate_num = sinfo->video.frame_rate_num;
+                this->currentFrame.frame_rate_den = sinfo->video.frame_rate_den;
+                this->currentFrame.timestamp = timestamp - this->info.start_time;
                 this->height = out.height;
                 this->width = out.width;
                 foundAFrame = 1;
             }
-
         }
 
         //Decode audio packet

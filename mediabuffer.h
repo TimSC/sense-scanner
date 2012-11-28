@@ -23,6 +23,7 @@ public:
 
     DecodedFrame();
     DecodedFrame(const DecodedFrame &other);
+    DecodedFrame& operator=(const DecodedFrame& other);
     virtual ~DecodedFrame();
     void AllocateSize(unsigned int size);
 };

@@ -63,6 +63,7 @@ protected:
     int firstVideoStream, firstAudioStream;
 
     std::vector<uint64_t> timestampOfChannel;
+    class DecodedFrame currentFrame;
 };
 
 #endif // AVBINBACKEND_H

@@ -21,6 +21,13 @@ DecodedFrame::DecodedFrame() : Deletable()
 DecodedFrame::DecodedFrame(const DecodedFrame &other)
 {
     //cout << "DecodedFrame::DecodedFrame(other)" << endl;
+    this->buff = NULL;
+    this->buffSize = 0;
+    DecodedFrame::operator=(other);
+}
+
+DecodedFrame& DecodedFrame::operator=(const DecodedFrame& other)
+{
     height = other.height;
     width = other.width;
     sample_aspect_num = other.sample_aspect_num;
@@ -29,8 +36,10 @@ DecodedFrame::DecodedFrame(const DecodedFrame &other)
     frame_rate_den = other.frame_rate_den;
     timestamp = other.timestamp;
 
-    buff = other.buff;
-    buffSize = other.buffSize;
+    if(this->buffSize != other.buffSize)
+        this->AllocateSize(other.buffSize);
+    memcpy(this->buff, other.buff, other.buffSize);
+    return *this;
 }
 
 DecodedFrame::~DecodedFrame()
