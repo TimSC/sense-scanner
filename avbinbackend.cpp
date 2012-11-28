@@ -101,6 +101,7 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
     if(doSeek)
     {
         //Seek in file
+        cout << "seeking to" << time << endl;
         AVbinResult res = avbin_seek_file(this->fi, time);
         assert(res == AVBIN_RESULT_OK);
         for(unsigned int chanNum=0;chanNum<this->numStreams;chanNum++)
@@ -122,7 +123,6 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
     {
         //Read frame from file
         int readRet = avbin_read(this->fi, &packet);
-        assert(readRet == 0);
         if(readRet == -1)
         {
             processing = 0;
