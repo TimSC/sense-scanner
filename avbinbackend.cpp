@@ -86,6 +86,7 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
         {
             //Used cached frame
             out = this->prevFrame;
+            return 1;
         }
     }
 
@@ -95,7 +96,7 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
     uint64_t currentVidTime = this->timestampOfChannel[this->firstVideoStream];
     int doSeek = 1;
 
-    if(currentVidTime > 0 && time > currentVidTime)
+    if(currentVidTime > 0 && time >= currentVidTime)
     {
         uint64_t diff = time - currentVidTime;
         if(diff < 1000000) doSeek = 0;
