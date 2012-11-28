@@ -15,6 +15,7 @@ AvBinBackend::AvBinBackend()
     this->firstVideoStream = -1;
     this->firstAudioStream = -1;
     this->eventReceiver = NULL;
+    this->eventLoop = NULL;
 }
 
 AvBinBackend::AvBinBackend(const AvBinBackend &other)
@@ -24,6 +25,7 @@ AvBinBackend::AvBinBackend(const AvBinBackend &other)
 
 AvBinBackend::~AvBinBackend()
 {
+    cout << "AvBinBackend::~AvBinBackend() " << (unsigned long long)this << endl;
     this->CloseFile();
     if(this->eventReceiver) delete this->eventReceiver;
     this->eventReceiver = NULL;

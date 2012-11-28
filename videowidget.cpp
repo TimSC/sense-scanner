@@ -157,7 +157,7 @@ void FrameCallbackTest(QImage& fr, unsigned long long timestamp, void *raw)
 
 void VideoWidget::TimerUpdate()
 {
-    if(this->seq.isNull())
+    if(this->seq.isNull() && this->playActive)
     {
         this->Pause();
     }

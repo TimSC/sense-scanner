@@ -11,16 +11,19 @@ using namespace std;
 AvBinMedia::AvBinMedia() : AbstractMedia()
 {
     this->eventReceiver = NULL;
+    this->eventLoop = NULL;
 }
 
 AvBinMedia::~AvBinMedia()
 {
+    cout << "AvBinMedia::~AvBinMedia()" << endl;
     if(this->eventReceiver) delete this->eventReceiver;
     this->eventReceiver = NULL;
 }
 
 int AvBinMedia::OpenFile(QString fina)
 {
+    assert(this->eventLoop);
     unsigned long long id = this->eventLoop->GetId();
     std::tr1::shared_ptr<class Event> openEv(new Event("AVBIN_OPEN_FILE", id));
     openEv->data = fina.toLocal8Bit().constData();
@@ -244,8 +247,5 @@ void AvBinThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
     if(ev->type == "STOP_THREADS")
         this->stopThreads = 1;
-    //if(ev.type == "AVBIN_GET_DURATION")
-
-
 }
 

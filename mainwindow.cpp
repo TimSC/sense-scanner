@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //    new MediaBuffer(this, QSharedPointer<AbstractMedia>(
     //        new ImageSequence(this,"/home/tim/dev/QtMedia/testseq"))));
     QSharedPointer<AvBinMedia> avbin (new class AvBinMedia());
-    avbin->SetEventLoop(&*this->eventLoop);
+    avbin->SetEventLoop(this->eventLoop);
     avbin->OpenFile("/home/tim/Desktop/SurreyHeadPoseDatabase/SANY0012.MP4");
 
     QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(avbin);
@@ -99,13 +99,22 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::ImportVideo()
 {
+    //Get filename from user
     QString fileName = QFileDialog::getOpenFileName(this,
       tr("Import Video"), "", tr("Video Files (*.avi *.mov *.mkv *.wmf, *.webm, *.flv, *.mp4, *.rm, *.asf)"));
-    QSharedPointer<AvBinMedia> avbin (new class AvBinMedia());
-    avbin->OpenFile(fileName.toLocal8Bit().constData());
+    if(fileName.length() == 0) return;
+
+    //Remove previous source
+    QSharedPointer<AbstractMedia> nullSrc;
+    this->ui->widget->SetSource(nullSrc);
+
+    //Create new media source
+    QSharedPointer<AvBinMedia> avbinNew (new class AvBinMedia());
+    avbinNew->SetEventLoop(this->eventLoop);
+    avbinNew->OpenFile(fileName.toLocal8Bit().constData());
 
     cout << "Opening " << fileName.toLocal8Bit().constData() << endl;
-    QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(avbin);
+    QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(avbinNew);
 
     this->ui->widget->SetSource(buff);
 }
