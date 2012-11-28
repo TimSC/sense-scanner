@@ -53,6 +53,8 @@ protected:
     int playActive;
     long long unsigned currentTime, playVidStartPos;
     long long unsigned mediaLength;
+    unsigned int waitingForNumFrames;
+
 private:
     Ui::VideoWidget *ui;
 };

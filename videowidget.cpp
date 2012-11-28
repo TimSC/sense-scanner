@@ -44,6 +44,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->currentTime = 0;
     this->playActive = false;
     this->mediaLength = 0;
+    this->waitingForNumFrames = 0;
 
     //QObject::connect(this->ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(SliderMoved(int)));
     //QObject::connect(this->ui->pauseButton,SIGNAL(clicked()), this, SLOT(Pause()));
@@ -97,6 +98,7 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
         unsigned long long actualTi = 0;
         //QSharedPointer<QImage> image = this->seq->Get(ti, actualTi);
         this->seq->RequestFrame(ti);
+
 /*
         //cout << "Requested:"<<ti << " Got:"<< actualTi << endl;
 
@@ -120,7 +122,11 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
 
 void VideoWidget::SliderMoved(int newValue)
 {
-    this->SetVisibleAtTime(newValue);
+    if(this->waitingForNumFrames < 2)
+    {
+        this->SetVisibleAtTime(newValue);
+        this->waitingForNumFrames ++;
+    }
 }
 
 void VideoWidget::Pause()
@@ -188,5 +194,8 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)
 
       //Update current time
       this->currentTime = timestamp;
+
+      if(this->waitingForNumFrames > 0)
+          this->waitingForNumFrames -- ;
 
 }
