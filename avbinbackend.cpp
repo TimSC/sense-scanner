@@ -84,7 +84,16 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
 
     time += this->info.start_time;
 
-    //cout << time << "," << firstVideoStream << "," << this->timestampOfChannel.size() << endl;
+    //Check if currently buffered frame is suitable for the response
+    if(this->currentFrame.timestamp > 0 && this->prevFrame.timestamp > 0)
+    {
+        if(time >= this->prevFrame.timestamp
+                && time < this->currentFrame.timestamp)
+        {
+            //Used cached frame
+            out = this->prevFrame;
+        }
+    }
 
     //Check if the requested from is close to requested frame
     //so that seeking is unnecessary
@@ -97,11 +106,10 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
         uint64_t diff = time - currentVidTime;
         if(diff < 1000000) doSeek = 0;
     }
-    doSeek = 1;
+
     if(doSeek)
     {
         //Seek in file
-        cout << "seeking to" << time << endl;
         AVbinResult res = avbin_seek_file(this->fi, time);
         assert(res == AVBIN_RESULT_OK);
         for(unsigned int chanNum=0;chanNum<this->numStreams;chanNum++)
@@ -109,13 +117,15 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
         this->currentFrame.width = 0;
         this->currentFrame.height = 0;
         this->currentFrame.timestamp = 0;
+        this->prevFrame.width = 0;
+        this->prevFrame.height = 0;
+        this->prevFrame.timestamp = 0;
     }
 
     //Decode the packets
     AVbinPacket packet;
     packet.structure_size = sizeof(packet);
     int done = false;
-
 
     int debug = 0;
     int processing = 1;
@@ -155,7 +165,7 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
 
             int32_t ret = avbin_decode_video(stream, packet.data, packet.size, this->currentFrame.buff);
             int error = (ret == -1);
-            cout << "z" << (timestamp > time && this->currentFrame.width > 0) << error<<endl;
+            //cout << "z" << (timestamp > time && this->currentFrame.width > 0) << error<<endl;
             if(timestamp > time && this->currentFrame.width > 0)
             {
                 if ((out.buff)==NULL || requiredBuffSize != out.buffSize)
@@ -168,12 +178,13 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
                     cout << "Warning: found frame after requested time" << endl;
                 assert(out.width > 0);
                 assert(out.height > 0);
-                cout <<"t "<< out.timestamp << endl;
                 done = 1;
             }
 
             if(!error)
             {
+                this->prevFrame = this->currentFrame;
+
                 //Allocate video buffer
                 if ((this->currentFrame.buff)==NULL || requiredBuffSize != this->currentFrame.buffSize)
                     this->currentFrame.AllocateSize(requiredBuffSize);
