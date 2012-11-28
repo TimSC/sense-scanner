@@ -95,6 +95,7 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
     //Get image from sequence
     try
     {
+        this->waitingForNumFrames ++;
         this->seq->RequestFrame(ti);
     }
     catch(std::runtime_error &err)
@@ -109,14 +110,30 @@ void VideoWidget::SliderMoved(int newValue)
     if(this->waitingForNumFrames < 2)
     {
         this->SetVisibleAtTime(newValue);
-        this->waitingForNumFrames ++;
+
     }
 }
 
 void VideoWidget::Pause()
 {
     cout << "pause" << endl;
-    playActive = false;
+
+    //Ensure we have an accurate frame when stopping
+    if(this->playActive)
+    {
+        this->playActive = false;
+
+        int elapsedMs = this->playPressedTime.elapsed();
+        long long unsigned calcCurrentTime = this->playVidStartPos + elapsedMs;
+
+        //Check if we have reached the end of the video
+        if(calcCurrentTime >= this->mediaLength)
+            calcCurrentTime = this->mediaLength;
+
+        //This automatically triggers the video frame refresh
+        this->SetVisibleAtTime(calcCurrentTime);
+    }
+
 }
 
 void VideoWidget::Play()
