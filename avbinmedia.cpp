@@ -10,12 +10,13 @@ using namespace std;
 
 AvBinMedia::AvBinMedia() : AbstractMedia()
 {
-
+    this->eventReceiver = NULL;
 }
 
 AvBinMedia::~AvBinMedia()
 {
-
+    if(this->eventReceiver) delete this->eventReceiver;
+    this->eventReceiver = NULL;
 }
 
 int AvBinMedia::OpenFile(QString fina)
@@ -66,7 +67,8 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
     try
     {
         //Wait for the response from the media backend
-        frameResponse = this->eventReceiver.WaitForEventId(id);
+        assert(this->eventReceiver);
+        frameResponse = this->eventReceiver->WaitForEventId(id);
 
         if (frameResponse->type == "AVBIN_FRAME_FAILED")
         {
@@ -114,7 +116,8 @@ long long unsigned AvBinMedia::Length() //Get length (ms)
     unsigned long long id = this->eventLoop->GetId();
     std::tr1::shared_ptr<class Event> durationEvent(new Event("AVBIN_GET_DURATION", id));
     this->eventLoop->SendEvent(durationEvent);
-    std::tr1::shared_ptr<class Event> ev = this->eventReceiver.WaitForEventId(id);
+    assert(this->eventReceiver);
+    std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(id);
     assert(ev->type == "AVBIN_DURATION_RESPONSE");
     return std::strtoull(ev->data.c_str(),NULL,10) / 1000;
 }
@@ -129,10 +132,14 @@ long long unsigned AvBinMedia::GetFrameStartTime(long long unsigned ti) //in mil
 
 void AvBinMedia::SetEventLoop(class EventLoop *eventLoopIn)
 {
-    this->eventLoop = eventLoopIn;
-    this->eventLoop->AddListener("AVBIN_DURATION_RESPONSE", this->eventReceiver);
-    this->eventLoop->AddListener("AVBIN_FRAME_RESPONSE", this->eventReceiver);
-    this->eventLoop->AddListener("AVBIN_FRAME_FAILED", this->eventReceiver);
+    if(this->eventReceiver == NULL)
+    {
+        this->eventReceiver = new class EventReceiver(eventLoopIn);
+        this->eventLoop = eventLoopIn;
+        this->eventLoop->AddListener("AVBIN_DURATION_RESPONSE", *this->eventReceiver);
+        this->eventLoop->AddListener("AVBIN_FRAME_RESPONSE", *this->eventReceiver);
+        this->eventLoop->AddListener("AVBIN_FRAME_FAILED", *this->eventReceiver);
+    }
 }
 
 //*******************************************
@@ -158,7 +165,8 @@ void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long tim
     {
         try
         {
-            std::tr1::shared_ptr<class Event> ev = this->eventReceiver.PopEvent();
+            assert(this->eventReceiver);
+            std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
             if(ev->type == "AVBIN_FRAME_RESPONSE")
             {
                 DecodedFrame *frame = (DecodedFrame *)ev->raw;
@@ -187,15 +195,18 @@ void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long tim
 
 AvBinThread::AvBinThread(class EventLoop *eventLoopIn)
 {
+    this->eventReceiver = new EventReceiver(eventLoopIn);
     this->eventLoop = eventLoopIn;
-    this->eventLoop->AddListener("STOP_THREADS", eventReceiver);
+    this->eventLoop->AddListener("STOP_THREADS", *eventReceiver);
     this->stopThreads = 0;
     this->avBinBackend.SetEventLoop(eventLoopIn);
 }
 
 AvBinThread::~AvBinThread()
 {
-
+    if(this->eventReceiver)
+        delete this->eventReceiver;
+    this->eventReceiver = NULL;
 }
 
 void AvBinThread::run()
@@ -209,7 +220,8 @@ void AvBinThread::run()
         int foundEvent = 0;
         try
         {
-            std::tr1::shared_ptr<class Event> ev = this->eventReceiver.PopEvent();
+            assert(this->eventReceiver);
+            std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
             cout << "Event type " << ev->type << endl;
             foundEvent = 1;
             this->HandleEvent(ev);

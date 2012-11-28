@@ -36,9 +36,11 @@ public:
 class EventReceiver
 {
 public:
-    EventReceiver();
+    EventReceiver(class EventLoop *elIn);
+    virtual ~EventReceiver();
     void AddMessage(std::tr1::shared_ptr<class Event> event);
     int BufferSize();
+    void MessageLoopDeleted();
     std::tr1::shared_ptr<class Event> PopEvent();
     std::tr1::shared_ptr<class Event> WaitForEventId(unsigned long long id,
                                unsigned timeOutMs = 5000);
@@ -46,6 +48,7 @@ public:
 protected:
     std::vector<std::tr1::shared_ptr<class Event> > eventBuffer;
     std::mutex mutex;
+    class EventLoop *el;
 };
 
 
@@ -53,8 +56,10 @@ class EventLoop
 {
 public:
     EventLoop();
+    virtual ~EventLoop();
     void SendEvent(std::tr1::shared_ptr<class Event> event);
     void AddListener(std::string type, class EventReceiver &rx);
+    void RemoveListener(class EventReceiver &rx);
     unsigned long long GetId();
 
 protected:

@@ -19,9 +19,12 @@ MainWindow::MainWindow(QWidget *parent) :
     this->threadCount = 0;
 
     //Create inter thread message system
-    this->eventLoop = QSharedPointer<class EventLoop>(new class EventLoop);
-    this->eventLoop->AddListener("THREAD_STARTING",eventReceiver);
-    this->eventLoop->AddListener("THREAD_STOPPING",eventReceiver);
+    this->eventLoop = new class EventLoop();
+
+    //Create event listener
+    this->eventReceiver = new class EventReceiver(this->eventLoop);
+    this->eventLoop->AddListener("THREAD_STARTING",*eventReceiver);
+    this->eventLoop->AddListener("THREAD_STOPPING",*eventReceiver);
 
     //Create file reader worker thread
     this->readInputThread = new AvBinThread(&*this->eventLoop);
@@ -32,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //        new ImageSequence(this,"/home/tim/dev/QtMedia/testseq"))));
     QSharedPointer<AvBinMedia> avbin (new class AvBinMedia());
     avbin->SetEventLoop(&*this->eventLoop);
-    avbin->OpenFile("/home/tim/Downloads/Massive Attack Mezzanine Live.mp4");
+    avbin->OpenFile("/home/tim/Desktop/SurreyHeadPoseDatabase/SANY0012.MP4");
 
     QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(avbin);
 
@@ -50,23 +53,33 @@ MainWindow::~MainWindow()
     delete this->timer;
     this->timer = NULL;
 
+    delete this->eventLoop;
+    this->eventLoop = NULL;
+
+    delete this->eventReceiver;
+    this->eventReceiver = NULL;
+
     delete ui;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     //Disconnect video widget from source
+    cout << "Disconnect video from source" << endl;
     QSharedPointer<AbstractMedia> nullSrc;
     this->ui->widget->SetSource(nullSrc);
 
     //Signal worker threads to stop
+    cout << "Signal worker threads to stop" << endl;
     std::tr1::shared_ptr<class Event> stopEvent(new Event("STOP_THREADS"));
     this->eventLoop->SendEvent(stopEvent);
 
+    cout << "Stop timer" << endl;
     //Stop the timer and handle messages in this function
     this->timer->stop();
 
     //Wait for threads to stop
+    cout << "Wait for threads to stop" << endl;
     for(int i=0;i<500;i++)
     {
         this->Update();
@@ -75,10 +88,12 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 
     //If threads still running, terminate them
+    cout << "If threads still running, terminate them" << endl;
     if(this->readInputThread->isRunning())
         this->readInputThread->terminate();
 
     //Continue shut down in parent object
+    cout << "Continue shut down in parent object" << endl;
     QMainWindow::closeEvent(event);
 }
 
@@ -102,7 +117,8 @@ void MainWindow::Update()
     while(flushing)
     try
     {
-        std::tr1::shared_ptr<class Event> ev = this->eventReceiver.PopEvent();
+        assert(this->eventReceiver);
+        std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
         assert(ev != NULL);
         cout << "Event type " << ev->type << endl;
 

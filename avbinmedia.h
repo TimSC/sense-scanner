@@ -29,7 +29,7 @@ public:
     void Update(void (*frameCallback)(QImage& fr, unsigned long long timestamp, void *raw), void *raw);
 
 protected:
-    class EventReceiver eventReceiver;
+    class EventReceiver *eventReceiver;
     class EventLoop *eventLoop;
 };
 
@@ -42,7 +42,7 @@ public:
     void HandleEvent(std::tr1::shared_ptr<class Event> ev);
 
 protected:
-    class EventReceiver eventReceiver;
+    class EventReceiver *eventReceiver;
     int stopThreads;
     class AvBinBackend avBinBackend;
     class EventLoop *eventLoop;

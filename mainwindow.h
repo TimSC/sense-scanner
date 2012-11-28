@@ -24,8 +24,8 @@ public:
 private:
     Ui::MainWindow *ui;
     AvBinThread *readInputThread;
-    QSharedPointer<class EventLoop> eventLoop;
-    class EventReceiver eventReceiver;
+    class EventLoop *eventLoop;
+    class EventReceiver *eventReceiver;
     QTimer *timer;
     int threadCount;
 

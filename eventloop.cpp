@@ -41,9 +41,16 @@ Event::~Event()
 
 //************************************************
 
-EventReceiver::EventReceiver()
+EventReceiver::EventReceiver(class EventLoop *elIn)
 {
+    this->el = elIn;
+}
 
+EventReceiver::~EventReceiver()
+{
+    cout << "EventReceiver::~EventReceiver()" << endl;
+
+    if(this->el) this->el->RemoveListener(*this);
 }
 
 void EventReceiver::AddMessage(std::tr1::shared_ptr<class Event> event)
@@ -103,11 +110,39 @@ std::tr1::shared_ptr<class Event> EventReceiver::WaitForEventId(unsigned long lo
     throw std::runtime_error("Wait for message has timed out");
 }
 
+void EventReceiver::MessageLoopDeleted()
+{
+    this->mutex.lock();
+    this->el = NULL;
+    this->mutex.unlock();
+}
+
 //*****************************************************
 
 EventLoop::EventLoop()
 {
 
+}
+
+EventLoop::~EventLoop()
+{
+    cout << "EventLoop::~EventLoop()" << endl;
+    this->mutex.lock();
+    std::map<std::string, std::vector<EventReceiver *> >::iterator it =
+            this->eventReceivers.begin();
+    while(it != this->eventReceivers.end())
+    {
+        std::vector<EventReceiver *> &eventListeners = it->second;
+
+        //Dispatch message to listeners
+        for(unsigned i=0;i<eventListeners.size();i++)
+        {
+            eventListeners[i]->MessageLoopDeleted();
+        }
+
+        it++;
+    }
+    this->mutex.unlock();
 }
 
 void EventLoop::SendEvent(std::tr1::shared_ptr<class Event> event)
@@ -142,6 +177,33 @@ void EventLoop::AddListener(std::string type, class EventReceiver &rx)
     it = this->eventReceivers.find(type);
     assert(it != this->eventReceivers.end());
     it->second.push_back(&rx);
+    this->mutex.unlock();
+}
+
+void EventLoop::RemoveListener(class EventReceiver &rx)
+{
+    cout << "EventLoop::RemoveListener(...)" << endl;
+    this->mutex.lock();
+
+    //Remove listener based on pointer location
+    std::map<std::string, std::vector<EventReceiver *> >::iterator it =
+            this->eventReceivers.begin();
+    while(it != this->eventReceivers.end())
+    {
+        std::vector<EventReceiver *> prefiltered = it->second;
+        std::vector<EventReceiver *> &eventListeners = it->second;
+        eventListeners.clear();
+
+        //Dispatch message to listeners
+        for(unsigned i=0;i<prefiltered.size();i++)
+        {
+            if(&rx != prefiltered[i])
+                eventListeners.push_back(prefiltered[i]);
+        }
+
+        it++;
+    }
+
     this->mutex.unlock();
 }
 

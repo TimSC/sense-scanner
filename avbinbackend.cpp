@@ -14,6 +14,7 @@ AvBinBackend::AvBinBackend()
     this->width = 0;
     this->firstVideoStream = -1;
     this->firstAudioStream = -1;
+    this->eventReceiver = NULL;
 }
 
 AvBinBackend::AvBinBackend(const AvBinBackend &other)
@@ -24,6 +25,8 @@ AvBinBackend::AvBinBackend(const AvBinBackend &other)
 AvBinBackend::~AvBinBackend()
 {
     this->CloseFile();
+    if(this->eventReceiver) delete this->eventReceiver;
+    this->eventReceiver = NULL;
 }
 
 int AvBinBackend::OpenFile(const char *filenameIn)
@@ -241,10 +244,15 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
 
 void AvBinBackend::SetEventLoop(class EventLoop *eventLoopIn)
 {
-    this->eventLoop = eventLoopIn;
-    this->eventLoop->AddListener("AVBIN_OPEN_FILE", this->eventReceiver);
-    this->eventLoop->AddListener("AVBIN_GET_DURATION", this->eventReceiver);
-    this->eventLoop->AddListener("AVBIN_GET_FRAME", this->eventReceiver);
+
+    if(this->eventReceiver==NULL)
+    {
+        this->eventReceiver = new class EventReceiver(eventLoopIn);
+        this->eventLoop = eventLoopIn;
+        this->eventLoop->AddListener("AVBIN_OPEN_FILE", *this->eventReceiver);
+        this->eventLoop->AddListener("AVBIN_GET_DURATION", *this->eventReceiver);
+        this->eventLoop->AddListener("AVBIN_GET_FRAME", *this->eventReceiver);
+    }
 }
 
 int AvBinBackend::PlayUpdate()
@@ -252,7 +260,8 @@ int AvBinBackend::PlayUpdate()
     int foundEvent = 0;
     try
     {
-        std::tr1::shared_ptr<class Event> ev = this->eventReceiver.PopEvent();
+        assert(this->eventReceiver);
+        std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
         //cout << "Event type " << ev->type << endl;
         foundEvent = 1;
         this->HandleEvent(ev);

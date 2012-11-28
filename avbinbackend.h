@@ -53,7 +53,7 @@ protected:
     std::vector<AVbinStream *> streams;
     AVbinFileInfo info;
     std::string filename;
-    class EventReceiver eventReceiver;
+    class EventReceiver *eventReceiver;
     class EventLoop *eventLoop;
     unsigned height, width;
     int firstVideoStream, firstAudioStream;
