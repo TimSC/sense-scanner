@@ -38,6 +38,10 @@ DecodedFrame& DecodedFrame::operator=(const DecodedFrame& other)
 
     if(this->buffSize != other.buffSize)
         this->AllocateSize(other.buffSize);
+    if(this->buff == NULL)
+    {
+        throw runtime_error("Bad alloc detected when allocating buffer");
+    }
     memcpy(this->buff, other.buff, other.buffSize);
     return *this;
 }
@@ -52,8 +56,16 @@ DecodedFrame::~DecodedFrame()
 void DecodedFrame::AllocateSize(unsigned int size)
 {
     if(this->buff) delete [] this->buff;
-    this->buff = new uint8_t[size];
-    this->buffSize = size;
+    this->buff = NULL;
+    try
+    {
+        this->buff = new uint8_t[size];
+        this->buffSize = size;
+    }
+    catch(bad_alloc &err)
+    {
+        cout << "Error: Bad alloc" << endl;
+    }
 }
 
 template <class T>void SwapVals(T &a, T &b)
