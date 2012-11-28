@@ -95,27 +95,11 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
     //Get image from sequence
     try
     {
-        unsigned long long actualTi = 0;
-        //QSharedPointer<QImage> image = this->seq->Get(ti, actualTi);
         this->seq->RequestFrame(ti);
-
-/*
-        //cout << "Requested:"<<ti << " Got:"<< actualTi << endl;
-
-        assert(!image->isNull());
-
-        //Add to scene
-        this->item = QSharedPointer<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap::fromImage(*image)));
-        this->scene->clear();
-        this->scene->addItem(&*item); //I love pointers
-        this->ui->graphicsView->setScene(&*this->scene);
-
-        //Update current time
-        this->currentTime = actualTi;*/
     }
     catch(std::runtime_error &err)
     {
-        cout << "Warning: failed to update to requested frame" << endl;
+        cout << "Warning: failed to update view to requested frame" << endl;
     }
 
 }

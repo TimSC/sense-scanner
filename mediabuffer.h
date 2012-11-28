@@ -14,7 +14,7 @@ class DecodedFrame : public Deletable
 {
 public:
     uint8_t *buff;
-    int buffSize;
+    unsigned int buffSize;
 
     unsigned int height, width;
     unsigned int sample_aspect_num, sample_aspect_den;
@@ -40,14 +40,13 @@ public:
 
     virtual QSharedPointer<QImage> Get(long long unsigned ti,
                                        long long unsigned &outFrameTi)=0; //in milliseconds
-    int GetFrame(int64_t time, class DecodedFrame &out) {return 0;}
 
     virtual long long unsigned GetNumFrames()=0;
     virtual long long unsigned Length()=0; //Get length (ms)
     virtual long long unsigned GetFrameStartTime(long long unsigned ti)=0; //in milliseconds
 
-    virtual int RequestFrame(long long unsigned ti) {return 0;};
-    virtual void Update(void (*frameCallback)(QImage& fr, unsigned long long timestamp, void *raw), void *raw) {};
+    virtual int RequestFrame(long long unsigned ti)=0;
+    virtual void Update(void (*frameCallback)(QImage& fr, unsigned long long timestamp, void *raw), void *raw)=0;
 };
 
 class MediaBuffer: public AbstractMedia

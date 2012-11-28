@@ -33,8 +33,7 @@ public:
     int64_t Length();
 
     //Frame based retrieval
-    std::tr1::shared_ptr<class FrameGroup> GetFrameRange(int64_t startTime, int64_t endTime);
-    int GetFrame(int64_t time, class DecodedFrame &out);
+    int GetFrame(uint64_t time, class DecodedFrame &out);
 
     //Replay retrieval
     int PlayUpdate(); //Returns true if playing is active

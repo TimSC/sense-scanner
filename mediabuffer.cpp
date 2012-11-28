@@ -74,7 +74,7 @@ void DecodedFrame::FastSwap(class DecodedFrame &other)
     SwapVals<unsigned int>(frame_rate_den, other.frame_rate_den);
     SwapVals<uint64_t>(timestamp, other.timestamp);
     SwapVals<uint8_t *>(this->buff, other.buff);
-    SwapVals<int>(this->buffSize, other.buffSize);
+    SwapVals<unsigned int>(this->buffSize, other.buffSize);
 }
 
 //**************************************

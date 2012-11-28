@@ -24,6 +24,7 @@ int AvBinMedia::OpenFile(QString fina)
     std::tr1::shared_ptr<class Event> openEv(new Event("AVBIN_OPEN_FILE", id));
     openEv->data = fina.toLocal8Bit().constData();
     this->eventLoop->SendEvent(openEv);
+    return 1;
 }
 
 void RawImgToQImage(DecodedFrame *frame, QImage &img)
@@ -35,12 +36,11 @@ void RawImgToQImage(DecodedFrame *frame, QImage &img)
     assert(frame->buffSize > 0);
 
     uint8_t *raw = &*frame->buff;
-    int cursor = 0;
-    for(int j=0;j<frame->height;j++)
-        for(int i=0;i<frame->width;i++)
+    unsigned int cursor = 0;
+    for(unsigned int j=0;j<frame->height;j++)
+        for(unsigned int i=0;i<frame->width;i++)
         {
             cursor = i * 3 + (j * frame->width * 3);
-            assert(cursor >= 0);
             assert(cursor + 2 < frame->buffSize);
 
             QRgb value = qRgb(raw[cursor], raw[cursor+1], raw[cursor+2]);
