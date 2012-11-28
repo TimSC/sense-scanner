@@ -139,7 +139,7 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
         }
 
         AVbinTimestamp &timestamp = packet.timestamp;
-        assert(timestamp > 0);
+        assert(timestamp >= 0);
         AVbinStreamInfo *sinfo = this->streamInfos[packet.stream_index];
         AVbinStream *stream = this->streams[packet.stream_index];
 
