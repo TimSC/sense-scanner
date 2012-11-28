@@ -88,16 +88,15 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
 
     //Check if the requested from is close to requested frame
     //so that seeking is unnecessary
+    //If current currentVidTime is zero, that is an unknown position so we always seek
     uint64_t currentVidTime = this->timestampOfChannel[this->firstVideoStream];
     int doSeek = 1;
 
-    //If current currentVidTime is zero, that is an unknown position so we always seek
     if(currentVidTime > 0 && time > currentVidTime)
     {
         uint64_t diff = time - currentVidTime;
         if(diff < 1000000) doSeek = 0;
     }
-    cout <<"doSeek "<< doSeek<< endl;
 
     if(doSeek)
     {
@@ -115,7 +114,6 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
 
 
     int debug = 0;
-    int foundAFrame = 0;
 
     while (!avbin_read(this->fi, &packet) && (!done))
     {
@@ -140,29 +138,35 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
         if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO &&
                 packet.stream_index == this->firstVideoStream)
         {
-            //Allocate video buffer
+            //cout << "Decoded: " << this->timestampOfChannel[packet.stream_index] << endl;
             unsigned requiredBuffSize = sinfo->video.width*sinfo->video.height*3;
-            if ((out.buff)==NULL || requiredBuffSize > out.buffSize)
-                out.AllocateSize(requiredBuffSize);
-            if ((this->currentFrame.buff)==NULL || requiredBuffSize > this->currentFrame.buffSize)
-                this->currentFrame.AllocateSize(requiredBuffSize);
-
-            assert(out.buff);
-            assert(out.buffSize > 0);
-            assert(this->currentFrame.buff);
-            assert(this->currentFrame.buffSize > 0);
 
             int32_t ret = avbin_decode_video(stream, packet.data, packet.size, this->currentFrame.buff);
             int error = (ret == -1);
 
-            if(timestamp > time && foundAFrame)
+            if(timestamp > time && this->currentFrame.buff != NULL)
             {
+                if ((out.buff)==NULL || requiredBuffSize != out.buffSize)
+                    out.AllocateSize(requiredBuffSize);
+                assert(out.buff);
+                assert(out.buffSize > 0);
+
                 out = this->currentFrame;
+                if(time < out.timestamp)
+                    cout << "Warning: found frame after requested time" << endl;
+                assert(out.width > 0);
+                assert(out.height > 0);
                 done = 1;
             }
 
             if(!error)
             {
+                //Allocate video buffer
+                if ((this->currentFrame.buff)==NULL || requiredBuffSize != this->currentFrame.buffSize)
+                    this->currentFrame.AllocateSize(requiredBuffSize);
+                assert(this->currentFrame.buff);
+                assert(this->currentFrame.buffSize > 0);
+
                 assert(sinfo->video.height > 0);
                 assert(sinfo->video.width > 0);
                 this->currentFrame.height = sinfo->video.height;
@@ -174,7 +178,6 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
                 this->currentFrame.timestamp = timestamp - this->info.start_time;
                 this->height = out.height;
                 this->width = out.width;
-                foundAFrame = 1;
             }
         }
 
@@ -205,7 +208,7 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
 
     }
 
-    return foundAFrame;
+    return (out.buff != NULL);
 }
 
 //***************************************************************
@@ -242,8 +245,8 @@ int AvBinBackend::Play(int64_t time, FrameCallback &frameFunc)
         if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO && ((out.buff)==NULL || requiredBuffSize > out.buffSize))
         {
             out.AllocateSize(requiredBuffSize);
-            cout << "Creating buffer at " << (unsigned long long) &*out.buff <<
-                    " of size " << out.buffSize<<endl;
+            //cout << "Creating buffer at " << (unsigned long long) &*out.buff <<
+            //        " of size " << out.buffSize<<endl;
             //cout << sinfo->video.width <<","<<sinfo->video.height << endl;
         }
 
