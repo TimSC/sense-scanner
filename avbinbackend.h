@@ -7,6 +7,7 @@
 #include "mediabuffer.h"
 #include "eventloop.h"
 #include <sstream>
+#include <vector>
 
 extern "C"
 {
@@ -58,6 +59,8 @@ protected:
     class EventReceiver eventReceiver;
     class EventLoop *eventLoop;
     unsigned height, width;
+    int firstVideoStream, firstAudioStream;
+    std::vector<int64_t> timestampOfChannel;
 
 };
 

@@ -12,6 +12,8 @@ AvBinBackend::AvBinBackend()
     this->fi = NULL;
     this->height = 0;
     this->width = 0;
+    this->firstVideoStream = -1;
+    this->firstAudioStream = -1;
 }
 
 AvBinBackend::~AvBinBackend()
@@ -35,6 +37,8 @@ void AvBinBackend::DoOpenFile()
     avbin_file_info(this->fi, &this->info);
     //this->PrintAVbinFileInfo(this->info);
     this->numStreams = this->info.n_streams;
+    this->firstVideoStream = -1;
+    this->firstAudioStream = -1;
 
     for(int32_t i = 0; i<numStreams; i++)
     {
@@ -43,7 +47,20 @@ void AvBinBackend::DoOpenFile()
         avbin_stream_info(this->fi, i, sinfo);
         this->PrintAVbinStreamInfo(*sinfo);
         this->streamInfos.push_back(sinfo);
+
+        /*if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO && this->firstVideoStream == -1)
+        {
+            this->firstVideoStream = i;
+        }
+        if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO && this->firstAudioStream == -1)
+        {
+            this->firstAudioStream = i;
+        }*/
     }
+
+    //this->timestampOfChannel.clear();
+    //for(unsigned int chanNum=0;chanNum<this->numStreams;chanNum++)
+    //    this->timestampOfChannel.push_back(-1);
 }
 
 std::tr1::shared_ptr<class FrameGroup> AvBinBackend::GetFrameRange(int64_t startTime, int64_t endTime)
@@ -59,6 +76,8 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
     assert(time >= 0);
     time += this->info.start_time;
 
+
+    //cout << time << "," << firstVideoStream << "," << this->timestampOfChannel.size() << endl;
     //Seek in file
     AVbinResult res = avbin_seek_file(this->fi, time);
     assert(res == AVBIN_RESULT_OK);
@@ -68,9 +87,6 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
     packet.structure_size = sizeof(packet);
     int done = false;
 
-    vector<int64_t> timestampOfChannel;
-    for(unsigned int chanNum=0;chanNum<this->numStreams;chanNum++)
-        timestampOfChannel.push_back(-1);
 
     int debug = 0;
     int foundAFrame = 0;
@@ -91,6 +107,8 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
         //if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO) cout << " video";
         //if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO) cout << " audio";
         //cout << endl;
+
+        //this->timestampOfChannel[packet.stream_index] = timestamp;
 
         //Allocate video buffer
         unsigned requiredBuffSize = sinfo->video.width*sinfo->video.height*3;
