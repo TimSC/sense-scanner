@@ -25,6 +25,7 @@ class AvBinBackend
 {
 public:
     AvBinBackend();
+    AvBinBackend(const AvBinBackend &other);
     ~AvBinBackend();
 
     int OpenFile(const char *filename);
@@ -60,8 +61,8 @@ protected:
     class EventLoop *eventLoop;
     unsigned height, width;
     int firstVideoStream, firstAudioStream;
-    //std::vector<int64_t> timestampOfChannel;
 
+    std::vector<uint64_t> timestampOfChannel;
 };
 
 #endif // AVBINBACKEND_H
