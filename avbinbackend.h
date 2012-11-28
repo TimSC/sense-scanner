@@ -37,9 +37,6 @@ public:
     int GetFrame(int64_t time, class DecodedFrame &out);
 
     //Replay retrieval
-    int Play(int64_t startTime, FrameCallback &frame);
-    int Pause();
-    int Stop();
     int PlayUpdate(); //Returns true if playing is active
     void HandleEvent(std::tr1::shared_ptr<class Event> ev);
 

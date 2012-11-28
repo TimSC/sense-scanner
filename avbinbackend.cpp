@@ -97,7 +97,7 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
         uint64_t diff = time - currentVidTime;
         if(diff < 1000000) doSeek = 0;
     }
-
+    doSeek = 1;
     if(doSeek)
     {
         //Seek in file
@@ -105,6 +105,9 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
         assert(res == AVBIN_RESULT_OK);
         for(unsigned int chanNum=0;chanNum<this->numStreams;chanNum++)
             this->timestampOfChannel[chanNum] = 0;
+        this->currentFrame.width = 0;
+        this->currentFrame.height = 0;
+        this->currentFrame.timestamp = 0;
     }
 
     //Decode the packets
@@ -114,9 +117,18 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
 
 
     int debug = 0;
-
-    while (!avbin_read(this->fi, &packet) && (!done))
+    int processing = 1;
+    while (processing && (!done))
     {
+        //Read frame from file
+        int readRet = avbin_read(this->fi, &packet);
+        assert(readRet == 0);
+        if(readRet == -1)
+        {
+            processing = 0;
+            continue;
+        }
+
         if(this->streams.empty())
         {
             this->OpenStreams();
@@ -143,8 +155,8 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
 
             int32_t ret = avbin_decode_video(stream, packet.data, packet.size, this->currentFrame.buff);
             int error = (ret == -1);
-
-            if(timestamp > time && this->currentFrame.buff != NULL)
+            cout << "z" << (timestamp > time && this->currentFrame.width > 0) << error<<endl;
+            if(timestamp > time && this->currentFrame.width > 0)
             {
                 if ((out.buff)==NULL || requiredBuffSize != out.buffSize)
                     out.AllocateSize(requiredBuffSize);
@@ -156,6 +168,7 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
                     cout << "Warning: found frame after requested time" << endl;
                 assert(out.width > 0);
                 assert(out.height > 0);
+                cout <<"t "<< out.timestamp << endl;
                 done = 1;
             }
 
@@ -208,105 +221,10 @@ int AvBinBackend::GetFrame(int64_t time, class DecodedFrame &out)
 
     }
 
-    return (out.buff != NULL);
+    return done;
 }
 
 //***************************************************************
-
-//Replay retrieval
-int AvBinBackend::Play(int64_t time, FrameCallback &frameFunc)
-{
-    assert(this->fi != NULL);
-
-    //Remove start offset
-    assert(time >= 0);
-    time += this->info.start_time;
-
-    //Seek in file
-    AVbinResult res = avbin_seek_file(this->fi, time);
-    assert(res == AVBIN_RESULT_OK);
-
-    //Decode the packets
-    class DecodedFrame out;
-    AVbinPacket packet;
-    packet.structure_size = sizeof(packet);
-
-    while (!avbin_read(this->fi, &packet))
-    {
-        if(this->streams.empty())
-            this->OpenStreams();
-
-        AVbinTimestamp &timestamp = packet.timestamp;
-        AVbinStreamInfo *sinfo = this->streamInfos[packet.stream_index];
-        AVbinStream *stream = this->streams[packet.stream_index];
-
-        //Allocate video buffer
-        unsigned requiredBuffSize = sinfo->video.width*sinfo->video.height*3;
-        if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO && ((out.buff)==NULL || requiredBuffSize > out.buffSize))
-        {
-            out.AllocateSize(requiredBuffSize);
-            //cout << "Creating buffer at " << (unsigned long long) &*out.buff <<
-            //        " of size " << out.buffSize<<endl;
-            //cout << sinfo->video.width <<","<<sinfo->video.height << endl;
-        }
-
-        //Decode video packet
-        if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO)
-        {
-            assert(out.buff);
-            assert(out.buffSize > 0);
-
-            int32_t ret = avbin_decode_video(stream, packet.data, packet.size, out.buff);
-            int error = (ret == -1);
-
-            if(!error)
-            {
-                out.height = sinfo->video.height;
-                out.width = sinfo->video.width;
-                out.sample_aspect_num = sinfo->video.sample_aspect_num;
-                out.sample_aspect_den = sinfo->video.sample_aspect_den;
-                out.frame_rate_num = sinfo->video.frame_rate_num;
-                out.frame_rate_den = sinfo->video.frame_rate_den;
-                out.timestamp = timestamp - this->info.start_time;
-
-                frameFunc(out);
-            }
-        }
-
-        //Decode audio packet
-        if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO)
-        {
-            uint8_t buff[1024*1024];
-            int bytesleft = 1024*1024;
-            int bytesout = bytesleft;
-            int bytesread = 0;
-            uint8_t *cursor = buff;
-            while ((bytesread = avbin_decode_audio(stream, packet.data, packet.size, cursor, &bytesout)) > 0)
-            {
-                packet.data += bytesread;
-                packet.size -= bytesread;
-                cursor += bytesout;
-                bytesleft -= bytesout;
-                bytesout = bytesleft;
-            }
-
-            int totalBytes = cursor-buff;
-            //cout << "Read audio bytes " << totalBytes << endl;
-        }
-
-    }
-    return 1;
-}
-
-int AvBinBackend::Pause()
-{
-
-}
-
-int AvBinBackend::Stop()
-{
-
-}
 
 void AvBinBackend::SetEventLoop(class EventLoop *eventLoopIn)
 {

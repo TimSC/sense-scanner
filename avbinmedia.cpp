@@ -87,7 +87,7 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
         QSharedPointer<QImage> img(new QImage(frame->width, frame->height,
                                               QImage::Format_RGB888));
         RawImgToQImage(frame, *img);
-        outFrameTi = frame->timestamp / 1000;
+        cout << "frame->timestamp " << frame->timestamp << endl;
 
         assert(!img->isNull());
         return img;
