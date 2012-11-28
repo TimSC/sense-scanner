@@ -19,13 +19,15 @@ public:
     unsigned int height, width;
     unsigned int sample_aspect_num, sample_aspect_den;
     unsigned int frame_rate_num, frame_rate_den;
-    int64_t timestamp;
+    uint64_t timestamp;
 
     DecodedFrame();
     DecodedFrame(const DecodedFrame &other);
     DecodedFrame& operator=(const DecodedFrame& other);
+
     virtual ~DecodedFrame();
     void AllocateSize(unsigned int size);
+    void FastSwap(class DecodedFrame &other);
 };
 
 typedef std::tr1::function<void (const class DecodedFrame&)> FrameCallback;

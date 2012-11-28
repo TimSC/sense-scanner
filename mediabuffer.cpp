@@ -56,6 +56,27 @@ void DecodedFrame::AllocateSize(unsigned int size)
     this->buffSize = size;
 }
 
+template <class T>void SwapVals(T &a, T &b)
+{
+    T tmp;
+    tmp = a;
+    a = b;
+    b = tmp;
+}
+
+void DecodedFrame::FastSwap(class DecodedFrame &other)
+{
+    SwapVals<unsigned int>(height, other.height);
+    SwapVals<unsigned int>(width, other.width);
+    SwapVals<unsigned int>(sample_aspect_num, other.sample_aspect_num);
+    SwapVals<unsigned int>(sample_aspect_den, other.sample_aspect_den);
+    SwapVals<unsigned int>(frame_rate_num, other.frame_rate_num);
+    SwapVals<unsigned int>(frame_rate_den, other.frame_rate_den);
+    SwapVals<uint64_t>(timestamp, other.timestamp);
+    SwapVals<uint8_t *>(this->buff, other.buff);
+    SwapVals<int>(this->buffSize, other.buffSize);
+}
+
 //**************************************
 
 MediaBuffer::MediaBuffer(QSharedPointer<AbstractMedia> src) : AbstractMedia()
