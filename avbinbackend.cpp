@@ -184,11 +184,8 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
 
             if(!error)
             {
-                int a = (this->currentFrame.buff == NULL);
-                int b = (this->prevFrame.buff == NULL);
+                //Swap forward and back render buffers
                 this->prevFrame.FastSwap(this->currentFrame);
-                assert ((this->prevFrame.buff == NULL) == a);
-                assert ((this->currentFrame.buff == NULL) == b);
 
                 //Allocate video buffer
                 if ((this->currentFrame.buff)==NULL || requiredBuffSize != this->currentFrame.buffSize)
