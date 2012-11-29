@@ -71,6 +71,8 @@
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\mainwindow.cpp" />
     <ClCompile Include="..\mediabuffer.cpp" />
+    <ClCompile Include="..\moc_mainwindow.cpp" />
+    <ClCompile Include="..\moc_videowidget.cpp" />
     <ClCompile Include="..\videoarea.cpp" />
     <ClCompile Include="..\videowidget.cpp" />
   </ItemGroup>

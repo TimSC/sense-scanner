@@ -126,6 +126,7 @@ long long unsigned AvBinMedia::GetNumFrames()
     if(!this->active)
         throw runtime_error("Media interface not active");
     assert(0); //Not implemented
+	return 0;
 }
 
 long long unsigned AvBinMedia::Length() //Get length (ms)

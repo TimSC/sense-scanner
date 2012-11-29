@@ -1,4 +1,8 @@
+#include <assert.h>
 #include "avbinapi.h"
+#ifdef _MSC_VER
+#include <Windows.h>
+#endif
 
 #ifndef _MSC_VER
 
@@ -57,11 +61,22 @@ void mod_avbin_close_file(AVbinFile *file)
 
 #endif //_MSC_VER
 //******************************************************
-
 #ifdef _MSC_VER
+#define WIN32DLL_API __declspec(dllimport)
+
 AVbinResult mod_avbin_init()
 {
-	return AVBIN_RESULT_ERROR;
+	HINSTANCE hinst = LoadLibrary("avbin11-32.dll");
+	assert(hinst != NULL);
+	
+	FARPROC init = GetProcAddress ( hinst , "avbin_init" );
+	assert(init != (FARPROC)NULL);
+
+	AVbinResult (*func)()=0;
+	func = (AVbinResult (*)()) init;
+	AVbinResult ret = (*func)();
+
+	return ret;
 }
 
 AVbinFile* mod_avbin_open_filename(const char *filename)
