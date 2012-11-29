@@ -44,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(this->timer, SIGNAL(timeout()), this, SLOT(Update()));
     this->timer->start(10); //in millisec
 
-    this->mediaInterface->OpenFile("/home/tim/Desktop/SurreyHeadPoseDatabase/SANY0012.MP4x");
+    this->mediaInterface->OpenFile("/home/tim/Desktop/SurreyHeadPoseDatabase/SANY0012.MP4");
 
     ui->setupUi(this);
     this->ui->widget->SetSource(this->mediaInterface);
@@ -72,6 +72,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    assert(this->threadCount == 1);
 
     //Disconnect video widget from media source
     cout << "Disconnect video from source" << endl;
@@ -106,8 +107,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
         this->mediaThread->terminate();
     }
 
-    //Continue shut down in parent object
-    cout << "Continue shut down in parent object" << endl;
+    //Continu shut down in parent object
+    cout << "Continuing shut down of QT framework" << endl;
     QMainWindow::closeEvent(event);
 }
 
@@ -165,7 +166,7 @@ void MainWindow::Update()
         }
         if(ev->type=="AVBIN_OPEN_RESULT")
         {
-            cout << ev->data << endl;
+            cout << "Open result: " << ev->data << endl;
         }
     }
     catch(std::runtime_error e) {flushing = 0;}

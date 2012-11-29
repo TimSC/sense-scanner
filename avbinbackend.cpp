@@ -52,7 +52,6 @@ void AvBinBackend::DoOpenFile(int requestId)
     tmp << (this->fi != NULL);
     resultEvent->data = tmp.str();
     this->eventLoop->SendEvent(resultEvent);
-    cout << "Open file result" << (this->fi != NULL) << endl;
 
     if(this->fi == NULL)
     {
