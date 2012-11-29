@@ -9,9 +9,11 @@ using namespace std;
 #define STR_TO_ULL std::strtoull
 #endif
 
+//**********************************************************
+
 AvBinBackend::AvBinBackend()
 {
-    AVbinResult res = avbin_init();
+    AVbinResult res = mod_avbin_init();
     assert(res == AVBIN_RESULT_OK);
     this->numStreams = -1;
     this->fi = NULL;
@@ -48,7 +50,7 @@ int AvBinBackend::OpenFile(const char *filenameIn, int requestId)
 void AvBinBackend::DoOpenFile(int requestId)
 {
     assert(this->fi == NULL);
-    this->fi = avbin_open_filename(this->filename.c_str());
+    this->fi = mod_avbin_open_filename(this->filename.c_str());
 
     //Create an event with the result
     std::tr1::shared_ptr<class Event> resultEvent(new Event("AVBIN_OPEN_RESULT", requestId));
@@ -66,7 +68,7 @@ void AvBinBackend::DoOpenFile(int requestId)
     }
 
     this->info.structure_size = sizeof(AVbinFileInfo);
-    avbin_file_info(this->fi, &this->info);
+    mod_avbin_file_info(this->fi, &this->info);
     //this->PrintAVbinFileInfo(this->info);
     this->numStreams = this->info.n_streams;
     this->firstVideoStream = -1;
@@ -76,7 +78,7 @@ void AvBinBackend::DoOpenFile(int requestId)
     {
         AVbinStreamInfo *sinfo = new AVbinStreamInfo;
         sinfo->structure_size = sizeof(AVbinStreamInfo);
-        avbin_stream_info(this->fi, i, sinfo);
+        mod_avbin_stream_info(this->fi, i, sinfo);
         this->PrintAVbinStreamInfo(*sinfo);
         this->streamInfos.push_back(sinfo);
 
@@ -134,7 +136,7 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
     if(doSeek)
     {
         //Seek in file
-        AVbinResult res = avbin_seek_file(this->fi, time);
+        AVbinResult res = mod_avbin_seek_file(this->fi, time);
         assert(res == AVBIN_RESULT_OK);
         for(int chanNum=0;chanNum<this->numStreams;chanNum++)
             this->timestampOfChannel[chanNum] = 0;
@@ -156,7 +158,7 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
     while (processing && (!done))
     {
         //Read frame from file
-        int readRet = avbin_read(this->fi, &packet);
+        int readRet = mod_avbin_read(this->fi, &packet);
         if(readRet == -1)
         {
             processing = 0;
@@ -188,7 +190,7 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
             //cout << "Decoded: " << this->timestampOfChannel[packet.stream_index] << endl;
             unsigned requiredBuffSize = sinfo->video.width*sinfo->video.height*3;
 
-            int32_t ret = avbin_decode_video(stream, packet.data, packet.size, this->currentFrame.buff);
+            int32_t ret = mod_avbin_decode_video(stream, packet.data, packet.size, this->currentFrame.buff);
             int error = (ret == -1);
             //cout << "z" << (timestamp > time && this->currentFrame.width > 0) << error<<endl;
             if((uint64_t)timestamp > time && this->currentFrame.width > 0)
@@ -242,7 +244,7 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
             int bytesout = bytesleft;
             int bytesread = 0;
             uint8_t *cursor = buff;
-            while ((bytesread = avbin_decode_audio(stream, packet.data, packet.size, cursor, &bytesout)) > 0)
+            while ((bytesread = mod_avbin_decode_audio(stream, packet.data, packet.size, cursor, &bytesout)) > 0)
             {
                 packet.data += bytesread;
                 packet.size -= bytesread;
@@ -368,7 +370,7 @@ void AvBinBackend::OpenStreams()
 
     for(int32_t i = 0; i<numStreams; i++)
     {
-        AVbinStream *stream = avbin_open_stream(this->fi, i);
+        AVbinStream *stream = mod_avbin_open_stream(this->fi, i);
         this->streams.push_back(stream);
     }
 }
@@ -376,7 +378,7 @@ void AvBinBackend::OpenStreams()
 void AvBinBackend::CloseStreams()
 {
     for(unsigned int i =0; i < this->streams.size(); i++)
-        avbin_close_stream(this->streams[i]);
+        mod_avbin_close_stream(this->streams[i]);
     this->streams.clear();
 }
 
@@ -389,7 +391,7 @@ void AvBinBackend::CloseFile()
     this->streamInfos.clear();
 
     if(this->fi)
-        avbin_close_file(this->fi);
+        mod_avbin_close_file(this->fi);
     this->fi = NULL;
 }
 

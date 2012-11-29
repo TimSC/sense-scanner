@@ -12,11 +12,7 @@
 #include "eventloop.h"
 #include <sstream>
 #include <vector>
-
-extern "C"
-{
-#include <avbin.h>
-}
+#include "avbinapi.h"
 
 class FrameGroup
 {
