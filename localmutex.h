@@ -3,7 +3,7 @@
 
 #ifdef _MSC_VER
 
-#include <QMutex>
+#include <QtCore/QMutex>
 typedef QMutex Mutex;
 
 #else

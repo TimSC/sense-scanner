@@ -1,12 +1,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QtCore>
-#include <QtGui>
-#include <QGraphicsScene>
-#include <QThread>
-#include <QTimer>
+#include <QtGui/QMainWindow>
+#include <QtCore/QtCore>
+#include <QtGui/QtGui>
+#include <QtGui/QGraphicsScene>
+#include <QtCore/QThread>
+#include <QtCore/QTimer>
 #include "avbinmedia.h"
 
 namespace Ui {

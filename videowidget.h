@@ -1,10 +1,10 @@
 #ifndef VIDEOWIDGET_H
 #define VIDEOWIDGET_H
 
-#include <QWidget>
-#include <QtCore>
-#include <QtGui>
-#include <QGraphicsScene>
+#include <QtGui/QWidget>
+#include <QtCore/QtCore>
+#include <QtGui/QtGui>
+#include <QtGui/QGraphicsScene>
 #include "mediabuffer.h"
 
 namespace Ui {

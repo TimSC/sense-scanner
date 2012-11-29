@@ -1,6 +1,6 @@
 #ifndef VIDEOAREA_H
 #define VIDEOAREA_H
-#include <QGraphicsView>
+#include <QtGui/QGraphicsView>
 
 class VideoArea : public QGraphicsView
 {

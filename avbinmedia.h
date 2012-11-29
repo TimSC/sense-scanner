@@ -1,10 +1,10 @@
 #ifndef AVBINMEDIA_H
 #define AVBINMEDIA_H
 
-#include <QWidget>
-#include <QtCore>
-#include <QtGui>
-#include <QThread>
+#include <QtGui/QWidget>
+#include <QtCore/QtCore>
+#include <QtGui/QtGui>
+#include <QtCore/QThread>
 #include <vector>
 #include "localmutex.h"
 #ifdef _MSC_VER
@@ -54,7 +54,7 @@ protected:
     int stopThreads;
     class AvBinBackend avBinBackend;
     class EventLoop *eventLoop;
-    std::mutex mutex;
+    Mutex mutex;
 };
 
 #endif // AVBINMEDIA_H

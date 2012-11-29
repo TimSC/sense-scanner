@@ -1,7 +1,7 @@
 #include "imagesequence.h"
-#include <QDir>
-#include <QFile>
-#include <QObject>
+#include <QtCore/QDir>
+#include <QtCore/QFile>
+#include <QtCore/QObject>
 #include <iostream>
 #include <assert.h>
 using namespace std;

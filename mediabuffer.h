@@ -1,10 +1,10 @@
 #ifndef MEDIABUFFER_H
 #define MEDIABUFFER_H
 
-#include <QObject>
-#include <QSharedPointer>
-#include <QImage>
-#include <QMap>
+#include <QtCore/QObject>
+#include <QtCore/QSharedPointer>
+#include <QtGui/QImage>
+#include <QtCore/QMap>
 #include "localints.h"
 #ifdef _MSC_VER
 	#include <memory>

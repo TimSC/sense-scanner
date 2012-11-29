@@ -1,9 +1,9 @@
 #ifndef IMAGESEQUENCE_H
 #define IMAGESEQUENCE_H
 
-#include <QWidget>
-#include <QtCore>
-#include <QtGui>
+#include <QtGui/QWidget>
+#include <QtCore/QtCore>
+#include <QtGui/QtGui>
 #include "mediabuffer.h"
 
 class ImageSequence : public AbstractMedia

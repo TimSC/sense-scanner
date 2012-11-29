@@ -41,7 +41,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\Dev\Lib\Qt\4.8.3\include\QtCore;C:\Dev\Lib\Qt\4.8.3\include\Qt;C:\Dev\Lib\Qt\4.8.3\include;C:\Dev\Lib\Qt\4.8.3\include\QtCore;C:\Dev\Lib\Qt\4.8.3\include\Qt;C:\Dev\Lib\Qt\4.8.3\include\QtGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Dev\Lib\avbin\include;C:\Dev\Lib\Qt\4.8.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

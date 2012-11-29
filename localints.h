@@ -2,9 +2,9 @@
 #define __LOCALINTS_H_
 
 #ifdef _MSC_VER
-	#define uint8_t unsigned char
-	#define uint64_t unsigned __int64
-	#define int64_t __int64
+	typedef unsigned char uint8_t;
+	typedef unsigned __int64 uint64_t;
+	typedef __int64 int64_t;
 #else
 	#include <inttypes.h>
 #endif
