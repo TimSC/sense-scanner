@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include "localmutex.h"
+#include "localints.h"
 #include <string>
 #ifdef _MSC_VER
 	#include <memory>

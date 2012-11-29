@@ -6,7 +6,11 @@
 #include "mediabuffer.h"
 #include <sstream>
 using namespace std;
-
+#ifdef _MSC_VER
+#define STR_TO_ULL _strtoui64
+#else
+#define STR_TO_ULL std::strtoull
+#endif
 
 AvBinMedia::AvBinMedia() : AbstractMedia()
 {
@@ -136,7 +140,7 @@ long long unsigned AvBinMedia::Length() //Get length (ms)
     assert(this->eventReceiver);
     std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(id);
     assert(ev->type == "AVBIN_DURATION_RESPONSE");
-    return std::strtoull(ev->data.c_str(),NULL,10) / 1000;
+    return STR_TO_ULL(ev->data.c_str(),NULL,10) / 1000;
 }
 
 long long unsigned AvBinMedia::GetFrameStartTime(long long unsigned ti) //in milliseconds

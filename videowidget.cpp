@@ -1,8 +1,8 @@
 #include "videowidget.h"
 #include "ui_videowidget.h"
-#include <QDir>
-#include <QFile>
-#include <QObject>
+#include <QtCore/QDir>
+#include <QtCore/QFile>
+#include <QtCore/QObject>
 #include <iostream>
 #include <assert.h>
 #include <stdexcept>
