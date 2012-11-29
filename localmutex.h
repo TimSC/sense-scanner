@@ -8,6 +8,7 @@ typedef QMutex Mutex;
 
 #else
 
+#include <mutex>
 typedef std::mutex Mutex;
 
 #endif
