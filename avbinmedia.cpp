@@ -224,6 +224,7 @@ AvBinThread::AvBinThread(class EventLoop *eventLoopIn)
 
 AvBinThread::~AvBinThread()
 {
+    this->StopThread();
     if(this->eventReceiver)
         delete this->eventReceiver;
     this->eventReceiver = NULL;
@@ -239,7 +240,7 @@ void AvBinThread::run()
     while(running)
     {
         this->mutex.lock();
-        int running = this->stopThreads;
+        running = !this->stopThreads;
         this->mutex.unlock();
 
         //cout << "x" << this->eventReceiver.BufferSize() << endl;
@@ -270,7 +271,6 @@ void AvBinThread::run()
 
 void AvBinThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
-
     if(ev->type == "STOP_THREADS")
     {
         this->mutex.lock();
