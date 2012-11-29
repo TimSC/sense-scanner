@@ -25,6 +25,8 @@ AvBinMedia::~AvBinMedia()
 int AvBinMedia::OpenFile(QString fina)
 {
     assert(this->active);
+    if(!this->active)
+        throw runtime_error("Media interface not active");
     assert(this->eventLoop);
     unsigned long long id = this->eventLoop->GetId();
     std::tr1::shared_ptr<class Event> openEv(new Event("AVBIN_OPEN_FILE", id));
@@ -59,6 +61,8 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
                                        long long unsigned &outFrameTi) //in milliseconds
 {
     assert(this->active);
+    if(!this->active)
+        throw runtime_error("Media interface not active");
     outFrameTi = 0;
 
     //Request the frame from the backend thread
@@ -115,12 +119,16 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
 long long unsigned AvBinMedia::GetNumFrames()
 {
     assert(this->active);
+    if(!this->active)
+        throw runtime_error("Media interface not active");
     assert(0); //Not implemented
 }
 
 long long unsigned AvBinMedia::Length() //Get length (ms)
 {
     assert(this->active);
+    if(!this->active)
+        throw runtime_error("Media interface not active");
 
     unsigned long long id = this->eventLoop->GetId();
     std::tr1::shared_ptr<class Event> durationEvent(new Event("AVBIN_GET_DURATION", id));
@@ -134,6 +142,8 @@ long long unsigned AvBinMedia::Length() //Get length (ms)
 long long unsigned AvBinMedia::GetFrameStartTime(long long unsigned ti) //in milliseconds
 {
     assert(this->active);
+    if(!this->active)
+        throw runtime_error("Media interface not active");
 
     long long unsigned outFrameTi = 0;
     QSharedPointer<QImage> out = this->Get(ti, outFrameTi);
@@ -158,6 +168,8 @@ void AvBinMedia::SetEventLoop(class EventLoop *eventLoopIn)
 int AvBinMedia::RequestFrame(long long unsigned ti) //in milliseconds
 {
     assert(this->active);
+    if(!this->active)
+        throw runtime_error("Media interface not active");
 
     //Request the frame from the backend thread
     assert(this->eventLoop != NULL);
@@ -173,6 +185,8 @@ int AvBinMedia::RequestFrame(long long unsigned ti) //in milliseconds
 void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long timestamp, void *raw), void *raw)
 {
     assert(this->active);
+    if(!this->active)
+        throw runtime_error("Media interface not active");
 
     //Check for new frames from media backend.
     int checking = 1;
