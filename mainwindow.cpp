@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventReceiver = new class EventReceiver(this->eventLoop);
     this->eventLoop->AddListener("THREAD_STARTING",*eventReceiver);
     this->eventLoop->AddListener("THREAD_STOPPING",*eventReceiver);
+    this->eventLoop->AddListener("AVBIN_OPEN_RESULT",*eventReceiver);
 
     //Create file reader worker thread
     this->mediaThread = new AvBinThread(this->eventLoop);
@@ -37,12 +38,13 @@ MainWindow::MainWindow(QWidget *parent) :
     this->mediaInterface = new class AvBinMedia();
     this->mediaInterface->SetEventLoop(this->eventLoop);
     this->mediaInterface->SetActive(1);
-    this->mediaInterface->OpenFile("/home/tim/Desktop/SurreyHeadPoseDatabase/SANY0012.MP4");
 
     //Start event buffer timer
     this->timer = new QTimer();
     QObject::connect(this->timer, SIGNAL(timeout()), this, SLOT(Update()));
     this->timer->start(10); //in millisec
+
+    this->mediaInterface->OpenFile("/home/tim/Desktop/SurreyHeadPoseDatabase/SANY0012.MP4x");
 
     ui->setupUi(this);
     this->ui->widget->SetSource(this->mediaInterface);
@@ -160,6 +162,10 @@ void MainWindow::Update()
         {
             assert(this->threadCount > 0);
             this->threadCount --;
+        }
+        if(ev->type=="AVBIN_OPEN_RESULT")
+        {
+            cout << ev->data << endl;
         }
     }
     catch(std::runtime_error e) {flushing = 0;}

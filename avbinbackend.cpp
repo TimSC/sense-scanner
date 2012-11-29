@@ -31,7 +31,7 @@ AvBinBackend::~AvBinBackend()
     this->eventReceiver = NULL;
 }
 
-int AvBinBackend::OpenFile(const char *filenameIn)
+int AvBinBackend::OpenFile(const char *filenameIn, int requestId)
 {
     assert(this->fi == NULL);
 
@@ -40,10 +40,27 @@ int AvBinBackend::OpenFile(const char *filenameIn)
     return 1;
 }
 
-void AvBinBackend::DoOpenFile()
+void AvBinBackend::DoOpenFile(int requestId)
 {
     assert(this->fi == NULL);
     this->fi = avbin_open_filename(this->filename.c_str());
+
+    //Create an event with the result
+    std::tr1::shared_ptr<class Event> resultEvent(new Event("AVBIN_OPEN_RESULT", requestId));
+    assert(this->eventLoop);
+    std::ostringstream tmp;
+    tmp << (this->fi != NULL);
+    resultEvent->data = tmp.str();
+    this->eventLoop->SendEvent(resultEvent);
+    cout << "Open file result" << (this->fi != NULL) << endl;
+
+    if(this->fi == NULL)
+    {
+        //File open failed
+        this->filename = "";
+        return;
+    }
+
     this->info.structure_size = sizeof(AVbinFileInfo);
     avbin_file_info(this->fi, &this->info);
     //this->PrintAVbinFileInfo(this->info);
@@ -76,9 +93,12 @@ void AvBinBackend::DoOpenFile()
 
 int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
 {
+    if(this->fi == NULL)
+        return 0;
+
+    assert(this->fi != NULL);
     assert(this->firstVideoStream >= 0);
     assert(this->firstVideoStream < (int)this->timestampOfChannel.size());
-    assert(this->fi != NULL);
 
     //Apply start offset
     time += this->info.start_time;
@@ -273,15 +293,26 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
     if(ev->type=="AVBIN_OPEN_FILE")
     {
-        this->OpenFile(ev->data.c_str());
+        this->OpenFile(ev->data.c_str(), ev->id);
     }
     if(ev->type=="AVBIN_GET_DURATION")
     {
-        std::tr1::shared_ptr<class Event> response(new Event("AVBIN_DURATION_RESPONSE", ev->id));
-        std::ostringstream tmp;
-        tmp << this->Length();
-        response->data = tmp.str();
-        this->eventLoop->SendEvent(response);
+        assert(this->eventLoop);
+        try
+        {
+            std::tr1::shared_ptr<class Event> response(
+                        new Event("AVBIN_DURATION_RESPONSE", ev->id));
+            std::ostringstream tmp;
+            tmp << this->Length();
+            response->data = tmp.str();
+            this->eventLoop->SendEvent(response);
+        }
+        catch (runtime_error &err)
+        {
+            std::tr1::shared_ptr<class Event> fail(new Event("AVBIN_REQUEST_FAILED", ev->id));
+            fail->data = err.what();
+            this->eventLoop->SendEvent(fail);
+        }
     }
     if(ev->type=="AVBIN_GET_FRAME")
     {
@@ -310,12 +341,14 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             }
 
             //Return a placeholder image
-            unsigned buffSize = this->height*this->width*3;
+            unsigned int w = this->width;
+            unsigned int h = this->height;
+            if(w == 0) w = 100; //Prevent a zero sized image
+            if(h == 0) h = 100;
+            unsigned buffSize = h*w*3;
             decodedFrame->AllocateSize(buffSize);
-            decodedFrame->height = this->height;
-            decodedFrame->width = this->width;
-            assert(decodedFrame->width > 0);
-            assert(decodedFrame->height > 0);
+            decodedFrame->height = h;
+            decodedFrame->width = w;
             response->rawSize = sizeof(class DecodedFrame);
             this->eventLoop->SendEvent(response);
         }
@@ -358,6 +391,9 @@ void AvBinBackend::CloseFile()
 
 int64_t AvBinBackend::Length()
 {
+    if(this->fi == NULL)
+        throw runtime_error("File not open");
+
     assert(this->fi != NULL);
     return this->info.duration - this->info.start_time;
 }

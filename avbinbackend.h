@@ -28,7 +28,7 @@ public:
     AvBinBackend(const AvBinBackend &other);
     ~AvBinBackend();
 
-    int OpenFile(const char *filename);
+    int OpenFile(const char *filename, int requestId = 0);
     void CloseFile();
     int64_t Length();
 
@@ -41,7 +41,7 @@ public:
 
     void OpenStreams();
     void CloseStreams();
-    void DoOpenFile();
+    void DoOpenFile(int requestId = 0);
     void PrintAVbinFileInfo(AVbinFileInfo &info);
     void PrintAVbinStreamInfo(AVbinStreamInfo &info);
     void SetEventLoop(class EventLoop *eventLoopIn);

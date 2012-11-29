@@ -121,7 +121,7 @@ void EventReceiver::MessageLoopDeleted()
 
 EventLoop::EventLoop()
 {
-
+    this->nextId = 1; //Don't use ID zero, that refers to an unknown ID
 }
 
 EventLoop::~EventLoop()
