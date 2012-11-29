@@ -64,12 +64,14 @@ void mod_avbin_close_file(AVbinFile *file)
 #ifdef _MSC_VER
 #define WIN32DLL_API __declspec(dllimport)
 
+HINSTANCE ghinst = 0;
+
 AVbinResult mod_avbin_init()
 {
-	HINSTANCE hinst = LoadLibrary("avbin11-32.dll");
-	assert(hinst != NULL);
+	if(ghinst==0) ghinst = LoadLibrary("avbin11-32.dll");
+	assert(ghinst != NULL);
 	
-	FARPROC init = GetProcAddress ( hinst , "avbin_init" );
+	FARPROC init = GetProcAddress ( ghinst , "avbin_init" );
 	assert(init != (FARPROC)NULL);
 
 	AVbinResult (*func)()=0;
@@ -81,49 +83,109 @@ AVbinResult mod_avbin_init()
 
 AVbinFile* mod_avbin_open_filename(const char *filename)
 {
-	return NULL;
+	assert(ghinst != NULL);
+	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_open_filename" );
+	assert(rawfunc != (FARPROC)NULL);
+
+	AVbinFile* (*func)(const char *filename)=0;
+	func = (AVbinFile* (*)(const char *filename)) rawfunc;
+	return (*func)(filename);
 }
 
 AVbinResult mod_avbin_file_info(AVbinFile *file, AVbinFileInfo *info)
 {
-	return AVBIN_RESULT_ERROR;
+	assert(ghinst != NULL);
+	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_file_info" );
+	assert(rawfunc != (FARPROC)NULL);
+
+	AVbinResult (*func)(AVbinFile *, AVbinFileInfo *)=0;
+	func = (AVbinResult (*)(AVbinFile *, AVbinFileInfo *)) rawfunc;
+	return (*func)(file, info);
 }
 
 AVbinResult mod_avbin_stream_info(AVbinFile *file, int stream_index, AVbinStreamInfo *info)
 {
-	return AVBIN_RESULT_ERROR;
+	assert(ghinst != NULL);
+	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_stream_info" );
+	assert(rawfunc != (FARPROC)NULL);
+
+	AVbinResult (*func)(AVbinFile *, int, AVbinStreamInfo *)=0;
+	func = (AVbinResult (*)(AVbinFile *, int, AVbinStreamInfo *)) rawfunc;
+	return (*func)(file, stream_index, info);
 }
 
 AVbinResult mod_avbin_seek_file(AVbinFile *file, AVbinTimestamp timestamp)
 {
-	return AVBIN_RESULT_ERROR;
+	assert(ghinst != NULL);
+	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_seek_file" );
+	assert(rawfunc != (FARPROC)NULL);
+
+	AVbinResult (*func)(AVbinFile *, AVbinTimestamp)=0;
+	func = (AVbinResult (*)(AVbinFile *, AVbinTimestamp)) rawfunc;
+	return (*func)(file, timestamp);
 }
 
 AVbinResult mod_avbin_read(AVbinFile *file, AVbinPacket *packet)
 {
-	return AVBIN_RESULT_ERROR;
+	assert(ghinst != NULL);
+	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_read" );
+	assert(rawfunc != (FARPROC)NULL);
+
+	AVbinResult (*func)(AVbinFile *, AVbinPacket *)=0;
+	func = (AVbinResult (*)(AVbinFile *, AVbinPacket *)) rawfunc;
+	return (*func)(file, packet);
 }
 
 int mod_avbin_decode_video(AVbinStream *stream, uint8_t *data_in, size_t size_in, uint8_t *data_out)
 {
-	return -1;
+	assert(ghinst != NULL);
+	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_decode_video" );
+	assert(rawfunc != (FARPROC)NULL);
+
+	int (*func)(AVbinStream *, uint8_t *, size_t, uint8_t *)=0;
+	func = (int (*)(AVbinStream *, uint8_t *, size_t, uint8_t *)) rawfunc;
+	return (*func)(stream, data_in, size_in, data_out);
 }
 
 int mod_avbin_decode_audio(AVbinStream *stream, uint8_t *data_in, size_t size_in, uint8_t *data_out, int *size_out)
 {
-	return -1;
+	assert(ghinst != NULL);
+	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_decode_audio" );
+	assert(rawfunc != (FARPROC)NULL);
+
+	int (*func)(AVbinStream *, uint8_t *, size_t, uint8_t *, int *)=0;
+	func = (int (*)(AVbinStream *, uint8_t *, size_t, uint8_t *, int *)) rawfunc;
+	return (*func)(stream, data_in, size_in, data_out, size_out);
 }
 AVbinStream* mod_avbin_open_stream(AVbinFile *file, int stream_index)
 {
-	return NULL;
+	assert(ghinst != NULL);
+	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_open_stream" );
+	assert(rawfunc != (FARPROC)NULL);
+
+	AVbinStream* (*func)(AVbinFile *, int)=0;
+	func = (AVbinStream* (*)(AVbinFile *, int)) rawfunc;
+	return (*func)(file, stream_index);
 }
 void mod_avbin_close_stream(AVbinStream *stream)
 {
-	
+	assert(ghinst != NULL);
+	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_close_stream" );
+	assert(rawfunc != (FARPROC)NULL);
+
+	void (*func)(AVbinStream *)=0;
+	func = (void (*)(AVbinStream *)) rawfunc;
+	(*func)(stream);	
 }
 
 void mod_avbin_close_file(AVbinFile *file)
 {
-	
+	assert(ghinst != NULL);
+	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_close_file" );
+	assert(rawfunc != (FARPROC)NULL);
+
+	void (*func)(AVbinFile *)=0;
+	func = (void (*)(AVbinFile *)) rawfunc;
+	(*func)(file);		
 }
 #endif
