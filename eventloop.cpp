@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <exception>
 #include <iostream>
+#include "localsleep.h"
 #include "mediabuffer.h"
 using namespace std;
 
@@ -103,7 +104,7 @@ std::tr1::shared_ptr<class Event> EventReceiver::WaitForEventId(unsigned long lo
         }
         this->mutex.unlock();
 
-        usleep(10000);
+        LocalSleep::usleep(10000);
         waitingTime += 10;
     }
 

@@ -6,10 +6,13 @@
 #include "imagesequence.h"
 #include "avbinmedia.h"
 #include "eventloop.h"
-#include <QFileDialog>
-#include <QThread>
+#include "localsleep.h"
+#include <QtGui/QFileDialog>
+#include <QtCore/QThread>
 #include <iostream>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -97,7 +100,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     {
         this->Update();
         if(this->threadCount == 0) break;
-        usleep(10000); //microsec
+        LocalSleep::usleep(10000); //microsec
     }
 
     //If threads still running, terminate them

@@ -41,7 +41,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\Dev\Lib\avbin\include;C:\Dev\Lib\Qt\4.8.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Dev\Src\QtMedia\ui;C:\Dev\Lib\avbin\include;C:\Dev\Lib\Qt\4.8.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -63,7 +63,6 @@
   <ItemGroup>
     <ClCompile Include="..\avbinbackend.cpp" />
     <ClCompile Include="..\avbinmedia.cpp" />
-    <ClCompile Include="..\avbintest.cpp" />
     <ClCompile Include="..\eventloop.cpp" />
     <ClCompile Include="..\imagesequence.cpp" />
     <ClCompile Include="..\main.cpp" />
@@ -79,6 +78,7 @@
     <ClInclude Include="..\imagesequence.h" />
     <ClInclude Include="..\localints.h" />
     <ClInclude Include="..\localmutex.h" />
+    <ClInclude Include="..\localsleep.h" />
     <ClInclude Include="..\mainwindow.h" />
     <ClInclude Include="..\mediabuffer.h" />
     <ClInclude Include="..\videoarea.h" />
