@@ -3,6 +3,11 @@
 #include <assert.h>
 #include <sstream>
 using namespace std;
+#ifdef _MSC_VER
+#define STR_TO_ULL _strtoui64
+#else
+#define STR_TO_ULL std::strtoull
+#endif
 
 AvBinBackend::AvBinBackend()
 {
@@ -315,7 +320,7 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
     if(ev->type=="AVBIN_GET_FRAME")
     {
-        unsigned long long ti = std::strtoull(ev->data.c_str(),NULL,10);
+        unsigned long long ti = STR_TO_ULL(ev->data.c_str(),NULL,10);
         std::tr1::shared_ptr<class Event> response(new Event("AVBIN_FRAME_RESPONSE", ev->id));
         class DecodedFrame* decodedFrame = new DecodedFrame();
         response->raw = (uint8_t*) decodedFrame;
