@@ -6,8 +6,12 @@
 #include <QtGui>
 #include <QThread>
 #include <vector>
-#include <mutex>
+#include "localmutex.h"
+#ifdef _MSC_VER
+#include <memory>
+#else
 #include <tr1/memory>
+#endif
 #include "mediabuffer.h"
 #include "eventloop.h"
 #include "avbinbackend.h"

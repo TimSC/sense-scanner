@@ -3,7 +3,11 @@
 
 #include <vector>
 #include <string>
-#include <tr1/memory>
+#ifdef _MSC_VER
+	#include <memory>
+#else
+	#include <tr1/memory>
+#endif
 #include "mediabuffer.h"
 #include "eventloop.h"
 #include <sstream>

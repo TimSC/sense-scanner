@@ -2,7 +2,7 @@
 #define VLCBACKEND_H
 
 #include <fstream>
-#include <inttypes.h>
+#include "localints.h"
 
 class VlcBackend
 {

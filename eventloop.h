@@ -3,9 +3,13 @@
 
 #include <vector>
 #include <map>
-#include <mutex>
+#include "localmutex.h"
 #include <string>
-#include <tr1/memory>
+#ifdef _MSC_VER
+	#include <memory>
+#else
+	#include <tr1/memory>
+#endif
 
 class Deletable
 {
@@ -47,7 +51,7 @@ public:
 
 protected:
     std::vector<std::tr1::shared_ptr<class Event> > eventBuffer;
-    std::mutex mutex;
+    Mutex mutex;
     class EventLoop *el;
 };
 
@@ -64,7 +68,7 @@ public:
 
 protected:
     std::map<std::string, std::vector<EventReceiver *> > eventReceivers;
-    std::mutex mutex;
+    Mutex mutex;
     unsigned long long nextId;
 };
 

@@ -5,9 +5,14 @@
 #include <QSharedPointer>
 #include <QImage>
 #include <QMap>
-#include <inttypes.h>
-#include <tr1/memory>
-#include <tr1/functional>
+#include "localints.h"
+#ifdef _MSC_VER
+	#include <memory>
+	#include <functional>
+#else
+	#include <tr1/memory>
+	#include <tr1/functional>
+#endif
 #include "eventloop.h"
 
 class DecodedFrame : public Deletable
