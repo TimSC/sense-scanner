@@ -47,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(this->timer, SIGNAL(timeout()), this, SLOT(Update()));
     this->timer->start(10); //in millisec
 
-    this->mediaInterface->OpenFile("/home/tim/Desktop/SurreyHeadPoseDatabase/SANY0012.MP4");
+    this->mediaInterface->OpenFile("c:\\Users\\tim\\Downloads\\Smashing Pumpkins Disarm video.mp4");
 
     ui->setupUi(this);
     this->ui->widget->SetSource(this->mediaInterface);

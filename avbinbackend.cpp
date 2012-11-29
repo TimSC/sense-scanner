@@ -239,8 +239,8 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
         if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO &&
                 (int)packet.stream_index == this->firstAudioStream)
         {
-            uint8_t buff[1024*1024];
-            int bytesleft = 1024*1024;
+            uint8_t buff[10*1024];
+            int bytesleft = 10*1024;
             int bytesout = bytesleft;
             int bytesread = 0;
             uint8_t *cursor = buff;
