@@ -34,7 +34,7 @@ public:
     virtual ~VideoWidget();
 
 public slots:
-    void SetSource(QSharedPointer<AbstractMedia> src);
+    void SetSource(AbstractMedia *src);
     void SliderMoved(int newValue);
     void Pause();
     void Play();
@@ -46,7 +46,7 @@ protected:
 
     QSharedPointer<QGraphicsScene> scene;
     QSharedPointer<QGraphicsPixmapItem> item;
-    QSharedPointer<AbstractMedia> seq;
+    AbstractMedia *seq;
     QSharedPointer<QTimer> timer;
 
     QTime playPressedTime;

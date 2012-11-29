@@ -45,6 +45,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->playActive = false;
     this->mediaLength = 0;
     this->waitingForNumFrames = 0;
+    this->seq = NULL;
 
     //QObject::connect(this->ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(SliderMoved(int)));
     //QObject::connect(this->ui->pauseButton,SIGNAL(clicked()), this, SLOT(Pause()));
@@ -65,14 +66,14 @@ VideoWidget::~VideoWidget()
     delete ui;
 }
 
-void VideoWidget::SetSource(QSharedPointer<AbstractMedia> src)
+void VideoWidget::SetSource(AbstractMedia *src)
 {
     this->seq = src;
     this->mediaLength = 0;
 
-    if(!this->seq.isNull())try
+    if(this->seq!=NULL) try
     {
-        this->mediaLength = src->Length();
+        this->mediaLength = this->seq->Length();
     }
     catch (std::runtime_error &e)
     {
@@ -90,7 +91,7 @@ void VideoWidget::SetSource(QSharedPointer<AbstractMedia> src)
 void VideoWidget::SetVisibleAtTime(long long unsigned ti)
 {
     //Check the sequence is valid
-    if(this->seq.isNull()) return;
+    if(this->seq == NULL) return;
 
     //Get image from sequence
     try
@@ -157,13 +158,13 @@ void FrameCallbackTest(QImage& fr, unsigned long long timestamp, void *raw)
 
 void VideoWidget::TimerUpdate()
 {
-    if(this->seq.isNull() && this->playActive)
+    if(this->seq == NULL && this->playActive)
     {
         this->Pause();
     }
 
     //Check if any async messages are waiting from the source media
-    if(!this->seq.isNull()) this->seq->Update(FrameCallbackTest, (void *)this);
+    if(!this->seq == NULL) this->seq->Update(FrameCallbackTest, (void *)this);
 
     if(this->playActive)
     {

@@ -6,6 +6,7 @@
 #include <QtGui>
 #include <QThread>
 #include <vector>
+#include <mutex>
 #include <tr1/memory>
 #include "mediabuffer.h"
 #include "eventloop.h"
@@ -24,6 +25,7 @@ public:
     virtual long long unsigned GetFrameStartTime(long long unsigned ti); //in milliseconds
     void SetEventLoop(class EventLoop *eventLoopIn);
     int OpenFile(QString fina);
+    void SetActive(int activeIn);
 
     int RequestFrame(long long unsigned ti);
     void Update(void (*frameCallback)(QImage& fr, unsigned long long timestamp, void *raw), void *raw);
@@ -31,6 +33,7 @@ public:
 protected:
     class EventReceiver *eventReceiver;
     class EventLoop *eventLoop;
+    int active;
 };
 
 class AvBinThread : public QThread
@@ -40,12 +43,14 @@ public:
     virtual ~AvBinThread();
     void run();
     void HandleEvent(std::tr1::shared_ptr<class Event> ev);
+    void StopThread();
 
 protected:
     class EventReceiver *eventReceiver;
     int stopThreads;
     class AvBinBackend avBinBackend;
     class EventLoop *eventLoop;
+    std::mutex mutex;
 };
 
 #endif // AVBINMEDIA_H

@@ -12,6 +12,7 @@ AvBinMedia::AvBinMedia() : AbstractMedia()
 {
     this->eventReceiver = NULL;
     this->eventLoop = NULL;
+    this->active = 0;
 }
 
 AvBinMedia::~AvBinMedia()
@@ -23,6 +24,7 @@ AvBinMedia::~AvBinMedia()
 
 int AvBinMedia::OpenFile(QString fina)
 {
+    assert(this->active);
     assert(this->eventLoop);
     unsigned long long id = this->eventLoop->GetId();
     std::tr1::shared_ptr<class Event> openEv(new Event("AVBIN_OPEN_FILE", id));
@@ -56,6 +58,7 @@ void RawImgToQImage(DecodedFrame *frame, QImage &img)
 QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
                                        long long unsigned &outFrameTi) //in milliseconds
 {
+    assert(this->active);
     outFrameTi = 0;
 
     //Request the frame from the backend thread
@@ -111,11 +114,14 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
 
 long long unsigned AvBinMedia::GetNumFrames()
 {
+    assert(this->active);
     assert(0); //Not implemented
 }
 
 long long unsigned AvBinMedia::Length() //Get length (ms)
 {
+    assert(this->active);
+
     unsigned long long id = this->eventLoop->GetId();
     std::tr1::shared_ptr<class Event> durationEvent(new Event("AVBIN_GET_DURATION", id));
     this->eventLoop->SendEvent(durationEvent);
@@ -127,6 +133,8 @@ long long unsigned AvBinMedia::Length() //Get length (ms)
 
 long long unsigned AvBinMedia::GetFrameStartTime(long long unsigned ti) //in milliseconds
 {
+    assert(this->active);
+
     long long unsigned outFrameTi = 0;
     QSharedPointer<QImage> out = this->Get(ti, outFrameTi);
     cout << "Frame start" << outFrameTi << endl;
@@ -149,6 +157,8 @@ void AvBinMedia::SetEventLoop(class EventLoop *eventLoopIn)
 
 int AvBinMedia::RequestFrame(long long unsigned ti) //in milliseconds
 {
+    assert(this->active);
+
     //Request the frame from the backend thread
     assert(this->eventLoop != NULL);
     unsigned long long id = this->eventLoop->GetId();
@@ -162,6 +172,8 @@ int AvBinMedia::RequestFrame(long long unsigned ti) //in milliseconds
 
 void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long timestamp, void *raw), void *raw)
 {
+    assert(this->active);
+
     //Check for new frames from media backend.
     int checking = 1;
     while(checking)
@@ -194,6 +206,11 @@ void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long tim
 
 }
 
+void AvBinMedia::SetActive(int activeIn)
+{
+    this->active = activeIn;
+}
+
 //************************************
 
 AvBinThread::AvBinThread(class EventLoop *eventLoopIn)
@@ -217,8 +234,14 @@ void AvBinThread::run()
     std::tr1::shared_ptr<class Event> startEvent (new Event("THREAD_STARTING"));
     this->eventLoop->SendEvent(startEvent);
 
-    while(!this->stopThreads)
+    int running = true;
+
+    while(running)
     {
+        this->mutex.lock();
+        int running = this->stopThreads;
+        this->mutex.unlock();
+
         //cout << "x" << this->eventReceiver.BufferSize() << endl;
         int foundEvent = 0;
         try
@@ -232,10 +255,12 @@ void AvBinThread::run()
         catch(std::runtime_error e) {}
 
         //Update the backend to actually do something useful
-        this->avBinBackend.PlayUpdate();
+        foundEvent = this->avBinBackend.PlayUpdate();
 
         if(!foundEvent)
             msleep(10);
+        else
+            msleep(0);
     }
 
     std::tr1::shared_ptr<class Event> stopEvent(new Event("THREAD_STOPPING"));
@@ -245,7 +270,18 @@ void AvBinThread::run()
 
 void AvBinThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
-    if(ev->type == "STOP_THREADS")
-        this->stopThreads = 1;
-}
 
+    if(ev->type == "STOP_THREADS")
+    {
+        this->mutex.lock();
+        this->stopThreads = 1;
+        this->mutex.unlock();
+    }
+}
+void AvBinThread::StopThread()
+{
+    this->mutex.lock();
+    this->stopThreads = 1;
+    this->mutex.unlock();
+
+}

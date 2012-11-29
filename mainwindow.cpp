@@ -27,17 +27,17 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("THREAD_STOPPING",*eventReceiver);
 
     //Create file reader worker thread
-    this->readInputThread = new AvBinThread(&*this->eventLoop);
-    this->readInputThread->start();
+    this->mediaThread = new AvBinThread(&*this->eventLoop);
+    this->mediaThread->start();
 
     //QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(
     //    new MediaBuffer(this, QSharedPointer<AbstractMedia>(
     //        new ImageSequence(this,"/home/tim/dev/QtMedia/testseq"))));
-    QSharedPointer<AvBinMedia> avbin (new class AvBinMedia());
-    avbin->SetEventLoop(this->eventLoop);
-    avbin->OpenFile("/home/tim/Desktop/SurreyHeadPoseDatabase/SANY0012.MP4");
-
-    QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(avbin);
+    //QSharedPointer<AvBinMedia> avbin (new class AvBinMedia());
+    this->mediaInterface = new class AvBinMedia();
+    this->mediaInterface->SetEventLoop(this->eventLoop);
+    this->mediaInterface->SetActive(1);
+    this->mediaInterface->OpenFile("/home/tim/Desktop/SurreyHeadPoseDatabase/SANY0012.MP4");
 
     //Start event buffer timer
     this->timer = new QTimer();
@@ -45,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->timer->start(10); //in millisec
 
     ui->setupUi(this);
-    this->ui->widget->SetSource(buff);
+    this->ui->widget->SetSource(this->mediaInterface);
 }
 
 MainWindow::~MainWindow()
@@ -59,15 +59,25 @@ MainWindow::~MainWindow()
     delete this->eventReceiver;
     this->eventReceiver = NULL;
 
+    if(this->mediaThread) delete this->mediaThread;
+    this->mediaThread = NULL;
+
+    delete this->mediaInterface;
+    this->mediaInterface = NULL;
+
     delete ui;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    //Disconnect video widget from source
+
+    //Disconnect video widget from media source
     cout << "Disconnect video from source" << endl;
-    QSharedPointer<AbstractMedia> nullSrc;
+    AbstractMedia *nullSrc = NULL;
     this->ui->widget->SetSource(nullSrc);
+
+    //Mark media interface as inactive
+    this->mediaInterface->SetActive(0);
 
     //Signal worker threads to stop
     cout << "Signal worker threads to stop" << endl;
@@ -88,9 +98,11 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 
     //If threads still running, terminate them
-    cout << "If threads still running, attempting to terminate them" << endl;
-    if(this->readInputThread->isRunning())
-        this->readInputThread->terminate();
+    if(this->mediaThread->isRunning())
+    {
+        cout << "Warning: terminating media tread" << endl;
+        this->mediaThread->terminate();
+    }
 
     //Continue shut down in parent object
     cout << "Continue shut down in parent object" << endl;
@@ -104,19 +116,26 @@ void MainWindow::ImportVideo()
       tr("Import Video"), "", tr("Video Files (*.avi *.mov *.mkv *.wmf, *.webm, *.flv, *.mp4, *.rm, *.asf)"));
     if(fileName.length() == 0) return;
 
-    //Remove previous source
-    QSharedPointer<AbstractMedia> nullSrc;
-    this->ui->widget->SetSource(nullSrc);
+    //Mark media interface as inactive
+    this->mediaInterface->SetActive(0);
 
-    //Create new media source
-    QSharedPointer<AvBinMedia> avbinNew (new class AvBinMedia());
-    avbinNew->SetEventLoop(this->eventLoop);
-    avbinNew->OpenFile(fileName.toLocal8Bit().constData());
+    //Shut down media thread and delete
+    this->mediaThread->StopThread();
+    delete(this->mediaThread);
+    this->mediaThread = NULL;
 
+    //Create a new source
+    this->mediaThread = new AvBinThread(&*this->eventLoop);
+
+    //Mark media interface as active
+    this->mediaInterface->SetActive(1);
+
+    //avbinNew->SetEventLoop(this->eventLoop);
     cout << "Opening " << fileName.toLocal8Bit().constData() << endl;
-    QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(avbinNew);
+    this->mediaInterface->OpenFile(fileName.toLocal8Bit().constData());
 
-    this->ui->widget->SetSource(buff);
+    //Set widget to use this source
+    this->ui->widget->SetSource(this->mediaInterface);
 }
 
 void MainWindow::Update()

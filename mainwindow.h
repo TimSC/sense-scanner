@@ -23,7 +23,8 @@ public:
     
 private:
     Ui::MainWindow *ui;
-    AvBinThread *readInputThread;
+    AvBinThread *mediaThread;
+    AvBinMedia *mediaInterface;
     class EventLoop *eventLoop;
     class EventReceiver *eventReceiver;
     QTimer *timer;
