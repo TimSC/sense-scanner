@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("THREAD_STOPPING",*eventReceiver);
 
     //Create file reader worker thread
-    this->mediaThread = new AvBinThread(&*this->eventLoop);
+    this->mediaThread = new AvBinThread(this->eventLoop);
     this->mediaThread->start();
 
     //QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(
@@ -120,12 +120,14 @@ void MainWindow::ImportVideo()
     this->mediaInterface->SetActive(0);
 
     //Shut down media thread and delete
-    this->mediaThread->StopThread();
+    int result = this->mediaThread->StopThread();
+    cout << "stop thread result=" << result << endl;
     delete(this->mediaThread);
     this->mediaThread = NULL;
 
     //Create a new source
-    this->mediaThread = new AvBinThread(&*this->eventLoop);
+    this->mediaThread = new AvBinThread(this->eventLoop);
+    this->mediaThread->start();
 
     //Mark media interface as active
     this->mediaInterface->SetActive(1);

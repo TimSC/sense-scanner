@@ -43,7 +43,7 @@ public:
     virtual ~AvBinThread();
     void run();
     void HandleEvent(std::tr1::shared_ptr<class Event> ev);
-    void StopThread();
+    int StopThread();
 
 protected:
     class EventReceiver *eventReceiver;

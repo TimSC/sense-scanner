@@ -278,10 +278,24 @@ void AvBinThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         this->mutex.unlock();
     }
 }
-void AvBinThread::StopThread()
+int AvBinThread::StopThread()
 {
     this->mutex.lock();
     this->stopThreads = 1;
     this->mutex.unlock();
 
+    for(int i=0;i<500;i++)
+    {
+        if(this->isFinished())
+        {
+            return 1;
+        }
+        usleep(10000); //microsec
+    }
+    if(this->isRunning())
+    {
+        cout << "Warning: terminating media thread" << endl;
+        this->terminate();
+    }
+    return 0;
 }
