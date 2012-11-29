@@ -1,6 +1,7 @@
 #ifndef _AVBIN_API_H_
 #define _AVBIN_API_H_
 
+#include <string.h>
 extern "C"
 {
 #include <avbin.h>

@@ -1,5 +1,4 @@
 #include "avbinapi.h"
-#include <string.h>
 
 #ifndef _MSC_VER
 
@@ -20,7 +19,7 @@ AVbinResult mod_avbin_file_info(AVbinFile *file, AVbinFileInfo *info)
 
 AVbinResult mod_avbin_stream_info(AVbinFile *file, int stream_index, AVbinStreamInfo *info)
 {
-	return avbin_stream_info(filem stream_index, info);
+    return avbin_stream_info(file, stream_index, info);
 }
 
 AVbinResult mod_avbin_seek_file(AVbinFile *file, AVbinTimestamp timestamp)
