@@ -45,6 +45,15 @@ SimpleScene::~SimpleScene()
 
 }
 
+void SimpleScene::VideoImageChanged(QImage &fr)
+{
+
+    this->item =
+            QSharedPointer<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap::fromImage(fr)));
+    this->scene->clear();
+    this->scene->addItem(&*this->item); //I love pointers
+}
+
 //********************************************************************
 
 VideoWidget::VideoWidget(QWidget *parent) :
@@ -201,16 +210,11 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)
         this->waitingForNumFrames -- ;
 
     //Add to scene
-    this->sceneControl->item =
-            QSharedPointer<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap::fromImage(fr)));
-    this->sceneControl->scene->clear();
-    this->sceneControl->scene->addItem(&*this->sceneControl->item); //I love pointers
+    this->sceneControl->VideoImageChanged(fr);
     this->ui->graphicsView->setScene(&*this->sceneControl->scene);
 
     //Update current time
     this->currentTime = timestamp;
-
-
 
 }
 

@@ -31,6 +31,8 @@ public:
     SimpleScene(QWidget *parent);
     virtual ~SimpleScene();
 
+    void VideoImageChanged(QImage &fr);
+
     QSharedPointer<QGraphicsPixmapItem> item;
     QSharedPointer<QGraphicsScene> scene;
 
