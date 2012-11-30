@@ -50,6 +50,9 @@ int AvBinBackend::OpenFile(const char *filenameIn, int requestId)
 void AvBinBackend::DoOpenFile(int requestId)
 {
     assert(this->fi == NULL);
+    assert(this->streams.size() == 0);
+
+    //Open file
     this->fi = mod_avbin_open_filename(this->filename.c_str());
 
     //Create an event with the result
@@ -67,6 +70,7 @@ void AvBinBackend::DoOpenFile(int requestId)
         return;
     }
 
+    //Get file info from avbin
     this->info.structure_size = sizeof(AVbinFileInfo);
     mod_avbin_file_info(this->fi, &this->info);
     //this->PrintAVbinFileInfo(this->info);
@@ -74,6 +78,7 @@ void AvBinBackend::DoOpenFile(int requestId)
     this->firstVideoStream = -1;
     this->firstAudioStream = -1;
 
+    //Get info for each stream
     for(int32_t i = 0; i<numStreams; i++)
     {
         AVbinStreamInfo *sinfo = new AVbinStreamInfo;
@@ -92,9 +97,85 @@ void AvBinBackend::DoOpenFile(int requestId)
         }
     }
 
+    //Prepare timestamp storage
     this->timestampOfChannel.clear();
     for(int chanNum=0;chanNum<this->numStreams;chanNum++)
         this->timestampOfChannel.push_back(0);
+
+    //Open stream decoders
+    if(this->streams.empty())
+        this->OpenStreams();
+
+    //Load some frames to get the video decoders to behave correctly
+    AVbinPacket packet;
+    packet.structure_size = sizeof(packet);
+    int done = false;
+    int processing = 1;
+    while (processing && (!done))
+    {
+        //Read frame from file
+        int readRet = mod_avbin_read(this->fi, &packet);
+        if(readRet == -1)
+        {
+            processing = 0;
+            continue;
+        }
+
+        AVbinTimestamp &timestamp = packet.timestamp;
+        assert(timestamp >= 0);
+        AVbinStreamInfo *sinfo = this->streamInfos[packet.stream_index];
+        AVbinStream *stream = this->streams[packet.stream_index];
+
+        this->timestampOfChannel[packet.stream_index] = timestamp;
+
+        //Check if all streams have received some data
+        done = true;
+        for(unsigned int chanNum=0;chanNum<this->timestampOfChannel.size();chanNum++)
+        {
+            if(this->timestampOfChannel[chanNum] < 100000) done = false;
+        }
+
+        //Decode video packet
+        if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO &&
+                (int)packet.stream_index == this->firstVideoStream)
+        {
+            unsigned requiredBuffSize = sinfo->video.width*sinfo->video.height*3;
+            if ((this->currentFrame.buff)==NULL || requiredBuffSize != this->currentFrame.buffSize)
+                this->currentFrame.AllocateSize(requiredBuffSize);
+
+            int32_t ret = mod_avbin_decode_video(stream, packet.data, packet.size, this->currentFrame.buff);
+            int error = (ret == -1);
+
+            if(!error)
+            {
+                //Do nothing
+            }
+        }
+
+        //Decode audio packet
+        if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO &&
+                (int)packet.stream_index == this->firstAudioStream)
+        {
+            uint8_t buff[10*1024];
+            int bytesleft = 10*1024;
+            int bytesout = bytesleft;
+            int bytesread = 0;
+            uint8_t *cursor = buff;
+            while ((bytesread = mod_avbin_decode_audio(stream, packet.data, packet.size, cursor, &bytesout)) > 0)
+            {
+                packet.data += bytesread;
+                packet.size -= bytesread;
+                cursor += bytesout;
+                bytesleft -= bytesout;
+                bytesout = bytesleft;
+            }
+        }
+    }
+
+
+    //Return to the start
+    AVbinResult res = mod_avbin_seek_file(this->fi, 0);
+    assert(res == AVBIN_RESULT_OK);
 }
 
 int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
