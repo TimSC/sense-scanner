@@ -35,6 +35,11 @@ public:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent);
+
+    void SetSceneControl(class SimpleScene *sceneControlIn);
+
+protected:
+    class SimpleScene *sceneControl;
 };
 
 class SimpleScene
@@ -44,6 +49,10 @@ public:
     virtual ~SimpleScene();
 
     void VideoImageChanged(QImage &fr);
+
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
+    void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
+    void mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent);
 
     QSharedPointer<QGraphicsPixmapItem> item;
     QSharedPointer<MouseGraphicsScene> scene;

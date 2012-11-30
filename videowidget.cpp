@@ -42,7 +42,7 @@ void ZoomGraphicsView::wheelEvent(QWheelEvent* event)
 
 MouseGraphicsScene::MouseGraphicsScene(QWidget *parent) : QGraphicsScene(parent)
 {
-
+    this->sceneControl = NULL;
 }
 
 MouseGraphicsScene::~MouseGraphicsScene()
@@ -52,17 +52,25 @@ MouseGraphicsScene::~MouseGraphicsScene()
 
 void MouseGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    cout << "mouseMoveEvent" << endl;
+    if(this->sceneControl != NULL)
+        this->sceneControl->mouseMoveEvent(mouseEvent);
 }
 
 void MouseGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    cout << "mousePressEvent" << endl;
+    if(this->sceneControl != NULL)
+        this->sceneControl->mousePressEvent(mouseEvent);
 }
 
 void MouseGraphicsScene::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent)
 {
-    cout << "mouseReleaseEvent" << endl;
+    if(this->sceneControl != NULL)
+        this->sceneControl->mouseReleaseEvent(mouseEvent);
+}
+
+void MouseGraphicsScene::SetSceneControl(SimpleScene *sceneControlIn)
+{
+    this->sceneControl = sceneControlIn;
 }
 
 //********************************************************************
@@ -70,6 +78,7 @@ void MouseGraphicsScene::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent
 SimpleScene::SimpleScene(QWidget *parent)
 {
     this->scene = QSharedPointer<MouseGraphicsScene>(new MouseGraphicsScene(parent));
+    this->scene->SetSceneControl(this);
     for(int i=0;i<50;i++)
     {
         vector<float> p;
@@ -82,7 +91,12 @@ SimpleScene::SimpleScene(QWidget *parent)
 SimpleScene::~SimpleScene()
 {
     this->item = QSharedPointer<QGraphicsPixmapItem>(NULL);
-    this->scene->clear();
+    if(!this->scene.isNull())
+    {
+        this->scene->clear();
+        this->scene->SetSceneControl(NULL);
+        this->scene = QSharedPointer<MouseGraphicsScene>(NULL);
+    }
 }
 
 void SimpleScene::VideoImageChanged(QImage &fr)
@@ -101,6 +115,21 @@ void SimpleScene::VideoImageChanged(QImage &fr)
     {
         this->scene->addEllipse(this->pos[i][0], this->pos[i][1], 2, 2, pen, brush);
     }
+}
+
+void SimpleScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
+{
+    cout << "mouseMoveEvent" << endl;
+}
+
+void SimpleScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
+{
+    cout << "mousePressEvent" << endl;
+}
+
+void SimpleScene::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent)
+{
+    cout << "mouseReleaseEvent" << endl;
 }
 
 //********************************************************************
