@@ -23,6 +23,8 @@ AvBinBackend::AvBinBackend()
     this->firstAudioStream = -1;
     this->eventReceiver = NULL;
     this->eventLoop = NULL;
+    this->audioBuffer = NULL;
+    this->audioBufferSize = 0;
 }
 
 AvBinBackend::AvBinBackend(const AvBinBackend &other)
@@ -36,6 +38,9 @@ AvBinBackend::~AvBinBackend()
     this->CloseFile();
     if(this->eventReceiver) delete this->eventReceiver;
     this->eventReceiver = NULL;
+
+    if(this->audioBuffer) delete [] this->audioBuffer;
+    this->audioBuffer = NULL;
 }
 
 int AvBinBackend::OpenFile(const char *filenameIn, int requestId)
@@ -156,11 +161,18 @@ void AvBinBackend::DoOpenFile(int requestId)
         if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO &&
                 (int)packet.stream_index == this->firstAudioStream)
         {
-            uint8_t buff[10*1024];
-            int bytesleft = 10*1024;
+            //Allocate audio buffer, if not already done
+            if(this->audioBuffer==NULL || this->audioBufferSize==0)
+            {
+                this->audioBufferSize = 1024*1024;
+                this->audioBuffer = new uint8_t[this->audioBufferSize];
+            }
+            assert(this->audioBuffer);
+
+            int bytesleft = this->audioBufferSize;
             int bytesout = bytesleft;
             int bytesread = 0;
-            uint8_t *cursor = buff;
+            uint8_t *cursor = this->audioBuffer;
             while ((bytesread = mod_avbin_decode_audio(stream, packet.data, packet.size, cursor, &bytesout)) > 0)
             {
                 packet.data += bytesread;
@@ -320,11 +332,18 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
         if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO &&
                 (int)packet.stream_index == this->firstAudioStream)
         {
-            uint8_t buff[10*1024];
-            int bytesleft = 10*1024;
+            //Allocate audio buffer, if not already done
+            if(this->audioBuffer==NULL || this->audioBufferSize==0)
+            {
+                this->audioBufferSize = 1024*1024;
+                this->audioBuffer = new uint8_t[this->audioBufferSize];
+            }
+            assert(this->audioBuffer);
+
+            int bytesleft = this->audioBufferSize;
             int bytesout = bytesleft;
             int bytesread = 0;
-            uint8_t *cursor = buff;
+            uint8_t *cursor = this->audioBuffer;
             while ((bytesread = mod_avbin_decode_audio(stream, packet.data, packet.size, cursor, &bytesout)) > 0)
             {
                 packet.data += bytesread;
