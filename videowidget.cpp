@@ -50,7 +50,8 @@ SimpleScene::SimpleScene(QWidget *parent)
 
 SimpleScene::~SimpleScene()
 {
-
+    this->item = QSharedPointer<QGraphicsPixmapItem>(NULL);
+    this->scene->clear();
 }
 
 void SimpleScene::VideoImageChanged(QImage &fr)
