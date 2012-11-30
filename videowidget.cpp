@@ -35,6 +35,18 @@ void ZoomGraphicsView::wheelEvent(QWheelEvent* event)
 
 //********************************************************************
 
+SimpleScene::SimpleScene(QWidget *parent)
+{
+    this->scene = QSharedPointer<QGraphicsScene>(new QGraphicsScene(parent));
+}
+
+SimpleScene::~SimpleScene()
+{
+
+}
+
+//********************************************************************
+
 VideoWidget::VideoWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::VideoWidget)
@@ -51,7 +63,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     //QObject::connect(this->ui->pauseButton,SIGNAL(clicked()), this, SLOT(Pause()));
     //QObject::connect(this->ui->playButton,SIGNAL(clicked()), this, SLOT(Play()));
 
-    this->scene = QSharedPointer<QGraphicsScene>(new QGraphicsScene(this));
+    this->sceneControl = QSharedPointer<SimpleScene>(new SimpleScene(this));
 
     this->SetVisibleAtTime(0);
 
@@ -185,18 +197,25 @@ void VideoWidget::TimerUpdate()
 
 void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)
 {
-      //cout << "Got:"<< timestamp << endl;
+    if(this->waitingForNumFrames > 0)
+        this->waitingForNumFrames -- ;
 
-      //Add to scene
-      this->item = QSharedPointer<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap::fromImage(fr)));
-      this->scene->clear();
-      this->scene->addItem(&*item); //I love pointers
-      this->ui->graphicsView->setScene(&*this->scene);
+    //Add to scene
+    this->sceneControl->item =
+            QSharedPointer<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap::fromImage(fr)));
+    this->sceneControl->scene->clear();
+    this->sceneControl->scene->addItem(&*this->sceneControl->item); //I love pointers
+    this->ui->graphicsView->setScene(&*this->sceneControl->scene);
 
-      //Update current time
-      this->currentTime = timestamp;
+    //Update current time
+    this->currentTime = timestamp;
 
-      if(this->waitingForNumFrames > 0)
-          this->waitingForNumFrames -- ;
 
+
+}
+
+void VideoWidget::SetSceneControl(QSharedPointer<SimpleScene> sceneIn)
+{
+    this->sceneControl = sceneIn;
+    this->ui->graphicsView->setScene(&*this->sceneControl->scene);
 }

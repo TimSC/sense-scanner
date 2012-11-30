@@ -25,6 +25,17 @@ protected:
     float scaleFactor;
 };
 
+class SimpleScene
+{
+public:
+    SimpleScene(QWidget *parent);
+    virtual ~SimpleScene();
+
+    QSharedPointer<QGraphicsPixmapItem> item;
+    QSharedPointer<QGraphicsScene> scene;
+
+};
+
 class VideoWidget : public QWidget
 {
     Q_OBJECT
@@ -40,12 +51,12 @@ public slots:
     void Play();
     void TimerUpdate();
     void AsyncFrameReceived(QImage& fr, unsigned long long timestamp);
+    void SetSceneControl(QSharedPointer<SimpleScene> sceneIn);
 
 protected:
     void SetVisibleAtTime(long long unsigned ti);
 
-    QSharedPointer<QGraphicsScene> scene;
-    QSharedPointer<QGraphicsPixmapItem> item;
+    QSharedPointer<SimpleScene> sceneControl;
     AbstractMedia *seq;
     QSharedPointer<QTimer> timer;
 
