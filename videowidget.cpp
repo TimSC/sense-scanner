@@ -52,6 +52,7 @@ void SimpleScene::VideoImageChanged(QImage &fr)
             QSharedPointer<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap::fromImage(fr)));
     this->scene->clear();
     this->scene->addItem(&*this->item); //I love pointers
+    this->scene->setSceneRect ( 0, 0, fr.width(), fr.height() );
 }
 
 //********************************************************************
