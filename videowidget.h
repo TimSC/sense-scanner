@@ -26,6 +26,17 @@ protected:
     float scaleFactor;
 };
 
+class MouseGraphicsScene : public QGraphicsScene
+{
+public:
+    MouseGraphicsScene(QWidget *parent);
+    virtual ~MouseGraphicsScene();
+
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
+    void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
+    void mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent);
+};
+
 class SimpleScene
 {
 public:
@@ -35,7 +46,7 @@ public:
     void VideoImageChanged(QImage &fr);
 
     QSharedPointer<QGraphicsPixmapItem> item;
-    QSharedPointer<QGraphicsScene> scene;
+    QSharedPointer<MouseGraphicsScene> scene;
     std::vector<std::vector<float> > pos;
 };
 

@@ -9,6 +9,8 @@
 #include <cstdlib>
 using namespace std;
 
+//Custom graphics view to catch mouse wheel
+
 ZoomGraphicsView::ZoomGraphicsView(QWidget *parent) : QGraphicsView(parent)
 {
     this->scaleFactor = 1.;
@@ -36,9 +38,38 @@ void ZoomGraphicsView::wheelEvent(QWheelEvent* event)
 
 //********************************************************************
 
+//Custom graphics scene to catch mouse move and press
+
+MouseGraphicsScene::MouseGraphicsScene(QWidget *parent) : QGraphicsScene(parent)
+{
+
+}
+
+MouseGraphicsScene::~MouseGraphicsScene()
+{
+
+}
+
+void MouseGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
+{
+    cout << "mouseMoveEvent" << endl;
+}
+
+void MouseGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
+{
+    cout << "mousePressEvent" << endl;
+}
+
+void MouseGraphicsScene::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent)
+{
+    cout << "mouseReleaseEvent" << endl;
+}
+
+//********************************************************************
+
 SimpleScene::SimpleScene(QWidget *parent)
 {
-    this->scene = QSharedPointer<QGraphicsScene>(new QGraphicsScene(parent));
+    this->scene = QSharedPointer<MouseGraphicsScene>(new MouseGraphicsScene(parent));
     for(int i=0;i<50;i++)
     {
         vector<float> p;
