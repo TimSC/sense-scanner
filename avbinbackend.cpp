@@ -8,6 +8,7 @@ using namespace std;
 #else
 #define STR_TO_ULL std::strtoull
 #endif
+#define DEFAULT_AUDIO_BUFF_SIZE 1024*1024
 
 //**********************************************************
 
@@ -164,7 +165,7 @@ void AvBinBackend::DoOpenFile(int requestId)
             //Allocate audio buffer, if not already done
             if(this->audioBuffer==NULL || this->audioBufferSize==0)
             {
-                this->audioBufferSize = 1024*1024;
+                this->audioBufferSize = DEFAULT_AUDIO_BUFF_SIZE;
                 this->audioBuffer = new uint8_t[this->audioBufferSize];
             }
             assert(this->audioBuffer);
@@ -335,7 +336,7 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
             //Allocate audio buffer, if not already done
             if(this->audioBuffer==NULL || this->audioBufferSize==0)
             {
-                this->audioBufferSize = 1024*1024;
+                this->audioBufferSize = DEFAULT_AUDIO_BUFF_SIZE;
                 this->audioBuffer = new uint8_t[this->audioBufferSize];
             }
             assert(this->audioBuffer);
