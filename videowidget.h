@@ -5,6 +5,7 @@
 #include <QtCore/QtCore>
 #include <QtGui/QtGui>
 #include <QtGui/QGraphicsScene>
+#include <vector>
 #include "mediabuffer.h"
 
 namespace Ui {
@@ -35,7 +36,7 @@ public:
 
     QSharedPointer<QGraphicsPixmapItem> item;
     QSharedPointer<QGraphicsScene> scene;
-
+    std::vector<std::vector<float> > pos;
 };
 
 class VideoWidget : public QWidget

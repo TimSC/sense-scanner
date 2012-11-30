@@ -6,6 +6,7 @@
 #include <iostream>
 #include <assert.h>
 #include <stdexcept>
+#include <cstdlib>
 using namespace std;
 
 ZoomGraphicsView::ZoomGraphicsView(QWidget *parent) : QGraphicsView(parent)
@@ -38,6 +39,13 @@ void ZoomGraphicsView::wheelEvent(QWheelEvent* event)
 SimpleScene::SimpleScene(QWidget *parent)
 {
     this->scene = QSharedPointer<QGraphicsScene>(new QGraphicsScene(parent));
+    for(int i=0;i<50;i++)
+    {
+        vector<float> p;
+        p.push_back(rand() % 500);
+        p.push_back(rand() % 500);
+        this->pos.push_back(p);
+    }
 }
 
 SimpleScene::~SimpleScene()
@@ -53,6 +61,14 @@ void SimpleScene::VideoImageChanged(QImage &fr)
     this->scene->clear();
     this->scene->addItem(&*this->item); //I love pointers
     this->scene->setSceneRect ( 0, 0, fr.width(), fr.height() );
+
+    QPen pen(QColor(255,0,0));
+    QBrush brush(QColor(255,0,0,0));
+
+    for(unsigned int i=0;i<this->pos.size();i++)
+    {
+        this->scene->addEllipse(this->pos[i][0], this->pos[i][1], 2, 2, pen, brush);
+    }
 }
 
 //********************************************************************
@@ -68,11 +84,6 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->mediaLength = 0;
     this->waitingForNumFrames = 0;
     this->seq = NULL;
-
-    //QObject::connect(this->ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(SliderMoved(int)));
-    //QObject::connect(this->ui->pauseButton,SIGNAL(clicked()), this, SLOT(Pause()));
-    //QObject::connect(this->ui->playButton,SIGNAL(clicked()), this, SLOT(Play()));
-
     this->sceneControl = QSharedPointer<SimpleScene>(new SimpleScene(this));
 
     this->SetVisibleAtTime(0);
