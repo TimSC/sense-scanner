@@ -53,10 +53,16 @@ public:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent);
+    int NearestPoint(float x, float y);
+    void Redraw();
 
     QSharedPointer<QGraphicsPixmapItem> item;
     QSharedPointer<MouseGraphicsScene> scene;
     std::vector<std::vector<float> > pos;
+    QImage img;
+protected:
+    int activePoint;
+    unsigned int imgHeight, imgWidth;
 };
 
 class VideoWidget : public QWidget

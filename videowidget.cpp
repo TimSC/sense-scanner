@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <stdexcept>
 #include <cstdlib>
+#include <math.h>
 using namespace std;
 
 //Custom graphics view to catch mouse wheel
@@ -86,6 +87,9 @@ SimpleScene::SimpleScene(QWidget *parent)
         p.push_back(rand() % 500);
         this->pos.push_back(p);
     }
+    activePoint = -1;
+    this->imgWidth = 0;
+    this->imgHeight = 0;
 }
 
 SimpleScene::~SimpleScene()
@@ -101,19 +105,36 @@ SimpleScene::~SimpleScene()
 
 void SimpleScene::VideoImageChanged(QImage &fr)
 {
+    this->img = fr;
+    //this->item =
+    //        QSharedPointer<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap::fromImage(fr)));
+    this->imgWidth = fr.width();
+    this->imgHeight = fr.height();
+    this->Redraw();
+}
 
-    this->item =
-            QSharedPointer<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap::fromImage(fr)));
+void SimpleScene::Redraw()
+{
+
     this->scene->clear();
-    this->scene->addItem(&*this->item); //I love pointers
-    this->scene->setSceneRect ( 0, 0, fr.width(), fr.height() );
+    if(this->imgWidth > 0 && this->imgHeight>0 && !this->item.isNull())
+    {
+        QGraphicsPixmapItem *tmp = new QGraphicsPixmapItem(QPixmap::fromImage(this->img));
+        this->scene->addItem(tmp); //I love pointers
+        this->scene->setSceneRect ( 0, 0, this->imgWidth, this->imgHeight );
+    }
 
-    QPen pen(QColor(255,0,0));
-    QBrush brush(QColor(255,0,0,0));
+    QPen penRed(QColor(255,0,0));
+    QBrush brushTransparent(QColor(0,0,0,0));
+    QBrush brushRed(QColor(255,0,0));
 
     for(unsigned int i=0;i<this->pos.size();i++)
     {
-        this->scene->addEllipse(this->pos[i][0], this->pos[i][1], 2, 2, pen, brush);
+        //cout << this->activePoint << endl;
+        if(i!=this->activePoint)
+            this->scene->addEllipse(this->pos[i][0], this->pos[i][1], 2, 2, penRed, brushRed);
+        else
+            this->scene->addEllipse(this->pos[i][0], this->pos[i][1], 2, 2, penRed, brushTransparent);
     }
 }
 
@@ -125,11 +146,37 @@ void SimpleScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 void SimpleScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     cout << "mousePressEvent" << endl;
+    assert(mouseEvent);
+    QPointF pos = mouseEvent->buttonDownScenePos(mouseEvent->button());
+    cout << pos.x()<<","<< pos.y() << endl;
+    int nearestPoint = this->NearestPoint(pos.x(), pos.y());
+    this->activePoint = nearestPoint;
+    cout << this->activePoint << endl;
+    this->Redraw();
 }
 
 void SimpleScene::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent)
 {
     cout << "mouseReleaseEvent" << endl;
+}
+
+int SimpleScene::NearestPoint(float x, float y)
+{
+    int best = -1;
+    float bestDist = -1;
+    for(unsigned int i=0;i<this->pos.size();i++)
+    {
+        float dx = this->pos[i][0] - x;
+        float dy = this->pos[i][1] - y;
+        float dist = pow(dx*dx + dy*dy, 0.5);
+        if(bestDist < 0. || dist < bestDist)
+        {
+            bestDist = dist;
+            best = i;
+        }
+        cout<<pos[i][0]<<","<<pos[i][1]<<","<<dist<< ","<<bestDist<<endl;
+    }
+    return best;
 }
 
 //********************************************************************
