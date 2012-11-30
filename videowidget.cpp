@@ -117,7 +117,7 @@ void SimpleScene::Redraw()
 {
 
     this->scene->clear();
-    if(this->imgWidth > 0 && this->imgHeight>0 && !this->item.isNull())
+    if(this->imgWidth > 0 && this->imgHeight>0 && !this->img.isNull())
     {
         QGraphicsPixmapItem *tmp = new QGraphicsPixmapItem(QPixmap::fromImage(this->img));
         this->scene->addItem(tmp); //I love pointers
@@ -148,10 +148,8 @@ void SimpleScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
     cout << "mousePressEvent" << endl;
     assert(mouseEvent);
     QPointF pos = mouseEvent->buttonDownScenePos(mouseEvent->button());
-    cout << pos.x()<<","<< pos.y() << endl;
     int nearestPoint = this->NearestPoint(pos.x(), pos.y());
     this->activePoint = nearestPoint;
-    cout << this->activePoint << endl;
     this->Redraw();
 }
 
@@ -174,7 +172,6 @@ int SimpleScene::NearestPoint(float x, float y)
             bestDist = dist;
             best = i;
         }
-        cout<<pos[i][0]<<","<<pos[i][1]<<","<<dist<< ","<<bestDist<<endl;
     }
     return best;
 }

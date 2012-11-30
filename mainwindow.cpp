@@ -47,7 +47,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(this->timer, SIGNAL(timeout()), this, SLOT(Update()));
     this->timer->start(10); //in millisec
 
-    this->mediaInterface->OpenFile("c:\\Users\\tim\\Downloads\\Smashing Pumpkins Disarm video.mp4");
+    //this->mediaInterface->OpenFile("c:\\Users\\tim\\Downloads\\Smashing Pumpkins Disarm video.mp4");
+    this->mediaInterface->OpenFile("/media/data/main/media/music/Smashing Pumpkins/The Smashing Pumpkins - The Everlasting Gaze.webm");
 
     ui->setupUi(this);
     this->ui->widget->SetSource(this->mediaInterface);
