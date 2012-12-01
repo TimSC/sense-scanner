@@ -104,6 +104,7 @@ SimpleScene::~SimpleScene()
         this->scene->SetSceneControl(NULL);
         this->scene = QSharedPointer<MouseGraphicsScene>(NULL);
     }
+
 }
 
 void SimpleScene::VideoImageChanged(QImage &fr)
@@ -203,20 +204,15 @@ int SimpleScene::NearestPoint(float x, float y)
     return best;
 }
 
-void SimpleScene::AddToolButtons(QLayout *layout)
+QWidget *SimpleScene::ControlsFactory(QWidget *parent)
 {
-    assert(layout);
-    class QPushButton *button = new class QPushButton("One");
-    layout->addWidget(button);
-    class QPushButton *button2 = new class QPushButton("Two");
-    layout->addWidget(button2);
-    button->show();
-    button2->show();
-}
-
-void SimpleScene::RemoveToolButtons(QLayout *layout)
-{
-
+    QWidget *layoutW = new QWidget();
+    assert(layoutW->layout() == NULL);
+    QHBoxLayout *layout = new QHBoxLayout();
+    layout->addWidget(new QPushButton("One"));
+    layout->addWidget(new QPushButton("Two"));
+    layoutW->setLayout(layout);
+    return layoutW;
 }
 
 //********************************************************************
@@ -380,9 +376,7 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)
 
 void VideoWidget::SetSceneControl(QSharedPointer<SimpleScene> sceneIn)
 {
-    if(!this->sceneControl.isNull())
-        this->sceneControl->RemoveToolButtons(this->ui->annotationTools);
     this->sceneControl = sceneIn;
     this->ui->graphicsView->setScene(&*this->sceneControl->scene);
-    this->sceneControl->AddToolButtons(this->ui->annotationTools);
+    this->ui->annotationTools->addWidget(this->sceneControl->ControlsFactory(this));
 }

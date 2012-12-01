@@ -56,8 +56,7 @@ public:
     int NearestPoint(float x, float y);
     void Redraw();
 
-    void AddToolButtons(QLayout *layout);
-    void RemoveToolButtons(QLayout *layout);
+    QWidget *ControlsFactory(QWidget *parent);
 
     QSharedPointer<QGraphicsPixmapItem> item;
     QSharedPointer<MouseGraphicsScene> scene;
@@ -68,6 +67,7 @@ protected:
     unsigned int imgHeight, imgWidth;
     float markerSize;
     int leftDrag;
+    std::vector<QPushButton> controls;
 };
 
 class VideoWidget : public QWidget
