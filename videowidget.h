@@ -67,7 +67,6 @@ protected:
     unsigned int imgHeight, imgWidth;
     float markerSize;
     int leftDrag;
-    std::vector<QPushButton> controls;
 };
 
 class VideoWidget : public QWidget
