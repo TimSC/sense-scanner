@@ -209,8 +209,11 @@ QWidget *SimpleScene::ControlsFactory(QWidget *parent)
     QWidget *layoutW = new QWidget();
     assert(layoutW->layout() == NULL);
     QHBoxLayout *layout = new QHBoxLayout();
-    layout->addWidget(new QPushButton("One"));
-    layout->addWidget(new QPushButton("Two"));
+    layout->addWidget(new QPushButton("Move"));
+    layout->addWidget(new QPushButton("Add"));
+    layout->addWidget(new QPushButton("Remove"));
+    layout->addWidget(new QPushButton("Add Link"));
+    layout->addWidget(new QPushButton("Remove Link"));
     layoutW->setLayout(layout);
     return layoutW;
 }

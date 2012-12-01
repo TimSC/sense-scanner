@@ -42,9 +42,12 @@ protected:
     class SimpleScene *sceneControl;
 };
 
-class SimpleScene
+class SimpleScene : public QObject
 {
+    Q_OBJECT
+
 public:
+
     SimpleScene(QWidget *parent);
     virtual ~SimpleScene();
 
