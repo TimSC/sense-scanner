@@ -118,7 +118,7 @@ void SimpleSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     assert(mouseEvent);
     QPointF pos = mouseEvent->scenePos();
-    cout << "mouseMoveEvent, " << pos.x() << "," << pos.y () << endl;
+    //cout << "mouseMoveEvent, " << pos.x() << "," << pos.y () << endl;
 
     if(this->mode == "MOVE")
     {
@@ -142,6 +142,25 @@ void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent
     {
         int nearestPoint = this->NearestPoint(pos.x(), pos.y());
         this->activePoint = nearestPoint;
+        this->Redraw();
+    }
+
+    if(this->mode == "ADD_POINT")
+    {
+        std::vector<float> p;
+        p.push_back(pos.x());
+        p.push_back(pos.y());
+        this->pos.push_back(p);
+        this->Redraw();
+    }
+
+    if(this->mode == "REMOVE_POINT")
+    {
+        int nearestPoint = this->NearestPoint(pos.x(), pos.y());
+        if(nearestPoint>=0)
+        {
+            this->pos.erase(this->pos.begin()+nearestPoint);
+        }
         this->Redraw();
     }
 
@@ -220,30 +239,25 @@ QWidget *SimpleSceneController::ControlsFactory(QWidget *parent)
 
 void SimpleSceneController::MovePressed()
 {
-    cout << "Move pressed"<< endl;
     this->mode = "MOVE";
 }
 
 void SimpleSceneController::AddPointPressed()
 {
-    cout << "AddPointPressed"<< endl;
     this->mode = "ADD_POINT";
 }
 
 void SimpleSceneController::RemovePointPressed()
 {
-    cout << "RemovePointPressed"<< endl;
     this->mode = "REMOVE_POINT";
 }
 
 void SimpleSceneController::AddLinkPressed()
 {
-    cout << "AddLinkPressed"<< endl;
     this->mode = "ADD_LINK";
 }
 
 void SimpleSceneController::RemoveLinkPressed()
 {
-    cout << "RemoveLinkPressed"<< endl;
     this->mode = "REMOVE_LINK";
 }
