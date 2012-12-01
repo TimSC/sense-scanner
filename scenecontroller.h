@@ -40,11 +40,7 @@ public:
 
     QWidget *ControlsFactory(QWidget *parent);
 
-    QSharedPointer<QGraphicsPixmapItem> item;
     QSharedPointer<MouseGraphicsScene> scene;
-    std::vector<std::vector<float> > pos;
-    QImage img;
-    float mousex, mousey;
 
 public slots:
     void MovePressed();
@@ -59,6 +55,11 @@ protected:
     float markerSize;
     int leftDrag;
     QString mode;
+    QImage img;
+    float mousex, mousey;
+    QSharedPointer<QGraphicsPixmapItem> item;
+    std::vector<std::vector<float> > pos;
+    std::vector<std::vector<int> > links;
 };
 
 #endif // SCENECONTROLLER_H

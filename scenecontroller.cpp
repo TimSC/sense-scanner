@@ -110,8 +110,19 @@ void SimpleSceneController::Redraw()
                              penBlue);
     }
 
+    //Draw links
+    for(unsigned int i=0;i<this->links.size();i++)
+    {
+        vector<int> &link = this->links[i];
+        assert(link.size()==2);
+        this->scene->addLine(this->pos[link[0]][0],this->pos[link[0]][1],
+                             this->pos[link[1]][0],this->pos[link[1]][1], penBlue);
+    }
+
+    //Draw marker points
     for(unsigned int i=0;i<this->pos.size();i++)
     {
+        assert(this->pos[i].size()==2);
         //cout << this->activePoint << endl;
         if(i!=this->activePoint)
             this->scene->addEllipse(this->pos[i][0]-this->markerSize/2,
@@ -190,6 +201,10 @@ void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent
         //Join previously selected point with nearest point
         if(this->activePoint >= 0)
         {
+            std::vector<int> link;
+            link.push_back(this->activePoint);
+            link.push_back(nearestPoint);
+            this->links.push_back(link);
             this->activePoint = nearestPoint;
             this->Redraw();
         }
