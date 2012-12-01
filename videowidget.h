@@ -7,6 +7,7 @@
 #include <QtGui/QGraphicsScene>
 #include <vector>
 #include "mediabuffer.h"
+#include "scenecontroller.h"
 
 namespace Ui {
 class VideoWidget;
@@ -26,60 +27,6 @@ protected:
     float scaleFactor;
 };
 
-class MouseGraphicsScene : public QGraphicsScene
-{
-public:
-    MouseGraphicsScene(QWidget *parent);
-    virtual ~MouseGraphicsScene();
-
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
-    void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
-    void mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent);
-
-    void SetSceneControl(class SimpleScene *sceneControlIn);
-
-protected:
-    class SimpleScene *sceneControl;
-};
-
-class SimpleScene : public QObject
-{
-    Q_OBJECT
-
-public:
-    SimpleScene(QWidget *parent);
-    virtual ~SimpleScene();
-
-    void VideoImageChanged(QImage &fr);
-
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
-    void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
-    void mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent);
-    int NearestPoint(float x, float y);
-    void Redraw();
-
-    QWidget *ControlsFactory(QWidget *parent);
-
-    QSharedPointer<QGraphicsPixmapItem> item;
-    QSharedPointer<MouseGraphicsScene> scene;
-    std::vector<std::vector<float> > pos;
-    QImage img;
-
-public slots:
-    void MovePressed();
-    void AddPointPressed();
-    void RemovePointPressed();
-    void AddLinkPressed();
-    void RemoveLinkPressed();
-
-protected:
-    int activePoint;
-    unsigned int imgHeight, imgWidth;
-    float markerSize;
-    int leftDrag;
-    QString mode;
-};
-
 class VideoWidget : public QWidget
 {
     Q_OBJECT
@@ -95,12 +42,12 @@ public slots:
     void Play();
     void TimerUpdate();
     void AsyncFrameReceived(QImage& fr, unsigned long long timestamp);
-    void SetSceneControl(QSharedPointer<SimpleScene> sceneIn);
+    void SetSceneControl(QSharedPointer<SimpleSceneController> sceneIn);
 
 protected:
     void SetVisibleAtTime(long long unsigned ti);
 
-    QSharedPointer<SimpleScene> sceneControl;
+    QSharedPointer<SimpleSceneController> sceneControl;
     AbstractMedia *seq;
     QSharedPointer<QTimer> timer;
 
