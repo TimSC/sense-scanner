@@ -63,6 +63,7 @@ public:
 protected:
     int activePoint;
     unsigned int imgHeight, imgWidth;
+    float markerSize;
 };
 
 class VideoWidget : public QWidget

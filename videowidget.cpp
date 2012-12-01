@@ -90,6 +90,7 @@ SimpleScene::SimpleScene(QWidget *parent)
     activePoint = -1;
     this->imgWidth = 0;
     this->imgHeight = 0;
+    this->markerSize = 2.;
 }
 
 SimpleScene::~SimpleScene()
@@ -132,15 +133,31 @@ void SimpleScene::Redraw()
     {
         //cout << this->activePoint << endl;
         if(i!=this->activePoint)
-            this->scene->addEllipse(this->pos[i][0], this->pos[i][1], 2, 2, penRed, brushRed);
+            this->scene->addEllipse(this->pos[i][0]-this->markerSize/2,
+                                    this->pos[i][1]-this->markerSize/2,
+                                    this->markerSize, this->markerSize,
+                                    penRed, brushRed);
         else
-            this->scene->addEllipse(this->pos[i][0], this->pos[i][1], 2, 2, penRed, brushTransparent);
+            this->scene->addEllipse(this->pos[i][0]-this->markerSize/2,
+                                    this->pos[i][1]-this->markerSize/2,
+                                    this->markerSize, this->markerSize,
+                                    penRed, brushTransparent);
     }
 }
 
 void SimpleScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     cout << "mouseMoveEvent" << endl;
+    assert(mouseEvent);
+    QPointF pos = mouseEvent->scenePos();
+    if(this->activePoint >= 0)
+    {
+        cout << pos.x() << "," << pos.y () << endl;
+        this->pos[this->activePoint][0] = pos.x();
+        this->pos[this->activePoint][1] = pos.y();
+        this->Redraw();
+    }
+
 }
 
 void SimpleScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
