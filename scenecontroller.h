@@ -36,6 +36,7 @@ public:
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent);
     int NearestPoint(float x, float y);
+    int NearestLink(float x, float y);
     void Redraw();
 
     QWidget *ControlsFactory(QWidget *parent);

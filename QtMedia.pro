@@ -29,7 +29,8 @@ HEADERS  += mainwindow.h \
     avbinmedia.h \
     eventloop.h \
     avbinapi.h \
-    scenecontroller.h
+    scenecontroller.h \
+    vectors.h
 
 FORMS    += mainwindow.ui \
     videowidget.ui

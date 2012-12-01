@@ -1,8 +1,10 @@
 #include "scenecontroller.h"
 #include <iostream>
 #include <vector>
+#include <math.h>
 #include <QtGui/QPixmap>
 #include "assert.h"
+#include "vectors.h"
 using namespace::std;
 
 //Custom graphics scene to catch mouse move and press
@@ -189,6 +191,45 @@ void SimpleSceneController::RemovePoint(int index)
 
 }
 
+int SimpleSceneController::NearestLink(float x, float y)
+{
+    cout << x << "," << y << endl;
+    vector<float> pc;
+    pc.push_back(x);
+    pc.push_back(y);
+
+    int bestInd = -1;
+    float bestDist = -1.f;
+    for(unsigned int i=0;i<this->links.size();i++)
+    {
+        //Calculate angle between clicked point and link direction
+        vector<int> &link = this->links[i];
+        vector<float> pa = this->pos[link[0]];
+        vector<float> pb = this->pos[link[1]];
+        vector<float> pac = SubVec(pc,pa);
+        vector<float> pab = SubVec(pb,pa);
+        vector<float> pacn = NormVec(pac);
+        vector<float> pabn = NormVec(pab);
+        float dot = DotVec(pacn, pabn);
+        float angA = acos(dot);
+
+        //Calculate click distance from link and how far along
+        float alongLineDist = dot * MagVec(pac);
+        float alongLineFrac = alongLineDist / MagVec(pab);
+        float fromLine = sin(angA) * MagVec(pac);
+
+        //Only consider clicks that are between nodes
+        if(alongLineFrac < 0.f || alongLineFrac > 1.f) continue;
+
+        if(bestDist < 0.f || fromLine < bestDist)
+        {
+            bestDist = fromLine;
+            bestInd = i;
+        }
+    }
+    return bestInd;
+}
+
 void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     cout << "mousePressEvent" << endl;
@@ -249,6 +290,17 @@ void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent
         //Right click deselects point in this mode
         this->activePoint = -1;
         this->Redraw();
+    }
+
+    if(this->mode == "REMOVE_LINK" && button==Qt::LeftButton)
+    {
+        this->activePoint = -1;
+        int nearestLink = this->NearestLink(pos.x(), pos.y());
+        if(nearestLink>=0)
+        {
+            this->links.erase(this->links.begin() + nearestLink);
+            this->Redraw();
+        }
     }
 
     //Update dragging flag
