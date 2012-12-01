@@ -25,6 +25,7 @@ public slots:
 
 protected:
     float scaleFactor;
+
 };
 
 class VideoWidget : public QWidget

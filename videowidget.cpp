@@ -16,12 +16,10 @@ using namespace std;
 ZoomGraphicsView::ZoomGraphicsView(QWidget *parent) : QGraphicsView(parent)
 {
     this->scaleFactor = 1.;
-
 }
 
 ZoomGraphicsView::~ZoomGraphicsView()
 {
-
 
 }
 
@@ -60,6 +58,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->timer = QSharedPointer<QTimer>(new QTimer(this));
     QObject::connect(&(*this->timer),SIGNAL(timeout()), this, SLOT(TimerUpdate()));
     this->timer->start(10);
+
 }
 
 VideoWidget::~VideoWidget()
@@ -182,6 +181,14 @@ void VideoWidget::TimerUpdate()
         //This automatically triggers the video frame refresh
         this->ui->horizontalScrollBar->setValue(calcCurrentTime);
     }
+
+    //Monitor if the mouse is in the video view area
+    int mouseOverVideoView = this->ui->graphicsView->underMouse();
+    if(mouseOverVideoView && !this->sceneControl->GetMouseOver())
+        this->sceneControl->MouseEnterEvent();
+    if(!mouseOverVideoView && this->sceneControl->GetMouseOver())
+        this->sceneControl->MouseLeaveEvent();
+
 }
 
 void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)

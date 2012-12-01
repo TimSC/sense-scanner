@@ -41,6 +41,10 @@ public:
     QWidget *ControlsFactory(QWidget *parent);
     void RemovePoint(int index);
 
+    int GetMouseOver();
+    void MouseEnterEvent();
+    void MouseLeaveEvent();
+
     QSharedPointer<MouseGraphicsScene> scene;
 
 public slots:
@@ -61,6 +65,7 @@ protected:
     QSharedPointer<QGraphicsPixmapItem> item;
     std::vector<std::vector<float> > pos;
     std::vector<std::vector<int> > links;
+    int mouseOver;
 };
 
 #endif // SCENECONTROLLER_H

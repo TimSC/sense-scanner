@@ -10,6 +10,7 @@ using namespace::std;
 MouseGraphicsScene::MouseGraphicsScene(QWidget *parent) : QGraphicsScene(parent)
 {
     this->sceneControl = NULL;
+
 }
 
 MouseGraphicsScene::~MouseGraphicsScene()
@@ -44,6 +45,8 @@ void MouseGraphicsScene::SetSceneControl(SimpleSceneController *sceneControlIn)
 
 SimpleSceneController::SimpleSceneController(QWidget *parent)
 {
+    this->mode = "MOVE";
+    this->mouseOver = false;
     this->scene = QSharedPointer<MouseGraphicsScene>(new MouseGraphicsScene(parent));
     this->scene->SetSceneControl(this);
     for(int i=0;i<50;i++)
@@ -60,7 +63,9 @@ SimpleSceneController::SimpleSceneController(QWidget *parent)
     this->leftDrag = 0;
     this->mousex = 0.f;
     this->mousey = 0.f;
-    this->mode = "MOVE";
+
+
+
 }
 
 SimpleSceneController::~SimpleSceneController()
@@ -102,7 +107,7 @@ void SimpleSceneController::Redraw()
     QPen penBlue(QColor(0,0,255));
 
     //If in add link mode
-    if(this->mode == "ADD_LINK" && this->activePoint >= 0)
+    if(this->mode == "ADD_LINK" && this->activePoint >= 0 && this->mouseOver)
     {
         //draw a link to encourage user to click on the next point
         this->scene->addLine(this->mousex, this->mousey,
@@ -344,4 +349,21 @@ void SimpleSceneController::AddLinkPressed()
 void SimpleSceneController::RemoveLinkPressed()
 {
     this->mode = "REMOVE_LINK";
+}
+
+int SimpleSceneController::GetMouseOver()
+{
+    return this->mouseOver;
+}
+
+void SimpleSceneController::MouseEnterEvent()
+{
+    this->mouseOver = true;
+    this->Redraw();
+}
+
+void SimpleSceneController::MouseLeaveEvent()
+{
+    this->mouseOver = false;
+    this->Redraw();
 }
