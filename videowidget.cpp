@@ -91,6 +91,7 @@ SimpleScene::SimpleScene(QWidget *parent)
     this->imgWidth = 0;
     this->imgHeight = 0;
     this->markerSize = 2.;
+    this->leftDrag = 0;
 }
 
 SimpleScene::~SimpleScene()
@@ -147,12 +148,11 @@ void SimpleScene::Redraw()
 
 void SimpleScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    cout << "mouseMoveEvent" << endl;
     assert(mouseEvent);
     QPointF pos = mouseEvent->scenePos();
-    if(this->activePoint >= 0)
+    cout << "mouseMoveEvent, " << pos.x() << "," << pos.y () << endl;
+    if(this->activePoint >= 0 && this->leftDrag)
     {
-        cout << pos.x() << "," << pos.y () << endl;
         this->pos[this->activePoint][0] = pos.x();
         this->pos[this->activePoint][1] = pos.y();
         this->Redraw();
@@ -168,11 +168,20 @@ void SimpleScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
     int nearestPoint = this->NearestPoint(pos.x(), pos.y());
     this->activePoint = nearestPoint;
     this->Redraw();
+
+    Qt::MouseButton button = mouseEvent->button();
+    if(button==Qt::LeftButton)
+        this->leftDrag = 1;
 }
 
 void SimpleScene::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent)
 {
     cout << "mouseReleaseEvent" << endl;
+    assert(mouseEvent);
+
+    Qt::MouseButton button = mouseEvent->button();
+    if(button==Qt::LeftButton)
+        this->leftDrag = 0;
 }
 
 int SimpleScene::NearestPoint(float x, float y)
