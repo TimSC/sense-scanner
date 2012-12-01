@@ -3,6 +3,7 @@
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QObject>
+#include <QtGui/QPushButton>
 #include <iostream>
 #include <assert.h>
 #include <stdexcept>
@@ -202,6 +203,22 @@ int SimpleScene::NearestPoint(float x, float y)
     return best;
 }
 
+void SimpleScene::AddToolButtons(QLayout *layout)
+{
+    assert(layout);
+    class QPushButton *button = new class QPushButton("One");
+    layout->addWidget(button);
+    class QPushButton *button2 = new class QPushButton("Two");
+    layout->addWidget(button2);
+    button->show();
+    button2->show();
+}
+
+void SimpleScene::RemoveToolButtons(QLayout *layout)
+{
+
+}
+
 //********************************************************************
 
 VideoWidget::VideoWidget(QWidget *parent) :
@@ -215,7 +232,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->mediaLength = 0;
     this->waitingForNumFrames = 0;
     this->seq = NULL;
-    this->sceneControl = QSharedPointer<SimpleScene>(new SimpleScene(this));
+    //this->sceneControl = QSharedPointer<SimpleScene>(NULL);
 
     this->SetVisibleAtTime(0);
 
@@ -363,6 +380,9 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)
 
 void VideoWidget::SetSceneControl(QSharedPointer<SimpleScene> sceneIn)
 {
+    if(!this->sceneControl.isNull())
+        this->sceneControl->RemoveToolButtons(this->ui->annotationTools);
     this->sceneControl = sceneIn;
     this->ui->graphicsView->setScene(&*this->sceneControl->scene);
+    this->sceneControl->AddToolButtons(this->ui->annotationTools);
 }

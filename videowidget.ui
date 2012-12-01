@@ -15,6 +15,9 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
+    <layout class="QHBoxLayout" name="annotationTools"/>
+   </item>
+   <item>
     <widget class="ZoomGraphicsView" name="graphicsView"/>
    </item>
    <item>
@@ -26,7 +29,7 @@
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>../QtMedia/icons/media-playback-pause.png</normaloff>../QtMedia/icons/media-playback-pause.png</iconset>
+         <normaloff>icons/media-playback-pause.png</normaloff>icons/media-playback-pause.png</iconset>
        </property>
       </widget>
      </item>
@@ -37,7 +40,7 @@
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>../QtMedia/icons/media-playback-start.png</normaloff>../QtMedia/icons/media-playback-start.png</iconset>
+         <normaloff>icons/media-playback-start.png</normaloff>icons/media-playback-start.png</iconset>
        </property>
       </widget>
      </item>

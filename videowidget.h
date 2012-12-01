@@ -56,6 +56,9 @@ public:
     int NearestPoint(float x, float y);
     void Redraw();
 
+    void AddToolButtons(QLayout *layout);
+    void RemoveToolButtons(QLayout *layout);
+
     QSharedPointer<QGraphicsPixmapItem> item;
     QSharedPointer<MouseGraphicsScene> scene;
     std::vector<std::vector<float> > pos;
