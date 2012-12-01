@@ -192,7 +192,7 @@ int SimpleScene::NearestPoint(float x, float y)
     {
         float dx = this->pos[i][0] - x;
         float dy = this->pos[i][1] - y;
-        float dist = pow(dx*dx + dy*dy, 0.5);
+        float dist = pow(dx*dx + dy*dy, 0.5f);
         if(bestDist < 0. || dist < bestDist)
         {
             bestDist = dist;
