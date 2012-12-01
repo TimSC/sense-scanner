@@ -53,11 +53,13 @@ SimpleSceneController::SimpleSceneController(QWidget *parent)
         p.push_back(rand() % 500);
         this->pos.push_back(p);
     }
-    activePoint = -1;
+    this->activePoint = -1;
     this->imgWidth = 0;
     this->imgHeight = 0;
     this->markerSize = 2.;
     this->leftDrag = 0;
+    this->mousex = 0.f;
+    this->mousey = 0.f;
     this->mode = "MOVE";
 }
 
@@ -97,6 +99,16 @@ void SimpleSceneController::Redraw()
     QPen penRed(QColor(255,0,0));
     QBrush brushTransparent(QColor(0,0,0,0));
     QBrush brushRed(QColor(255,0,0));
+    QPen penBlue(QColor(0,0,255));
+
+    //If in add link mode
+    if(this->mode == "ADD_LINK" && this->activePoint >= 0)
+    {
+        //draw a link to encourage user to click on the next point
+        this->scene->addLine(this->mousex, this->mousey,
+                             this->pos[this->activePoint][0], this->pos[this->activePoint][1],
+                             penBlue);
+    }
 
     for(unsigned int i=0;i<this->pos.size();i++)
     {
@@ -116,8 +128,10 @@ void SimpleSceneController::Redraw()
 
 void SimpleSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    assert(mouseEvent);
+    //assert(mouseEvent);
     QPointF pos = mouseEvent->scenePos();
+    this->mousex = pos.x();
+    this->mousey = pos.y();
     //cout << "mouseMoveEvent, " << pos.x() << "," << pos.y () << endl;
 
     if(this->mode == "MOVE")
@@ -130,6 +144,9 @@ void SimpleSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
     }
     }
 
+    //Update prompt line
+    if(this->mode == "ADD_LINK" && this->activePoint >= 0)
+        this->Redraw();
 }
 
 void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
@@ -137,15 +154,16 @@ void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent
     cout << "mousePressEvent" << endl;
     assert(mouseEvent);
     QPointF pos = mouseEvent->buttonDownScenePos(mouseEvent->button());
+    Qt::MouseButton button = mouseEvent->button();
 
-    if(this->mode == "MOVE")
+    if(this->mode == "MOVE" && button==Qt::LeftButton)
     {
         int nearestPoint = this->NearestPoint(pos.x(), pos.y());
         this->activePoint = nearestPoint;
         this->Redraw();
     }
 
-    if(this->mode == "ADD_POINT")
+    if(this->mode == "ADD_POINT" && button==Qt::LeftButton)
     {
         std::vector<float> p;
         p.push_back(pos.x());
@@ -154,17 +172,45 @@ void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent
         this->Redraw();
     }
 
-    if(this->mode == "REMOVE_POINT")
+    if(this->mode == "REMOVE_POINT" && button==Qt::LeftButton)
     {
         int nearestPoint = this->NearestPoint(pos.x(), pos.y());
         if(nearestPoint>=0)
         {
             this->pos.erase(this->pos.begin()+nearestPoint);
         }
+        this->activePoint = -1;
         this->Redraw();
     }
 
-    Qt::MouseButton button = mouseEvent->button();
+    if(this->mode == "ADD_LINK" && button==Qt::LeftButton)
+    {
+        int nearestPoint = this->NearestPoint(pos.x(), pos.y());
+
+        //Join previously selected point with nearest point
+        if(this->activePoint >= 0)
+        {
+            this->activePoint = nearestPoint;
+            this->Redraw();
+        }
+
+        //Nothing is selected, so select nearest point
+        if(this->activePoint == -1)
+        {
+            this->activePoint = nearestPoint;
+            this->Redraw();
+        }
+
+    }
+
+    if(this->mode == "ADD_LINK" && button==Qt::RightButton)
+    {
+        //Right click deselects point in this mode
+        this->activePoint = -1;
+        this->Redraw();
+    }
+
+    //Update dragging flag
     if(button==Qt::LeftButton)
         this->leftDrag = 1;
 }
@@ -255,6 +301,8 @@ void SimpleSceneController::RemovePointPressed()
 void SimpleSceneController::AddLinkPressed()
 {
     this->mode = "ADD_LINK";
+    this->activePoint = -1; //Start with nothing selected
+    this->Redraw();
 }
 
 void SimpleSceneController::RemoveLinkPressed()

@@ -45,6 +45,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     ui(new Ui::VideoWidget)
 {
     ui->setupUi(this);
+    this->ui->graphicsView->setMouseTracking(true);
     this->playVidStartPos = 0;
     this->currentTime = 0;
     this->playActive = false;

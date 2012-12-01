@@ -44,6 +44,7 @@ public:
     QSharedPointer<MouseGraphicsScene> scene;
     std::vector<std::vector<float> > pos;
     QImage img;
+    float mousex, mousey;
 
 public slots:
     void MovePressed();
