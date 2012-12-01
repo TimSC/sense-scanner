@@ -47,7 +47,6 @@ class SimpleScene : public QObject
     Q_OBJECT
 
 public:
-
     SimpleScene(QWidget *parent);
     virtual ~SimpleScene();
 
@@ -65,6 +64,11 @@ public:
     QSharedPointer<MouseGraphicsScene> scene;
     std::vector<std::vector<float> > pos;
     QImage img;
+
+public slots:
+    void MovePressed();
+
+
 protected:
     int activePoint;
     unsigned int imgHeight, imgWidth;

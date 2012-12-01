@@ -209,13 +209,41 @@ QWidget *SimpleScene::ControlsFactory(QWidget *parent)
     QWidget *layoutW = new QWidget();
     assert(layoutW->layout() == NULL);
     QHBoxLayout *layout = new QHBoxLayout();
-    layout->addWidget(new QPushButton("Move"));
-    layout->addWidget(new QPushButton("Add"));
-    layout->addWidget(new QPushButton("Remove"));
-    layout->addWidget(new QPushButton("Add Link"));
-    layout->addWidget(new QPushButton("Remove Link"));
+
+    QPushButton *button = new QPushButton("Move");
+    QObject::connect(button, SIGNAL(clicked()), this, SLOT(MovePressed()));
+    button->setAutoExclusive(true);
+    button->setCheckable(true);
+    button->setChecked(true);
+    layout->addWidget(button);
+
+    button = new QPushButton("Add");
+    button->setAutoExclusive(true);
+    button->setCheckable(true);
+    layout->addWidget(button);
+
+    button = new QPushButton("Remove");
+    button->setAutoExclusive(true);
+    button->setCheckable(true);
+    layout->addWidget(button);
+
+    button = new QPushButton("Add Link");
+    button->setAutoExclusive(true);
+    button->setCheckable(true);
+    layout->addWidget(button);
+
+    button = new QPushButton("Remove Link");
+    button->setAutoExclusive(true);
+    button->setCheckable(true);
+    layout->addWidget(button);
     layoutW->setLayout(layout);
     return layoutW;
+}
+
+void SimpleScene::MovePressed()
+{
+    cout << "Move pressed"<< endl;
+
 }
 
 //********************************************************************
