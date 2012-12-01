@@ -160,6 +160,30 @@ void SimpleSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
         this->Redraw();
 }
 
+void SimpleSceneController::RemovePoint(int index)
+{
+    assert(index >=0);
+    assert(index < this->pos.size());
+
+    //Remove from points list
+    this->pos.erase(this->pos.begin()+index);
+
+    //Update links with a higher index number
+    vector<vector<int> > filteredLinks;
+    for(unsigned int i=0;i<this->links.size();i++)
+    {
+        int broken = 0;
+        vector<int> &link = this->links[i];
+        if(link[0]==index) broken = 1;
+        if(link[1]==index) broken = 1;
+        if(link[0]>index) link[0] --;
+        if(link[1]>index) link[1] --;
+        if(!broken) filteredLinks.push_back(link);
+    }
+    this->links = filteredLinks;
+
+}
+
 void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     cout << "mousePressEvent" << endl;
@@ -186,10 +210,7 @@ void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent
     if(this->mode == "REMOVE_POINT" && button==Qt::LeftButton)
     {
         int nearestPoint = this->NearestPoint(pos.x(), pos.y());
-        if(nearestPoint>=0)
-        {
-            this->pos.erase(this->pos.begin()+nearestPoint);
-        }
+        if(nearestPoint>=0) this->RemovePoint(nearestPoint);
         this->activePoint = -1;
         this->Redraw();
     }

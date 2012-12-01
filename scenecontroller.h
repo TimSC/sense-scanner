@@ -39,6 +39,7 @@ public:
     void Redraw();
 
     QWidget *ControlsFactory(QWidget *parent);
+    void RemovePoint(int index);
 
     QSharedPointer<MouseGraphicsScene> scene;
 
