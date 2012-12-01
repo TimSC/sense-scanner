@@ -52,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->mediaInterface->OpenFile("/media/data/main/media/music/Smashing Pumpkins/The Smashing Pumpkins - The Everlasting Gaze.webm");
 
     ui->setupUi(this);
+    this->setWindowTitle("Video Cognition System");
     this->ui->widget->SetSceneControl(QSharedPointer<SimpleSceneController>(new SimpleSceneController(this)));
     this->ui->widget->SetSource(this->mediaInterface);
 }
