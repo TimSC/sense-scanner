@@ -67,13 +67,17 @@ public:
 
 public slots:
     void MovePressed();
-
+    void AddPointPressed();
+    void RemovePointPressed();
+    void AddLinkPressed();
+    void RemoveLinkPressed();
 
 protected:
     int activePoint;
     unsigned int imgHeight, imgWidth;
     float markerSize;
     int leftDrag;
+    QString mode;
 };
 
 class VideoWidget : public QWidget

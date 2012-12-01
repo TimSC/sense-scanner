@@ -93,6 +93,7 @@ SimpleScene::SimpleScene(QWidget *parent)
     this->imgHeight = 0;
     this->markerSize = 2.;
     this->leftDrag = 0;
+    this->mode = "MOVE";
 }
 
 SimpleScene::~SimpleScene()
@@ -153,11 +154,15 @@ void SimpleScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
     assert(mouseEvent);
     QPointF pos = mouseEvent->scenePos();
     cout << "mouseMoveEvent, " << pos.x() << "," << pos.y () << endl;
+
+    if(this->mode == "MOVE")
+    {
     if(this->activePoint >= 0 && this->leftDrag)
     {
         this->pos[this->activePoint][0] = pos.x();
         this->pos[this->activePoint][1] = pos.y();
         this->Redraw();
+    }
     }
 
 }
@@ -167,9 +172,13 @@ void SimpleScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
     cout << "mousePressEvent" << endl;
     assert(mouseEvent);
     QPointF pos = mouseEvent->buttonDownScenePos(mouseEvent->button());
-    int nearestPoint = this->NearestPoint(pos.x(), pos.y());
-    this->activePoint = nearestPoint;
-    this->Redraw();
+
+    if(this->mode == "MOVE")
+    {
+        int nearestPoint = this->NearestPoint(pos.x(), pos.y());
+        this->activePoint = nearestPoint;
+        this->Redraw();
+    }
 
     Qt::MouseButton button = mouseEvent->button();
     if(button==Qt::LeftButton)
@@ -218,21 +227,25 @@ QWidget *SimpleScene::ControlsFactory(QWidget *parent)
     layout->addWidget(button);
 
     button = new QPushButton("Add");
+    QObject::connect(button, SIGNAL(clicked()), this, SLOT(AddPointPressed()));
     button->setAutoExclusive(true);
     button->setCheckable(true);
     layout->addWidget(button);
 
     button = new QPushButton("Remove");
+    QObject::connect(button, SIGNAL(clicked()), this, SLOT(RemovePointPressed()));
     button->setAutoExclusive(true);
     button->setCheckable(true);
     layout->addWidget(button);
 
     button = new QPushButton("Add Link");
+    QObject::connect(button, SIGNAL(clicked()), this, SLOT(AddLinkPressed()));
     button->setAutoExclusive(true);
     button->setCheckable(true);
     layout->addWidget(button);
 
     button = new QPushButton("Remove Link");
+    QObject::connect(button, SIGNAL(clicked()), this, SLOT(RemoveLinkPressed()));
     button->setAutoExclusive(true);
     button->setCheckable(true);
     layout->addWidget(button);
@@ -243,7 +256,31 @@ QWidget *SimpleScene::ControlsFactory(QWidget *parent)
 void SimpleScene::MovePressed()
 {
     cout << "Move pressed"<< endl;
+    this->mode = "MOVE";
+}
 
+void SimpleScene::AddPointPressed()
+{
+    cout << "AddPointPressed"<< endl;
+    this->mode = "ADD_POINT";
+}
+
+void SimpleScene::RemovePointPressed()
+{
+    cout << "RemovePointPressed"<< endl;
+    this->mode = "REMOVE_POINT";
+}
+
+void SimpleScene::AddLinkPressed()
+{
+    cout << "AddLinkPressed"<< endl;
+    this->mode = "ADD_LINK";
+}
+
+void SimpleScene::RemoveLinkPressed()
+{
+    cout << "RemoveLinkPressed"<< endl;
+    this->mode = "REMOVE_LINK";
 }
 
 //********************************************************************
