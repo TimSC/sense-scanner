@@ -227,6 +227,15 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
     //Apply start offset
     time += this->info.start_time;
 
+    //Check if first frame is suitable
+    //class DecodedFrame *test = this->firstFrames[this->firstVideoStream];
+    class DecodedFrame *test = NULL;
+    /*if(this->firstFrames[this->firstVideoStream]->buff)
+    {
+        cout << "set" << endl;
+
+    }*/
+
     //Check if currently buffered frame is suitable for the response
     if(this->currentFrame.timestamp > 0 && this->prevFrame.timestamp > 0)
     {

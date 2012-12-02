@@ -234,6 +234,7 @@ void AvBinMedia::SetActive(int activeIn)
 
 AvBinThread::AvBinThread(class EventLoop *eventLoopIn)
 {
+    this->setStackSize(1024*1024*100);
     this->eventReceiver = new EventReceiver(eventLoopIn);
     this->eventLoop = eventLoopIn;
     this->eventLoop->AddListener("STOP_THREADS", *eventReceiver);
