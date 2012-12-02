@@ -191,17 +191,20 @@ void SimpleSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 void SimpleSceneController::RemovePoint(int index)
 {
-    //Get current frame
-    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
-    it = this->pos.find(this->currentTime);
-    if(it == this->pos.end()) return;
-    std::vector<std::vector<float> > &currentFrame = it->second;
-
     assert(index >=0);
-    assert(index < currentFrame.size());
+    assert(index < this->shape.size());
+
+    //Remove from existing annotaiton frames
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it=this->pos.begin(); it != this->pos.end();it++)
+    {
+        std::vector<std::vector<float> > &frame = it->second;
+        frame.erase(frame.begin()+index);
+        assert(frame.size() == this->shape.size() - 1);
+    }
 
     //Remove from points list
-    currentFrame.erase(currentFrame.begin()+index);
+    this->shape.erase(this->shape.begin()+index);
 
     //Update links with a higher index number
     vector<vector<int> > filteredLinks;
@@ -284,7 +287,19 @@ void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent
         std::vector<float> p;
         p.push_back(pos.x());
         p.push_back(pos.y());
-        currentFrame.push_back(p);
+
+        //Apply change to existing annotation frames
+        std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+        for(it=this->pos.begin(); it != this->pos.end();it++)
+        {
+            std::vector<std::vector<float> > &frame = it->second;
+            frame.push_back(p);
+            assert(frame.size() == this->shape.size() + 1);
+        }
+
+        //Apply to currunt shape template
+        this->shape.push_back(p);
+
         this->Redraw();
     }
 
