@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?><shape>
+<point id='0' x='169' y='15'/>
+<point id='1' x='210' y='9'/>
+<point id='2' x='243.94' y='14.8695'/>
+<point id='3' x='305.025' y='23.3089'/>
+<point id='4' x='335.568' y='14.4676'/>
+<point id='5' x='364.503' y='21.7014'/>
+<point id='6' x='180.041' y='33.7577'/>
+<point id='7' x='209.378' y='20.4958'/>
+<point id='8' x='208.574' y='24.1126'/>
+<point id='9' x='208.173' y='30.9446'/>
+<point id='10' x='207.771' y='45.0103'/>
+<point id='11' x='235.5' y='39.384'/>
+<point id='12' x='280.51' y='37.7765'/>
+<point id='13' x='305.829' y='43.4028'/>
+<point id='14' x='332.755' y='25.3183'/>
+<point id='15' x='331.951' y='31.3464'/>
+<point id='16' x='329.54' y='38.5802'/>
+<point id='17' x='331.951' y='50.6366'/>
+<point id='18' x='357.269' y='45.0103'/>
+<point id='19' x='278.742' y='97.4151'/>
+<point id='20' x='243.538' y='113.329'/>
+<point id='21' x='273.92' y='127.797'/>
+<point id='22' x='301.89' y='122.01'/>
+<point id='23' x='231.964' y='87.77'/>
+<point id='24' x='220.39' y='110.918'/>
+<point id='25' x='205.44' y='139.371'/>
+<point id='26' x='192.901' y='164.931'/>
+<point id='27' x='304.302' y='91.1458'/>
+<point id='28' x='317.805' y='120.081'/>
+<point id='29' x='323.592' y='152.392'/>
+<point id='30' x='326.485' y='172.647'/>
+<point id='31' x='208.333' y='168.789'/>
+<point id='32' x='231.481' y='151.91'/>
+<point id='33' x='270.544' y='155.285'/>
+<point id='34' x='297.55' y='162.519'/>
+<point id='35' x='309.606' y='173.129'/>
+<point id='36' x='295.621' y='197.724'/>
+<point id='37' x='264.275' y='211.709'/>
+<point id='38' x='230.517' y='200.135'/>
+<point id='39' x='213.156' y='169.753'/>
+<point id='40' x='269.097' y='162.519'/>
+<point id='41' x='302.373' y='175.058'/>
+<point id='42' x='263.792' y='189.043'/>
+<point id='43' x='112.365' y='65.5864'/>
+<point id='44' x='351.08' y='85.841'/>
+<point id='45' x='279.167' y='20.8333'/>
+<link from='0' to='1'/>
+<link from='1' to='2'/>
+<link from='3' to='4'/>
+<link from='4' to='5'/>
+<link from='6' to='7'/>
+<link from='7' to='11'/>
+<link from='11' to='10'/>
+<link from='10' to='6'/>
+<link from='13' to='14'/>
+<link from='14' to='18'/>
+<link from='18' to='17'/>
+<link from='17' to='13'/>
+<link from='7' to='8'/>
+<link from='14' to='15'/>
+<link from='23' to='24'/>
+<link from='24' to='25'/>
+<link from='25' to='26'/>
+<link from='20' to='21'/>
+<link from='21' to='22'/>
+<link from='21' to='19'/>
+<link from='27' to='28'/>
+<link from='28' to='29'/>
+<link from='29' to='30'/>
+<link from='31' to='32'/>
+<link from='32' to='33'/>
+<link from='33' to='34'/>
+<link from='34' to='35'/>
+<link from='35' to='36'/>
+<link from='36' to='37'/>
+<link from='37' to='38'/>
+<link from='38' to='31'/>
+<link from='39' to='40'/>
+<link from='40' to='41'/>
+<link from='41' to='42'/>
+<link from='42' to='39'/>
+<link from='2' to='45'/>
+<link from='45' to='3'/>
+</shape>
