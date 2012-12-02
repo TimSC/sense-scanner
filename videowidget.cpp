@@ -141,6 +141,7 @@ void VideoWidget::Play()
 {
     cout << "play" << endl;
     this->playPressedTime.start();
+    this->waitingForNumFrames = 0;
 
     //If the video is at the end, start playing from the beginning
     if(this->currentTime < this->mediaLength - 1000)

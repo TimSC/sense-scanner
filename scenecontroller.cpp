@@ -391,6 +391,12 @@ unsigned long long SimpleSceneController::GetSeekFowardTime()
     throw std::runtime_error("No frame");
 }
 
+unsigned long long AbsDiff(unsigned long long a, unsigned long long b)
+{
+    if(a>b) return a-b;
+    return b-a;
+}
+
 unsigned long long SimpleSceneController::GetSeekBackTime()
 {
 
@@ -403,7 +409,7 @@ unsigned long long SimpleSceneController::GetSeekBackTime()
         const unsigned long long &ti = it->first;
         std::vector<std::vector<float> >&framePos = it->second;
         if(ti >= this->currentTime) continue; //Ignore frames in the future
-        unsigned long long diff = abs(ti - this->currentTime);
+        unsigned long long diff = AbsDiff(ti, this->currentTime);
         if(!bestSet || diff < bestDiff)
         {
             bestDiff = diff;
