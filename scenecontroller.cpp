@@ -60,7 +60,7 @@ SimpleSceneController::SimpleSceneController(QWidget *parent)
     this->leftDrag = 0;
     this->mousex = 0.f;
     this->mousey = 0.f;
-
+    this->markFrameButton = NULL;
 
 
 }
@@ -81,10 +81,15 @@ void SimpleSceneController::VideoImageChanged(QImage &fr, unsigned long long ti)
 {
     this->img = fr;
     this->currentTime = ti;
-    //this->item =
-    //        QSharedPointer<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap::fromImage(fr)));
     this->imgWidth = fr.width();
     this->imgHeight = fr.height();
+
+    //Check if this frame is used for annotation
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    it = this->pos.find(this->currentTime);
+    int isUsed = (it != this->pos.end());
+    this->markFrameButton->setChecked(isUsed);
+
     this->Redraw();
 }
 
@@ -420,13 +425,14 @@ QWidget *SimpleSceneController::ControlsFactory(QWidget *parent)
     assert(layoutW->layout() == NULL);
     QHBoxLayout *layout = new QHBoxLayout();
 
-    QPushButton *button = new QPushButton("Mark Frame");
-    QObject::connect(button, SIGNAL(toggled(bool)), this, SLOT(MarkFramePressed(bool)));
-    button->setCheckable(true);
-    button->setChecked(true);
-    layout->addWidget(button);
+    assert(this->markFrameButton == NULL);
+    this->markFrameButton = new QPushButton("Mark Frame");
+    QObject::connect(this->markFrameButton, SIGNAL(toggled(bool)), this, SLOT(MarkFramePressed(bool)));
+    this->markFrameButton->setCheckable(true);
+    //this->markFrameButton->setChecked(true);
+    layout->addWidget(this->markFrameButton);
 
-    button = new QPushButton("Move");
+    QPushButton *button = new QPushButton("Move");
     QObject::connect(button, SIGNAL(clicked()), this, SLOT(MovePressed()));
     button->setAutoExclusive(true);
     button->setCheckable(true);

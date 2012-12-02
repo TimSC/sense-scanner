@@ -71,6 +71,7 @@ protected:
     std::vector<std::vector<int> > links;
     unsigned long long currentTime;
     int mouseOver;
+    QPushButton *markFrameButton;
 };
 
 #endif // SCENECONTROLLER_H
