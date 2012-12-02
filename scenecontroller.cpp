@@ -89,6 +89,7 @@ SimpleSceneController::~SimpleSceneController()
 void SimpleSceneController::VideoImageChanged(QImage &fr, unsigned long long ti)
 {
     this->img = fr;
+    this->currentTime = ti;
     //this->item =
     //        QSharedPointer<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap::fromImage(fr)));
     this->imgWidth = fr.width();
@@ -372,14 +373,52 @@ int SimpleSceneController::NearestPoint(float x, float y, std::vector<std::vecto
 
 unsigned long long SimpleSceneController::GetSeekFowardTime()
 {
+    unsigned long long bestDiff = 0;
+    unsigned long long bestFrame = 0;
+    int bestSet = 0;
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it = this->pos.begin(); it != this->pos.end(); it++)
+    {
+        const unsigned long long &ti = it->first;
+        std::vector<std::vector<float> >&framePos = it->second;
+        if(ti <= this->currentTime) continue; //Ignore frames in the past
+        unsigned long long diff = abs(ti - this->currentTime);
+        if(!bestSet || diff < bestDiff)
+        {
+            bestDiff = diff;
+            bestFrame = ti;
+            bestSet = 1;
+        }
+    }
+    if(bestSet)
+        return bestFrame;
     throw std::runtime_error("No frame");
-    return 0;
 }
 
 unsigned long long SimpleSceneController::GetSeekBackTime()
 {
+
+    unsigned long long bestDiff = 0;
+    unsigned long long bestFrame = 0;
+    int bestSet = 0;
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it = this->pos.begin(); it != this->pos.end(); it++)
+    {
+        const unsigned long long &ti = it->first;
+        std::vector<std::vector<float> >&framePos = it->second;
+        if(ti >= this->currentTime) continue; //Ignore frames in the future
+        unsigned long long diff = abs(ti - this->currentTime);
+        if(!bestSet || diff < bestDiff)
+        {
+            bestDiff = diff;
+            bestFrame = ti;
+            bestSet = 1;
+        }
+    }
+
+    if(bestSet)
+        return bestFrame;
     throw std::runtime_error("No frame");
-    return 0;
 }
 
 //********************************************************************

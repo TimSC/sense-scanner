@@ -134,6 +134,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>seekBackButton</sender>
+   <signal>pressed()</signal>
+   <receiver>VideoWidget</receiver>
+   <slot>SeekBack()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>25</x>
+     <y>274</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>seekForwardButton</sender>
+   <signal>pressed()</signal>
+   <receiver>VideoWidget</receiver>
+   <slot>SeekForward()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>136</x>
+     <y>274</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>SliderMoved(int)</slot>
