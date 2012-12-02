@@ -430,7 +430,7 @@ QWidget *SimpleSceneController::ControlsFactory(QWidget *parent)
     QHBoxLayout *layout = new QHBoxLayout();
 
     QPushButton *button = new QPushButton("Mark Frame");
-    QObject::connect(button, SIGNAL(clicked()), this, SLOT(MarkFramePressed()));
+    QObject::connect(button, SIGNAL(toggled(bool)), this, SLOT(MarkFramePressed(bool)));
     button->setCheckable(true);
     button->setChecked(true);
     layout->addWidget(button);
@@ -469,9 +469,9 @@ QWidget *SimpleSceneController::ControlsFactory(QWidget *parent)
     return layoutW;
 }
 
-void SimpleSceneController::MarkFramePressed()
+void SimpleSceneController::MarkFramePressed(bool val)
 {
-
+    cout << val << endl;
 }
 
 void SimpleSceneController::MovePressed()
