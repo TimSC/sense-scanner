@@ -49,6 +49,7 @@ public:
     void MouseLeaveEvent();
     unsigned long long GetSeekFowardTime();
     unsigned long long GetSeekBackTime();
+    void WriteShapeToStream(QTextStream &textStream);
 
     QSharedPointer<MouseGraphicsScene> scene;
 

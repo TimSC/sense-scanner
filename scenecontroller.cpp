@@ -703,19 +703,8 @@ void SimpleSceneController::LoadShape()
     }
 }
 
-void SimpleSceneController::SaveShape()
+void SimpleSceneController::WriteShapeToStream(QTextStream &out)
 {
-    //Get output filename from user
-    QString fileName = QFileDialog::getSaveFileName(0,
-      tr("Save Shape"), "", tr("Shapes (*.shape)"));
-    if(fileName.length() == 0) return;
-
-    //Save data to file
-    QFile f(fileName);
-    f.open( QIODevice::WriteOnly );
-    QTextStream out(&f);
-    out.setCodec("UTF-8");
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>";
     out << "<shape>" << endl;
 
     for(unsigned int i=0; i < this->shape.size(); i++)
@@ -728,6 +717,22 @@ void SimpleSceneController::SaveShape()
     }
 
     out << "</shape>" << endl;
+}
+
+void SimpleSceneController::SaveShape()
+{
+    //Get output filename from user
+    QString fileName = QFileDialog::getSaveFileName(0,
+      tr("Save Shape"), "", tr("Shapes (*.shape)"));
+    if(fileName.length() == 0) return;
+
+    //Save data to file
+    QFile f(fileName);
+    f.open( QIODevice::WriteOnly );
+    QTextStream out(&f);
+    out.setCodec("UTF-8");
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;;
+    this->WriteShapeToStream(out);
     f.close();
 }
 
@@ -750,6 +755,33 @@ void SimpleSceneController::LoadAnnotation()
 
 void SimpleSceneController::SaveAnnotation()
 {
+    //Get output filename from user
+    QString fileName = QFileDialog::getSaveFileName(0,
+      tr("Save Annotation Track"), "", tr("Annotation (*.annot)"));
+    if(fileName.length() == 0) return;
 
+    //Save data to file
+    QFile f(fileName);
+    f.open( QIODevice::WriteOnly );
+    QTextStream out(&f);
+    out.setCodec("UTF-8");
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;
+    out << "<annotation>" << endl;
+    this->WriteShapeToStream(out);
+
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it=this->pos.begin(); it != this->pos.end();it++)
+    {
+        std::vector<std::vector<float> > &frame = it->second;
+        assert(frame.size() == this->shape.size());
+        out << "<frame time='"<<(it->first/1000.f)<<"'>" << endl;
+        for(unsigned int i=0; i < frame.size(); i++)
+        {
+            out << "<point id='"<<i<<"' x='"<<frame[i][0]<<"' y='"<<frame[i][1]<<"'/>" << endl;
+        }
+        out << "</frame>" << endl;
+    }
+    out << "</annotation>" << endl;
+    f.close();
 }
 
