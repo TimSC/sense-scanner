@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <math.h>
+#include <stdexcept>
 #include <QtGui/QPixmap>
 #include "assert.h"
 #include "vectors.h"
@@ -334,6 +335,18 @@ int SimpleSceneController::NearestPoint(float x, float y)
         }
     }
     return best;
+}
+
+unsigned long long SimpleSceneController::GetSeekFowardTime()
+{
+    throw std::runtime_error("No frame");
+    return 0;
+}
+
+unsigned long long SimpleSceneController::GetSeekBackTime()
+{
+    throw std::runtime_error("No frame");
+    return 0;
 }
 
 //********************************************************************

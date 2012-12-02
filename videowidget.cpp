@@ -150,6 +150,33 @@ void VideoWidget::Play()
     playActive = true;
 }
 
+void VideoWidget::SeekBack()
+{
+    if(this->sceneControl.isNull()) return;
+    try
+    {
+        //This throws an exception if no seek point exists
+        unsigned long long ti = this->sceneControl->GetSeekBackTime();
+        assert(ti < this->mediaLength);
+        this->ui->horizontalScrollBar->setValue(ti);
+    }
+    catch(exception &err) {}
+}
+
+void VideoWidget::SeekForward()
+{
+    if(this->sceneControl.isNull()) return;
+    try
+    {
+        //This throws an exception if no seek point exists
+        unsigned long long ti = this->sceneControl->GetSeekFowardTime();
+        assert(ti < this->mediaLength);
+        this->ui->horizontalScrollBar->setValue(ti);
+    }
+    catch(exception &err) {}
+}
+
+
 void FrameCallbackTest(QImage& fr, unsigned long long timestamp, void *raw)
 {
     VideoWidget *widget = (VideoWidget *)raw;

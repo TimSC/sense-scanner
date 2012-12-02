@@ -41,6 +41,8 @@ public slots:
     void SliderMoved(int newValue);
     void Pause();
     void Play();
+    void SeekBack();
+    void SeekForward();
     void TimerUpdate();
     void AsyncFrameReceived(QImage& fr, unsigned long long timestamp);
     void SetSceneControl(QSharedPointer<SimpleSceneController> sceneIn);

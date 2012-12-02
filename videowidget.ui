@@ -23,6 +23,17 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
+      <widget class="QToolButton" name="seekBackButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>icons/media-seek-backward.png</normaloff>icons/media-seek-backward.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QToolButton" name="pauseButton">
        <property name="text">
         <string>...</string>
@@ -41,6 +52,17 @@
        <property name="icon">
         <iconset>
          <normaloff>icons/media-playback-start.png</normaloff>icons/media-playback-start.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="seekForwardButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>icons/media-seek-forward.png</normaloff>icons/media-seek-forward.png</iconset>
        </property>
       </widget>
      </item>
@@ -117,5 +139,7 @@
   <slot>SliderMoved(int)</slot>
   <slot>Play()</slot>
   <slot>Pause()</slot>
+  <slot>SeekBack()</slot>
+  <slot>SeekForward()</slot>
  </slots>
 </ui>

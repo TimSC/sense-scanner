@@ -45,6 +45,8 @@ public:
     int GetMouseOver();
     void MouseEnterEvent();
     void MouseLeaveEvent();
+    unsigned long long GetSeekFowardTime();
+    unsigned long long GetSeekBackTime();
 
     QSharedPointer<MouseGraphicsScene> scene;
 
