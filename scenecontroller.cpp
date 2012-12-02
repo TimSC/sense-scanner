@@ -53,15 +53,6 @@ SimpleSceneController::SimpleSceneController(QWidget *parent)
     this->currentTime = 0;
     this->scene = QSharedPointer<MouseGraphicsScene>(new MouseGraphicsScene(parent));
     this->scene->SetSceneControl(this);
-    std::vector<std::vector<float> > exampleFrame;
-    for(int i=0;i<50;i++)
-    {
-        std::vector<float> p;
-        p.push_back(rand() % 500);
-        p.push_back(rand() % 500);
-        exampleFrame.push_back(p);
-    }
-    this->pos[0] = exampleFrame;
     this->activePoint = -1;
     this->imgWidth = 0;
     this->imgHeight = 0;
@@ -471,7 +462,29 @@ QWidget *SimpleSceneController::ControlsFactory(QWidget *parent)
 
 void SimpleSceneController::MarkFramePressed(bool val)
 {
-    cout << val << endl;
+    //Check if current frame already exists
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    it = this->pos.find(this->currentTime);
+    int frameExists = (it != this->pos.end());
+
+    if(val==0 && frameExists) //Deselect frame for marking
+    {
+        this->pos.erase(it);
+    }
+    if(val==1 && !frameExists) //Enable frame annotation
+    {
+        std::vector<std::vector<float> > exampleFrame;
+        for(int i=0;i<50;i++)
+        {
+            std::vector<float> p;
+            p.push_back(rand() % 500);
+            p.push_back(rand() % 500);
+            exampleFrame.push_back(p);
+        }
+        this->pos[this->currentTime] = exampleFrame;
+
+    }
+    this->Redraw();
 }
 
 void SimpleSceneController::MovePressed()
