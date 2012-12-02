@@ -266,7 +266,7 @@ void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent
         int nearestPoint = this->NearestPoint(pos.x(), pos.y());
 
         //Join previously selected point with nearest point
-        if(this->activePoint >= 0)
+        if(this->activePoint >= 0 && nearestPoint >= 0 && this->activePoint != nearestPoint)
         {
             std::vector<int> link;
             link.push_back(this->activePoint);
