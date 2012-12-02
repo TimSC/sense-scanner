@@ -545,4 +545,14 @@ void SimpleSceneController::MouseLeaveEvent()
 
 //************************************************************
 
+QWidget *SimpleSceneController::MenuFactory(QMenuBar *menuBar)
+{
+    QAction *test = new QAction(tr("&test1..."), menuBar);
+    QAction *test2 = new QAction(tr("&test2..."), menuBar);
 
+    assert(menuBar);
+    QMenu *newMenu = menuBar->addMenu(tr("&Annotate"));
+    newMenu->addAction(test);
+    newMenu->addAction(test2);
+
+}

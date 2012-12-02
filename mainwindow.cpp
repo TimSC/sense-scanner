@@ -55,6 +55,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowTitle("Video Cognition System");
     this->ui->widget->SetSceneControl(QSharedPointer<SimpleSceneController>(new SimpleSceneController(this)));
     this->ui->widget->SetSource(this->mediaInterface);
+    this->ui->widget->SetMenuBar(this->menuBar());
 }
 
 MainWindow::~MainWindow()

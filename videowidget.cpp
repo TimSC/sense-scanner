@@ -239,3 +239,9 @@ void VideoWidget::SetSceneControl(QSharedPointer<SimpleSceneController> sceneIn)
     this->ui->graphicsView->setScene(&*this->sceneControl->scene);
     this->ui->annotationTools->addWidget(this->sceneControl->ControlsFactory(this));
 }
+
+void VideoWidget::SetMenuBar(QMenuBar *menuBar)
+{
+    this->sceneControl->MenuFactory(menuBar);
+
+}

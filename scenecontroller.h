@@ -40,6 +40,8 @@ public:
     void Redraw();
 
     QWidget *ControlsFactory(QWidget *parent);
+    QWidget *MenuFactory(QMenuBar *menuBar);
+
     void RemovePoint(int index);
 
     int GetMouseOver();
