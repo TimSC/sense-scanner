@@ -336,13 +336,21 @@ int SimpleSceneController::NearestPoint(float x, float y)
     return best;
 }
 
+//********************************************************************
+
 QWidget *SimpleSceneController::ControlsFactory(QWidget *parent)
 {
     QWidget *layoutW = new QWidget();
     assert(layoutW->layout() == NULL);
     QHBoxLayout *layout = new QHBoxLayout();
 
-    QPushButton *button = new QPushButton("Move");
+    QPushButton *button = new QPushButton("Mark Frame");
+    QObject::connect(button, SIGNAL(clicked()), this, SLOT(MarkFramePressed()));
+    button->setCheckable(true);
+    button->setChecked(true);
+    layout->addWidget(button);
+
+    button = new QPushButton("Move");
     QObject::connect(button, SIGNAL(clicked()), this, SLOT(MovePressed()));
     button->setAutoExclusive(true);
     button->setCheckable(true);
@@ -374,6 +382,11 @@ QWidget *SimpleSceneController::ControlsFactory(QWidget *parent)
     layout->addWidget(button);
     layoutW->setLayout(layout);
     return layoutW;
+}
+
+void SimpleSceneController::MarkFramePressed()
+{
+
 }
 
 void SimpleSceneController::MovePressed()
@@ -419,3 +432,7 @@ void SimpleSceneController::MouseLeaveEvent()
     this->mouseOver = false;
     this->Redraw();
 }
+
+//************************************************************
+
+

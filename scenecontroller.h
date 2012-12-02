@@ -49,6 +49,7 @@ public:
     QSharedPointer<MouseGraphicsScene> scene;
 
 public slots:
+    void MarkFramePressed();
     void MovePressed();
     void AddPointPressed();
     void RemovePointPressed();
