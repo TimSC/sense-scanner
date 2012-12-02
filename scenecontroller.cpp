@@ -7,7 +7,6 @@
 #include <QtGui/QFileDialog>
 #include <QtCore/QTextStream>
 #include <QtXml/QtXml>
-#include <QtXml/QXmlSimpleReader>
 #include "assert.h"
 #include "vectors.h"
 using namespace::std;
@@ -598,6 +597,42 @@ QWidget *SimpleSceneController::MenuFactory(QMenuBar *menuBar)
     return newMenu;
 }
 
+std::vector<std::vector<float> > SimpleSceneController::ProcessXmlDomFrame(QDomElement &rootElem)
+{
+    std::vector<std::vector<float> > out;
+    QDomNode n = rootElem.firstChild();
+    while(!n.isNull()) {
+        QDomElement e = n.toElement(); // try to convert the node to an element.
+
+        if(!e.isNull()) {
+            //cout << qPrintable(e.tagName()) << endl; // the node really is an element.
+            if(e.tagName() == "point")
+            {
+                std::vector<float> p;
+                int id = e.attribute("id").toInt();
+                p.push_back(e.attribute("x").toFloat());
+                p.push_back(e.attribute("y").toFloat());
+                while(id >= out.size())
+                {
+                    std::vector<float> empty;
+                    out.push_back(empty);
+                }
+                out[id] = p;
+            }
+            if(e.tagName() == "link")
+            {
+                std::vector<int> link;
+                link.push_back(e.attribute("from").toInt());
+                link.push_back(e.attribute("to").toInt());
+                this->links.push_back(link);
+            }
+        }
+    n = n.nextSibling();
+    }
+
+    return out;
+}
+
 void SimpleSceneController::LoadShape()
 {
 
@@ -620,36 +655,8 @@ void SimpleSceneController::LoadShape()
     //Load points and links into memory
     QDomElement rootElem = doc.documentElement();
 
-    this->shape.clear();
     this->links.clear();
-    QDomNode n = rootElem.firstChild();
-    while(!n.isNull()) {
-        QDomElement e = n.toElement(); // try to convert the node to an element.
-        if(!e.isNull()) {
-            //cout << qPrintable(e.tagName()) << endl; // the node really is an element.
-            if(e.tagName() == "point")
-            {
-                std::vector<float> p;
-                int id = e.attribute("id").toInt();
-                p.push_back(e.attribute("x").toFloat());
-                p.push_back(e.attribute("y").toFloat());
-                while(id >= this->shape.size())
-                {
-                    std::vector<float> empty;
-                    this->shape.push_back(empty);
-                }
-                this->shape[id] = p;
-            }
-            if(e.tagName() == "link")
-            {
-                std::vector<int> link;
-                link.push_back(e.attribute("from").toInt());
-                link.push_back(e.attribute("to").toInt());
-                this->links.push_back(link);
-            }
-        }
-        n = n.nextSibling();
-    }
+    this->shape = this->ProcessXmlDomFrame(rootElem);
 
     //Validate points
     int invalidShape = 0;
@@ -750,7 +757,48 @@ void SimpleSceneController::SetShapeFromCurentFrame()
 
 void SimpleSceneController::LoadAnnotation()
 {
+    //Get input filename from user
+    QString fileName = QFileDialog::getOpenFileName(0,
+        tr("Load Annotation"), "", tr("Annotation (*.annot)"));
+    if(fileName.length() == 0) return;
 
+    //Parse XML to DOM
+    QFile f(fileName);
+    QDomDocument doc("mydocument");
+    if (!doc.setContent(&f))
+    {
+        cout << "Xml Error?" << endl;
+        f.close();
+        return;
+    }
+    f.close();
+
+    //Load points and links into memory
+    QDomElement rootElem = doc.documentElement();
+
+    this->shape.clear();
+    this->links.clear();
+    this->pos.clear();
+    QDomNode n = rootElem.firstChild();
+    while(!n.isNull()) {
+        QDomElement e = n.toElement(); // try to convert the node to an element.
+        if(!e.isNull()) {
+            if(e.tagName() == "shape")
+            {
+                std::vector<std::vector<float> > shapeData = ProcessXmlDomFrame(e);
+                this->shape = shapeData;
+            }
+            if(e.tagName() == "frame")
+            {
+                std::vector<std::vector<float> > frame = ProcessXmlDomFrame(e);
+                cout << e.attribute("time").toFloat() << endl;
+                float timeSec = e.attribute("time").toFloat();
+                assert(timeSec > 0.f);
+                this->pos[(unsigned long long)(timeSec * 1000.f + 0.5)] = frame;
+            }
+        }
+        n = n.nextSibling();
+    }
 }
 
 void SimpleSceneController::SaveAnnotation()

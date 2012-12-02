@@ -5,6 +5,8 @@
 #include <QtGui/QWidget>
 #include <QtCore/QtCore>
 #include <QtGui/QtGui>
+#include <QtXml/QXmlSimpleReader>
+#include <QtXml/QtXml>
 
 class MouseGraphicsScene : public QGraphicsScene
 {
@@ -50,6 +52,7 @@ public:
     unsigned long long GetSeekFowardTime();
     unsigned long long GetSeekBackTime();
     void WriteShapeToStream(QTextStream &textStream);
+    std::vector<std::vector<float> > ProcessXmlDomFrame(QDomElement &e);
 
     QSharedPointer<MouseGraphicsScene> scene;
 
