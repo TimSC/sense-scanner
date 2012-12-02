@@ -794,6 +794,7 @@ void SimpleSceneController::LoadAnnotation()
                 cout << e.attribute("time").toFloat() << endl;
                 float timeSec = e.attribute("time").toFloat();
                 assert(timeSec > 0.f);
+                assert(frame.size() == this->shape.size());
                 this->pos[(unsigned long long)(timeSec * 1000.f + 0.5)] = frame;
             }
         }
