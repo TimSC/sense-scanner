@@ -224,7 +224,7 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)
         this->waitingForNumFrames -- ;
 
     //Add to scene
-    this->sceneControl->VideoImageChanged(fr);
+    this->sceneControl->VideoImageChanged(fr, timestamp);
     this->ui->graphicsView->setScene(&*this->sceneControl->scene);
 
     //Update current time

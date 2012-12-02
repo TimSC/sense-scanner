@@ -30,13 +30,13 @@ public:
     SimpleSceneController(QWidget *parent);
     virtual ~SimpleSceneController();
 
-    void VideoImageChanged(QImage &fr);
+    void VideoImageChanged(QImage &fr, unsigned long long ti);
 
     void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent);
-    int NearestPoint(float x, float y);
-    int NearestLink(float x, float y);
+    int NearestPoint(float x, float y, std::vector<std::vector<float> > &currentFrame);
+    int NearestLink(float x, float y, std::vector<std::vector<float> > &currentFrame);
     void Redraw();
 
     QWidget *ControlsFactory(QWidget *parent);
@@ -67,8 +67,9 @@ protected:
     QImage img;
     float mousex, mousey;
     QSharedPointer<QGraphicsPixmapItem> item;
-    std::vector<std::vector<float> > pos;
+    std::map<unsigned long long, std::vector<std::vector<float> > > pos;
     std::vector<std::vector<int> > links;
+    unsigned long long currentTime;
     int mouseOver;
 };
 

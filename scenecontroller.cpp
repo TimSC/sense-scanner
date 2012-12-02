@@ -50,15 +50,18 @@ SimpleSceneController::SimpleSceneController(QWidget *parent)
 {
     this->mode = "MOVE";
     this->mouseOver = false;
+    this->currentTime = 0;
     this->scene = QSharedPointer<MouseGraphicsScene>(new MouseGraphicsScene(parent));
     this->scene->SetSceneControl(this);
+    std::vector<std::vector<float> > exampleFrame;
     for(int i=0;i<50;i++)
     {
         std::vector<float> p;
         p.push_back(rand() % 500);
         p.push_back(rand() % 500);
-        this->pos.push_back(p);
+        exampleFrame.push_back(p);
     }
+    this->pos[0] = exampleFrame;
     this->activePoint = -1;
     this->imgWidth = 0;
     this->imgHeight = 0;
@@ -83,7 +86,7 @@ SimpleSceneController::~SimpleSceneController()
 
 }
 
-void SimpleSceneController::VideoImageChanged(QImage &fr)
+void SimpleSceneController::VideoImageChanged(QImage &fr, unsigned long long ti)
 {
     this->img = fr;
     //this->item =
@@ -95,7 +98,16 @@ void SimpleSceneController::VideoImageChanged(QImage &fr)
 
 void SimpleSceneController::Redraw()
 {
+    //Get positions for current frame
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    it = this->pos.find(this->currentTime);
+    std::vector<std::vector<float> > currentFrame;
+    if(it != this->pos.end())
+    {
+        currentFrame = it->second;
+    }
 
+    //Recreate scene and convert image
     this->scene->clear();
     if(this->imgWidth > 0 && this->imgHeight>0 && !this->img.isNull())
     {
@@ -110,36 +122,38 @@ void SimpleSceneController::Redraw()
     QPen penBlue(QColor(0,0,255));
 
     //If in add link mode
-    if(this->mode == "ADD_LINK" && this->activePoint >= 0 && this->mouseOver)
+    if(this->mode == "ADD_LINK" && this->activePoint >= 0 && this->mouseOver && currentFrame.size() > 0)
     {
         //draw a link to encourage user to click on the next point
         this->scene->addLine(this->mousex, this->mousey,
-                             this->pos[this->activePoint][0], this->pos[this->activePoint][1],
+                             currentFrame[this->activePoint][0], currentFrame[this->activePoint][1],
                              penBlue);
     }
 
     //Draw links
+    if(currentFrame.size() > 0)
     for(unsigned int i=0;i<this->links.size();i++)
     {
         vector<int> &link = this->links[i];
         assert(link.size()==2);
-        this->scene->addLine(this->pos[link[0]][0],this->pos[link[0]][1],
-                             this->pos[link[1]][0],this->pos[link[1]][1], penBlue);
+        this->scene->addLine(currentFrame[link[0]][0],currentFrame[link[0]][1],
+                             currentFrame[link[1]][0],currentFrame[link[1]][1], penBlue);
     }
 
     //Draw marker points
-    for(unsigned int i=0;i<this->pos.size();i++)
+    if(currentFrame.size() > 0)
+    for(unsigned int i=0;i<currentFrame.size();i++)
     {
-        assert(this->pos[i].size()==2);
+        assert(currentFrame[i].size()==2);
         //cout << this->activePoint << endl;
         if(i!=this->activePoint)
-            this->scene->addEllipse(this->pos[i][0]-this->markerSize/2,
-                                    this->pos[i][1]-this->markerSize/2,
+            this->scene->addEllipse(currentFrame[i][0]-this->markerSize/2,
+                                    currentFrame[i][1]-this->markerSize/2,
                                     this->markerSize, this->markerSize,
                                     penRed, brushRed);
         else
-            this->scene->addEllipse(this->pos[i][0]-this->markerSize/2,
-                                    this->pos[i][1]-this->markerSize/2,
+            this->scene->addEllipse(currentFrame[i][0]-this->markerSize/2,
+                                    currentFrame[i][1]-this->markerSize/2,
                                     this->markerSize, this->markerSize,
                                     penRed, brushTransparent);
     }
@@ -153,12 +167,18 @@ void SimpleSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
     this->mousey = pos.y();
     //cout << "mouseMoveEvent, " << pos.x() << "," << pos.y () << endl;
 
+    //Get current frame
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    it = this->pos.find(this->currentTime);
+    if(it == this->pos.end()) return;
+    std::vector<std::vector<float> > &currentFrame = it->second;
+
     if(this->mode == "MOVE")
     {
     if(this->activePoint >= 0 && this->leftDrag)
     {
-        this->pos[this->activePoint][0] = pos.x();
-        this->pos[this->activePoint][1] = pos.y();
+        currentFrame[this->activePoint][0] = pos.x();
+        currentFrame[this->activePoint][1] = pos.y();
         this->Redraw();
     }
     }
@@ -170,11 +190,17 @@ void SimpleSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 void SimpleSceneController::RemovePoint(int index)
 {
+    //Get current frame
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    it = this->pos.find(this->currentTime);
+    if(it == this->pos.end()) return;
+    std::vector<std::vector<float> > &currentFrame = it->second;
+
     assert(index >=0);
-    assert(index < this->pos.size());
+    assert(index < currentFrame.size());
 
     //Remove from points list
-    this->pos.erase(this->pos.begin()+index);
+    currentFrame.erase(currentFrame.begin()+index);
 
     //Update links with a higher index number
     vector<vector<int> > filteredLinks;
@@ -192,9 +218,9 @@ void SimpleSceneController::RemovePoint(int index)
 
 }
 
-int SimpleSceneController::NearestLink(float x, float y)
+int SimpleSceneController::NearestLink(float x, float y, std::vector<std::vector<float> > &currentFrame)
 {
-    cout << x << "," << y << endl;
+    //cout << x << "," << y << endl;
     vector<float> pc;
     pc.push_back(x);
     pc.push_back(y);
@@ -205,8 +231,8 @@ int SimpleSceneController::NearestLink(float x, float y)
     {
         //Calculate angle between clicked point and link direction
         vector<int> &link = this->links[i];
-        vector<float> pa = this->pos[link[0]];
-        vector<float> pb = this->pos[link[1]];
+        vector<float> pa = currentFrame[link[0]];
+        vector<float> pb = currentFrame[link[1]];
         vector<float> pac = SubVec(pc,pa);
         vector<float> pab = SubVec(pb,pa);
         vector<float> pacn = NormVec(pac);
@@ -235,12 +261,19 @@ void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent
 {
     cout << "mousePressEvent" << endl;
     assert(mouseEvent);
+
+    //Get current frame
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    it = this->pos.find(this->currentTime);
+    if(it == this->pos.end()) return;
+    std::vector<std::vector<float> > &currentFrame = it->second;
+
     QPointF pos = mouseEvent->buttonDownScenePos(mouseEvent->button());
     Qt::MouseButton button = mouseEvent->button();
 
     if(this->mode == "MOVE" && button==Qt::LeftButton)
     {
-        int nearestPoint = this->NearestPoint(pos.x(), pos.y());
+        int nearestPoint = this->NearestPoint(pos.x(), pos.y(), currentFrame);
         this->activePoint = nearestPoint;
         this->Redraw();
     }
@@ -250,13 +283,13 @@ void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent
         std::vector<float> p;
         p.push_back(pos.x());
         p.push_back(pos.y());
-        this->pos.push_back(p);
+        currentFrame.push_back(p);
         this->Redraw();
     }
 
     if(this->mode == "REMOVE_POINT" && button==Qt::LeftButton)
     {
-        int nearestPoint = this->NearestPoint(pos.x(), pos.y());
+        int nearestPoint = this->NearestPoint(pos.x(), pos.y(), currentFrame);
         if(nearestPoint>=0) this->RemovePoint(nearestPoint);
         this->activePoint = -1;
         this->Redraw();
@@ -264,7 +297,7 @@ void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent
 
     if(this->mode == "ADD_LINK" && button==Qt::LeftButton)
     {
-        int nearestPoint = this->NearestPoint(pos.x(), pos.y());
+        int nearestPoint = this->NearestPoint(pos.x(), pos.y(), currentFrame);
 
         //Join previously selected point with nearest point
         if(this->activePoint >= 0 && nearestPoint >= 0 && this->activePoint != nearestPoint)
@@ -296,7 +329,7 @@ void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent
     if(this->mode == "REMOVE_LINK" && button==Qt::LeftButton)
     {
         this->activePoint = -1;
-        int nearestLink = this->NearestLink(pos.x(), pos.y());
+        int nearestLink = this->NearestLink(pos.x(), pos.y(), currentFrame);
         if(nearestLink>=0)
         {
             this->links.erase(this->links.begin() + nearestLink);
@@ -319,14 +352,14 @@ void SimpleSceneController::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEv
         this->leftDrag = 0;
 }
 
-int SimpleSceneController::NearestPoint(float x, float y)
+int SimpleSceneController::NearestPoint(float x, float y, std::vector<std::vector<float> > &currentFrame)
 {
     int best = -1;
     float bestDist = -1;
-    for(unsigned int i=0;i<this->pos.size();i++)
+    for(unsigned int i=0;i<currentFrame.size();i++)
     {
-        float dx = this->pos[i][0] - x;
-        float dy = this->pos[i][1] - y;
+        float dx = currentFrame[i][0] - x;
+        float dy = currentFrame[i][1] - y;
         float dist = pow(dx*dx + dy*dy, 0.5f);
         if(bestDist < 0. || dist < bestDist)
         {
