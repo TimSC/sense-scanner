@@ -489,16 +489,23 @@ void SimpleSceneController::MarkFramePressed(bool val)
     }
     if(val==1 && !frameExists) //Enable frame annotation
     {
-        std::vector<std::vector<float> > exampleFrame;
-        for(int i=0;i<50;i++)
+        if(this->shape.size() > 0)
         {
-            std::vector<float> p;
-            p.push_back(rand() % 500);
-            p.push_back(rand() % 500);
-            exampleFrame.push_back(p);
+            this->pos[this->currentTime] = this->shape;
         }
-        this->pos[this->currentTime] = exampleFrame;
-
+        else
+        {
+            //Create random shape
+            std::vector<std::vector<float> > exampleFrame;
+            for(int i=0;i<50;i++)
+            {
+                std::vector<float> p;
+                p.push_back(rand() % 500);
+                p.push_back(rand() % 500);
+                exampleFrame.push_back(p);
+            }
+            this->pos[this->currentTime] = exampleFrame;
+        }
     }
     this->Redraw();
 }
@@ -593,10 +600,39 @@ void SimpleSceneController::LoadShape()
         f.close();
         return;
     }
-
-    cout << "here" << endl;
-
     f.close();
+
+    //Load points and links into memory
+    QDomElement rootElem = doc.documentElement();
+
+    this->shape.clear();
+    this->links.clear();
+    QDomNode n = rootElem.firstChild();
+    while(!n.isNull()) {
+        QDomElement e = n.toElement(); // try to convert the node to an element.
+        if(!e.isNull()) {
+            //cout << qPrintable(e.tagName()) << endl; // the node really is an element.
+            if(e.tagName() == "point")
+            {
+                std::vector<float> p;
+                p.push_back(e.attribute("x").toFloat());
+                p.push_back(e.attribute("y").toFloat());
+                this->shape.push_back(p);
+            }
+            if(e.tagName() == "link")
+            {
+                std::vector<int> link;
+                link.push_back(e.attribute("from").toInt());
+                link.push_back(e.attribute("to").toInt());
+                this->links.push_back(link);
+            }
+        }
+        n = n.nextSibling();
+    }
+
+    //Validate
+    //TODO
+
 }
 
 void SimpleSceneController::SaveShape()
