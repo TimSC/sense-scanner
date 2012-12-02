@@ -615,9 +615,15 @@ void SimpleSceneController::LoadShape()
             if(e.tagName() == "point")
             {
                 std::vector<float> p;
+                id = e.attribute("id").toInt();
                 p.push_back(e.attribute("x").toFloat());
                 p.push_back(e.attribute("y").toFloat());
-                this->shape.push_back(p);
+                while(id <= this->shape.size())
+                {
+                    std::vector<float> empty;
+                    this->shape.push_back(empty);
+                }
+                this->shape[id] = p;
             }
             if(e.tagName() == "link")
             {
@@ -630,7 +636,39 @@ void SimpleSceneController::LoadShape()
         n = n.nextSibling();
     }
 
-    //Validate
+    //Validate points
+    int invalidShape = 1;
+    for(unsigned int i=0;i<this->shape.size();i++)
+        if(this->shape[i].size() != 2)
+        {
+            cout << "Error: missing point ID " << i << endl;
+            invalidShape = 1;
+        }
+
+    //Validate links
+    for(unsigned int i=0;i<this->links.size();i++)
+    {
+        if(this->links[i].size() != 2)
+        {
+            cout << "Error: Invalid link" << endl;
+            invalidShape = 1;
+        }
+        if(this->links[i][0] < 0 || this->links[i][0] >= this->shape.size())
+        {
+            cout << "Link refers to non-existent point " << this->links[i][0] << endl;
+            invalidShape = 1;
+        }
+        if(this->links[i][1] < 0 || this->links[i][1] >= this->shape.size())
+        {
+            cout << "Link refers to non-existent point " << this->links[i][1] << endl;
+            invalidShape = 1;
+        }
+    }
+
+    if(invalidShape)
+        throw runtime_error("Invalid shape file");
+
+    //Check existing data to see if has the correct number of points
     //TODO
 
 }
