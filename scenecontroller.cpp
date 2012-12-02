@@ -615,10 +615,10 @@ void SimpleSceneController::LoadShape()
             if(e.tagName() == "point")
             {
                 std::vector<float> p;
-                id = e.attribute("id").toInt();
+                int id = e.attribute("id").toInt();
                 p.push_back(e.attribute("x").toFloat());
                 p.push_back(e.attribute("y").toFloat());
-                while(id <= this->shape.size())
+                while(id >= this->shape.size())
                 {
                     std::vector<float> empty;
                     this->shape.push_back(empty);
@@ -637,7 +637,7 @@ void SimpleSceneController::LoadShape()
     }
 
     //Validate points
-    int invalidShape = 1;
+    int invalidShape = 0;
     for(unsigned int i=0;i<this->shape.size();i++)
         if(this->shape[i].size() != 2)
         {
