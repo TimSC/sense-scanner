@@ -61,6 +61,8 @@ protected:
     std::vector<uint64_t> timestampOfChannel;
     class DecodedFrame currentFrame;
     class DecodedFrame prevFrame;
+    std::vector<class DecodedFrame *> firstFrames;
+
     uint8_t *audioBuffer;
     unsigned audioBufferSize;
 };

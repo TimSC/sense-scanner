@@ -42,6 +42,13 @@ AvBinBackend::~AvBinBackend()
 
     if(this->audioBuffer) delete [] this->audioBuffer;
     this->audioBuffer = NULL;
+
+    for(unsigned int i=0;i<this->firstFrames.size();i++)
+    {
+        if(this->firstFrames[i]) delete this->firstFrames[i];
+        this->firstFrames[i] = NULL;
+    }
+    this->firstFrames.clear();
 }
 
 int AvBinBackend::OpenFile(const char *filenameIn, int requestId)
@@ -84,6 +91,11 @@ void AvBinBackend::DoOpenFile(int requestId)
     this->firstVideoStream = -1;
     this->firstAudioStream = -1;
 
+    //Initialise first frame storage
+    assert(this->firstFrames.size()==0);
+    for(int32_t i = 0; i<numStreams; i++)
+        this->firstFrames.push_back(NULL);
+
     //Get info for each stream
     for(int32_t i = 0; i<numStreams; i++)
     {
@@ -100,6 +112,11 @@ void AvBinBackend::DoOpenFile(int requestId)
         if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO && this->firstAudioStream == -1)
         {
             this->firstAudioStream = i;
+        }
+        if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO)
+        {
+            assert(!this->firstFrames[i]);
+            this->firstFrames[i] = new DecodedFrame;
         }
     }
 
@@ -132,18 +149,15 @@ void AvBinBackend::DoOpenFile(int requestId)
         AVbinStreamInfo *sinfo = this->streamInfos[packet.stream_index];
         AVbinStream *stream = this->streams[packet.stream_index];
 
-        this->timestampOfChannel[packet.stream_index] = timestamp;
-
         //Check if all streams have received some data
         done = true;
         for(unsigned int chanNum=0;chanNum<this->timestampOfChannel.size();chanNum++)
         {
-            if(this->timestampOfChannel[chanNum] < 100000) done = false;
+            if(this->timestampOfChannel[chanNum] == 0) done = false;
         }
 
         //Decode video packet
-        if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO &&
-                (int)packet.stream_index == this->firstVideoStream)
+        if(sinfo->type == AVBIN_STREAM_TYPE_VIDEO)
         {
             unsigned requiredBuffSize = sinfo->video.width*sinfo->video.height*3;
             if ((this->currentFrame.buff)==NULL || requiredBuffSize != this->currentFrame.buffSize)
@@ -151,16 +165,21 @@ void AvBinBackend::DoOpenFile(int requestId)
 
             int32_t ret = mod_avbin_decode_video(stream, packet.data, packet.size, this->currentFrame.buff);
             int error = (ret == -1);
-
             if(!error)
             {
-                //Do nothing
+                //Check if this is the first frame of stream
+                if(this->firstFrames[packet.stream_index]->buffSize == 0)
+                {
+                    cout << "First frame found" << endl;
+                    *this->firstFrames[packet.stream_index] = this->currentFrame;
+                }
+
+                this->timestampOfChannel[packet.stream_index] = timestamp;
             }
         }
 
         //Decode audio packet
-        if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO &&
-                (int)packet.stream_index == this->firstAudioStream)
+        if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO)
         {
             //Allocate audio buffer, if not already done
             if(this->audioBuffer==NULL || this->audioBufferSize==0)
@@ -182,6 +201,8 @@ void AvBinBackend::DoOpenFile(int requestId)
                 bytesleft -= bytesout;
                 bytesout = bytesleft;
             }
+
+            this->timestampOfChannel[packet.stream_index] = timestamp;
         }
     }
 
