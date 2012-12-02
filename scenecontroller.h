@@ -67,20 +67,20 @@ public slots:
     void SaveAnnotation();
 
 protected:
-    int activePoint;
+    int activePoint; //which point is selected
     unsigned int imgHeight, imgWidth;
     float markerSize;
     int leftDrag;
-    QString mode;
+    QString mode; //current mode of the gui
     QImage img;
     float mousex, mousey;
     QSharedPointer<QGraphicsPixmapItem> item;
-    std::map<unsigned long long, std::vector<std::vector<float> > > pos;
+    std::map<unsigned long long, std::vector<std::vector<float> > > pos; //contains annotation positions
     std::vector<std::vector<int> > links;
     unsigned long long currentTime;
     int mouseOver;
     QPushButton *markFrameButton;
-    std::vector<std::vector<float> > shape;
+    std::vector<std::vector<float> > shape; //contains the default shape
 };
 
 #endif // SCENECONTROLLER_H

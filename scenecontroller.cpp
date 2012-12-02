@@ -666,11 +666,26 @@ void SimpleSceneController::LoadShape()
     }
 
     if(invalidShape)
-        throw runtime_error("Invalid shape file");
+    {
+        this->shape.clear();
+        this->links.clear();
+        return;
+    }
 
     //Check existing data to see if has the correct number of points
-    //TODO
-
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it=this->pos.begin(); it != this->pos.end();it++)
+    {
+        std::vector<std::vector<float> > &frame = it->second;
+        while(frame.size() > this->shape.size())
+        {
+            frame.pop_back();
+        }
+        while(frame.size() < this->shape.size())
+        {
+            frame.push_back(this->shape[frame.size()]);
+        }
+    }
 }
 
 void SimpleSceneController::SaveShape()
