@@ -163,18 +163,25 @@ void AvBinBackend::DoOpenFile(int requestId)
             if ((this->currentFrame.buff)==NULL || requiredBuffSize != this->currentFrame.buffSize)
                 this->currentFrame.AllocateSize(requiredBuffSize);
 
+            //cout << (unsigned long long) this->currentFrame.buff << endl;
+            assert(this->currentFrame.buff!=NULL);
             int32_t ret = mod_avbin_decode_video(stream, packet.data, packet.size, this->currentFrame.buff);
             int error = (ret == -1);
             if(!error)
             {
                 //Check if this is the first frame of stream
-                if(this->firstFrames[packet.stream_index]->buffSize == 0)
+                if(this->firstFrames[packet.stream_index]->buff == NULL)
                 {
-                    cout << "First frame found" << endl;
+                    cout << "First frame found at " << timestamp << endl;
+                    this->currentFrame.height = sinfo->video.height;
+                    this->currentFrame.width = sinfo->video.width;
+                    this->currentFrame.sample_aspect_num = sinfo->video.sample_aspect_num;
+                    this->currentFrame.sample_aspect_den = sinfo->video.sample_aspect_den;
+                    this->currentFrame.frame_rate_num = sinfo->video.frame_rate_num;
+                    this->currentFrame.frame_rate_den = sinfo->video.frame_rate_den;
+                    this->currentFrame.timestamp = timestamp - this->info.start_time;
                     *this->firstFrames[packet.stream_index] = this->currentFrame;
                 }
-
-                this->timestampOfChannel[packet.stream_index] = timestamp;
             }
         }
 
@@ -235,6 +242,17 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
             return 1;
         }
     }
+
+    //Check if the first frame is a suitable response
+    //assert(this->firstFrames[this->firstVideoStream]!=NULL);
+    //assert(this->firstFrames[this->firstVideoStream]->buff!=NULL);
+    //cout << this->firstFrames[this->firstVideoStream]->timestamp << "," << time << endl;
+    /*if(time < this->firstFrames[this->firstVideoStream]->timestamp)
+    {
+        //cout << "xxx" << endl;
+        //out = *this->firstFrames[this->firstVideoStream];
+        //return 1;
+    }*/
 
     //Check if the requested from is close to requested frame
     //so that seeking is unnecessary
@@ -305,6 +323,7 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
             //cout << "Decoded: " << this->timestampOfChannel[packet.stream_index] << endl;
             unsigned requiredBuffSize = sinfo->video.width*sinfo->video.height*3;
 
+            assert(this->currentFrame.buff);
             int32_t ret = mod_avbin_decode_video(stream, packet.data, packet.size, this->currentFrame.buff);
             int error = (ret == -1);
             //cout << "z" << (timestamp > time && this->currentFrame.width > 0) << error<<endl;
@@ -325,14 +344,14 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
 
             if(!error)
             {
-                //Swap forward and back render buffers
-                this->prevFrame.FastSwap(this->currentFrame);
-
-                //Allocate video buffer
                 if ((this->currentFrame.buff)==NULL || requiredBuffSize != this->currentFrame.buffSize)
                 {
                     this->currentFrame.AllocateSize(requiredBuffSize);
                 }
+                //Swap forward and back render buffers
+                this->prevFrame.FastSwap(this->currentFrame);
+
+                //Allocate video buffer
                 assert(this->currentFrame.buff);
                 assert(this->currentFrame.buffSize > 0);
 
