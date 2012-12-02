@@ -4,6 +4,8 @@
 #include <math.h>
 #include <stdexcept>
 #include <QtGui/QPixmap>
+#include <QtGui/QFileDialog>
+#include <QtCore/QTextStream>
 #include "assert.h"
 #include "vectors.h"
 using namespace::std;
@@ -547,12 +549,82 @@ void SimpleSceneController::MouseLeaveEvent()
 
 QWidget *SimpleSceneController::MenuFactory(QMenuBar *menuBar)
 {
-    QAction *test = new QAction(tr("&test1..."), menuBar);
-    QAction *test2 = new QAction(tr("&test2..."), menuBar);
+    QAction *loadShape = new QAction(tr("&Load Shape from File"), menuBar);
+    QAction *saveShape = new QAction(tr("&Save Shape to File"), menuBar);
+    QAction *setShape = new QAction(tr("Set Shape from &Current Frame"), menuBar);
+
+    QAction *loadAnnotation = new QAction(tr("L&oad Annotation"), menuBar);
+    QAction *saveAnnotation = new QAction(tr("S&ave Annotation"), menuBar);
 
     assert(menuBar);
     QMenu *newMenu = menuBar->addMenu(tr("&Annotate"));
-    newMenu->addAction(test);
-    newMenu->addAction(test2);
+    newMenu->addAction(loadShape);
+    newMenu->addAction(saveShape);
+    newMenu->addAction(setShape);
+    newMenu->addSeparator();
+    newMenu->addAction(loadAnnotation);
+    newMenu->addAction(saveAnnotation);
+
+    QObject::connect(loadShape, SIGNAL(triggered()), this, SLOT(LoadShape()));
+    QObject::connect(saveShape, SIGNAL(triggered()), this, SLOT(SaveShape()));
+    QObject::connect(setShape, SIGNAL(triggered()), this, SLOT(SetShapeFromCurentFrame()));
+    QObject::connect(loadAnnotation, SIGNAL(triggered()), this, SLOT(LoadAnnotation()));
+    QObject::connect(saveAnnotation, SIGNAL(triggered()), this, SLOT(SaveAnnotation()));
 
 }
+
+void SimpleSceneController::LoadShape()
+{
+
+}
+
+void SimpleSceneController::SaveShape()
+{
+    //Get output filename from user
+    QString fileName = QFileDialog::getSaveFileName(0,
+      tr("Save Shape"), "", tr("Shapes (*.shape)"));
+    if(fileName.length() == 0) return;
+
+    //Save data to file
+    QFile f(fileName);
+    f.open( QIODevice::WriteOnly );
+    QTextStream out(&f);
+    out.setCodec("UTF-8");
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>";
+    out << "<shape>" << endl;
+
+    for(unsigned int i=0; i < this->shape.size(); i++)
+    {
+        out << "<point id='"<<i<<"' x='"<<this->shape[i][0]<<"' y='"<<this->shape[i][1]<<"'/>" << endl;
+    }
+    for(unsigned int i=0;i < this->links.size();i++)
+    {
+        out << "<link from='"<<this->links[i][0]<<"' to='"<<this->links[i][1]<<"'/>" << endl;
+    }
+
+    out << "</shape>" << endl;
+    f.close();
+}
+
+void SimpleSceneController::SetShapeFromCurentFrame()
+{
+    //Get current frame
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    it = this->pos.find(this->currentTime);
+    if(it == this->pos.end()) return;
+    std::vector<std::vector<float> > &currentFrame = it->second;
+
+    //Set shape from current frame
+    this->shape = currentFrame;
+}
+
+void SimpleSceneController::LoadAnnotation()
+{
+
+}
+
+void SimpleSceneController::SaveAnnotation()
+{
+
+}
+

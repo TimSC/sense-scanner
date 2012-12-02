@@ -60,6 +60,12 @@ public slots:
     void AddLinkPressed();
     void RemoveLinkPressed();
 
+    void LoadShape();
+    void SaveShape();
+    void SetShapeFromCurentFrame();
+    void LoadAnnotation();
+    void SaveAnnotation();
+
 protected:
     int activePoint;
     unsigned int imgHeight, imgWidth;
@@ -74,6 +80,7 @@ protected:
     unsigned long long currentTime;
     int mouseOver;
     QPushButton *markFrameButton;
+    std::vector<std::vector<float> > shape;
 };
 
 #endif // SCENECONTROLLER_H
