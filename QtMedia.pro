@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
+QT       += xml
 
 TARGET = QtMedia
 TEMPLATE = app

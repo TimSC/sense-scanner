@@ -6,6 +6,8 @@
 #include <QtGui/QPixmap>
 #include <QtGui/QFileDialog>
 #include <QtCore/QTextStream>
+#include <QtXml/QtXml>
+#include <QtXml/QXmlSimpleReader>
 #include "assert.h"
 #include "vectors.h"
 using namespace::std;
@@ -571,11 +573,30 @@ QWidget *SimpleSceneController::MenuFactory(QMenuBar *menuBar)
     QObject::connect(loadAnnotation, SIGNAL(triggered()), this, SLOT(LoadAnnotation()));
     QObject::connect(saveAnnotation, SIGNAL(triggered()), this, SLOT(SaveAnnotation()));
 
+    return newMenu;
 }
 
 void SimpleSceneController::LoadShape()
 {
 
+    //Get input filename from user
+    QString fileName = QFileDialog::getOpenFileName(0,
+        tr("Load Shape"), "", tr("Shapes (*.shape)"));
+    if(fileName.length() == 0) return;
+
+    //Parse XML to DOM
+    QFile f(fileName);
+    QDomDocument doc("mydocument");
+    if (!doc.setContent(&f))
+    {
+        cout << "Xml Error?" << endl;
+        f.close();
+        return;
+    }
+
+    cout << "here" << endl;
+
+    f.close();
 }
 
 void SimpleSceneController::SaveShape()
