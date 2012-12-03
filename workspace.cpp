@@ -76,16 +76,9 @@ void Workspace::Load(QString fina)
                     assert(sourceEle.tagName() == "source");
 
                     QString sourceFiNa = sourceEle.attribute("file");
-                    //cout << sourceFiNa.toLocal8Bit().constData() << endl;
-                    QString sourceFiNaAbs = dir.absoluteFilePath(sourceFiNa).toLocal8Bit().constData();
-                    this->sources.push_back(sourceFiNaAbs);
-
-                    /*std::vector<std::vector<float> > frame = ProcessXmlDomFrame(e);
-                    cout << e.attribute("time").toFloat() << endl;
-                    float timeSec = e.attribute("time").toFloat();
-                    assert(timeSec > 0.f);
-                    assert(frame.size() == this->shape.size());
-                    this->pos[(unsigned long long)(timeSec * 1000.f + 0.5)] = frame;*/
+                    QString sourceFiNaAbs = dir.absoluteFilePath(sourceFiNa);
+                    QFileInfo fileInfo(sourceFiNaAbs);
+                    this->sources.push_back(fileInfo.absoluteFilePath());
 
                     sourceNode = sourceNode.nextSibling();
                 }
