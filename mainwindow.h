@@ -8,6 +8,7 @@
 #include <QtCore/QThread>
 #include <QtCore/QTimer>
 #include "avbinmedia.h"
+#include "workspace.h"
 
 namespace Ui {
 class MainWindow;
@@ -29,6 +30,7 @@ private:
     class EventReceiver *eventReceiver;
     QTimer *timer;
     int threadCount;
+    class Workspace workspace;
 
 public slots:
     void ImportVideo();
