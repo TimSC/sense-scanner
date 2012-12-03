@@ -11,10 +11,11 @@ public:
     Workspace();
     virtual ~Workspace();
 
-    void AddSource(class AbstractMedia *media);
+    void AddSource(QString &fina);
+    unsigned int GetNumSources();
 protected:
 
-
+    std::vector<QString> sources;
 
 };
 

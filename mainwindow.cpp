@@ -59,17 +59,9 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->widget->SetSource(this->mediaInterface);
     this->ui->widget->SetMenuBar(this->menuBar());
 
-    QIcon *icon = new QIcon("icons/media-eject.png");
-    QStandardItemModel *model = new QStandardItemModel(4, 1);
-    for (int row = 0; row < 10; ++row) {
-        for (int column = 0; column < 1; ++column) {
-            QStandardItem *item = new QStandardItem(*icon, QString("row %0, column %1").arg(row).arg(column));
-            model->setItem(row, column, item);
-        }
-    }
-
-    this->ui->dataSources->setModel(model);
-
+    this->sourcesModel = new QStandardItemModel(4, 1);
+    this->ui->dataSources->setModel(this->sourcesModel);
+    this->RegenerateSourcesList();
 }
 
 MainWindow::~MainWindow()
@@ -88,6 +80,9 @@ MainWindow::~MainWindow()
 
     delete this->mediaInterface;
     this->mediaInterface = NULL;
+
+    delete this->sourcesModel;
+    this->sourcesModel = NULL;
 
     delete ui;
 }
@@ -134,6 +129,21 @@ void MainWindow::closeEvent(QCloseEvent *event)
     QMainWindow::closeEvent(event);
 }
 
+void MainWindow::RegenerateSourcesList()
+{
+    assert(this->sourcesModel);
+
+    QIcon *icon = new QIcon("icons/media-eject.png");
+    //QStandardItemModel *model = new QStandardItemModel(this->workspace.GetNumSources(), 1);
+    for (int row = 0; row < this->workspace.GetNumSources(); ++row) {
+        for (int column = 0; column < 1; ++column) {
+            QStandardItem *item = new QStandardItem(*icon, QString("row %0, column %1").arg(row).arg(column));
+            this->sourcesModel->setItem(row, column, item);
+        }
+    }
+
+}
+
 void MainWindow::ImportVideo()
 {
     //Get filename from user
@@ -141,8 +151,11 @@ void MainWindow::ImportVideo()
       tr("Import Video"), "", tr("Video Files (*.avi *.mov *.mkv *.wmf *.webm *.flv *.mp4 *.rm *.asf)"));
     if(fileName.length() == 0) return;
 
+    this->workspace.AddSource(fileName);
+    this->RegenerateSourcesList();
+
     //Mark media interface as inactive
-    this->mediaInterface->SetActive(0);
+    /*this->mediaInterface->SetActive(0);
 
     //Shut down media thread and delete
     int result = this->mediaThread->StopThread();
@@ -162,7 +175,7 @@ void MainWindow::ImportVideo()
     this->mediaInterface->OpenFile(fileName.toLocal8Bit().constData());
 
     //Set widget to use this source
-    this->ui->widget->SetSource(this->mediaInterface);
+    this->ui->widget->SetSource(this->mediaInterface);*/
 
 }
 

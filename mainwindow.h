@@ -31,11 +31,13 @@ private:
     QTimer *timer;
     int threadCount;
     class Workspace workspace;
+    QStandardItemModel *sourcesModel;
 
 public slots:
     void ImportVideo();
     void Update();
     void closeEvent(QCloseEvent *event);
+    void RegenerateSourcesList();
 };
 
 #endif // MAINWINDOW_H
