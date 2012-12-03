@@ -13,6 +13,19 @@ namespace Ui {
 class MainWindow;
 }
 
+class SourcesModel : public QAbstractItemModel
+{
+public:
+    SourcesModel(QObject *parent = 0);
+    virtual ~SourcesModel();
+
+    QModelIndex index(int row, int column, const QModelIndex &parent);
+    QModelIndex parent(const QModelIndex &index);
+    int rowCount(const QModelIndex &parent);
+    int columnCount(const QModelIndex &parent);
+    QVariant data( const QModelIndex &index, int role);
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT

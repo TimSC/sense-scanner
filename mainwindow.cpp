@@ -16,6 +16,45 @@
 #endif
 using namespace std;
 
+//***************************************
+
+SourcesModel::SourcesModel(QObject *parent) : QAbstractItemModel(parent)
+{
+
+}
+
+SourcesModel::~SourcesModel()
+{
+
+}
+
+QModelIndex SourcesModel::index(int row, int column, const QModelIndex &parent)
+{
+
+}
+
+QModelIndex SourcesModel::parent(const QModelIndex &index)
+{
+
+}
+
+int SourcesModel::rowCount(const QModelIndex &parent)
+{
+
+}
+
+int SourcesModel::columnCount(const QModelIndex &parent)
+{
+
+}
+
+QVariant SourcesModel::data( const QModelIndex &index, int role)
+{
+
+}
+
+//**************************
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -56,6 +95,9 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->widget->SetSceneControl(QSharedPointer<SimpleSceneController>(new SimpleSceneController(this)));
     this->ui->widget->SetSource(this->mediaInterface);
     this->ui->widget->SetMenuBar(this->menuBar());
+
+    this->ui->dataSources->setViewMode(QListView::IconMode);
+
 }
 
 MainWindow::~MainWindow()

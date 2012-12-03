@@ -236,7 +236,6 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
 
     //Check if first frame is suitable
     class DecodedFrame *test = this->firstFrames[this->firstVideoStream];
-    cout << time <<","<<test->timestamp << endl;
     if(test && test->buff && time < test->timestamp)
     {
         out = *test;
