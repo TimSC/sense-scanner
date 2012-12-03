@@ -141,11 +141,13 @@ void MainWindow::RegenerateSourcesList()
     this->sourcesModel->setRowCount(this->workspace.GetNumSources());
     for (int row = 0; row < this->workspace.GetNumSources(); ++row) {
         for (int column = 0; column < 1; ++column) {
-            QStandardItem *item = new QStandardItem(icon, this->workspace.GetSourceName(row));
+            QString fina = this->workspace.GetSourceName(row);
+            QFileInfo finaInfo(fina);
+
+            QStandardItem *item = new QStandardItem(icon, finaInfo.fileName());
             this->sourcesModel->setItem(row, column, item);
         }
     }
-
 }
 
 void MainWindow::ImportVideo()
