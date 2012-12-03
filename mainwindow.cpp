@@ -104,11 +104,11 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->widget->SetSource(this->mediaInterface);
     this->ui->widget->SetMenuBar(this->menuBar());
 
-    //this->ui->dataSources->setViewMode(QListView::IconMode);
-    QStandardItemModel *model = new QStandardItemModel(4, 4);
-    for (int row = 0; row < 4; ++row) {
-        for (int column = 0; column < 4; ++column) {
-            QStandardItem *item = new QStandardItem(QString("row %0, column %1").arg(row).arg(column));
+    QIcon *icon = new QIcon("icons/media-eject.png");
+    QStandardItemModel *model = new QStandardItemModel(4, 1);
+    for (int row = 0; row < 10; ++row) {
+        for (int column = 0; column < 1; ++column) {
+            QStandardItem *item = new QStandardItem(*icon, QString("row %0, column %1").arg(row).arg(column));
             model->setItem(row, column, item);
         }
     }
