@@ -644,9 +644,10 @@ void SimpleSceneController::LoadShape()
     //Parse XML to DOM
     QFile f(fileName);
     QDomDocument doc("mydocument");
-    if (!doc.setContent(&f))
+    QString errorMsg;
+    if (!doc.setContent(&f, &errorMsg))
     {
-        cout << "Xml Error?" << endl;
+        cout << "Xml Error: "<< errorMsg.toLocal8Bit().constData() << endl;
         f.close();
         return;
     }

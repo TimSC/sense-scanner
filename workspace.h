@@ -16,7 +16,7 @@ public:
     QString GetSourceName(unsigned int index);
 
     void Clear();
-    void Load(QString &fina);
+    void Load(QString fina);
     int Save();
     void SaveAs(QString &fina);
 

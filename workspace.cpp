@@ -3,6 +3,9 @@
 #include <QtCore/QFile>
 #include <QtCore/QTextStream>
 #include <QtGui>
+#include <QtXml/QtXml>
+#include <iostream>
+using namespace std;
 
 Workspace::Workspace()
 {
@@ -36,9 +39,61 @@ void Workspace::Clear()
     this->defaultFilename = "";
 }
 
-void Workspace::Load(QString &fina)
+void Workspace::Load(QString fina)
 {
+    this->Clear();
+    this->defaultFilename = fina;
 
+    //Parse XML to DOM
+    QFile f(fina);
+    QDomDocument doc("mydocument");
+    QString errorMsg;
+    if (!doc.setContent(&f, &errorMsg))
+    {
+        cout << "Xml Error: "<< errorMsg.toLocal8Bit().constData() << endl;
+        f.close();
+        return;
+    }
+    f.close();
+
+    //Get dir of data file
+    QFileInfo pathInfo(fina);
+    QDir dir(pathInfo.absoluteDir());
+
+    //Load points and links into memory
+    QDomElement rootElem = doc.documentElement();
+    QDomNode n = rootElem.firstChild();
+    while(!n.isNull()) {
+        QDomElement e = n.toElement(); // try to convert the node to an element.
+        if(!e.isNull()) {
+
+            if(e.tagName() == "sources")
+            {
+                QDomNode sourceNode = e.firstChild();
+                while(!sourceNode.isNull())
+                {
+                    QDomElement sourceEle = sourceNode.toElement(); // try to convert the node to an element.
+                    assert(sourceEle.tagName() == "source");
+
+                    QString sourceFiNa = sourceEle.attribute("file");
+                    //cout << sourceFiNa.toLocal8Bit().constData() << endl;
+                    QString sourceFiNaAbs = dir.absoluteFilePath(sourceFiNa).toLocal8Bit().constData();
+                    this->sources.push_back(sourceFiNaAbs);
+
+                    /*std::vector<std::vector<float> > frame = ProcessXmlDomFrame(e);
+                    cout << e.attribute("time").toFloat() << endl;
+                    float timeSec = e.attribute("time").toFloat();
+                    assert(timeSec > 0.f);
+                    assert(frame.size() == this->shape.size());
+                    this->pos[(unsigned long long)(timeSec * 1000.f + 0.5)] = frame;*/
+
+                    sourceNode = sourceNode.nextSibling();
+                }
+
+            }
+        }
+        n = n.nextSibling();
+    }
 }
 
 int Workspace::Save()
@@ -58,7 +113,7 @@ int Workspace::Save()
     out << "<sources>" << endl;
     for(unsigned int i=0;i<this->sources.size();i++)
     {
-        out << "\t<source file=\""<<Qt::escape(dir.relativeFilePath(this->sources[i]))<<"\">" << endl;
+        out << "\t<source file=\""<<Qt::escape(dir.relativeFilePath(this->sources[i]))<<"\"/>" << endl;
 
     }
 

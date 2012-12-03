@@ -62,6 +62,9 @@ MainWindow::MainWindow(QWidget *parent) :
     this->sourcesModel = new QStandardItemModel(4, 1);
     this->ui->dataSources->setModel(this->sourcesModel);
     this->RegenerateSourcesList();
+
+    this->workspace.Load(tr("/home/tim/test.work"));
+    this->RegenerateSourcesList();
 }
 
 MainWindow::~MainWindow()
