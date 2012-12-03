@@ -154,6 +154,7 @@ void AvBinBackend::DoOpenFile(int requestId)
         for(unsigned int chanNum=0;chanNum<this->timestampOfChannel.size();chanNum++)
         {
             if(this->timestampOfChannel[chanNum] == 0) done = false;
+            if(this->timestampOfChannel[chanNum] < 1000000) done = false;
         }
 
         //Decode video packet
