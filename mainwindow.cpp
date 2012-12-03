@@ -16,51 +16,6 @@
 #endif
 using namespace std;
 
-//***************************************
-
-/*SourcesModel::SourcesModel(QObject *parent) : QAbstractItemModel(parent)
-{
-    cout << "SourcesModel::SourcesModel" << endl;
-}
-
-SourcesModel::~SourcesModel()
-{
-
-}
-
-QModelIndex SourcesModel::index(int row, int column, const QModelIndex &parent) const
-{
-    cout << "index called " << row<< "," << column <<","<< (unsigned long long)&parent << endl;
-    QModelIndex out = QAbstractItemModel::createIndex(row, column);
-
-    return out;
-}
-
-QModelIndex SourcesModel::parent(const QModelIndex &index) const
-{
-    cout << "parent called" << endl;
-    QModelIndex out;
-
-    return out;
-}
-
-int SourcesModel::rowCount(const QModelIndex &parent) const
-{
-    cout << "rowCount" << (unsigned long long)&parent << endl;
-    return 5;
-}
-
-int SourcesModel::columnCount(const QModelIndex &parent) const
-{
-    return 1;
-}
-
-QVariant SourcesModel::data( const QModelIndex &index, int role) const
-{
-    cout << "data called" << index.row() << "," << index.column() << "," << role << endl;
-    return QVariant("stuff");
-}*/
-
 //**************************
 
 MainWindow::MainWindow(QWidget *parent) :
