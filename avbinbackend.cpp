@@ -173,7 +173,13 @@ void AvBinBackend::DoOpenFile(int requestId)
                 {
                     cout << "First frame found at " << timestamp << endl;
                     //this->currentFrame
-                    this->currentFrame.timestamp = timestamp;
+                    this->currentFrame.height = sinfo->video.height;
+                    this->currentFrame.width = sinfo->video.width;
+                    this->currentFrame.sample_aspect_num = sinfo->video.sample_aspect_num;
+                    this->currentFrame.sample_aspect_den = sinfo->video.sample_aspect_den;
+                    this->currentFrame.frame_rate_num = sinfo->video.frame_rate_num;
+                    this->currentFrame.frame_rate_den = sinfo->video.frame_rate_den;
+                    this->currentFrame.timestamp = timestamp - this->info.start_time;
                     *this->firstFrames[packet.stream_index] = this->currentFrame;
                 }
 
@@ -228,13 +234,13 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
     time += this->info.start_time;
 
     //Check if first frame is suitable
-    //class DecodedFrame *test = this->firstFrames[this->firstVideoStream];
-    class DecodedFrame *test = NULL;
-    /*if(this->firstFrames[this->firstVideoStream]->buff)
+    class DecodedFrame *test = this->firstFrames[this->firstVideoStream];
+    cout << time <<","<<test->timestamp << endl;
+    if(test && test->buff && time < test->timestamp)
     {
-        cout << "set" << endl;
-
-    }*/
+        out = *test;
+        return 1;
+    }
 
     //Check if currently buffered frame is suitable for the response
     if(this->currentFrame.timestamp > 0 && this->prevFrame.timestamp > 0)
