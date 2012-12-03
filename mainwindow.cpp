@@ -133,11 +133,12 @@ void MainWindow::RegenerateSourcesList()
 {
     assert(this->sourcesModel);
 
-    QIcon *icon = new QIcon("icons/media-eject.png");
-    //QStandardItemModel *model = new QStandardItemModel(this->workspace.GetNumSources(), 1);
+    QIcon icon("icons/media-eject.png");
+    this->sourcesModel->setColumnCount(1);
+    this->sourcesModel->setRowCount(this->workspace.GetNumSources());
     for (int row = 0; row < this->workspace.GetNumSources(); ++row) {
         for (int column = 0; column < 1; ++column) {
-            QStandardItem *item = new QStandardItem(*icon, QString("row %0, column %1").arg(row).arg(column));
+            QStandardItem *item = new QStandardItem(icon, this->workspace.GetSourceName(row));
             this->sourcesModel->setItem(row, column, item);
         }
     }

@@ -13,6 +13,7 @@ public:
 
     void AddSource(QString &fina);
     unsigned int GetNumSources();
+    QString GetSourceName(unsigned int index);
 protected:
 
     std::vector<QString> sources;
