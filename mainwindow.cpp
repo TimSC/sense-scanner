@@ -210,6 +210,7 @@ void MainWindow::Update()
 void MainWindow::NewWorkspace()
 {
     this->workspace.Clear();
+    this->RegenerateSourcesList();
 }
 
 void MainWindow::LoadWorkspace()
@@ -220,6 +221,7 @@ void MainWindow::LoadWorkspace()
     if(fileName.length() == 0) return;
 
     this->workspace.Load(fileName);
+    this->RegenerateSourcesList();
 }
 
 void MainWindow::SaveWorkspace()
@@ -241,6 +243,9 @@ void MainWindow::SaveAsWorkspace()
 void MainWindow::SelectedSourceChanged(const QModelIndex ind)
 {
     int selectedRow = ind.row();
+    if(selectedRow < 0 && selectedRow >= this->workspace.GetNumSources())
+        return;
+
     QString fina = this->workspace.GetSourceName(selectedRow);
 
     this->ui->widget->Pause();
