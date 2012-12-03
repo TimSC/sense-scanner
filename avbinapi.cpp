@@ -4,17 +4,17 @@
 #include <Windows.h>
 #endif
 
-int avBinInitCompleted = 0;
+int gavBinInitCompleted = 0;
 
 #ifndef _MSC_VER
 
 AVbinResult mod_avbin_init()
 {
-    if(!avBinInitCompleted)
+    if(!gavBinInitCompleted)
     {
         AVbinResult ret = avbin_init();
         if(ret == AVBIN_RESULT_OK)
-            avBinInitCompleted = 1;
+            gavBinInitCompleted = 1;
         return ret;
     }
     return AVBIN_RESULT_OK;
@@ -80,7 +80,7 @@ AVbinResult mod_avbin_init()
 	if(ghinst==0) ghinst = LoadLibrary("avbin11-32.dll");
 	assert(ghinst != NULL);
 	
-    if(!avBinInitCompleted)
+    if(!gavBinInitCompleted)
     {
         FARPROC init = GetProcAddress ( ghinst , "avbin_init" );
         assert(init != (FARPROC)NULL);
@@ -89,7 +89,7 @@ AVbinResult mod_avbin_init()
         func = (AVbinResult (*)()) init;
         AVbinResult ret = (*func)();
         if(ret == AVBIN_RESULT_OK)
-            avBinInitCompleted = 1;
+            gavBinInitCompleted = 1;
         return ret;
     }
     return AVBIN_RESULT_OK;
