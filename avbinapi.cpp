@@ -4,11 +4,20 @@
 #include <Windows.h>
 #endif
 
+int avBinInitCompleted = 0;
+
 #ifndef _MSC_VER
 
 AVbinResult mod_avbin_init()
 {
-	return avbin_init();
+    if(!avBinInitCompleted)
+    {
+        AVbinResult ret = avbin_init();
+        if(ret == AVBIN_RESULT_OK)
+            avBinInitCompleted = 1;
+        return ret;
+    }
+    return AVBIN_RESULT_OK;
 }
 
 AVbinFile* mod_avbin_open_filename(const char *filename)
@@ -71,14 +80,19 @@ AVbinResult mod_avbin_init()
 	if(ghinst==0) ghinst = LoadLibrary("avbin11-32.dll");
 	assert(ghinst != NULL);
 	
-	FARPROC init = GetProcAddress ( ghinst , "avbin_init" );
-	assert(init != (FARPROC)NULL);
+    if(!avBinInitCompleted)
+    {
+        FARPROC init = GetProcAddress ( ghinst , "avbin_init" );
+        assert(init != (FARPROC)NULL);
 
-	AVbinResult (*func)()=0;
-	func = (AVbinResult (*)()) init;
-	AVbinResult ret = (*func)();
-
-	return ret;
+        AVbinResult (*func)()=0;
+        func = (AVbinResult (*)()) init;
+        AVbinResult ret = (*func)();
+        if(ret == AVBIN_RESULT_OK)
+            avBinInitCompleted = 1;
+        return ret;
+    }
+    return AVBIN_RESULT_OK;
 }
 
 AVbinFile* mod_avbin_open_filename(const char *filename)
