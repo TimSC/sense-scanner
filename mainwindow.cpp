@@ -176,30 +176,6 @@ void MainWindow::ImportVideo()
 
     this->workspace.AddSource(fileName);
     this->RegenerateSourcesList();
-
-    //Mark media interface as inactive
-    /*this->mediaInterface->SetActive(0);
-
-    //Shut down media thread and delete
-    int result = this->mediaThread->StopThread();
-    cout << "stop thread result=" << result << endl;
-    delete(this->mediaThread);
-    this->mediaThread = NULL;
-
-    //Create a new source
-    this->mediaThread = new AvBinThread(this->eventLoop);
-    this->mediaThread->start();
-
-    //Mark media interface as active
-    this->mediaInterface->SetActive(1);
-
-    //avbinNew->SetEventLoop(this->eventLoop);
-    cout << "Opening " << fileName.toLocal8Bit().constData() << endl;
-    this->mediaInterface->OpenFile(fileName.toLocal8Bit().constData());
-
-    //Set widget to use this source
-    this->ui->widget->SetSource(this->mediaInterface);*/
-
 }
 
 void MainWindow::Update()
@@ -265,5 +241,31 @@ void MainWindow::SaveAsWorkspace()
 void MainWindow::SelectedSourceChanged(const QModelIndex ind)
 {
     int selectedRow = ind.row();
+    QString fina = this->workspace.GetSourceName(selectedRow);
+
+    this->ui->widget->Pause();
+
+    //Mark media interface as inactive
+    this->mediaInterface->SetActive(0);
+
+    //Shut down media thread and delete
+    int result = this->mediaThread->StopThread();
+    cout << "stop thread result=" << result << endl;
+    delete(this->mediaThread);
+    this->mediaThread = NULL;
+
+    //Create a new source
+    this->mediaThread = new AvBinThread(this->eventLoop);
+    this->mediaThread->start();
+
+    //Mark media interface as active
+    this->mediaInterface->SetActive(1);
+
+    //avbinNew->SetEventLoop(this->eventLoop);
+    cout << "Opening " << fina.toLocal8Bit().constData() << endl;
+    this->mediaInterface->OpenFile(fina.toLocal8Bit().constData());
+
+    //Set widget to use this source
+    this->ui->widget->SetSource(this->mediaInterface);
 
 }
