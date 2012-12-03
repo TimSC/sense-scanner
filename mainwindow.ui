@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QListView" name="dataSources">
+     <widget class="SourcesList" name="dataSources">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -95,6 +95,14 @@
    <header>videowidget.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>SourcesList</class>
+   <extends>QListView</extends>
+   <header>mainwindow.h</header>
+   <slots>
+    <signal>UpdateSources(QModelIndex)</signal>
+   </slots>
+  </customwidget>
  </customwidgets>
  <resources/>
  <connections>
@@ -153,8 +161,8 @@
    <slot>SaveWorkspace()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>199</x>
-     <y>149</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
      <x>199</x>
@@ -178,6 +186,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>dataSources</sender>
+   <signal>UpdateSources(QModelIndex)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SelectedSourceChanged(QModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>136</x>
+     <y>155</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>ImportVideo()</slot>
@@ -185,5 +209,6 @@
   <slot>LoadWorkspace()</slot>
   <slot>SaveWorkspace()</slot>
   <slot>SaveAsWorkspace()</slot>
+  <slot>SelectedSourceChanged(QModelIndex)</slot>
  </slots>
 </ui>

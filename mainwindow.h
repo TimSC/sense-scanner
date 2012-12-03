@@ -14,6 +14,20 @@ namespace Ui {
 class MainWindow;
 }
 
+class SourcesList : public QListView
+{
+    Q_OBJECT
+public:
+    SourcesList(QWidget * parent = 0);
+    virtual ~SourcesList();
+
+    void currentChanged(const QModelIndex & current, const QModelIndex & previous);
+
+signals:
+    void UpdateSources(const QModelIndex current);
+
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -43,6 +57,7 @@ public slots:
     void LoadWorkspace();
     void SaveWorkspace();
     void SaveAsWorkspace();
+    void SelectedSourceChanged(const QModelIndex current);
 };
 
 #endif // MAINWINDOW_H

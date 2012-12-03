@@ -16,6 +16,23 @@
 #endif
 using namespace std;
 
+//********************************
+
+SourcesList::SourcesList(QWidget * parent) : QListView(parent)
+{
+
+}
+
+SourcesList::~SourcesList()
+{
+
+}
+
+void SourcesList::currentChanged(const QModelIndex & current, const QModelIndex & previous)
+{
+    this->UpdateSources(current);
+}
+
 //**************************
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -243,4 +260,10 @@ void MainWindow::SaveAsWorkspace()
     if(fileName.length() == 0) return;
 
     this->workspace.SaveAs(fileName);
+}
+
+void MainWindow::SelectedSourceChanged(const QModelIndex ind)
+{
+    int selectedRow = ind.row();
+
 }
