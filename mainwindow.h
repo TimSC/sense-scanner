@@ -13,18 +13,18 @@ namespace Ui {
 class MainWindow;
 }
 
-class SourcesModel : public QAbstractItemModel
+/*class SourcesModel : public QAbstractItemModel
 {
 public:
     SourcesModel(QObject *parent = 0);
     virtual ~SourcesModel();
 
-    QModelIndex index(int row, int column, const QModelIndex &parent);
-    QModelIndex parent(const QModelIndex &index);
-    int rowCount(const QModelIndex &parent);
-    int columnCount(const QModelIndex &parent);
-    QVariant data( const QModelIndex &index, int role);
-};
+    QModelIndex index(int row, int column, const QModelIndex &parent) const;
+    QModelIndex parent(const QModelIndex &index) const;
+    int rowCount(const QModelIndex &parent) const;
+    int columnCount(const QModelIndex &parent) const;
+    QVariant data( const QModelIndex &index, int role) const;
+};*/
 
 class MainWindow : public QMainWindow
 {

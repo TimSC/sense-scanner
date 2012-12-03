@@ -18,9 +18,9 @@ using namespace std;
 
 //***************************************
 
-SourcesModel::SourcesModel(QObject *parent) : QAbstractItemModel(parent)
+/*SourcesModel::SourcesModel(QObject *parent) : QAbstractItemModel(parent)
 {
-
+    cout << "SourcesModel::SourcesModel" << endl;
 }
 
 SourcesModel::~SourcesModel()
@@ -28,30 +28,38 @@ SourcesModel::~SourcesModel()
 
 }
 
-QModelIndex SourcesModel::index(int row, int column, const QModelIndex &parent)
+QModelIndex SourcesModel::index(int row, int column, const QModelIndex &parent) const
 {
+    cout << "index called " << row<< "," << column <<","<< (unsigned long long)&parent << endl;
+    QModelIndex out = QAbstractItemModel::createIndex(row, column);
 
+    return out;
 }
 
-QModelIndex SourcesModel::parent(const QModelIndex &index)
+QModelIndex SourcesModel::parent(const QModelIndex &index) const
 {
+    cout << "parent called" << endl;
+    QModelIndex out;
 
+    return out;
 }
 
-int SourcesModel::rowCount(const QModelIndex &parent)
+int SourcesModel::rowCount(const QModelIndex &parent) const
 {
-
+    cout << "rowCount" << (unsigned long long)&parent << endl;
+    return 5;
 }
 
-int SourcesModel::columnCount(const QModelIndex &parent)
+int SourcesModel::columnCount(const QModelIndex &parent) const
 {
-
+    return 1;
 }
 
-QVariant SourcesModel::data( const QModelIndex &index, int role)
+QVariant SourcesModel::data( const QModelIndex &index, int role) const
 {
-
-}
+    cout << "data called" << index.row() << "," << index.column() << "," << role << endl;
+    return QVariant("stuff");
+}*/
 
 //**************************
 
@@ -96,7 +104,16 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->widget->SetSource(this->mediaInterface);
     this->ui->widget->SetMenuBar(this->menuBar());
 
-    this->ui->dataSources->setViewMode(QListView::IconMode);
+    //this->ui->dataSources->setViewMode(QListView::IconMode);
+    QStandardItemModel *model = new QStandardItemModel(4, 4);
+    for (int row = 0; row < 4; ++row) {
+        for (int column = 0; column < 4; ++column) {
+            QStandardItem *item = new QStandardItem(QString("row %0, column %1").arg(row).arg(column));
+            model->setItem(row, column, item);
+        }
+    }
+
+    this->ui->dataSources->setModel(model);
 
 }
 
@@ -191,6 +208,7 @@ void MainWindow::ImportVideo()
 
     //Set widget to use this source
     this->ui->widget->SetSource(this->mediaInterface);
+
 }
 
 void MainWindow::Update()
