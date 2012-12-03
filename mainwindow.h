@@ -38,6 +38,11 @@ public slots:
     void Update();
     void closeEvent(QCloseEvent *event);
     void RegenerateSourcesList();
+
+    void NewWorkspace();
+    void LoadWorkspace();
+    void SaveWorkspace();
+    void SaveAsWorkspace();
 };
 
 #endif // MAINWINDOW_H

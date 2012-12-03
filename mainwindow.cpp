@@ -208,3 +208,34 @@ void MainWindow::Update()
     }
     catch(std::runtime_error e) {flushing = 0;}
 }
+
+void MainWindow::NewWorkspace()
+{
+    this->workspace.Clear();
+}
+
+void MainWindow::LoadWorkspace()
+{
+    //Get filename from user
+    QString fileName = QFileDialog::getOpenFileName(this,
+      tr("Load Workspace"), "", tr("Workspaces (*.work)"));
+    if(fileName.length() == 0) return;
+
+    this->workspace.Load(fileName);
+}
+
+void MainWindow::SaveWorkspace()
+{
+    int ret = this->workspace.Save();
+    if(ret == 0) this->SaveAsWorkspace();
+}
+
+void MainWindow::SaveAsWorkspace()
+{
+    //Get output filename from user
+    QString fileName = QFileDialog::getSaveFileName(0,
+      tr("Save Workspace"), "", tr("Workspaces (*.work)"));
+    if(fileName.length() == 0) return;
+
+    this->workspace.SaveAs(fileName);
+}

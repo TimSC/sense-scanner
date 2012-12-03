@@ -14,9 +14,16 @@ public:
     void AddSource(QString &fina);
     unsigned int GetNumSources();
     QString GetSourceName(unsigned int index);
+
+    void Clear();
+    void Load(QString &fina);
+    int Save();
+    void SaveAs(QString &fina);
+
 protected:
 
     std::vector<QString> sources;
+    QString defaultFilename;
 
 };
 

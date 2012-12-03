@@ -46,6 +46,7 @@
     <addaction name="actionNew_Workspace"/>
     <addaction name="actionLoad_Workspace"/>
     <addaction name="actionSave_Workspace"/>
+    <addaction name="actionSave_Workspace_As"/>
     <addaction name="separator"/>
     <addaction name="actionImport_Video"/>
    </widget>
@@ -80,6 +81,11 @@
     <string>Import Video</string>
    </property>
   </action>
+  <action name="actionSave_Workspace_As">
+   <property name="text">
+    <string>Save Workspace As...</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -108,8 +114,76 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionNew_Workspace</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>NewWorkspace()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLoad_Workspace</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>LoadWorkspace()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave_Workspace</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SaveWorkspace()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave_Workspace_As</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SaveAsWorkspace()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>ImportVideo()</slot>
+  <slot>NewWorkspace()</slot>
+  <slot>LoadWorkspace()</slot>
+  <slot>SaveWorkspace()</slot>
+  <slot>SaveAsWorkspace()</slot>
  </slots>
 </ui>
