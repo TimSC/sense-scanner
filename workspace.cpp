@@ -148,7 +148,7 @@ void Workspace::HideAllMenus()
     for(unsigned int i=0;i<this->annotationMenus.size();i++)
     {
         if(this->annotationMenus[i]==NULL) continue;
-        this->annotationMenus[i]->setVisible(false);
+        this->annotationMenus[i]->menuAction()->setVisible(false);
     }
 
 }
@@ -161,5 +161,5 @@ void Workspace::ShowMenu(unsigned int index, QMenuBar *menuBar)
     if(this->annotationMenus[index]==NULL)
         this->annotationMenus[index] = this->tracks[index]->MenuFactory(menuBar);
     assert(this->annotationMenus[index]!=NULL);
-    this->annotationMenus[index]->setVisible(true);
+    this->annotationMenus[index]->menuAction()->setVisible(true);
 }
