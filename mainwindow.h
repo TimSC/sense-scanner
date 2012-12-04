@@ -48,6 +48,10 @@ private:
     QStandardItemModel *sourcesModel;
     QMenu *annotationMenu;
 
+    //Shutdown dialog data
+    QString shutdownUserSelection;
+    QDialog *shutdownDialog;
+
 public slots:
     void ImportVideo();
     void Update();
@@ -59,6 +63,10 @@ public slots:
     void SaveWorkspace();
     void SaveAsWorkspace();
     void SelectedSourceChanged(const QModelIndex current);
+
+    void ShutdownSaveAs();
+    void ShutdownWithoutSave();
+    void ShutdownCancel();
 };
 
 #endif // MAINWINDOW_H

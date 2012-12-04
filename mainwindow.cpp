@@ -42,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     this->threadCount = 0;
     this->annotationMenu = NULL;
+    this->shutdownDialog = NULL;
 
     //Create inter thread message system
     this->eventLoop = new class EventLoop();
@@ -117,21 +118,47 @@ void MainWindow::closeEvent(QCloseEvent *event)
     if(this->workspace.HasChanged())
     {
         //Create a dialog to find what the user wants
-        QDialog dialog(this);
-        QVBoxLayout topLayout(&dialog);
+        this->shutdownDialog = new QDialog(this);
+        QVBoxLayout topLayout(this->shutdownDialog);
         QDialogButtonBox buttonbox;
         QLabel question("This workspace has unsaved changes.");
-        dialog.setLayout(&topLayout);
+        this->shutdownDialog->setLayout(&topLayout);
         topLayout.addWidget(&question);
         topLayout.addWidget(&buttonbox);
         QPushButton *buttonClose = new QPushButton("Close without saving");
         QPushButton *buttonCancel = new QPushButton("Cancel");
         QPushButton *buttonSaveAs = new QPushButton("Save as..");
-        buttonbox.addButton(buttonClose, QDialogButtonBox::ActionRole);
-        buttonbox.addButton(buttonCancel, QDialogButtonBox::ActionRole);
+        buttonbox.addButton(buttonClose, QDialogButtonBox::DestructiveRole);
+        buttonbox.addButton(buttonCancel, QDialogButtonBox::RejectRole);
         buttonbox.addButton(buttonSaveAs, QDialogButtonBox::ActionRole);
+        buttonSaveAs->setDefault(true);
+        QObject::connect(buttonClose,SIGNAL(pressed()), this, SLOT(ShutdownWithoutSave()));
+        QObject::connect(buttonCancel,SIGNAL(pressed()), this, SLOT(ShutdownCancel()));
+        QObject::connect(buttonSaveAs,SIGNAL(pressed()), this, SLOT(ShutdownSaveAs()));
 
-        dialog.exec();
+        this->shutdownUserSelection = "CANCEL";
+        this->shutdownDialog->exec();
+        cout << this->shutdownUserSelection.toLocal8Bit().constData() << endl;
+
+        if(this->shutdownUserSelection == "CANCEL")
+        {
+            event->setAccepted(false);
+            return;
+        }
+
+        if(this->shutdownUserSelection == "SAVEAS")
+        {
+            event->setAccepted(false);
+            this->SaveAsWorkspace();
+            return;
+        }
+
+        if(this->shutdownUserSelection == "NOSAVE")
+        {
+            event->setAccepted(true);
+        }
+
+        this->shutdownDialog = NULL;
     }
 
     assert(this->threadCount == 1);
@@ -320,4 +347,25 @@ void MainWindow::SelectedSourceChanged(const QModelIndex ind)
     //Set widget to use this source
     this->ui->widget->SetSource(this->mediaInterface);
 
+}
+
+void MainWindow::ShutdownSaveAs()
+{
+    this->shutdownUserSelection = "SAVEAS";
+    assert(this->shutdownDialog != NULL);
+    this->shutdownDialog->close();
+}
+
+void MainWindow::ShutdownWithoutSave()
+{
+    this->shutdownUserSelection = "NOSAVE";
+    assert(this->shutdownDialog != NULL);
+    this->shutdownDialog->close();
+}
+
+void MainWindow::ShutdownCancel()
+{
+    this->shutdownUserSelection = "CANCEL";
+    assert(this->shutdownDialog != NULL);
+    this->shutdownDialog->close();
 }
