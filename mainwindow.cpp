@@ -177,9 +177,7 @@ void MainWindow::ImportVideo()
     if(fileName.length() == 0) return;
 
     unsigned int sourceId = this->workspace.AddSource(fileName);
-    QSharedPointer<SimpleSceneController> scenePtr =
-            QSharedPointer<SimpleSceneController>(new SimpleSceneController(this));
-    this->workspace.SetTrack(sourceId, scenePtr);
+
 
     this->RegenerateSourcesList();
 }
@@ -276,8 +274,8 @@ void MainWindow::SelectedSourceChanged(const QModelIndex ind)
     cout << "Opening " << fina.toLocal8Bit().constData() << endl;
     this->mediaInterface->OpenFile(fina.toLocal8Bit().constData());
 
-    //QSharedPointer<SimpleSceneController> scene = this->workspace.GetTrack(selectedRow);
-    //this->ui->widget->SetSceneControl(scene);
+    SimpleSceneController *scene = this->workspace.GetTrack(selectedRow);
+    this->ui->widget->SetSceneControl(scene);
 
     //Set widget to use this source
     this->ui->widget->SetSource(this->mediaInterface);

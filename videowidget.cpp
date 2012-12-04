@@ -50,7 +50,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->mediaLength = 0;
     this->waitingForNumFrames = 0;
     this->seq = NULL;
-    //this->sceneControl = QSharedPointer<SimpleScene>(NULL);
+    this->sceneControl = NULL;
 
     this->SetVisibleAtTime(0);
 
@@ -153,7 +153,7 @@ void VideoWidget::Play()
 
 void VideoWidget::SeekBack()
 {
-    if(this->sceneControl.isNull()) return;
+    if(this->sceneControl = NULL) return;
     try
     {
         //This throws an exception if no seek point exists
@@ -166,7 +166,7 @@ void VideoWidget::SeekBack()
 
 void VideoWidget::SeekForward()
 {
-    if(this->sceneControl.isNull()) return;
+    if(this->sceneControl = NULL) return;
     try
     {
         //This throws an exception if no seek point exists
@@ -212,7 +212,7 @@ void VideoWidget::TimerUpdate()
 
     //Monitor if the mouse is in the video view area
     int mouseOverVideoView = this->ui->graphicsView->underMouse();
-    if(!this->sceneControl.isNull())
+    if(this->sceneControl!=NULL)
     {
         if(mouseOverVideoView && !this->sceneControl->GetMouseOver())
             this->sceneControl->MouseEnterEvent();
@@ -227,7 +227,7 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)
         this->waitingForNumFrames -- ;
 
     //Add to scene
-    if(!this->sceneControl.isNull())
+    if(this->sceneControl!=NULL)
     {
         this->sceneControl->VideoImageChanged(fr, timestamp);
         this->ui->graphicsView->setScene(&*this->sceneControl->scene);
@@ -238,7 +238,7 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)
 
 }
 
-void VideoWidget::SetSceneControl(QSharedPointer<SimpleSceneController> sceneIn)
+void VideoWidget::SetSceneControl(SimpleSceneController *sceneIn)
 {
     //Remove previous scene controls
     while(this->ui->annotationTools->count()>0)
@@ -251,8 +251,8 @@ void VideoWidget::SetSceneControl(QSharedPointer<SimpleSceneController> sceneIn)
 
     //Activate new scene controls
     this->sceneControl = sceneIn;
-    cout << "isnull" << this->sceneControl.isNull() << endl;
-    if(!this->sceneControl.isNull())
+    cout << "isnull" << (this->sceneControl == NULL) << endl;
+    if(this->sceneControl!=NULL)
     {
         this->ui->graphicsView->setScene(&*this->sceneControl->scene);
         //this->ui->annotationTools->addWidget(this->sceneControl->ControlsFactory(this));

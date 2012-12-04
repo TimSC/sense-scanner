@@ -14,8 +14,8 @@ public:
     virtual ~Workspace();
 
     unsigned int AddSource(QString &fina);
-    void SetTrack(unsigned int trackNum, QSharedPointer<SimpleSceneController> track);
-    QSharedPointer<SimpleSceneController> GetTrack(unsigned int trackNum);
+    //void SetTrack(unsigned int trackNum, SimpleSceneController *track);
+    SimpleSceneController *GetTrack(unsigned int trackNum);
 
     unsigned int GetNumSources();
     QString GetSourceName(unsigned int index);
@@ -29,7 +29,7 @@ protected:
 
     std::vector<QString> sources;
     QString defaultFilename;
-    std::vector<QSharedPointer<SimpleSceneController> > tracks;
+    std::vector<SimpleSceneController *> tracks;
 };
 
 #endif // WORKSPACE_H

@@ -20,17 +20,19 @@ Workspace::~Workspace()
 unsigned int Workspace::AddSource(QString &fina)
 {
     this->sources.push_back(fina);
-    QSharedPointer<SimpleSceneController> empty;
-    this->tracks.push_back(empty);
+
+    SimpleSceneController *scenePtr = new SimpleSceneController(0);
+    this->tracks.push_back(scenePtr);
+
     return this->sources.size();
 }
 
-void Workspace::SetTrack(unsigned int trackNum, QSharedPointer<SimpleSceneController> track)
+/*void Workspace::SetTrack(unsigned int trackNum, SimpleSceneController *track)
 {
     this->tracks[trackNum] = track;
-}
+}*/
 
-QSharedPointer<SimpleSceneController> Workspace::GetTrack(unsigned int trackNum)
+SimpleSceneController *Workspace::GetTrack(unsigned int trackNum)
 {
     assert(this->tracks.size() == this->sources.size());
     return this->tracks[trackNum];
@@ -97,7 +99,7 @@ void Workspace::Load(QString fina)
                     this->sources.push_back(fileInfo.absoluteFilePath());
                     //QSharedPointer<SimpleSceneController> track =
                     //        QSharedPointer<SimpleSceneController>(new SimpleSceneController(NULL));
-                    QSharedPointer<SimpleSceneController> track;
+                    SimpleSceneController *track = NULL;
                     this->tracks.push_back(track);
 
                     sourceNode = sourceNode.nextSibling();
