@@ -136,10 +136,13 @@ void MainWindow::closeEvent(QCloseEvent *event)
         QObject::connect(buttonCancel,SIGNAL(pressed()), this, SLOT(ShutdownCancel()));
         QObject::connect(buttonSaveAs,SIGNAL(pressed()), this, SLOT(ShutdownSaveAs()));
 
+        //Run the dialog
         this->shutdownUserSelection = "CANCEL";
         this->shutdownDialog->exec();
-        cout << this->shutdownUserSelection.toLocal8Bit().constData() << endl;
 
+        //The variable this->shutdownUserSelection is modified at this stage!
+
+        //Process the users choice
         if(this->shutdownUserSelection == "CANCEL")
         {
             event->setAccepted(false);
