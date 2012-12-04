@@ -3,7 +3,9 @@
 
 #include <vector>
 #include <QtCore/QString>
+#include <QtCore/QSharedPointer>
 #include "mediabuffer.h"
+#include "scenecontroller.h"
 
 class Workspace
 {
@@ -11,7 +13,10 @@ public:
     Workspace();
     virtual ~Workspace();
 
-    void AddSource(QString &fina);
+    unsigned int AddSource(QString &fina);
+    void SetTrack(unsigned int trackNum, QSharedPointer<SimpleSceneController> track);
+    QSharedPointer<SimpleSceneController> GetTrack(unsigned int trackNum);
+
     unsigned int GetNumSources();
     QString GetSourceName(unsigned int index);
 
@@ -24,7 +29,7 @@ protected:
 
     std::vector<QString> sources;
     QString defaultFilename;
-
+    std::vector<QSharedPointer<SimpleSceneController> > tracks;
 };
 
 #endif // WORKSPACE_H

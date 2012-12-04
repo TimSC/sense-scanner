@@ -17,10 +17,25 @@ Workspace::~Workspace()
 
 }
 
-void Workspace::AddSource(QString &fina)
+unsigned int Workspace::AddSource(QString &fina)
 {
     this->sources.push_back(fina);
+    QSharedPointer<SimpleSceneController> empty;
+    this->tracks.push_back(empty);
+    return this->sources.size();
 }
+
+void Workspace::SetTrack(unsigned int trackNum, QSharedPointer<SimpleSceneController> track)
+{
+    this->tracks[trackNum] = track;
+}
+
+QSharedPointer<SimpleSceneController> Workspace::GetTrack(unsigned int trackNum)
+{
+    assert(this->tracks.size() == this->sources.size());
+    return this->tracks[trackNum];
+}
+
 
 unsigned int Workspace::GetNumSources()
 {
@@ -36,6 +51,7 @@ QString Workspace::GetSourceName(unsigned int index)
 void Workspace::Clear()
 {
     this->sources.clear();
+    this->tracks.clear();
     this->defaultFilename = "";
 }
 
@@ -79,6 +95,9 @@ void Workspace::Load(QString fina)
                     QString sourceFiNaAbs = dir.absoluteFilePath(sourceFiNa);
                     QFileInfo fileInfo(sourceFiNaAbs);
                     this->sources.push_back(fileInfo.absoluteFilePath());
+                    QSharedPointer<SimpleSceneController> track =
+                            QSharedPointer<SimpleSceneController>(new SimpleSceneController(NULL));
+                    this->tracks.push_back(track);
 
                     sourceNode = sourceNode.nextSibling();
                 }

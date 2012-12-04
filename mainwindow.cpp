@@ -68,11 +68,11 @@ MainWindow::MainWindow(QWidget *parent) :
     this->timer->start(10); //in millisec
 
     //this->mediaInterface->OpenFile("c:\\Users\\tim\\Downloads\\Smashing Pumpkins Disarm video.mp4");
-    this->mediaInterface->OpenFile("/media/data/main/media/music/Smashing Pumpkins/The Smashing Pumpkins - The Everlasting Gaze.webm");
+    //this->mediaInterface->OpenFile("/media/data/main/media/music/Smashing Pumpkins/The Smashing Pumpkins - The Everlasting Gaze.webm");
 
     ui->setupUi(this);
     this->setWindowTitle("Video Cognition System");
-    this->ui->widget->SetSceneControl(QSharedPointer<SimpleSceneController>(new SimpleSceneController(this)));
+    //this->ui->widget->SetSceneControl(QSharedPointer<SimpleSceneController>(new SimpleSceneController(this)));
     this->ui->widget->SetSource(this->mediaInterface);
     this->ui->widget->SetMenuBar(this->menuBar());
 
@@ -174,7 +174,11 @@ void MainWindow::ImportVideo()
       tr("Import Video"), "", tr("Video Files (*.avi *.mov *.mkv *.wmf *.webm *.flv *.mp4 *.rm *.asf)"));
     if(fileName.length() == 0) return;
 
-    this->workspace.AddSource(fileName);
+    unsigned int sourceId = this->workspace.AddSource(fileName);
+    QSharedPointer<SimpleSceneController> scenePtr =
+            QSharedPointer<SimpleSceneController>(new SimpleSceneController(this));
+    this->workspace.SetTrack(sourceId, scenePtr);
+
     this->RegenerateSourcesList();
 }
 
@@ -269,6 +273,9 @@ void MainWindow::SelectedSourceChanged(const QModelIndex ind)
     //avbinNew->SetEventLoop(this->eventLoop);
     cout << "Opening " << fina.toLocal8Bit().constData() << endl;
     this->mediaInterface->OpenFile(fina.toLocal8Bit().constData());
+
+    QSharedPointer<SimpleSceneController> scene = this->workspace.GetTrack(selectedRow);
+    this->ui->widget->SetSceneControl(scene);
 
     //Set widget to use this source
     this->ui->widget->SetSource(this->mediaInterface);

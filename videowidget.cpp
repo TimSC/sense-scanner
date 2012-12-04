@@ -212,11 +212,13 @@ void VideoWidget::TimerUpdate()
 
     //Monitor if the mouse is in the video view area
     int mouseOverVideoView = this->ui->graphicsView->underMouse();
-    if(mouseOverVideoView && !this->sceneControl->GetMouseOver())
-        this->sceneControl->MouseEnterEvent();
-    if(!mouseOverVideoView && this->sceneControl->GetMouseOver())
-        this->sceneControl->MouseLeaveEvent();
-
+    if(!this->sceneControl.isNull())
+    {
+        if(mouseOverVideoView && !this->sceneControl->GetMouseOver())
+            this->sceneControl->MouseEnterEvent();
+        if(!mouseOverVideoView && this->sceneControl->GetMouseOver())
+            this->sceneControl->MouseLeaveEvent();
+    }
 }
 
 void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)
@@ -225,8 +227,11 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)
         this->waitingForNumFrames -- ;
 
     //Add to scene
-    this->sceneControl->VideoImageChanged(fr, timestamp);
-    this->ui->graphicsView->setScene(&*this->sceneControl->scene);
+    if(!this->sceneControl.isNull())
+    {
+        this->sceneControl->VideoImageChanged(fr, timestamp);
+        this->ui->graphicsView->setScene(&*this->sceneControl->scene);
+    }
 
     //Update current time
     this->currentTime = timestamp;
@@ -236,8 +241,17 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)
 void VideoWidget::SetSceneControl(QSharedPointer<SimpleSceneController> sceneIn)
 {
     this->sceneControl = sceneIn;
-    this->ui->graphicsView->setScene(&*this->sceneControl->scene);
-    this->ui->annotationTools->addWidget(this->sceneControl->ControlsFactory(this));
+    cout << "isnull" << this->sceneControl.isNull() << endl;
+    if(!this->sceneControl.isNull())
+    {
+        this->ui->graphicsView->setScene(&*this->sceneControl->scene);
+        this->ui->annotationTools->addWidget(this->sceneControl->ControlsFactory(this));
+    }
+    else
+    {
+        this->ui->graphicsView->setScene(NULL);
+    }
+
 }
 
 void VideoWidget::SetMenuBar(QMenuBar *menuBar)
