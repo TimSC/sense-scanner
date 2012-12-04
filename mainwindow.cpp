@@ -10,6 +10,7 @@
 #include "scenecontroller.h"
 #include <QtGui/QFileDialog>
 #include <QtCore/QThread>
+#include <QtGui/QDialogButtonBox>
 #include <iostream>
 #ifndef _MSC_VER
 #include <unistd.h>
@@ -110,6 +111,29 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+
+    //Check if the workspace has been saved, if not
+    //prompt the user
+    if(this->workspace.HasChanged())
+    {
+        //Create a dialog to find what the user wants
+        QDialog dialog(this);
+        QVBoxLayout topLayout(&dialog);
+        QDialogButtonBox buttonbox;
+        QLabel question("This workspace has unsaved changes.");
+        dialog.setLayout(&topLayout);
+        topLayout.addWidget(&question);
+        topLayout.addWidget(&buttonbox);
+        QPushButton *buttonClose = new QPushButton("Close without saving");
+        QPushButton *buttonCancel = new QPushButton("Cancel");
+        QPushButton *buttonSaveAs = new QPushButton("Save as..");
+        buttonbox.addButton(buttonClose, QDialogButtonBox::ActionRole);
+        buttonbox.addButton(buttonCancel, QDialogButtonBox::ActionRole);
+        buttonbox.addButton(buttonSaveAs, QDialogButtonBox::ActionRole);
+
+        dialog.exec();
+    }
+
     assert(this->threadCount == 1);
 
     //Disconnect video widget from media source

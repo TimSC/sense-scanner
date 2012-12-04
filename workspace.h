@@ -24,6 +24,7 @@ public:
     void Load(QString fina);
     int Save();
     void SaveAs(QString &fina);
+    int HasChanged();
 
 protected:
 

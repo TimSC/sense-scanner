@@ -158,3 +158,7 @@ void Workspace::SaveAs(QString &fina)
     this->Save();
 }
 
+int Workspace::HasChanged()
+{
+    return 1;
+}
