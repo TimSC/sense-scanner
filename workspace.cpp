@@ -95,8 +95,9 @@ void Workspace::Load(QString fina)
                     QString sourceFiNaAbs = dir.absoluteFilePath(sourceFiNa);
                     QFileInfo fileInfo(sourceFiNaAbs);
                     this->sources.push_back(fileInfo.absoluteFilePath());
-                    QSharedPointer<SimpleSceneController> track =
-                            QSharedPointer<SimpleSceneController>(new SimpleSceneController(NULL));
+                    //QSharedPointer<SimpleSceneController> track =
+                    //        QSharedPointer<SimpleSceneController>(new SimpleSceneController(NULL));
+                    QSharedPointer<SimpleSceneController> track;
                     this->tracks.push_back(track);
 
                     sourceNode = sourceNode.nextSibling();

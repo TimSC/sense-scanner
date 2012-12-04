@@ -276,8 +276,8 @@ void MainWindow::SelectedSourceChanged(const QModelIndex ind)
     cout << "Opening " << fina.toLocal8Bit().constData() << endl;
     this->mediaInterface->OpenFile(fina.toLocal8Bit().constData());
 
-    QSharedPointer<SimpleSceneController> scene = this->workspace.GetTrack(selectedRow);
-    this->ui->widget->SetSceneControl(scene);
+    //QSharedPointer<SimpleSceneController> scene = this->workspace.GetTrack(selectedRow);
+    //this->ui->widget->SetSceneControl(scene);
 
     //Set widget to use this source
     this->ui->widget->SetSource(this->mediaInterface);
