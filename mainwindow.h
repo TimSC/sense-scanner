@@ -45,6 +45,7 @@ private:
     QTimer *timer;
     int threadCount;
     class Workspace workspace;
+    class Workspace workspaceAsStored;
     QStandardItemModel *sourcesModel;
     QMenu *annotationMenu;
 

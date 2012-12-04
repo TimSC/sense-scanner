@@ -82,6 +82,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->RegenerateSourcesList();
 
     this->workspace.Load(tr("/home/tim/test.work"));
+    this->workspaceAsStored = this->workspace;
     this->RegenerateSourcesList();
 }
 
@@ -115,7 +116,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
     //Check if the workspace has been saved, if not
     //prompt the user
-    if(this->workspace.HasChanged())
+    if(this->workspace != this->workspaceAsStored)
     {
         //Create a dialog to find what the user wants
         this->shutdownDialog = new QDialog(this);
@@ -278,6 +279,7 @@ void MainWindow::LoadWorkspace()
     if(fileName.length() == 0) return;
 
     this->workspace.Load(fileName);
+    this->workspaceAsStored = this->workspace;
     this->RegenerateSourcesList();
 }
 
@@ -285,6 +287,7 @@ void MainWindow::SaveWorkspace()
 {
     int ret = this->workspace.Save();
     if(ret == 0) this->SaveAsWorkspace();
+    else this->workspaceAsStored = this->workspace;
 }
 
 void MainWindow::SaveAsWorkspace()
@@ -295,6 +298,7 @@ void MainWindow::SaveAsWorkspace()
     if(fileName.length() == 0) return;
 
     this->workspace.SaveAs(fileName);
+    this->workspaceAsStored = this->workspace;
 }
 
 void MainWindow::SelectedSourceChanged(const QModelIndex ind)

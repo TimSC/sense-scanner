@@ -12,9 +12,27 @@ Workspace::Workspace()
     this->Clear();
 }
 
+Workspace::Workspace(const Workspace &other)
+{
+    this->operator =(other);
+}
+
 Workspace::~Workspace()
 {
 
+}
+
+Workspace& Workspace::operator= (const Workspace &other)
+{
+
+
+
+    return *this;
+}
+
+bool Workspace::operator!= (const Workspace &other)
+{
+    return true;
 }
 
 unsigned int Workspace::AddSource(QString &fina)
@@ -158,7 +176,3 @@ void Workspace::SaveAs(QString &fina)
     this->Save();
 }
 
-int Workspace::HasChanged()
-{
-    return 1;
-}

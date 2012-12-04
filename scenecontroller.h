@@ -55,6 +55,7 @@ public:
     unsigned long long GetSeekBackTime();
     void WriteShapeToStream(QTextStream &textStream);
     std::vector<std::vector<float> > ProcessXmlDomFrame(QDomElement &e);
+    int HasChanged();
 
     QSharedPointer<MouseGraphicsScene> scene;
 
@@ -91,6 +92,7 @@ protected:
     QPushButton *markFrameButton;
     std::vector<std::vector<float> > shape; //contains the default shape
     QWidget *annotationControls;
+
 };
 
 #endif // SCENECONTROLLER_H

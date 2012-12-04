@@ -868,3 +868,4 @@ void SimpleSceneController::WriteAnnotationXml(QTextStream &out)
     }
     out << "\t</tracking>" << endl;
 }
+

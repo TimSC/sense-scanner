@@ -11,7 +11,10 @@ class Workspace
 {
 public:
     Workspace();
+    Workspace(const Workspace &other);
     virtual ~Workspace();
+    Workspace& operator= (const Workspace &other);
+    bool operator!= (const Workspace &other);
 
     unsigned int AddSource(QString &fina);
     //void SetTrack(unsigned int trackNum, SimpleSceneController *track);
@@ -27,7 +30,6 @@ public:
     int HasChanged();
 
 protected:
-
     std::vector<QString> sources;
     QString defaultFilename;
     std::vector<SimpleSceneController *> tracks;
