@@ -46,6 +46,7 @@ private:
     int threadCount;
     class Workspace workspace;
     QStandardItemModel *sourcesModel;
+    QMenu *annotationMenu;
 
 public slots:
     void ImportVideo();

@@ -64,7 +64,6 @@ SimpleSceneController::SimpleSceneController(QWidget *parent)
     this->mousex = 0.f;
     this->mousey = 0.f;
     this->markFrameButton = NULL;
-    this->menu=NULL;
 
     this->annotationControls = NULL;
 }
@@ -593,7 +592,6 @@ QMenu *SimpleSceneController::MenuFactory(QMenuBar *menuBar)
 {
     assert(this!=NULL);
     assert(menuBar != NULL);
-    assert(this->menu==NULL);
     QAction *loadShape = new QAction(tr("&Load Shape from File"), menuBar);
     QAction *saveShape = new QAction(tr("&Save Shape to File"), menuBar);
     QAction *setShape = new QAction(tr("Set Shape from &Current Frame"), menuBar);
@@ -615,7 +613,6 @@ QMenu *SimpleSceneController::MenuFactory(QMenuBar *menuBar)
     QObject::connect(loadAnnotation, SIGNAL(triggered()), this, SLOT(LoadAnnotation()));
     QObject::connect(saveAnnotation, SIGNAL(triggered()), this, SLOT(SaveAnnotation()));
 
-    this->menu = newMenu;
     return newMenu;
 }
 

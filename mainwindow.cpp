@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     this->threadCount = 0;
+    this->annotationMenu = NULL;
 
     //Create inter thread message system
     this->eventLoop = new class EventLoop();
@@ -250,6 +251,11 @@ void MainWindow::SelectedSourceChanged(const QModelIndex ind)
 
     QString fina = this->workspace.GetSourceName(selectedRow);
 
+    if(this->annotationMenu)
+    {
+        this->menuBar()->removeAction(this->annotationMenu->menuAction());
+    }
+
     //Pause video
     this->ui->widget->Pause();
 
@@ -282,7 +288,10 @@ void MainWindow::SelectedSourceChanged(const QModelIndex ind)
 
     //if(scene != NULL && this->annotationMenus[selectedRow] = NULL)
     //    this->annotationMenus[selectedRow] = scene->MenuFactory(this->menuBar());
-    this->workspace.ShowMenu(selectedRow, this->menuBar());
+    //this->workspace.ShowMenu(selectedRow, this->menuBar());
+
+
+    this->annotationMenu = scene->MenuFactory(this->menuBar());
 
     //Set widget to use this source
     this->ui->widget->SetSource(this->mediaInterface);

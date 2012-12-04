@@ -25,9 +25,6 @@ public:
     int Save();
     void SaveAs(QString &fina);
 
-    void HideAllMenus();
-    void ShowMenu(unsigned int index, QMenuBar *menuBar);
-
 protected:
 
     std::vector<QString> sources;

@@ -88,7 +88,6 @@ protected:
     QPushButton *markFrameButton;
     std::vector<std::vector<float> > shape; //contains the default shape
     QWidget *annotationControls;
-    QMenu *menu;
 };
 
 #endif // SCENECONTROLLER_H
