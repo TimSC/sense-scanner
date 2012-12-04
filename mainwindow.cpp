@@ -74,7 +74,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowTitle("Video Cognition System");
     //this->ui->widget->SetSceneControl(QSharedPointer<SimpleSceneController>(new SimpleSceneController(this)));
     this->ui->widget->SetSource(this->mediaInterface);
-    this->ui->widget->SetMenuBar(this->menuBar());
+    //this->ui->widget->SetMenuBar(this->menuBar());
 
     this->sourcesModel = new QStandardItemModel(4, 1);
     this->ui->dataSources->setModel(this->sourcesModel);
@@ -86,6 +86,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    this->workspace.Clear();
+
     delete this->timer;
     this->timer = NULL;
 

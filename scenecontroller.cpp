@@ -70,6 +70,7 @@ SimpleSceneController::SimpleSceneController(QWidget *parent)
 
 SimpleSceneController::~SimpleSceneController()
 {
+    cout << "SimpleSceneController::~SimpleSceneController()" << endl;
     this->item = QSharedPointer<QGraphicsPixmapItem>(NULL);
     if(!this->scene.isNull())
     {
@@ -94,7 +95,8 @@ void SimpleSceneController::VideoImageChanged(QImage &fr, unsigned long long ti)
     std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
     it = this->pos.find(this->currentTime);
     int isUsed = (it != this->pos.end());
-    this->markFrameButton->setChecked(isUsed);
+    if(this->markFrameButton!=NULL)
+        this->markFrameButton->setChecked(isUsed);
 
     this->Redraw();
 }
@@ -498,11 +500,11 @@ QWidget *SimpleSceneController::ControlsFactory(QWidget *parent)
 void SimpleSceneController::DestroyControls()
 {
     assert(this->markFrameButton != NULL);
-    delete this->markFrameButton;
+    //delete this->markFrameButton;
     this->markFrameButton = NULL;
 
     assert(this->annotationControls != NULL);
-    delete this->annotationControls;
+    //delete this->annotationControls;
     this->annotationControls = NULL;
 }
 
@@ -588,6 +590,8 @@ void SimpleSceneController::MouseLeaveEvent()
 
 QWidget *SimpleSceneController::MenuFactory(QMenuBar *menuBar)
 {
+    assert(this!=NULL);
+    assert(menuBar != NULL);
     QAction *loadShape = new QAction(tr("&Load Shape from File"), menuBar);
     QAction *saveShape = new QAction(tr("&Save Shape to File"), menuBar);
     QAction *setShape = new QAction(tr("Set Shape from &Current Frame"), menuBar);
