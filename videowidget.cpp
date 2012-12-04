@@ -153,7 +153,7 @@ void VideoWidget::Play()
 
 void VideoWidget::SeekBack()
 {
-    if(this->sceneControl = NULL) return;
+    if(this->sceneControl == NULL) return;
     try
     {
         //This throws an exception if no seek point exists
@@ -166,7 +166,7 @@ void VideoWidget::SeekBack()
 
 void VideoWidget::SeekForward()
 {
-    if(this->sceneControl = NULL) return;
+    if(this->sceneControl == NULL) return;
     try
     {
         //This throws an exception if no seek point exists

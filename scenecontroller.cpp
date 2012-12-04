@@ -422,7 +422,7 @@ unsigned long long AbsDiff(unsigned long long a, unsigned long long b)
 
 unsigned long long SimpleSceneController::GetSeekBackTime()
 {
-
+    assert(this!=NULL);
     unsigned long long bestDiff = 0;
     unsigned long long bestFrame = 0;
     int bestSet = 0;
