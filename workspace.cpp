@@ -31,7 +31,7 @@ Workspace& Workspace::operator= (const Workspace &other)
     {
         QObject *par = other.tracks[i]->parent();
         SimpleSceneController *tr = new SimpleSceneController(par);
-        *tr = other.tracks[i];
+        *tr = *other.tracks[i];
         tracks.push_back(tr);
     }
     return *this;
@@ -44,7 +44,7 @@ bool Workspace::operator!= (const Workspace &other)
     if(sources != other.sources) return true;
     for(unsigned int i=0;i<other.tracks.size();i++)
     {
-        if(tracks[i] != other.tracks[i]) return true;
+        if(*tracks[i] != *other.tracks[i]) return true;
     }
     return false;
 }

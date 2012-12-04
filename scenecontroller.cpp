@@ -66,6 +66,7 @@ SimpleSceneController::SimpleSceneController(QObject *parent)
     this->markFrameButton = NULL;
 
     this->annotationControls = NULL;
+
 }
 
 SimpleSceneController::SimpleSceneController(const SimpleSceneController &other)
@@ -91,13 +92,30 @@ SimpleSceneController::~SimpleSceneController()
 
 SimpleSceneController& SimpleSceneController::operator= (const SimpleSceneController &other)
 {
+    this->mode = other.mode;
+    this->mouseOver = other.mouseOver;
+    this->currentTime = other.currentTime;
+    this->scene = QSharedPointer<MouseGraphicsScene>(new MouseGraphicsScene(other.parent()));
+    this->scene->SetSceneControl(this);
+    this->activePoint = other.activePoint;
+    this->imgWidth = other.imgWidth;
+    this->imgHeight = other.imgHeight;
+    this->markerSize = other.markerSize;
+    this->leftDrag = other.leftDrag;
+    this->mousex = other.mousex;
+    this->mousey = other.mousey;
+    this->markFrameButton = NULL;
+    this->annotationControls = NULL;
+    this->pos = other.pos; //contains annotation positions
+    this->shape = other.shape; //contains the default shape
 
 }
 
 bool SimpleSceneController::operator!= (const SimpleSceneController &other)
 {
-
-
+    if(this->pos != other.pos) return true;
+    if(this->shape != other.shape) return true;
+    return false;
 }
 
 void SimpleSceneController::VideoImageChanged(QImage &fr, unsigned long long ti)
