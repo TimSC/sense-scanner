@@ -24,15 +24,29 @@ Workspace::~Workspace()
 
 Workspace& Workspace::operator= (const Workspace &other)
 {
-
-
-
+    sources = other.sources;
+    defaultFilename = other.defaultFilename;
+    tracks.clear();
+    for(unsigned int i=0;i<other.tracks.size();i++)
+    {
+        QObject *par = other.tracks[i]->parent();
+        SimpleSceneController *tr = new SimpleSceneController(par);
+        *tr = other.tracks[i];
+        tracks.push_back(tr);
+    }
     return *this;
 }
 
 bool Workspace::operator!= (const Workspace &other)
 {
-    return true;
+    if(defaultFilename != other.defaultFilename) return true;
+    if(tracks.size() != other.tracks.size()) return true;
+    if(sources != other.sources) return true;
+    for(unsigned int i=0;i<other.tracks.size();i++)
+    {
+        if(tracks[i] != other.tracks[i]) return true;
+    }
+    return false;
 }
 
 unsigned int Workspace::AddSource(QString &fina)

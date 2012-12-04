@@ -11,7 +11,7 @@
 class MouseGraphicsScene : public QGraphicsScene
 {
 public:
-    MouseGraphicsScene(QWidget *parent);
+    MouseGraphicsScene(QObject *parent);
     virtual ~MouseGraphicsScene();
 
     void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
@@ -29,8 +29,11 @@ class SimpleSceneController : public QObject
     Q_OBJECT
 
 public:
-    SimpleSceneController(QWidget *parent);
+    SimpleSceneController(QObject *parent);
+    SimpleSceneController(const SimpleSceneController &other);
     virtual ~SimpleSceneController();
+    SimpleSceneController& operator= (const SimpleSceneController &other);
+    bool operator!= (const SimpleSceneController &other);
 
     void VideoImageChanged(QImage &fr, unsigned long long ti);
 
@@ -55,9 +58,8 @@ public:
     unsigned long long GetSeekBackTime();
     void WriteShapeToStream(QTextStream &textStream);
     std::vector<std::vector<float> > ProcessXmlDomFrame(QDomElement &e);
-    int HasChanged();
+    QSharedPointer<MouseGraphicsScene> GetScene();
 
-    QSharedPointer<MouseGraphicsScene> scene;
 
 public slots:
     void MarkFramePressed(bool val);
@@ -77,6 +79,7 @@ public slots:
     void WriteAnnotationXml(QTextStream &out);
 
 protected:
+    QSharedPointer<MouseGraphicsScene> scene;
     int activePoint; //which point is selected
     unsigned int imgHeight, imgWidth;
     float markerSize;

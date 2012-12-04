@@ -33,7 +33,6 @@ protected:
     std::vector<QString> sources;
     QString defaultFilename;
     std::vector<SimpleSceneController *> tracks;
-    std::vector<QMenu *>annotationMenus;
 };
 
 #endif // WORKSPACE_H

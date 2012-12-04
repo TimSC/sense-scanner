@@ -230,7 +230,7 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)
     if(this->sceneControl!=NULL)
     {
         this->sceneControl->VideoImageChanged(fr, timestamp);
-        this->ui->graphicsView->setScene(&*this->sceneControl->scene);
+        this->ui->graphicsView->setScene(&*this->sceneControl->GetScene());
     }
 
     //Update current time
@@ -259,7 +259,7 @@ void VideoWidget::SetSceneControl(SimpleSceneController *sceneIn)
     this->sceneControl = sceneIn;
     if(this->sceneControl!=NULL)
     {
-        this->ui->graphicsView->setScene(&*this->sceneControl->scene);
+        this->ui->graphicsView->setScene(&*this->sceneControl->GetScene());
         this->ui->annotationTools->addWidget(this->sceneControl->ControlsFactory(this));
     }
     else

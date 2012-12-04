@@ -13,7 +13,7 @@ using namespace::std;
 
 //Custom graphics scene to catch mouse move and press
 
-MouseGraphicsScene::MouseGraphicsScene(QWidget *parent) : QGraphicsScene(parent)
+MouseGraphicsScene::MouseGraphicsScene(QObject *parent) : QGraphicsScene(parent)
 {
     this->sceneControl = NULL;
 
@@ -49,7 +49,7 @@ void MouseGraphicsScene::SetSceneControl(SimpleSceneController *sceneControlIn)
 
 //********************************************************************
 
-SimpleSceneController::SimpleSceneController(QWidget *parent)
+SimpleSceneController::SimpleSceneController(QObject *parent)
 {
     this->mode = "MOVE";
     this->mouseOver = false;
@@ -68,6 +68,11 @@ SimpleSceneController::SimpleSceneController(QWidget *parent)
     this->annotationControls = NULL;
 }
 
+SimpleSceneController::SimpleSceneController(const SimpleSceneController &other)
+{
+    this->operator=(other);
+}
+
 SimpleSceneController::~SimpleSceneController()
 {
     cout << "SimpleSceneController::~SimpleSceneController()" << endl;
@@ -82,6 +87,17 @@ SimpleSceneController::~SimpleSceneController()
     if(this->annotationControls != NULL)
         delete annotationControls;
     annotationControls = NULL;
+}
+
+SimpleSceneController& SimpleSceneController::operator= (const SimpleSceneController &other)
+{
+
+}
+
+bool SimpleSceneController::operator!= (const SimpleSceneController &other)
+{
+
+
 }
 
 void SimpleSceneController::VideoImageChanged(QImage &fr, unsigned long long ti)
@@ -869,3 +885,7 @@ void SimpleSceneController::WriteAnnotationXml(QTextStream &out)
     out << "\t</tracking>" << endl;
 }
 
+QSharedPointer<MouseGraphicsScene> SimpleSceneController::GetScene()
+{
+    return this->scene;
+}
