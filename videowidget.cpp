@@ -240,6 +240,16 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)
 
 void VideoWidget::SetSceneControl(QSharedPointer<SimpleSceneController> sceneIn)
 {
+    //Remove previous scene controls
+    while(this->ui->annotationTools->count()>0)
+    {
+        QLayoutItem *item = this->ui->annotationTools->itemAt(0);
+        this->ui->annotationTools->removeItem(item);
+    }
+    if(!this->sceneControl.isNull())
+        this->sceneControl->DestroyControls();
+
+    //Activate new scene controls
     this->sceneControl = sceneIn;
     cout << "isnull" << this->sceneControl.isNull() << endl;
     if(!this->sceneControl.isNull())

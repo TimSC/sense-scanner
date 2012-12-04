@@ -65,7 +65,7 @@ SimpleSceneController::SimpleSceneController(QWidget *parent)
     this->mousey = 0.f;
     this->markFrameButton = NULL;
 
-
+    this->annotationControls = NULL;
 }
 
 SimpleSceneController::~SimpleSceneController()
@@ -78,6 +78,9 @@ SimpleSceneController::~SimpleSceneController()
         this->scene = QSharedPointer<MouseGraphicsScene>(NULL);
     }
 
+    if(this->annotationControls != NULL)
+        delete annotationControls;
+    annotationControls = NULL;
 }
 
 void SimpleSceneController::VideoImageChanged(QImage &fr, unsigned long long ti)
@@ -445,8 +448,10 @@ unsigned long long SimpleSceneController::GetSeekBackTime()
 
 QWidget *SimpleSceneController::ControlsFactory(QWidget *parent)
 {
-    QWidget *layoutW = new QWidget();
-    assert(layoutW->layout() == NULL);
+    assert(this->annotationControls==NULL);
+
+    this->annotationControls = new QWidget();
+    assert(this->annotationControls->layout() == NULL);
     QHBoxLayout *layout = new QHBoxLayout();
 
     assert(this->markFrameButton == NULL);
@@ -486,8 +491,19 @@ QWidget *SimpleSceneController::ControlsFactory(QWidget *parent)
     button->setAutoExclusive(true);
     button->setCheckable(true);
     layout->addWidget(button);
-    layoutW->setLayout(layout);
-    return layoutW;
+    this->annotationControls->setLayout(layout);
+    return this->annotationControls;
+}
+
+void SimpleSceneController::DestroyControls()
+{
+    assert(this->markFrameButton != NULL);
+    delete this->markFrameButton;
+    this->markFrameButton = NULL;
+
+    assert(this->annotationControls != NULL);
+    delete this->annotationControls;
+    this->annotationControls = NULL;
 }
 
 void SimpleSceneController::MarkFramePressed(bool val)
