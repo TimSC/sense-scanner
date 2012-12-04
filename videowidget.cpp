@@ -159,6 +159,7 @@ void VideoWidget::SeekBack()
         //This throws an exception if no seek point exists
         unsigned long long ti = this->sceneControl->GetSeekBackTime();
         assert(ti < this->mediaLength);
+        cout << "Requesting frame at " << ti << endl;
         this->ui->horizontalScrollBar->setValue(ti);
     }
     catch(exception &err) {}
@@ -172,6 +173,7 @@ void VideoWidget::SeekForward()
         //This throws an exception if no seek point exists
         unsigned long long ti = this->sceneControl->GetSeekFowardTime();
         assert(ti < this->mediaLength);
+        cout << "Requesting frame at " << ti << endl;
         this->ui->horizontalScrollBar->setValue(ti);
     }
     catch(exception &err) {}
@@ -223,6 +225,7 @@ void VideoWidget::TimerUpdate()
 
 void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)
 {
+    cout << "Showing frame from " << timestamp << endl;
     if(this->waitingForNumFrames > 0)
         this->waitingForNumFrames -- ;
 

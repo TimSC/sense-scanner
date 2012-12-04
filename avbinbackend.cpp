@@ -327,7 +327,12 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
             int32_t ret = mod_avbin_decode_video(stream, packet.data, packet.size, this->currentFrame.buff);
             int error = (ret == -1);
             //cout << "z" << (timestamp > time && this->currentFrame.width > 0) << error<<endl;
-            if((uint64_t)timestamp > time && this->currentFrame.width > 0)
+
+            //Check if this frame is after the requested time and stop
+            //processing frames if that is the case
+            if(!error)
+                cout << "found:" <<timestamp << " req:"<< time << endl;
+            if((uint64_t)timestamp > time && this->currentFrame.width > 0 && !error)
             {
                 if ((out.buff)==NULL || requiredBuffSize != out.buffSize)
                     out.AllocateSize(requiredBuffSize);
@@ -339,6 +344,9 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
                     cout << "Warning: found frame after requested time" << endl;
                 assert(out.width > 0);
                 assert(out.height > 0);
+                cout << "stopping search. current timestamp" << this->currentFrame.timestamp << endl;
+                cout << "prev timestamp" << this->prevFrame.timestamp << endl;
+
                 done = 1;
             }
 
