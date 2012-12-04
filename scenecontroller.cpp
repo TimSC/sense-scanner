@@ -786,9 +786,10 @@ void SimpleSceneController::LoadAnnotation()
     //Parse XML to DOM
     QFile f(fileName);
     QDomDocument doc("mydocument");
-    if (!doc.setContent(&f))
+    QString errorMsg;
+    if (!doc.setContent(&f, &errorMsg))
     {
-        cout << "Xml Error?" << endl;
+        cout << "Xml Error: "<< errorMsg.toLocal8Bit().constData() << endl;
         f.close();
         return;
     }
@@ -797,30 +798,7 @@ void SimpleSceneController::LoadAnnotation()
     //Load points and links into memory
     QDomElement rootElem = doc.documentElement();
 
-    this->shape.clear();
-    this->links.clear();
-    this->pos.clear();
-    QDomNode n = rootElem.firstChild();
-    while(!n.isNull()) {
-        QDomElement e = n.toElement(); // try to convert the node to an element.
-        if(!e.isNull()) {
-            if(e.tagName() == "shape")
-            {
-                std::vector<std::vector<float> > shapeData = ProcessXmlDomFrame(e);
-                this->shape = shapeData;
-            }
-            if(e.tagName() == "frame")
-            {
-                std::vector<std::vector<float> > frame = ProcessXmlDomFrame(e);
-                cout << e.attribute("time").toFloat() << endl;
-                float timeSec = e.attribute("time").toFloat();
-                assert(timeSec > 0.f);
-                assert(frame.size() == this->shape.size());
-                this->pos[(unsigned long long)(timeSec * 1000.f + 0.5)] = frame;
-            }
-        }
-        n = n.nextSibling();
-    }
+    this->ReadAnnotationXml(rootElem);
 }
 
 void SimpleSceneController::SaveAnnotation()
@@ -842,9 +820,32 @@ void SimpleSceneController::SaveAnnotation()
 
 //*********************************************************
 
-void SimpleSceneController::ReadAnnotationXml()
+void SimpleSceneController::ReadAnnotationXml(QDomElement &elem)
 {
-
+    this->shape.clear();
+    this->links.clear();
+    this->pos.clear();
+    QDomNode n = elem.firstChild();
+    while(!n.isNull()) {
+        QDomElement e = n.toElement(); // try to convert the node to an element.
+        if(!e.isNull()) {
+            if(e.tagName() == "shape")
+            {
+                std::vector<std::vector<float> > shapeData = ProcessXmlDomFrame(e);
+                this->shape = shapeData;
+            }
+            if(e.tagName() == "frame")
+            {
+                std::vector<std::vector<float> > frame = ProcessXmlDomFrame(e);
+                cout << e.attribute("time").toFloat() << endl;
+                float timeSec = e.attribute("time").toFloat();
+                assert(timeSec > 0.f);
+                assert(frame.size() == this->shape.size());
+                this->pos[(unsigned long long)(timeSec * 1000.f + 0.5)] = frame;
+            }
+        }
+        n = n.nextSibling();
+    }
 
 }
 

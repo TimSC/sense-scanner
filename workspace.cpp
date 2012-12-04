@@ -91,7 +91,7 @@ void Workspace::Load(QString fina)
                 while(!sourceNode.isNull())
                 {
                     QDomElement sourceEle = sourceNode.toElement(); // try to convert the node to an element.
-                    assert(sourceEle.tagName() == "source");
+                    if(sourceEle.tagName() != "source") {sourceNode = sourceNode.nextSibling(); continue;}
 
                     QString sourceFiNa = sourceEle.attribute("file");
                     QString sourceFiNaAbs = dir.absoluteFilePath(sourceFiNa);
@@ -99,8 +99,21 @@ void Workspace::Load(QString fina)
                     this->sources.push_back(fileInfo.absoluteFilePath());
                     SimpleSceneController *track =
                             new SimpleSceneController(NULL);
-                    this->tracks.push_back(track);
 
+                    QDomNode trackData = sourceNode.firstChild();
+                    while(!trackData.isNull())
+                    {
+                        QDomElement et = trackData.toElement(); // try to convert the node to an element.
+                        if(et.isNull()) continue;
+                        if(et.tagName() != "tracking") {trackData = trackData.nextSibling(); continue;}
+
+                        track->ReadAnnotationXml(et);
+
+                        trackData = trackData.nextSibling();
+
+                    }
+
+                    this->tracks.push_back(track);
                     sourceNode = sourceNode.nextSibling();
                 }
 
@@ -132,8 +145,6 @@ int Workspace::Save()
         this->tracks[i]->WriteAnnotationXml(out);
         out << "\t</source>" << endl;
     }
-
-
 
     out << "</sources>" << endl;
     out << "</workspace>" << endl;

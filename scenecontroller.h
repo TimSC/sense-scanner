@@ -72,7 +72,7 @@ public slots:
     void LoadAnnotation();
     void SaveAnnotation();
 
-    void ReadAnnotationXml();
+    void ReadAnnotationXml(QDomElement &elem);
     void WriteAnnotationXml(QTextStream &out);
 
 protected:
