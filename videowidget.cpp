@@ -246,8 +246,8 @@ void VideoWidget::SetSceneControl(SimpleSceneController *sceneIn)
         QLayoutItem *item = this->ui->annotationTools->itemAt(0);
         this->ui->annotationTools->removeItem(item);
     }
-    //if(!this->sceneControl.isNull())
-    //    this->sceneControl->DestroyControls();
+    if(this->sceneControl!=NULL)
+        this->sceneControl->DestroyControls();
 
     //Activate new scene controls
     this->sceneControl = sceneIn;
@@ -255,7 +255,7 @@ void VideoWidget::SetSceneControl(SimpleSceneController *sceneIn)
     if(this->sceneControl!=NULL)
     {
         this->ui->graphicsView->setScene(&*this->sceneControl->scene);
-        //this->ui->annotationTools->addWidget(this->sceneControl->ControlsFactory(this));
+        this->ui->annotationTools->addWidget(this->sceneControl->ControlsFactory(this));
     }
     else
     {
