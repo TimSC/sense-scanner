@@ -240,7 +240,7 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)
 
 void VideoWidget::SetSceneControl(SimpleSceneController *sceneIn)
 {
-    //Remove previous scene controls
+    //Remove previous scene button controls
     while(this->ui->annotationTools->count()>0)
     {
         QLayoutItem *item = this->ui->annotationTools->itemAt(0);
@@ -249,7 +249,9 @@ void VideoWidget::SetSceneControl(SimpleSceneController *sceneIn)
     if(this->sceneControl!=NULL)
         this->sceneControl->DestroyControls();
 
-    //Activate new scene controls
+    //Remove previous menu controls
+
+    //Activate new scene button controls
     this->sceneControl = sceneIn;
     cout << "isnull" << (this->sceneControl == NULL) << endl;
     if(this->sceneControl!=NULL)
@@ -261,11 +263,5 @@ void VideoWidget::SetSceneControl(SimpleSceneController *sceneIn)
     {
         this->ui->graphicsView->setScene(NULL);
     }
-
-}
-
-void VideoWidget::SetMenuBar(QMenuBar *menuBar)
-{
-    this->sceneControl->MenuFactory(menuBar);
 
 }

@@ -72,9 +72,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
     this->setWindowTitle("Video Cognition System");
-    //this->ui->widget->SetSceneControl(QSharedPointer<SimpleSceneController>(new SimpleSceneController(this)));
     this->ui->widget->SetSource(this->mediaInterface);
-    //this->ui->widget->SetMenuBar(this->menuBar());
 
     this->sourcesModel = new QStandardItemModel(4, 1);
     this->ui->dataSources->setModel(this->sourcesModel);
@@ -246,12 +244,13 @@ void MainWindow::SaveAsWorkspace()
 
 void MainWindow::SelectedSourceChanged(const QModelIndex ind)
 {
-    int selectedRow = ind.row();
+    unsigned int selectedRow = ind.row();
     if(selectedRow < 0 && selectedRow >= this->workspace.GetNumSources())
         return;
 
     QString fina = this->workspace.GetSourceName(selectedRow);
 
+    //Pause video
     this->ui->widget->Pause();
 
     //Mark media interface as inactive
@@ -270,12 +269,20 @@ void MainWindow::SelectedSourceChanged(const QModelIndex ind)
     //Mark media interface as active
     this->mediaInterface->SetActive(1);
 
-    //avbinNew->SetEventLoop(this->eventLoop);
     cout << "Opening " << fina.toLocal8Bit().constData() << endl;
     this->mediaInterface->OpenFile(fina.toLocal8Bit().constData());
 
+    //Update scene controller
     SimpleSceneController *scene = this->workspace.GetTrack(selectedRow);
     this->ui->widget->SetSceneControl(scene);
+
+    //Update menus
+    //while(selectedRow >= this->annotationMenus)
+    //    this->annotationMenus.push_back(NULL);
+
+    //if(scene != NULL && this->annotationMenus[selectedRow] = NULL)
+    //    this->annotationMenus[selectedRow] = scene->MenuFactory(this->menuBar());
+    this->workspace.ShowMenu(selectedRow, this->menuBar());
 
     //Set widget to use this source
     this->ui->widget->SetSource(this->mediaInterface);

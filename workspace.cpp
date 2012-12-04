@@ -142,3 +142,24 @@ void Workspace::SaveAs(QString &fina)
     this->defaultFilename = fina;
     this->Save();
 }
+
+void Workspace::HideAllMenus()
+{
+    for(unsigned int i=0;i<this->annotationMenus.size();i++)
+    {
+        if(this->annotationMenus[i]==NULL) continue;
+        this->annotationMenus[i]->setVisible(false);
+    }
+
+}
+
+void Workspace::ShowMenu(unsigned int index, QMenuBar *menuBar)
+{
+    this->HideAllMenus();
+    while(index>=this->annotationMenus.size())
+        this->annotationMenus.push_back(NULL);
+    if(this->annotationMenus[index]==NULL)
+        this->annotationMenus[index] = this->tracks[index]->MenuFactory(menuBar);
+    assert(this->annotationMenus[index]!=NULL);
+    this->annotationMenus[index]->setVisible(true);
+}

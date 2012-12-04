@@ -64,6 +64,7 @@ SimpleSceneController::SimpleSceneController(QWidget *parent)
     this->mousex = 0.f;
     this->mousey = 0.f;
     this->markFrameButton = NULL;
+    this->menu=NULL;
 
     this->annotationControls = NULL;
 }
@@ -588,10 +589,11 @@ void SimpleSceneController::MouseLeaveEvent()
 
 //************************************************************
 
-QWidget *SimpleSceneController::MenuFactory(QMenuBar *menuBar)
+QMenu *SimpleSceneController::MenuFactory(QMenuBar *menuBar)
 {
     assert(this!=NULL);
     assert(menuBar != NULL);
+    assert(this->menu==NULL);
     QAction *loadShape = new QAction(tr("&Load Shape from File"), menuBar);
     QAction *saveShape = new QAction(tr("&Save Shape to File"), menuBar);
     QAction *setShape = new QAction(tr("Set Shape from &Current Frame"), menuBar);
@@ -599,7 +601,6 @@ QWidget *SimpleSceneController::MenuFactory(QMenuBar *menuBar)
     QAction *loadAnnotation = new QAction(tr("L&oad Annotation"), menuBar);
     QAction *saveAnnotation = new QAction(tr("S&ave Annotation"), menuBar);
 
-    assert(menuBar);
     QMenu *newMenu = menuBar->addMenu(tr("&Annotate"));
     newMenu->addAction(loadShape);
     newMenu->addAction(saveShape);
@@ -614,6 +615,7 @@ QWidget *SimpleSceneController::MenuFactory(QMenuBar *menuBar)
     QObject::connect(loadAnnotation, SIGNAL(triggered()), this, SLOT(LoadAnnotation()));
     QObject::connect(saveAnnotation, SIGNAL(triggered()), this, SLOT(SaveAnnotation()));
 
+    this->menu = newMenu;
     return newMenu;
 }
 

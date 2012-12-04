@@ -25,11 +25,15 @@ public:
     int Save();
     void SaveAs(QString &fina);
 
+    void HideAllMenus();
+    void ShowMenu(unsigned int index, QMenuBar *menuBar);
+
 protected:
 
     std::vector<QString> sources;
     QString defaultFilename;
     std::vector<SimpleSceneController *> tracks;
+    std::vector<QMenu *>annotationMenus;
 };
 
 #endif // WORKSPACE_H

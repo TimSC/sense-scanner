@@ -44,7 +44,7 @@ public:
     QWidget *ControlsFactory(QWidget *parent);
     void DestroyControls();
 
-    QWidget *MenuFactory(QMenuBar *menuBar);
+    QMenu *MenuFactory(QMenuBar *menuBar);
 
     void RemovePoint(int index);
 
@@ -88,6 +88,7 @@ protected:
     QPushButton *markFrameButton;
     std::vector<std::vector<float> > shape; //contains the default shape
     QWidget *annotationControls;
+    QMenu *menu;
 };
 
 #endif // SCENECONTROLLER_H

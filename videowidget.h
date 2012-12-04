@@ -46,7 +46,6 @@ public slots:
     void TimerUpdate();
     void AsyncFrameReceived(QImage& fr, unsigned long long timestamp);
     void SetSceneControl(SimpleSceneController *sceneIn);
-    void SetMenuBar(QMenuBar *menuBar);
 
 protected:
     void SetVisibleAtTime(long long unsigned ti);
