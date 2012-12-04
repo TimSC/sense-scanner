@@ -537,6 +537,7 @@ void SimpleSceneController::MarkFramePressed(bool val)
                 exampleFrame.push_back(p);
             }
             this->pos[this->currentTime] = exampleFrame;
+            this->shape = exampleFrame;
         }
     }
     this->Redraw();
@@ -732,18 +733,18 @@ void SimpleSceneController::LoadShape()
 
 void SimpleSceneController::WriteShapeToStream(QTextStream &out)
 {
-    out << "<shape>" << endl;
+    out << "\t<shape>" << endl;
 
     for(unsigned int i=0; i < this->shape.size(); i++)
     {
-        out << "<point id='"<<i<<"' x='"<<this->shape[i][0]<<"' y='"<<this->shape[i][1]<<"'/>" << endl;
+        out << "\t\t<point id='"<<i<<"' x='"<<this->shape[i][0]<<"' y='"<<this->shape[i][1]<<"'/>" << endl;
     }
     for(unsigned int i=0;i < this->links.size();i++)
     {
-        out << "<link from='"<<this->links[i][0]<<"' to='"<<this->links[i][1]<<"'/>" << endl;
+        out << "\t\t<link from='"<<this->links[i][0]<<"' to='"<<this->links[i][1]<<"'/>" << endl;
     }
 
-    out << "</shape>" << endl;
+    out << "\t</shape>" << endl;
 }
 
 void SimpleSceneController::SaveShape()
@@ -835,7 +836,21 @@ void SimpleSceneController::SaveAnnotation()
     QTextStream out(&f);
     out.setCodec("UTF-8");
     out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;
-    out << "<annotation>" << endl;
+    this->WriteAnnotationXml(out);
+    f.close();
+}
+
+//*********************************************************
+
+void SimpleSceneController::ReadAnnotationXml()
+{
+
+
+}
+
+void SimpleSceneController::WriteAnnotationXml(QTextStream &out)
+{
+    out << "\t<tracking>" << endl;
     this->WriteShapeToStream(out);
 
     std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
@@ -843,14 +858,12 @@ void SimpleSceneController::SaveAnnotation()
     {
         std::vector<std::vector<float> > &frame = it->second;
         assert(frame.size() == this->shape.size());
-        out << "<frame time='"<<(it->first/1000.f)<<"'>" << endl;
+        out << "\t<frame time='"<<(it->first/1000.f)<<"'>" << endl;
         for(unsigned int i=0; i < frame.size(); i++)
         {
-            out << "<point id='"<<i<<"' x='"<<frame[i][0]<<"' y='"<<frame[i][1]<<"'/>" << endl;
+            out << "\t\t<point id='"<<i<<"' x='"<<frame[i][0]<<"' y='"<<frame[i][1]<<"'/>" << endl;
         }
-        out << "</frame>" << endl;
+        out << "\t</frame>" << endl;
     }
-    out << "</annotation>" << endl;
-    f.close();
+    out << "\t</tracking>" << endl;
 }
-

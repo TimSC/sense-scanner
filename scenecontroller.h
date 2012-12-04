@@ -72,6 +72,9 @@ public slots:
     void LoadAnnotation();
     void SaveAnnotation();
 
+    void ReadAnnotationXml();
+    void WriteAnnotationXml(QTextStream &out);
+
 protected:
     int activePoint; //which point is selected
     unsigned int imgHeight, imgWidth;

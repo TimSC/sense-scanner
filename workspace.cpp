@@ -112,6 +112,7 @@ void Workspace::Load(QString fina)
 
 int Workspace::Save()
 {
+    assert(this->tracks.size()==this->sources.size());
     if(this->defaultFilename.length()==0)
         return 0;
     QFileInfo pathInfo(this->defaultFilename);
@@ -127,9 +128,12 @@ int Workspace::Save()
     out << "<sources>" << endl;
     for(unsigned int i=0;i<this->sources.size();i++)
     {
-        out << "\t<source file=\""<<Qt::escape(dir.relativeFilePath(this->sources[i]))<<"\"/>" << endl;
-
+        out << "\t<source id=\""<<i<<"\" file=\""<<Qt::escape(dir.relativeFilePath(this->sources[i]))<<"\">" << endl;
+        this->tracks[i]->WriteAnnotationXml(out);
+        out << "\t</source>" << endl;
     }
+
+
 
     out << "</sources>" << endl;
     out << "</workspace>" << endl;
@@ -143,23 +147,3 @@ void Workspace::SaveAs(QString &fina)
     this->Save();
 }
 
-void Workspace::HideAllMenus()
-{
-    for(unsigned int i=0;i<this->annotationMenus.size();i++)
-    {
-        if(this->annotationMenus[i]==NULL) continue;
-        this->annotationMenus[i]->menuAction()->setVisible(false);
-    }
-
-}
-
-void Workspace::ShowMenu(unsigned int index, QMenuBar *menuBar)
-{
-    this->HideAllMenus();
-    while(index>=this->annotationMenus.size())
-        this->annotationMenus.push_back(NULL);
-    if(this->annotationMenus[index]==NULL)
-        this->annotationMenus[index] = this->tracks[index]->MenuFactory(menuBar);
-    assert(this->annotationMenus[index]!=NULL);
-    this->annotationMenus[index]->menuAction()->setVisible(true);
-}

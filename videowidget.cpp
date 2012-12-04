@@ -243,7 +243,11 @@ void VideoWidget::SetSceneControl(SimpleSceneController *sceneIn)
     //Remove previous scene button controls
     while(this->ui->annotationTools->count()>0)
     {
+        cout << "xx" << endl;
         QLayoutItem *item = this->ui->annotationTools->itemAt(0);
+        QWidget *custom = item->widget();
+        assert(custom!=NULL);
+        custom->close();
         this->ui->annotationTools->removeItem(item);
     }
     if(this->sceneControl!=NULL)
@@ -253,7 +257,6 @@ void VideoWidget::SetSceneControl(SimpleSceneController *sceneIn)
 
     //Activate new scene button controls
     this->sceneControl = sceneIn;
-    cout << "isnull" << (this->sceneControl == NULL) << endl;
     if(this->sceneControl!=NULL)
     {
         this->ui->graphicsView->setScene(&*this->sceneControl->scene);
