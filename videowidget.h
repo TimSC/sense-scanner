@@ -61,6 +61,7 @@ protected:
     long long unsigned currentTime, playVidStartPos;
     long long unsigned mediaLength;
     unsigned int waitingForNumFrames;
+    int fitWindowToNextFrame;
 
 private:
     Ui::VideoWidget *ui;

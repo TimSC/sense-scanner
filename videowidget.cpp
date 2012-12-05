@@ -51,6 +51,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->waitingForNumFrames = 0;
     this->seq = NULL;
     this->sceneControl = NULL;
+    this->fitWindowToNextFrame = 0;
 
     this->SetVisibleAtTime(0);
 
@@ -86,6 +87,8 @@ void VideoWidget::SetSource(AbstractMedia *src)
         this->ui->horizontalScrollBar->setRange(0, 1000);
     this->ui->horizontalScrollBar->setValue(0);
     this->SetVisibleAtTime(0);
+
+    this->fitWindowToNextFrame = 1;
 }
 
 void VideoWidget::SetVisibleAtTime(long long unsigned ti)
@@ -241,6 +244,11 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long startTimesta
     //Update current time
     this->currentTime = startTimestamp;
 
+    //Fit to window, if this is selected
+    if(this->fitWindowToNextFrame)
+        this->FitToWindow();
+    this->fitWindowToNextFrame = 0;
+
 }
 
 void VideoWidget::SetSceneControl(SimpleSceneController *sceneIn)
@@ -276,6 +284,7 @@ void VideoWidget::SetSceneControl(SimpleSceneController *sceneIn)
 
 void VideoWidget::FitToWindow()
 {
+    if(this->sceneControl == NULL) return;
     QSharedPointer<MouseGraphicsScene> scene = this->sceneControl->GetScene();
     if(scene.isNull()) return;
     this->ui->graphicsView->fitInView(scene->itemsBoundingRect());
