@@ -195,6 +195,7 @@ void SimpleSceneController::SetAnnotationBetweenTimestamps(unsigned long long st
     if(found) return;
 
     //No annotation data set, so create a new annotation entry
+    assert(endTime >= startTime);
     unsigned long long midTime = ROUND_TIMESTAMP(0.5*(startTime + endTime));
     this->pos[midTime] = annot;
 }
@@ -630,6 +631,7 @@ void SimpleSceneController::MarkFramePressed(bool val)
     }
     if(val==1 && !isUsed) //Enable frame annotation
     {
+        assert(this->frameEndTime >= this->frameStartTime);
         float frameMidpoint = 0.5f*(this->frameStartTime + this->frameEndTime);
         if(this->shape.size() > 0)
         {
