@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'videowidget.h'
 **
-** Created: Thu Nov 29 19:42:00 2012
+** Created: Wed Dec 5 14:14:25 2012
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -97,7 +97,7 @@ static const uint qt_meta_data_VideoWidget[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       6,   14, // methods
+       9,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -110,7 +110,10 @@ static const uint qt_meta_data_VideoWidget[] = {
       69,   12,   12,   12, 0x0a,
       77,   12,   12,   12, 0x0a,
       84,   12,   12,   12, 0x0a,
-     111,   98,   12,   12, 0x0a,
+      95,   12,   12,   12, 0x0a,
+     109,   12,   12,   12, 0x0a,
+     154,  123,   12,   12, 0x0a,
+     228,  220,   12,   12, 0x0a,
 
        0        // eod
 };
@@ -118,8 +121,10 @@ static const uint qt_meta_data_VideoWidget[] = {
 static const char qt_meta_stringdata_VideoWidget[] = {
     "VideoWidget\0\0src\0SetSource(AbstractMedia*)\0"
     "newValue\0SliderMoved(int)\0Pause()\0"
-    "Play()\0TimerUpdate()\0fr,timestamp\0"
-    "AsyncFrameReceived(QImage&,unsigned long long)\0"
+    "Play()\0SeekBack()\0SeekForward()\0"
+    "TimerUpdate()\0fr,startTimestamp,endTimestamp\0"
+    "AsyncFrameReceived(QImage&,unsigned long long,unsigned long long)\0"
+    "sceneIn\0SetSceneControl(SimpleSceneController*)\0"
 };
 
 void VideoWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -132,8 +137,11 @@ void VideoWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         case 1: _t->SliderMoved((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 2: _t->Pause(); break;
         case 3: _t->Play(); break;
-        case 4: _t->TimerUpdate(); break;
-        case 5: _t->AsyncFrameReceived((*reinterpret_cast< QImage(*)>(_a[1])),(*reinterpret_cast< unsigned long long(*)>(_a[2]))); break;
+        case 4: _t->SeekBack(); break;
+        case 5: _t->SeekForward(); break;
+        case 6: _t->TimerUpdate(); break;
+        case 7: _t->AsyncFrameReceived((*reinterpret_cast< QImage(*)>(_a[1])),(*reinterpret_cast< unsigned long long(*)>(_a[2])),(*reinterpret_cast< unsigned long long(*)>(_a[3]))); break;
+        case 8: _t->SetSceneControl((*reinterpret_cast< SimpleSceneController*(*)>(_a[1]))); break;
         default: ;
         }
     }
@@ -171,9 +179,9 @@ int VideoWidget::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 6)
+        if (_id < 9)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 6;
+        _id -= 9;
     }
     return _id;
 }
