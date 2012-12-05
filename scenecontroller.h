@@ -35,7 +35,8 @@ public:
     SimpleSceneController& operator= (const SimpleSceneController &other);
     bool operator!= (const SimpleSceneController &other);
 
-    void VideoImageChanged(QImage &fr, unsigned long long ti);
+    void VideoImageChanged(QImage &fr, unsigned long long startTime,
+                           unsigned long long endTime);
 
     void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
@@ -60,6 +61,16 @@ public:
     std::vector<std::vector<float> > ProcessXmlDomFrame(QDomElement &e);
     QSharedPointer<MouseGraphicsScene> GetScene();
 
+    int GetAnnotationBetweenTimestamps(unsigned long long startTime,
+        unsigned long long endTime,
+        std::vector<std::vector<float> > &annot);
+    void DeleteAnnotationBetweenTimestamps(unsigned long long startTime,
+        unsigned long long endTime);
+    std::vector<unsigned long long> GetAnnotationTimesBetweenTimestamps(unsigned long long startTime,
+        unsigned long long endTime);
+    void SetAnnotationBetweenTimestamps(unsigned long long startTime,
+        unsigned long long endTime,
+        std::vector<std::vector<float> > annot);
 
 public slots:
     void MarkFramePressed(bool val);
@@ -90,7 +101,7 @@ protected:
     QSharedPointer<QGraphicsPixmapItem> item;
     std::map<unsigned long long, std::vector<std::vector<float> > > pos; //contains annotation positions
     std::vector<std::vector<int> > links;
-    unsigned long long currentTime;
+    unsigned long long frameStartTime, frameEndTime;
     int mouseOver;
     QPushButton *markFrameButton;
     std::vector<std::vector<float> > shape; //contains the default shape

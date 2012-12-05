@@ -234,7 +234,7 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long startTimesta
     //Add to scene
     if(this->sceneControl!=NULL)
     {
-        this->sceneControl->VideoImageChanged(fr, startTimestamp);
+        this->sceneControl->VideoImageChanged(fr, startTimestamp, endTimestamp);
         this->ui->graphicsView->setScene(&*this->sceneControl->GetScene());
     }
 
