@@ -169,6 +169,13 @@ void AvBinBackend::DoOpenFile(int requestId)
             int error = (ret == -1);
             if(!error)
             {
+                //If first frame is set, but not ending timestamp, do so now
+                if(this->firstFrames[packet.stream_index]->buffSize != 0
+                        && this->firstFrames[packet.stream_index]->endTimestamp == 0)
+                {
+                    this->firstFrames[packet.stream_index]->endTimestamp = timestamp - this->info.start_time;
+                }
+
                 //Check if this is the first frame of stream
                 if(this->firstFrames[packet.stream_index]->buffSize == 0)
                 {
