@@ -70,6 +70,7 @@ public slots:
     void ShutdownSaveAs();
     void ShutdownWithoutSave();
     void ShutdownCancel();
+
 };
 
 #endif // MAINWINDOW_H

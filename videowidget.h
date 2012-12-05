@@ -47,6 +47,7 @@ public slots:
     void AsyncFrameReceived(QImage& fr, unsigned long long startTimestamp,
                             unsigned long long endTimestamp);
     void SetSceneControl(SimpleSceneController *sceneIn);
+    void FitToWindow();
 
 protected:
     void SetVisibleAtTime(long long unsigned ti);

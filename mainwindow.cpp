@@ -386,3 +386,4 @@ void MainWindow::ShutdownCancel()
     assert(this->shutdownDialog != NULL);
     this->shutdownDialog->close();
 }
+

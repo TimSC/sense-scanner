@@ -273,3 +273,16 @@ void VideoWidget::SetSceneControl(SimpleSceneController *sceneIn)
     }
 
 }
+
+void VideoWidget::FitToWindow()
+{
+    QSharedPointer<MouseGraphicsScene> scene = this->sceneControl->GetScene();
+    if(scene.isNull()) return;
+    this->ui->graphicsView->fitInView(scene->itemsBoundingRect());
+    QMatrix mat = this->ui->graphicsView->matrix();
+
+    qreal scale = mat.m11();
+    if(mat.m22() < scale) scale = mat.m22();
+    mat.setMatrix(scale,mat.m12(),mat.m21(),scale,mat.dx(),mat.dy());
+    this->ui->graphicsView->setMatrix(mat);
+}

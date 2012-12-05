@@ -173,5 +173,6 @@
   <slot>Pause()</slot>
   <slot>SeekBack()</slot>
   <slot>SeekForward()</slot>
+  <slot>FitToWindow()</slot>
  </slots>
 </ui>

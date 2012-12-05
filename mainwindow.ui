@@ -80,7 +80,14 @@
     <addaction name="separator"/>
     <addaction name="actionImport_Video"/>
    </widget>
+   <widget class="QMenu" name="menuVideo">
+    <property name="title">
+     <string>Video</string>
+    </property>
+    <addaction name="actionFit_to_Window"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuVideo"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -116,6 +123,11 @@
     <string>Save Workspace As...</string>
    </property>
   </action>
+  <action name="actionFit_to_Window">
+   <property name="text">
+    <string>Fit to Window</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -124,6 +136,9 @@
    <extends>QWidget</extends>
    <header>videowidget.h</header>
    <container>1</container>
+   <slots>
+    <slot>FitToWindow()</slot>
+   </slots>
   </customwidget>
   <customwidget>
    <class>SourcesList</class>
@@ -261,6 +276,22 @@
     <hint type="destinationlabel">
      <x>199</x>
      <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionFit_to_Window</sender>
+   <signal>activated()</signal>
+   <receiver>widget</receiver>
+   <slot>FitToWindow()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>331</x>
+     <y>155</y>
     </hint>
    </hints>
   </connection>
