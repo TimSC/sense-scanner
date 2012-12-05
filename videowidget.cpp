@@ -180,10 +180,10 @@ void VideoWidget::SeekForward()
 }
 
 
-void FrameCallbackTest(QImage& fr, unsigned long long timestamp, void *raw)
+void FrameCallbackTest(QImage& fr, unsigned long long startTimestamp, unsigned long long endTimestamp, void *raw)
 {
     VideoWidget *widget = (VideoWidget *)raw;
-    widget->AsyncFrameReceived(fr, timestamp);
+    widget->AsyncFrameReceived(fr, startTimestamp, endTimestamp);
 }
 
 void VideoWidget::TimerUpdate()
@@ -223,21 +223,23 @@ void VideoWidget::TimerUpdate()
     }
 }
 
-void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long timestamp)
+void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long startTimestamp,
+                                     unsigned long long endTimestamp)
 {
-    cout << "Showing frame from " << timestamp << endl;
+    cout << "Showing frame from " << startTimestamp << endl;
+    cout << "Frame ends " << endTimestamp << endl;
     if(this->waitingForNumFrames > 0)
         this->waitingForNumFrames -- ;
 
     //Add to scene
     if(this->sceneControl!=NULL)
     {
-        this->sceneControl->VideoImageChanged(fr, timestamp);
+        this->sceneControl->VideoImageChanged(fr, startTimestamp);
         this->ui->graphicsView->setScene(&*this->sceneControl->GetScene());
     }
 
     //Update current time
-    this->currentTime = timestamp;
+    this->currentTime = startTimestamp;
 
 }
 

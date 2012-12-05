@@ -276,9 +276,11 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
         this->currentFrame.width = 0;
         this->currentFrame.height = 0;
         this->currentFrame.timestamp = 0;
+        this->prevFrame.endTimestamp = 0;
         this->prevFrame.width = 0;
         this->prevFrame.height = 0;
         this->prevFrame.timestamp = 0;
+        this->prevFrame.endTimestamp = 0;
     }
 
     //Decode the packets
@@ -330,8 +332,8 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
 
             //Check if this frame is after the requested time and stop
             //processing frames if that is the case
-            if(!error)
-                cout << "found:" <<timestamp << " req:"<< time << endl;
+            //if(!error)
+            //    cout << "found:" <<timestamp << " req:"<< time << endl;
             if((uint64_t)timestamp > time && this->currentFrame.width > 0 && !error)
             {
                 if ((out.buff)==NULL || requiredBuffSize != out.buffSize)
@@ -339,13 +341,16 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
                 assert(out.buff);
                 assert(out.buffSize > 0);
 
+                //Set end time of current frame
+                this->currentFrame.endTimestamp = timestamp;
+
                 out = this->currentFrame;
                 if(time < out.timestamp)
                     cout << "Warning: found frame after requested time" << endl;
                 assert(out.width > 0);
                 assert(out.height > 0);
-                cout << "stopping search. current timestamp" << this->currentFrame.timestamp << endl;
-                cout << "prev timestamp" << this->prevFrame.timestamp << endl;
+                //cout << "stopping search. current timestamp" << this->currentFrame.timestamp << endl;
+                //cout << "prev timestamp" << this->prevFrame.timestamp << endl;
 
                 done = 1;
             }
@@ -353,9 +358,10 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
             if(!error)
             {
                 //Swap forward and back render buffers
+                //The current frame now becomes the "previous frame"
                 this->prevFrame.FastSwap(this->currentFrame);
 
-                //Allocate video buffer
+                //Allocate video buffer if necessary
                 if ((this->currentFrame.buff)==NULL || requiredBuffSize != this->currentFrame.buffSize)
                 {
                     this->currentFrame.AllocateSize(requiredBuffSize);
@@ -372,6 +378,7 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
                 this->currentFrame.frame_rate_num = sinfo->video.frame_rate_num;
                 this->currentFrame.frame_rate_den = sinfo->video.frame_rate_den;
                 this->currentFrame.timestamp = timestamp - this->info.start_time;
+                this->currentFrame.endTimestamp = 0;
                 if(out.height>0) this->height = out.height;
                 if(out.width>0) this->width = out.width;
             }

@@ -24,7 +24,8 @@ public:
     unsigned int height, width;
     unsigned int sample_aspect_num, sample_aspect_den;
     unsigned int frame_rate_num, frame_rate_den;
-    uint64_t timestamp;
+    uint64_t timestamp; //start time
+    uint64_t endTimestamp; //end time
 
     DecodedFrame();
     DecodedFrame(const DecodedFrame &other);
@@ -51,7 +52,9 @@ public:
     virtual long long unsigned GetFrameStartTime(long long unsigned ti)=0; //in milliseconds
 
     virtual int RequestFrame(long long unsigned ti)=0;
-    virtual void Update(void (*frameCallback)(QImage& fr, unsigned long long timestamp, void *raw), void *raw)=0;
+    virtual void Update(void (*frameCallback)(QImage& fr, unsigned long long startTimestamp,
+                                              unsigned long long endTimestamp,
+                                              void *raw), void *raw)=0;
 };
 
 class MediaBuffer: public AbstractMedia

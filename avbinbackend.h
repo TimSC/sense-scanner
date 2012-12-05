@@ -12,6 +12,7 @@
 #include "eventloop.h"
 #include <sstream>
 #include <vector>
+#include <list>
 #include "avbinapi.h"
 
 class FrameGroup
@@ -61,6 +62,7 @@ protected:
     std::vector<uint64_t> timestampOfChannel;
     class DecodedFrame currentFrame;
     class DecodedFrame prevFrame;
+    std::list<class DecodedFrame> frames;
     std::vector<class DecodedFrame *> firstFrames;
 
     uint8_t *audioBuffer;

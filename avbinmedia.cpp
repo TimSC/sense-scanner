@@ -11,6 +11,7 @@ using namespace std;
 #else
 #define STR_TO_ULL std::strtoull
 #endif
+#define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
 
 AvBinMedia::AvBinMedia() : AbstractMedia()
 {
@@ -141,7 +142,7 @@ long long unsigned AvBinMedia::Length() //Get length (ms)
     assert(this->eventReceiver);
     std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(id);
     assert(ev->type == "AVBIN_DURATION_RESPONSE");
-    return STR_TO_ULL(ev->data.c_str(),NULL,10) / 1000;
+    return ROUND_TIMESTAMP(STR_TO_ULL(ev->data.c_str(),NULL,10) / 1000.);
 }
 
 long long unsigned AvBinMedia::GetFrameStartTime(long long unsigned ti) //in milliseconds
@@ -187,7 +188,9 @@ int AvBinMedia::RequestFrame(long long unsigned ti) //in milliseconds
     return id;
 }
 
-void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long timestamp, void *raw), void *raw)
+void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long startTimestamp,
+                                              unsigned long long endTimestamp,
+                                              void *raw), void *raw)
 {
     assert(this->active);
     if(!this->active)
@@ -212,7 +215,8 @@ void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long tim
                 assert(!img->isNull());
 
                 //Return image to calling object by callback
-                frameCallback(*img, frame->timestamp / 1000, raw);
+                frameCallback(*img, ROUND_TIMESTAMP(frame->timestamp / 1000.),
+                              ROUND_TIMESTAMP(frame->endTimestamp / 1000.), raw);
             }
 
         }

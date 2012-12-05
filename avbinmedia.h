@@ -32,7 +32,9 @@ public:
     void SetActive(int activeIn);
 
     int RequestFrame(long long unsigned ti);
-    void Update(void (*frameCallback)(QImage& fr, unsigned long long timestamp, void *raw), void *raw);
+    void Update(void (*frameCallback)(QImage& fr, unsigned long long startTimestamp,
+                                      unsigned long long endTimestamp,
+                                      void *raw), void *raw);
 
 protected:
     class EventReceiver *eventReceiver;
