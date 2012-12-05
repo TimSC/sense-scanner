@@ -236,6 +236,12 @@ void MainWindow::ImportVideo()
     this->RegenerateSourcesList();
 }
 
+void MainWindow::RemoveVideo()
+{
+    cout << "remove" << endl;
+    this->RegenerateSourcesList();
+}
+
 void MainWindow::Update()
 {
     //Check for and handle events

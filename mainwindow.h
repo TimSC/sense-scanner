@@ -55,6 +55,8 @@ private:
 
 public slots:
     void ImportVideo();
+    void RemoveVideo();
+
     void Update();
     void closeEvent(QCloseEvent *event);
     void RegenerateSourcesList();
