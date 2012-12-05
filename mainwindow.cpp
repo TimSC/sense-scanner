@@ -57,10 +57,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->mediaThread = new AvBinThread(this->eventLoop);
     this->mediaThread->start();
 
-    //QSharedPointer<AbstractMedia> buff = QSharedPointer<AbstractMedia>(
-    //    new MediaBuffer(this, QSharedPointer<AbstractMedia>(
-    //        new ImageSequence(this,"/home/tim/dev/QtMedia/testseq"))));
-    //QSharedPointer<AvBinMedia> avbin (new class AvBinMedia());
     this->mediaInterface = new class AvBinMedia();
     this->mediaInterface->SetEventLoop(this->eventLoop);
     this->mediaInterface->SetActive(1);
@@ -69,9 +65,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->timer = new QTimer();
     QObject::connect(this->timer, SIGNAL(timeout()), this, SLOT(Update()));
     this->timer->start(10); //in millisec
-
-    //this->mediaInterface->OpenFile("c:\\Users\\tim\\Downloads\\Smashing Pumpkins Disarm video.mp4");
-    //this->mediaInterface->OpenFile("/media/data/main/media/music/Smashing Pumpkins/The Smashing Pumpkins - The Everlasting Gaze.webm");
 
     ui->setupUi(this);
     this->setWindowTitle("Video Cognition System");
@@ -239,6 +232,17 @@ void MainWindow::ImportVideo()
 void MainWindow::RemoveVideo()
 {
     cout << "remove" << endl;
+    QItemSelectionModel *sourceSelected = this->ui->dataSources->selectionModel();
+    assert(sourceSelected!=NULL);
+
+    QModelIndexList rowList = sourceSelected->selectedRows();
+    for(unsigned int i=0;i<rowList.size();i++)
+    {
+        QModelIndex &ind = rowList[i];
+        cout << ind.row() << endl;
+        this->workspace.RemoveSource(ind.row());
+    }
+
     this->RegenerateSourcesList();
 }
 

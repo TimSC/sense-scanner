@@ -17,6 +17,8 @@ public:
     bool operator!= (const Workspace &other);
 
     unsigned int AddSource(QString &fina);
+    void RemoveSource(unsigned int num);
+
     //void SetTrack(unsigned int trackNum, SimpleSceneController *track);
     SimpleSceneController *GetTrack(unsigned int trackNum);
 
@@ -33,6 +35,7 @@ protected:
     std::vector<QString> sources;
     QString defaultFilename;
     std::vector<SimpleSceneController *> tracks;
+    std::vector<bool> visible;
 };
 
 #endif // WORKSPACE_H

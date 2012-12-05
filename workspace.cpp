@@ -26,6 +26,7 @@ Workspace& Workspace::operator= (const Workspace &other)
 {
     sources = other.sources;
     defaultFilename = other.defaultFilename;
+    visible = other.visible;
     tracks.clear();
     for(unsigned int i=0;i<other.tracks.size();i++)
     {
@@ -42,6 +43,7 @@ bool Workspace::operator!= (const Workspace &other)
     if(defaultFilename != other.defaultFilename) return true;
     if(tracks.size() != other.tracks.size()) return true;
     if(sources != other.sources) return true;
+    if(visible != other.visible) return true;
     for(unsigned int i=0;i<other.tracks.size();i++)
     {
         if(*tracks[i] != *other.tracks[i]) return true;
@@ -55,8 +57,16 @@ unsigned int Workspace::AddSource(QString &fina)
 
     SimpleSceneController *scenePtr = new SimpleSceneController(0);
     this->tracks.push_back(scenePtr);
+    this->visible.push_back(true);
 
     return this->sources.size();
+}
+
+void Workspace::RemoveSource(unsigned int num)
+{
+    this->visible.erase(this->visible.begin()+num);
+    this->tracks.erase(this->tracks.begin()+num);
+    this->sources.erase(this->sources.begin()+num);
 }
 
 /*void Workspace::SetTrack(unsigned int trackNum, SimpleSceneController *track)
@@ -87,6 +97,7 @@ void Workspace::Clear()
     this->sources.clear();
     this->tracks.clear();
     this->defaultFilename = "";
+    this->visible.clear();
 }
 
 void Workspace::Load(QString fina)
@@ -129,6 +140,7 @@ void Workspace::Load(QString fina)
                     QString sourceFiNaAbs = dir.absoluteFilePath(sourceFiNa);
                     QFileInfo fileInfo(sourceFiNaAbs);
                     this->sources.push_back(fileInfo.absoluteFilePath());
+                    this->visible.push_back(true);
                     SimpleSceneController *track =
                             new SimpleSceneController(NULL);
 
