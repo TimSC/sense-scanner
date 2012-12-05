@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <QtCore/QFile>
 #include <QtCore/QTextStream>
-#include <QtGui>
+#include <QtGui/QtGui>
 #include <QtXml/QtXml>
 #include <iostream>
 using namespace std;

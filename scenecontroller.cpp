@@ -111,7 +111,7 @@ SimpleSceneController& SimpleSceneController::operator= (const SimpleSceneContro
     this->annotationControls = NULL;
     this->pos = other.pos; //contains annotation positions
     this->shape = other.shape; //contains the default shape
-
+	return *this;
 }
 
 bool SimpleSceneController::operator!= (const SimpleSceneController &other)
@@ -501,6 +501,12 @@ int SimpleSceneController::NearestPoint(float x, float y, std::vector<std::vecto
     return best;
 }
 
+unsigned long long AbsDiff(unsigned long long a, unsigned long long b)
+{
+    if(a>b) return a-b;
+    return b-a;
+}
+
 unsigned long long SimpleSceneController::GetSeekFowardTime()
 {
     unsigned long long bestDiff = 0;
@@ -512,7 +518,7 @@ unsigned long long SimpleSceneController::GetSeekFowardTime()
         const unsigned long long &ti = it->first;
         std::vector<std::vector<float> >&framePos = it->second;
         if(ti < this->frameEndTime) continue; //Ignore frames in the past
-        unsigned long long diff = abs(ti - this->frameEndTime);
+        unsigned long long diff = AbsDiff(ti, this->frameEndTime);
         if(!bestSet || diff < bestDiff)
         {
             bestDiff = diff;
@@ -523,12 +529,6 @@ unsigned long long SimpleSceneController::GetSeekFowardTime()
     if(bestSet)
         return bestFrame;
     throw std::runtime_error("No frame");
-}
-
-unsigned long long AbsDiff(unsigned long long a, unsigned long long b)
-{
-    if(a>b) return a-b;
-    return b-a;
 }
 
 unsigned long long SimpleSceneController::GetSeekBackTime()

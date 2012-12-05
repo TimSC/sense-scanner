@@ -46,7 +46,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Dev\Lib\Qt\4.8.3\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>QtGui4.lib;QtCore4.lib;QtWebKit4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>QtGui4.lib;QtCore4.lib;QtWebKit4.lib;QtXml4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -72,9 +72,12 @@
     <ClCompile Include="..\mainwindow.cpp" />
     <ClCompile Include="..\mediabuffer.cpp" />
     <ClCompile Include="..\moc_mainwindow.cpp" />
+    <ClCompile Include="..\moc_scenecontroller.cpp" />
     <ClCompile Include="..\moc_videowidget.cpp" />
+    <ClCompile Include="..\scenecontroller.cpp" />
     <ClCompile Include="..\videoarea.cpp" />
     <ClCompile Include="..\videowidget.cpp" />
+    <ClCompile Include="..\workspace.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\avbinapi.h" />
@@ -87,8 +90,10 @@
     <ClInclude Include="..\localsleep.h" />
     <ClInclude Include="..\mainwindow.h" />
     <ClInclude Include="..\mediabuffer.h" />
+    <ClInclude Include="..\scenecontroller.h" />
     <ClInclude Include="..\videoarea.h" />
     <ClInclude Include="..\videowidget.h" />
+    <ClInclude Include="..\workspace.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
