@@ -36,7 +36,7 @@ DecodedFrame& DecodedFrame::operator=(const DecodedFrame& other)
     frame_rate_num = other.frame_rate_num;
     frame_rate_den = other.frame_rate_den;
     timestamp = other.timestamp;
-    endTimestamp = other.timestamp;
+    endTimestamp = other.endTimestamp;
 
     if(this->buffSize != other.buffSize)
         this->AllocateSize(other.buffSize);
