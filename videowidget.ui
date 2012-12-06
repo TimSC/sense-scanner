@@ -76,6 +76,9 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QTimeEdit" name="timeEdit"/>
+     </item>
     </layout>
    </item>
   </layout>

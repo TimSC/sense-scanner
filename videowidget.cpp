@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <math.h>
 using namespace std;
+#define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
 
 //Custom graphics view to catch mouse wheel
 
@@ -59,6 +60,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->timer = QSharedPointer<QTimer>(new QTimer(this));
     QObject::connect(&(*this->timer),SIGNAL(timeout()), this, SLOT(TimerUpdate()));
     this->timer->start(10);
+    this->ui->timeEdit->setDisplayFormat("hh:mm:ss:zzz");
 
 }
 
@@ -229,8 +231,8 @@ void VideoWidget::TimerUpdate()
 void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long startTimestamp,
                                      unsigned long long endTimestamp)
 {
-    cout << "Showing frame from " << startTimestamp << endl;
-    cout << "Frame ends " << endTimestamp << endl;
+    //cout << "Showing frame from " << startTimestamp << endl;
+    //cout << "Frame ends " << endTimestamp << endl;
     if(this->waitingForNumFrames > 0)
         this->waitingForNumFrames -- ;
 
@@ -248,6 +250,21 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long startTimesta
     if(this->fitWindowToNextFrame)
         this->FitToWindow();
     this->fitWindowToNextFrame = 0;
+
+    //Update time display
+    QTime time;
+    unsigned long long displayTime = startTimestamp;
+    if(endTimestamp > 0)
+    {
+        displayTime = ROUND_TIMESTAMP(startTimestamp + endTimestamp * 0.5);
+    }
+    int ms = displayTime % 1000;
+    int sec = ((displayTime - ms) / 1000) % 60;
+    int remainSec = (displayTime - sec * 1000 - ms) / 1000;
+    int min = (remainSec / 60) % 60;
+    int remainMin = (remainSec - min * 60) / 60;
+    time.setHMS(remainMin / 60, min, sec, ms);
+    this->ui->timeEdit->setTime(time);
 
     //Change sider to move one frame length in a single step
     if(endTimestamp > 0)
