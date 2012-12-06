@@ -41,6 +41,20 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="trainModelButton">
+          <property name="text">
+           <string>Train</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="applyModelButton">
+          <property name="text">
+           <string>Apply</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>
@@ -295,6 +309,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>trainModelButton</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>TrainModelPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>128</x>
+     <y>59</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>applyModelButton</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ApplyModelPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>221</x>
+     <y>59</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>ImportVideo()</slot>
@@ -304,5 +350,7 @@
   <slot>SaveAsWorkspace()</slot>
   <slot>SelectedSourceChanged(QModelIndex)</slot>
   <slot>RemoveVideo()</slot>
+  <slot>TrainModelPressed()</slot>
+  <slot>ApplyModelPressed()</slot>
  </slots>
 </ui>

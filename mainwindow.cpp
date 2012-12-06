@@ -135,6 +135,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->workspace.Load(tr("/home/tim/test.work"));
     this->workspaceAsStored = this->workspace;
+    this->ui->dataSources->setSelectionMode(QListView::SelectionMode::ExtendedSelection);
     this->RegenerateSourcesList();
 }
 
@@ -417,15 +418,6 @@ void MainWindow::SelectedSourceChanged(const QModelIndex ind)
     SimpleSceneController *scene = this->workspace.GetTrack(selectedRow);
     this->ui->widget->SetSceneControl(scene);
 
-    //Update menus
-    //while(selectedRow >= this->annotationMenus)
-    //    this->annotationMenus.push_back(NULL);
-
-    //if(scene != NULL && this->annotationMenus[selectedRow] = NULL)
-    //    this->annotationMenus[selectedRow] = scene->MenuFactory(this->menuBar());
-    //this->workspace.ShowMenu(selectedRow, this->menuBar());
-
-
     this->annotationMenu = scene->MenuFactory(this->menuBar());
 
     //Set widget to use this source
@@ -433,3 +425,16 @@ void MainWindow::SelectedSourceChanged(const QModelIndex ind)
 
 }
 
+void MainWindow::TrainModelPressed()
+{
+    cout << "TrainModelPressed" << endl;
+    QItemSelectionModel *selection = this->ui->dataSources->selectionModel();
+
+}
+
+void MainWindow::ApplyModelPressed()
+{
+    cout << "ApplyModelPressed" << endl;
+    QItemSelectionModel *selection = this->ui->dataSources->selectionModel();
+
+}

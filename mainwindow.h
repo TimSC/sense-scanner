@@ -73,6 +73,8 @@ private:
 public slots:
     void ImportVideo();
     void RemoveVideo();
+    void TrainModelPressed();
+    void ApplyModelPressed();
 
     void Update();
     void closeEvent(QCloseEvent *event);
