@@ -1,8 +1,16 @@
 
+All original software in this package is (C) 2012 Tim sheerman-Chase. All rights reserved.
+
+This software uses code of:
+
 QT library, GNU LGPL v2.1
+Source available: https://qt-project.org/downloads
 
-Oxygen icons, LGPLv3
+Oxygen icons, LGPL v3
+Project: http://www.oxygen-icons.org/
 
-libvlc, LGPLv2.1 or later
+A snapshot of avbin, LGPL v3
+https://github.com/AVbin/AVbin/tree/323d5d91e57caad0f4889e8715e07bd04da7f8a8
 
-
+A modified version of libav, LGPL version 2.1 or later
+Source code: https://github.com/TimSC/libav/commit/87851b4d0140b6d92d36f7f1154281509d48f3fc
