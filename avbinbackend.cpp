@@ -448,16 +448,45 @@ void AvBinBackend::SetEventLoop(class EventLoop *eventLoopIn)
 int AvBinBackend::PlayUpdate()
 {
     int foundEvent = 0;
+
+    //Read incoming events into a local list
     try
     {
         assert(this->eventReceiver);
+        cout << "avbin thread queue " << this->eventReceiver->BufferSize() << endl;
+        while(1)
+        {
         std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
         //cout << "Event type " << ev->type << endl;
-        foundEvent = 1;
-        this->HandleEvent(ev);
+        foundEvent++;
+        if(ev->type == "AVBIN_GET_FRAME")
+            this->incomingFrameRequests.push_back(ev);
+        else
+            this->HandleEvent(ev);
+        }
     }
     catch(std::runtime_error e) {}
-    return foundEvent;
+
+    //Process all frames in queue
+    //std::list<std::tr1::shared_ptr<class Event> >::iterator it;
+    //cout << foundEvent << endl;
+    //for(it=this->incomingFrameRequests.begin();it!=this->incomingFrameRequests.end();it++)
+    //{
+    //    this->HandleEvent(*it);
+    //}
+
+    if(!this->incomingFrameRequests.empty())
+    {
+        //Only process the most recent request, discard the others
+        std::list<std::tr1::shared_ptr<class Event> >::iterator it;
+        it = this->incomingFrameRequests.end();
+        it --;
+        this->HandleEvent(*it);
+    }
+
+    this->incomingFrameRequests.clear();
+
+    return foundEvent > 0;
 }
 
 void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)

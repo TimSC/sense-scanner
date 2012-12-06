@@ -61,7 +61,6 @@ protected:
     int playActive;
     long long unsigned currentTime, playVidStartPos;
     long long unsigned mediaLength;
-    unsigned int waitingForNumFrames;
     int fitWindowToNextFrame;
     long long unsigned lastRequestedTime;
 

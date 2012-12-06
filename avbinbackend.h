@@ -64,6 +64,7 @@ protected:
     class DecodedFrame prevFrame;
     std::list<class DecodedFrame> frames;
     std::vector<class DecodedFrame *> firstFrames;
+    std::list<std::tr1::shared_ptr<class Event> > incomingFrameRequests;
 
     uint8_t *audioBuffer;
     unsigned audioBufferSize;

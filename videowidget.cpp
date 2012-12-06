@@ -49,7 +49,6 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->currentTime = 0;
     this->playActive = false;
     this->mediaLength = 0;
-    this->waitingForNumFrames = 0;
     this->seq = NULL;
     this->sceneControl = NULL;
     this->fitWindowToNextFrame = 0;
@@ -109,7 +108,6 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
     //Get image from sequence
     try
     {
-        this->waitingForNumFrames ++;
         this->seq->RequestFrame(ti);
     }
     catch(std::runtime_error &err)
@@ -131,10 +129,9 @@ void VideoWidget::SliderMoved(int newValue)
     time.setHMS(remainMin / 60, min, sec, ms);
     this->ui->timeEdit->setTime(time);
 
-    if(this->waitingForNumFrames < 2)
-    {
-        this->SetVisibleAtTime(newValue);
-    }
+
+    this->SetVisibleAtTime(newValue);
+
 }
 
 void VideoWidget::Pause()
@@ -164,7 +161,6 @@ void VideoWidget::Play()
     cout << "play" << endl;
 
     this->playPressedTime.start();
-    this->waitingForNumFrames = 0;
 
     //If the video is at the end, start playing from the beginning
     if(this->currentTime < this->mediaLength - 1000)
@@ -251,8 +247,6 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long startTimesta
 {
     //cout << "Showing frame from " << startTimestamp << endl;
     //cout << "Frame ends " << endTimestamp << endl;
-    if(this->waitingForNumFrames > 0)
-        this->waitingForNumFrames -- ;
 
     //Add to scene
     if(this->sceneControl!=NULL)
@@ -322,7 +316,6 @@ void VideoWidget::FitToWindow()
 
 void VideoWidget::TimeChanged(QTime time)
 {
-
     unsigned long long t = time.msec();
     t += time.second() * 1000;
     t += time.minute() * 60000;
