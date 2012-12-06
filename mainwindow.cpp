@@ -17,6 +17,66 @@
 #endif
 using namespace std;
 
+//*********************************************
+
+CheckDiscardDataDialog::CheckDiscardDataDialog(QWidget *parent, QString discardMsg) : QObject(parent)
+{
+    this->shutdownDialog = new QDialog(parent);
+    QVBoxLayout topLayout(this->shutdownDialog);
+    QDialogButtonBox buttonbox;
+    QLabel question("This workspace has unsaved changes.");
+    this->shutdownDialog->setLayout(&topLayout);
+    topLayout.addWidget(&question);
+    topLayout.addWidget(&buttonbox);
+    QPushButton *buttonClose = new QPushButton(discardMsg);
+    QPushButton *buttonCancel = new QPushButton("Cancel");
+    QPushButton *buttonSaveAs = new QPushButton("Save as..");
+    buttonbox.addButton(buttonClose, QDialogButtonBox::DestructiveRole);
+    buttonbox.addButton(buttonCancel, QDialogButtonBox::RejectRole);
+    buttonbox.addButton(buttonSaveAs, QDialogButtonBox::ActionRole);
+    buttonSaveAs->setDefault(true);
+    QObject::connect(buttonClose,SIGNAL(pressed()), this, SLOT(ShutdownWithoutSave()));
+    QObject::connect(buttonCancel,SIGNAL(pressed()), this, SLOT(ShutdownCancel()));
+    QObject::connect(buttonSaveAs,SIGNAL(pressed()), this, SLOT(ShutdownSaveAs()));
+
+    //Run the dialog
+    //The variable this->shutdownUserSelection is modified at this stage!
+    this->shutdownUserSelection = "CANCEL";
+    this->shutdownDialog->exec();
+}
+
+CheckDiscardDataDialog::~CheckDiscardDataDialog()
+{
+    this->shutdownDialog = NULL;
+}
+
+QString CheckDiscardDataDialog::GetUserChoice()
+{
+    return this->shutdownUserSelection;
+}
+
+void CheckDiscardDataDialog::ShutdownSaveAs()
+{
+    this->shutdownUserSelection = "SAVEAS";
+    assert(this->shutdownDialog != NULL);
+    this->shutdownDialog->close();
+}
+
+void CheckDiscardDataDialog::ShutdownWithoutSave()
+{
+    this->shutdownUserSelection = "NOSAVE";
+    assert(this->shutdownDialog != NULL);
+    this->shutdownDialog->close();
+}
+
+void CheckDiscardDataDialog::ShutdownCancel()
+{
+    this->shutdownUserSelection = "CANCEL";
+    assert(this->shutdownDialog != NULL);
+    this->shutdownDialog->close();
+}
+
+
 //********************************
 
 SourcesList::SourcesList(QWidget * parent) : QListView(parent)
@@ -42,7 +102,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     this->threadCount = 0;
     this->annotationMenu = NULL;
-    this->shutdownDialog = NULL;
 
     //Create inter thread message system
     this->eventLoop = new class EventLoop();
@@ -104,61 +163,42 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+QString MainWindow::CheckIfDataShouldBeDiscarded(QString discardMsg)
 {
-
     //Check if the workspace has been saved, if not
     //prompt the user
     if(this->workspace != this->workspaceAsStored)
     {
         //Create a dialog to find what the user wants
-        this->shutdownDialog = new QDialog(this);
-        QVBoxLayout topLayout(this->shutdownDialog);
-        QDialogButtonBox buttonbox;
-        QLabel question("This workspace has unsaved changes.");
-        this->shutdownDialog->setLayout(&topLayout);
-        topLayout.addWidget(&question);
-        topLayout.addWidget(&buttonbox);
-        QPushButton *buttonClose = new QPushButton("Close without saving");
-        QPushButton *buttonCancel = new QPushButton("Cancel");
-        QPushButton *buttonSaveAs = new QPushButton("Save as..");
-        buttonbox.addButton(buttonClose, QDialogButtonBox::DestructiveRole);
-        buttonbox.addButton(buttonCancel, QDialogButtonBox::RejectRole);
-        buttonbox.addButton(buttonSaveAs, QDialogButtonBox::ActionRole);
-        buttonSaveAs->setDefault(true);
-        QObject::connect(buttonClose,SIGNAL(pressed()), this, SLOT(ShutdownWithoutSave()));
-        QObject::connect(buttonCancel,SIGNAL(pressed()), this, SLOT(ShutdownCancel()));
-        QObject::connect(buttonSaveAs,SIGNAL(pressed()), this, SLOT(ShutdownSaveAs()));
-
-        //Run the dialog
-        this->shutdownUserSelection = "CANCEL";
-        this->shutdownDialog->exec();
-
-        //The variable this->shutdownUserSelection is modified at this stage!
+        class CheckDiscardDataDialog dialog(this, discardMsg);
 
         //Process the users choice
-        if(this->shutdownUserSelection == "CANCEL")
-        {
-            event->setAccepted(false);
-            return;
-        }
+        QString shutdownUserSelection = dialog.GetUserChoice();
 
-        if(this->shutdownUserSelection == "SAVEAS")
-        {
-            event->setAccepted(false);
-            this->SaveAsWorkspace();
-            return;
-        }
+        return shutdownUserSelection;
+    }
+    return "NO_CHANGE";
+}
 
-        if(this->shutdownUserSelection == "NOSAVE")
-        {
-            event->setAccepted(true);
-        }
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    QString shutdownUserSelection = this->CheckIfDataShouldBeDiscarded("Close without saving");
 
-        this->shutdownDialog = NULL;
+    if(shutdownUserSelection == "CANCEL")
+    {
+        event->setAccepted(false);
+        return;
     }
 
-    assert(this->threadCount == 1);
+    if(shutdownUserSelection == "SAVEAS")
+    {
+        event->setAccepted(false);
+        this->SaveAsWorkspace();
+        return;
+    }
+
+    event->setAccepted(true);
+    assert(this->threadCount >= 1);
 
     //Disconnect video widget from media source
     cout << "Disconnect video from source" << endl;
@@ -277,12 +317,39 @@ void MainWindow::Update()
 
 void MainWindow::NewWorkspace()
 {
+    QString shutdownUserSelection = this->CheckIfDataShouldBeDiscarded("Continue without saving");
+
+    if(shutdownUserSelection == "CANCEL")
+    {
+        return;
+    }
+
+    if(shutdownUserSelection == "SAVEAS")
+    {
+        this->SaveAsWorkspace();
+        return;
+    }
+
     this->workspace.Clear();
+    this->workspaceAsStored = this->workspace;
     this->RegenerateSourcesList();
 }
 
 void MainWindow::LoadWorkspace()
 {
+    QString shutdownUserSelection = this->CheckIfDataShouldBeDiscarded("Continue without saving");
+
+    if(shutdownUserSelection == "CANCEL")
+    {
+        return;
+    }
+
+    if(shutdownUserSelection == "SAVEAS")
+    {
+        this->SaveAsWorkspace();
+        return;
+    }
+
     //Get filename from user
     QString fileName = QFileDialog::getOpenFileName(this,
       tr("Load Workspace"), "", tr("Workspaces (*.work)"));
@@ -364,26 +431,5 @@ void MainWindow::SelectedSourceChanged(const QModelIndex ind)
     //Set widget to use this source
     this->ui->widget->SetSource(this->mediaInterface);
 
-}
-
-void MainWindow::ShutdownSaveAs()
-{
-    this->shutdownUserSelection = "SAVEAS";
-    assert(this->shutdownDialog != NULL);
-    this->shutdownDialog->close();
-}
-
-void MainWindow::ShutdownWithoutSave()
-{
-    this->shutdownUserSelection = "NOSAVE";
-    assert(this->shutdownDialog != NULL);
-    this->shutdownDialog->close();
-}
-
-void MainWindow::ShutdownCancel()
-{
-    this->shutdownUserSelection = "CANCEL";
-    assert(this->shutdownDialog != NULL);
-    this->shutdownDialog->close();
 }
 

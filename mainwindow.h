@@ -14,6 +14,25 @@ namespace Ui {
 class MainWindow;
 }
 
+class CheckDiscardDataDialog : public QObject
+{
+    Q_OBJECT
+public:
+    CheckDiscardDataDialog(QWidget *parent, QString discardMsg);
+    virtual ~CheckDiscardDataDialog();
+
+    QString GetUserChoice();
+public slots:
+    void ShutdownSaveAs();
+    void ShutdownWithoutSave();
+    void ShutdownCancel();
+protected:
+    QDialog *shutdownDialog;
+    QString shutdownUserSelection;
+};
+
+//*****************************************
+
 class SourcesList : public QListView
 {
     Q_OBJECT
@@ -27,6 +46,8 @@ signals:
     void UpdateSources(const QModelIndex current);
 
 };
+
+//***************************************
 
 class MainWindow : public QMainWindow
 {
@@ -49,10 +70,6 @@ private:
     QStandardItemModel *sourcesModel;
     QMenu *annotationMenu;
 
-    //Shutdown dialog data
-    QString shutdownUserSelection;
-    QDialog *shutdownDialog;
-
 public slots:
     void ImportVideo();
     void RemoveVideo();
@@ -66,10 +83,7 @@ public slots:
     void SaveWorkspace();
     void SaveAsWorkspace();
     void SelectedSourceChanged(const QModelIndex current);
-
-    void ShutdownSaveAs();
-    void ShutdownWithoutSave();
-    void ShutdownCancel();
+    QString CheckIfDataShouldBeDiscarded(QString discardMsg);
 
 };
 
