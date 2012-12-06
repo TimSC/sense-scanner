@@ -249,6 +249,10 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long startTimesta
         this->FitToWindow();
     this->fitWindowToNextFrame = 0;
 
+    //Change sider to move one frame length in a single step
+    if(endTimestamp > 0)
+        this->ui->horizontalScrollBar->setSingleStep(endTimestamp - startTimestamp);
+
 }
 
 void VideoWidget::SetSceneControl(SimpleSceneController *sceneIn)

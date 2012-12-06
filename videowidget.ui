@@ -68,6 +68,9 @@
      </item>
      <item>
       <widget class="QScrollBar" name="horizontalScrollBar">
+       <property name="pageStep">
+        <number>1000</number>
+       </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
