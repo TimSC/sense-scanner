@@ -430,6 +430,13 @@ void MainWindow::TrainModelPressed()
     cout << "TrainModelPressed" << endl;
     QItemSelectionModel *selection = this->ui->dataSources->selectionModel();
 
+    QModelIndexList rowList = selection->selectedRows();
+    for(unsigned int i=0;i<rowList.size();i++)
+    {
+        QModelIndex &ind = rowList[i];
+        cout << ind.row() << endl;
+    }
+
 }
 
 void MainWindow::ApplyModelPressed()
