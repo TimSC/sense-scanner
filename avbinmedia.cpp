@@ -198,6 +198,7 @@ void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long sta
 
     //Check for new frames from media backend.
     int checking = 1;
+    //cout << "GUI receive queue " << this->eventReceiver->BufferSize() << endl;
     while(checking)
     {
         try

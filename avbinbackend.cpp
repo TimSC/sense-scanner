@@ -453,7 +453,7 @@ int AvBinBackend::PlayUpdate()
     try
     {
         assert(this->eventReceiver);
-        cout << "avbin thread queue " << this->eventReceiver->BufferSize() << endl;
+        //cout << "avbin thread queue " << this->eventReceiver->BufferSize() << endl;
         while(1)
         {
         std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
