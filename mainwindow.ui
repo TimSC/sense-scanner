@@ -14,63 +14,73 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QToolButton" name="addSourceButton">
-          <property name="text">
-           <string>...</string>
-          </property>
-          <property name="icon">
-           <iconset>
-            <normaloff>icons/archive-insert.png</normaloff>icons/archive-insert.png</iconset>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QToolButton" name="addSourceButton">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>icons/archive-insert.png</normaloff>icons/archive-insert.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="removeSourceButton">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>icons/archive-remove.png</normaloff>icons/archive-remove.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="trainModelButton">
+            <property name="text">
+             <string>Train</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="applyModelButton">
+            <property name="text">
+             <string>Apply</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
-         <widget class="QToolButton" name="removeSourceButton">
-          <property name="text">
-           <string>...</string>
+         <widget class="QSplitter" name="splitter">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
           </property>
-          <property name="icon">
-           <iconset>
-            <normaloff>icons/archive-remove.png</normaloff>icons/archive-remove.png</iconset>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="trainModelButton">
-          <property name="text">
-           <string>Train</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="applyModelButton">
-          <property name="text">
-           <string>Apply</string>
-          </property>
+          <widget class="SourcesList" name="dataSources">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+          <widget class="QListView" name="modelList"/>
          </widget>
         </item>
        </layout>
       </item>
       <item>
-       <widget class="SourcesList" name="dataSources">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
+       <widget class="VideoWidget" name="widget" native="true"/>
       </item>
      </layout>
-    </item>
-    <item>
-     <widget class="VideoWidget" name="widget" native="true"/>
     </item>
    </layout>
   </widget>
