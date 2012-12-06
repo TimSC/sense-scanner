@@ -84,6 +84,7 @@ public slots:
     void LoadShape();
     void SaveShape();
     void SetShapeFromCurentFrame();
+    void ResetCurentFrameShape();
     void LoadAnnotation();
     void SaveAnnotation();
 

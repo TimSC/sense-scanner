@@ -716,6 +716,7 @@ QMenu *SimpleSceneController::MenuFactory(QMenuBar *menuBar)
     QAction *loadShape = new QAction(tr("&Load Shape from File"), menuBar);
     QAction *saveShape = new QAction(tr("&Save Shape to File"), menuBar);
     QAction *setShape = new QAction(tr("Set Shape from &Current Frame"), menuBar);
+    QAction *resetShape = new QAction(tr("&Reset Shape"), menuBar);
 
     QAction *loadAnnotation = new QAction(tr("L&oad Annotation"), menuBar);
     QAction *saveAnnotation = new QAction(tr("S&ave Annotation"), menuBar);
@@ -724,6 +725,7 @@ QMenu *SimpleSceneController::MenuFactory(QMenuBar *menuBar)
     newMenu->addAction(loadShape);
     newMenu->addAction(saveShape);
     newMenu->addAction(setShape);
+    newMenu->addAction(resetShape);
     newMenu->addSeparator();
     newMenu->addAction(loadAnnotation);
     newMenu->addAction(saveAnnotation);
@@ -731,6 +733,7 @@ QMenu *SimpleSceneController::MenuFactory(QMenuBar *menuBar)
     QObject::connect(loadShape, SIGNAL(triggered()), this, SLOT(LoadShape()));
     QObject::connect(saveShape, SIGNAL(triggered()), this, SLOT(SaveShape()));
     QObject::connect(setShape, SIGNAL(triggered()), this, SLOT(SetShapeFromCurentFrame()));
+    QObject::connect(resetShape, SIGNAL(triggered()), this, SLOT(ResetCurentFrameShape()));
     QObject::connect(loadAnnotation, SIGNAL(triggered()), this, SLOT(LoadAnnotation()));
     QObject::connect(saveAnnotation, SIGNAL(triggered()), this, SLOT(SaveAnnotation()));
 
@@ -898,6 +901,18 @@ void SimpleSceneController::SetShapeFromCurentFrame()
 
     //Set shape from current frame
     this->shape = annotShape;
+}
+
+void SimpleSceneController::ResetCurentFrameShape()
+{
+    //Get current frame
+    std::vector<std::vector<float> > currentFrame;
+    int isUsed = this->GetAnnotationBetweenTimestamps(this->frameStartTime, this->frameEndTime, currentFrame);
+    if(!isUsed) return;
+
+    //Set current frame to canonical shape
+    this->SetAnnotationBetweenTimestamps(this->frameStartTime, this->frameEndTime, this->shape);
+    this->Redraw();
 }
 
 void SimpleSceneController::LoadAnnotation()
