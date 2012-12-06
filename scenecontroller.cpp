@@ -287,15 +287,12 @@ void SimpleSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
     int isUsed = this->GetAnnotationBetweenTimestamps(this->frameStartTime, this->frameEndTime, currentFrame);
     if(!isUsed) return;
 
-    if(this->mode == "MOVE")
-    {
-    if(this->activePoint >= 0 && this->leftDrag)
+    if(this->mode == "MOVE" && this->activePoint >= 0 && this->leftDrag)
     {
         currentFrame[this->activePoint][0] = pos.x();
         currentFrame[this->activePoint][1] = pos.y();
         this->SetAnnotationBetweenTimestamps(this->frameStartTime, this->frameEndTime, currentFrame);
         this->Redraw();
-    }
     }
 
     if(this->mode == "MOVE_ALL" && this->leftDrag)
