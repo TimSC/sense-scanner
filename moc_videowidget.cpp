@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'videowidget.h'
 **
-** Created: Wed Dec 5 14:14:25 2012
+** Created: Thu Dec 6 14:04:04 2012
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -97,7 +97,7 @@ static const uint qt_meta_data_VideoWidget[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       9,   14, // methods
+      11,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -114,6 +114,8 @@ static const uint qt_meta_data_VideoWidget[] = {
      109,   12,   12,   12, 0x0a,
      154,  123,   12,   12, 0x0a,
      228,  220,   12,   12, 0x0a,
+     268,   12,   12,   12, 0x0a,
+     287,  282,   12,   12, 0x0a,
 
        0        // eod
 };
@@ -125,6 +127,7 @@ static const char qt_meta_stringdata_VideoWidget[] = {
     "TimerUpdate()\0fr,startTimestamp,endTimestamp\0"
     "AsyncFrameReceived(QImage&,unsigned long long,unsigned long long)\0"
     "sceneIn\0SetSceneControl(SimpleSceneController*)\0"
+    "FitToWindow()\0time\0TimeChanged(QTime)\0"
 };
 
 void VideoWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -142,6 +145,8 @@ void VideoWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         case 6: _t->TimerUpdate(); break;
         case 7: _t->AsyncFrameReceived((*reinterpret_cast< QImage(*)>(_a[1])),(*reinterpret_cast< unsigned long long(*)>(_a[2])),(*reinterpret_cast< unsigned long long(*)>(_a[3]))); break;
         case 8: _t->SetSceneControl((*reinterpret_cast< SimpleSceneController*(*)>(_a[1]))); break;
+        case 9: _t->FitToWindow(); break;
+        case 10: _t->TimeChanged((*reinterpret_cast< QTime(*)>(_a[1]))); break;
         default: ;
         }
     }
@@ -179,9 +184,9 @@ int VideoWidget::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 9)
+        if (_id < 11)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 9;
+        _id -= 11;
     }
     return _id;
 }
