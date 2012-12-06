@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'videowidget.ui'
 **
-** Created: Wed Dec 5 14:14:14 2012
+** Created: Thu Dec 6 14:03:54 2012
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -17,6 +17,7 @@
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QHeaderView>
 #include <QtGui/QScrollBar>
+#include <QtGui/QTimeEdit>
 #include <QtGui/QToolButton>
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QWidget>
@@ -36,6 +37,7 @@ public:
     QToolButton *playButton;
     QToolButton *seekForwardButton;
     QScrollBar *horizontalScrollBar;
+    QTimeEdit *timeEdit;
 
     void setupUi(QWidget *VideoWidget)
     {
@@ -90,9 +92,15 @@ public:
 
         horizontalScrollBar = new QScrollBar(VideoWidget);
         horizontalScrollBar->setObjectName(QString::fromUtf8("horizontalScrollBar"));
+        horizontalScrollBar->setPageStep(1000);
         horizontalScrollBar->setOrientation(Qt::Horizontal);
 
         horizontalLayout->addWidget(horizontalScrollBar);
+
+        timeEdit = new QTimeEdit(VideoWidget);
+        timeEdit->setObjectName(QString::fromUtf8("timeEdit"));
+
+        horizontalLayout->addWidget(timeEdit);
 
 
         verticalLayout_2->addLayout(horizontalLayout);
@@ -104,6 +112,7 @@ public:
         QObject::connect(pauseButton, SIGNAL(pressed()), VideoWidget, SLOT(Pause()));
         QObject::connect(seekBackButton, SIGNAL(pressed()), VideoWidget, SLOT(SeekBack()));
         QObject::connect(seekForwardButton, SIGNAL(pressed()), VideoWidget, SLOT(SeekForward()));
+        QObject::connect(timeEdit, SIGNAL(timeChanged(QTime)), VideoWidget, SLOT(TimeChanged(QTime)));
 
         QMetaObject::connectSlotsByName(VideoWidget);
     } // setupUi

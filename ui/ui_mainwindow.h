@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Wed Dec 5 15:08:30 2012
+** Created: Thu Dec 6 14:03:54 2012
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -37,6 +37,7 @@ public:
     QAction *actionSave_Workspace;
     QAction *actionImport_Video;
     QAction *actionSave_Workspace_As;
+    QAction *actionFit_to_Window;
     QWidget *centralWidget;
     QHBoxLayout *horizontalLayout;
     QVBoxLayout *verticalLayout;
@@ -47,6 +48,7 @@ public:
     VideoWidget *widget;
     QMenuBar *menuBar;
     QMenu *menuFile;
+    QMenu *menuVideo;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
 
@@ -65,6 +67,8 @@ public:
         actionImport_Video->setObjectName(QString::fromUtf8("actionImport_Video"));
         actionSave_Workspace_As = new QAction(MainWindow);
         actionSave_Workspace_As->setObjectName(QString::fromUtf8("actionSave_Workspace_As"));
+        actionFit_to_Window = new QAction(MainWindow);
+        actionFit_to_Window->setObjectName(QString::fromUtf8("actionFit_to_Window"));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         horizontalLayout = new QHBoxLayout(centralWidget);
@@ -120,6 +124,8 @@ public:
         menuBar->setGeometry(QRect(0, 0, 400, 23));
         menuFile = new QMenu(menuBar);
         menuFile->setObjectName(QString::fromUtf8("menuFile"));
+        menuVideo = new QMenu(menuBar);
+        menuVideo->setObjectName(QString::fromUtf8("menuVideo"));
         MainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
@@ -129,12 +135,14 @@ public:
         MainWindow->setStatusBar(statusBar);
 
         menuBar->addAction(menuFile->menuAction());
+        menuBar->addAction(menuVideo->menuAction());
         menuFile->addAction(actionNew_Workspace);
         menuFile->addAction(actionLoad_Workspace);
         menuFile->addAction(actionSave_Workspace);
         menuFile->addAction(actionSave_Workspace_As);
         menuFile->addSeparator();
         menuFile->addAction(actionImport_Video);
+        menuVideo->addAction(actionFit_to_Window);
 
         retranslateUi(MainWindow);
         QObject::connect(actionImport_Video, SIGNAL(activated()), MainWindow, SLOT(ImportVideo()));
@@ -145,6 +153,7 @@ public:
         QObject::connect(dataSources, SIGNAL(UpdateSources(QModelIndex)), MainWindow, SLOT(SelectedSourceChanged(QModelIndex)));
         QObject::connect(addSourceButton, SIGNAL(pressed()), MainWindow, SLOT(ImportVideo()));
         QObject::connect(removeSourceButton, SIGNAL(pressed()), MainWindow, SLOT(RemoveVideo()));
+        QObject::connect(actionFit_to_Window, SIGNAL(activated()), widget, SLOT(FitToWindow()));
 
         QMetaObject::connectSlotsByName(MainWindow);
     } // setupUi
@@ -157,9 +166,11 @@ public:
         actionSave_Workspace->setText(QApplication::translate("MainWindow", "Save Workspace", 0, QApplication::UnicodeUTF8));
         actionImport_Video->setText(QApplication::translate("MainWindow", "Import Video", 0, QApplication::UnicodeUTF8));
         actionSave_Workspace_As->setText(QApplication::translate("MainWindow", "Save Workspace As...", 0, QApplication::UnicodeUTF8));
+        actionFit_to_Window->setText(QApplication::translate("MainWindow", "Fit to Window", 0, QApplication::UnicodeUTF8));
         addSourceButton->setText(QApplication::translate("MainWindow", "...", 0, QApplication::UnicodeUTF8));
         removeSourceButton->setText(QApplication::translate("MainWindow", "...", 0, QApplication::UnicodeUTF8));
         menuFile->setTitle(QApplication::translate("MainWindow", "File", 0, QApplication::UnicodeUTF8));
+        menuVideo->setTitle(QApplication::translate("MainWindow", "Video", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
 };
