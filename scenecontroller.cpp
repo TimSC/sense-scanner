@@ -280,8 +280,6 @@ void SimpleSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     //assert(mouseEvent);
     QPointF pos = mouseEvent->scenePos();
-    this->mousex = pos.x();
-    this->mousey = pos.y();
     //cout << "mouseMoveEvent, " << pos.x() << "," << pos.y () << endl;
 
     //Get current frame
@@ -300,9 +298,23 @@ void SimpleSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
     }
     }
 
+    if(this->mode == "MOVE_ALL" && this->leftDrag)
+    {
+        for(unsigned int i=0;i<currentFrame.size();i++)
+        {
+            currentFrame[i][0] += pos.x()-this->mousex;
+            currentFrame[i][1] += pos.y()-this->mousey;
+        }
+        this->SetAnnotationBetweenTimestamps(this->frameStartTime, this->frameEndTime, currentFrame);
+        this->Redraw();
+    }
+
     //Update prompt line
     if(this->mode == "ADD_LINK" && this->activePoint >= 0)
         this->Redraw();
+
+    this->mousex = pos.x();
+    this->mousey = pos.y();
 }
 
 void SimpleSceneController::RemovePoint(int index)
@@ -581,6 +593,12 @@ QWidget *SimpleSceneController::ControlsFactory(QWidget *parent)
     button->setChecked(true);
     layout->addWidget(button);
 
+    button = new QPushButton("Move All");
+    QObject::connect(button, SIGNAL(clicked()), this, SLOT(MoveAllPressed()));
+    button->setAutoExclusive(true);
+    button->setCheckable(true);
+    layout->addWidget(button);
+
     button = new QPushButton("Add");
     QObject::connect(button, SIGNAL(clicked()), this, SLOT(AddPointPressed()));
     button->setAutoExclusive(true);
@@ -631,27 +649,14 @@ void SimpleSceneController::MarkFramePressed(bool val)
     }
     if(val==1 && !isUsed) //Enable frame annotation
     {
-        assert(this->frameEndTime >= this->frameStartTime);
-        float frameMidpoint = 0.5f*(this->frameStartTime + this->frameEndTime);
-        if(this->shape.size() > 0)
+        if(this->shape.size() == 0)
         {
+            this->LoadShape();
+        }
 
-            this->pos[frameMidpoint] = this->shape;
-        }
-        else
-        {
-            //Create random shape
-            std::vector<std::vector<float> > exampleFrame;
-            for(int i=0;i<50;i++)
-            {
-                std::vector<float> p;
-                p.push_back(rand() % 500);
-                p.push_back(rand() % 500);
-                exampleFrame.push_back(p);
-            }
-            this->pos[frameMidpoint] = exampleFrame;
-            this->shape = exampleFrame;
-        }
+        assert(this->frameEndTime >= this->frameStartTime);
+        unsigned long long frameMidpoint = ROUND_TIMESTAMP(0.5f*(this->frameStartTime + this->frameEndTime));
+        this->pos[frameMidpoint] = this->shape;
     }
     this->Redraw();
 }
@@ -659,6 +664,11 @@ void SimpleSceneController::MarkFramePressed(bool val)
 void SimpleSceneController::MovePressed()
 {
     this->mode = "MOVE";
+}
+
+void SimpleSceneController::MoveAllPressed()
+{
+    this->mode = "MOVE_ALL";
 }
 
 void SimpleSceneController::AddPointPressed()

@@ -75,6 +75,7 @@ public:
 public slots:
     void MarkFramePressed(bool val);
     void MovePressed();
+    void MoveAllPressed();
     void AddPointPressed();
     void RemovePointPressed();
     void AddLinkPressed();
