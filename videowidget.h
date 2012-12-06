@@ -48,6 +48,7 @@ public slots:
                             unsigned long long endTimestamp);
     void SetSceneControl(SimpleSceneController *sceneIn);
     void FitToWindow();
+    void TimeChanged(QTime time);
 
 protected:
     void SetVisibleAtTime(long long unsigned ti);
@@ -62,6 +63,7 @@ protected:
     long long unsigned mediaLength;
     unsigned int waitingForNumFrames;
     int fitWindowToNextFrame;
+    long long unsigned lastRequestedTime;
 
 private:
     Ui::VideoWidget *ui;

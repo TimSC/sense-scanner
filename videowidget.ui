@@ -172,6 +172,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>timeEdit</sender>
+   <signal>timeChanged(QTime)</signal>
+   <receiver>VideoWidget</receiver>
+   <slot>TimeChanged(QTime)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>333</x>
+     <y>274</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>SliderMoved(int)</slot>
@@ -180,5 +196,6 @@
   <slot>SeekBack()</slot>
   <slot>SeekForward()</slot>
   <slot>FitToWindow()</slot>
+  <slot>TimeChanged(QTime)</slot>
  </slots>
 </ui>

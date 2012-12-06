@@ -53,6 +53,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->seq = NULL;
     this->sceneControl = NULL;
     this->fitWindowToNextFrame = 0;
+    this->lastRequestedTime = 1;
 
     this->SetVisibleAtTime(0);
 
@@ -95,8 +96,15 @@ void VideoWidget::SetSource(AbstractMedia *src)
 
 void VideoWidget::SetVisibleAtTime(long long unsigned ti)
 {
+    assert(this!=NULL);
+
     //Check the sequence is valid
     if(this->seq == NULL) return;
+
+    //Check the requested time has not already been set
+    if(this->lastRequestedTime == ti)
+        return;
+    this->lastRequestedTime = ti;
 
     //Get image from sequence
     try
@@ -113,10 +121,19 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
 
 void VideoWidget::SliderMoved(int newValue)
 {
+    //Update time display
+    QTime time;
+    int ms = newValue % 1000;
+    int sec = ((newValue - ms) / 1000) % 60;
+    int remainSec = (newValue - sec * 1000 - ms) / 1000;
+    int min = (remainSec / 60) % 60;
+    int remainMin = (remainSec - min * 60) / 60;
+    time.setHMS(remainMin / 60, min, sec, ms);
+    this->ui->timeEdit->setTime(time);
+
     if(this->waitingForNumFrames < 2)
     {
         this->SetVisibleAtTime(newValue);
-
     }
 }
 
@@ -145,6 +162,7 @@ void VideoWidget::Pause()
 void VideoWidget::Play()
 {
     cout << "play" << endl;
+
     this->playPressedTime.start();
     this->waitingForNumFrames = 0;
 
@@ -251,21 +269,6 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long startTimesta
         this->FitToWindow();
     this->fitWindowToNextFrame = 0;
 
-    //Update time display
-    QTime time;
-    unsigned long long displayTime = startTimestamp;
-    if(endTimestamp > 0)
-    {
-        displayTime = ROUND_TIMESTAMP(startTimestamp + endTimestamp * 0.5);
-    }
-    int ms = displayTime % 1000;
-    int sec = ((displayTime - ms) / 1000) % 60;
-    int remainSec = (displayTime - sec * 1000 - ms) / 1000;
-    int min = (remainSec / 60) % 60;
-    int remainMin = (remainSec - min * 60) / 60;
-    time.setHMS(remainMin / 60, min, sec, ms);
-    this->ui->timeEdit->setTime(time);
-
     //Change sider to move one frame length in a single step
     if(endTimestamp > 0)
         this->ui->horizontalScrollBar->setSingleStep(endTimestamp - startTimestamp);
@@ -315,4 +318,15 @@ void VideoWidget::FitToWindow()
     if(mat.m22() < scale) scale = mat.m22();
     mat.setMatrix(scale,mat.m12(),mat.m21(),scale,mat.dx(),mat.dy());
     this->ui->graphicsView->setMatrix(mat);
+}
+
+void VideoWidget::TimeChanged(QTime time)
+{
+
+    unsigned long long t = time.msec();
+    t += time.second() * 1000;
+    t += time.minute() * 60000;
+    t += time.hour() * 3600000;
+    this->ui->horizontalScrollBar->setValue(t);
+    this->SetVisibleAtTime(t);
 }
