@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     eventloop.cpp \
     avbinapi.cpp \
     scenecontroller.cpp \
-    workspace.cpp
+    workspace.cpp \
+    algorithm.cpp
 
 HEADERS  += mainwindow.h \
     videowidget.h \
@@ -33,7 +34,8 @@ HEADERS  += mainwindow.h \
     avbinapi.h \
     scenecontroller.h \
     vectors.h \
-    workspace.h
+    workspace.h \
+    algorithm.h
 
 FORMS    += mainwindow.ui \
     videowidget.ui

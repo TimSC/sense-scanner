@@ -27,6 +27,7 @@ Workspace& Workspace::operator= (const Workspace &other)
     sources = other.sources;
     defaultFilename = other.defaultFilename;
     visible = other.visible;
+    processingList = other.processingList;
     tracks.clear();
     for(unsigned int i=0;i<other.tracks.size();i++)
     {
@@ -44,6 +45,7 @@ bool Workspace::operator!= (const Workspace &other)
     if(tracks.size() != other.tracks.size()) return true;
     if(sources != other.sources) return true;
     if(visible != other.visible) return true;
+    if(processingList != other.processingList) return true;
     for(unsigned int i=0;i<other.tracks.size();i++)
     {
         if(*tracks[i] != *other.tracks[i]) return true;
@@ -92,12 +94,40 @@ QString Workspace::GetSourceName(unsigned int index)
     return this->sources[index];
 }
 
+//***********************************************************************
+
+unsigned int Workspace::AddProcessing(std::tr1::shared_ptr<class Algorithm> alg)
+{
+    this->processingList.push_back(alg);
+
+}
+
+void Workspace::RemoveProcessing(unsigned int num)
+{
+    this->processingList.erase(this->processingList.begin()+num);
+}
+
+unsigned int Workspace::GetNumProcessing()
+{
+    return this->processingList.size();
+}
+
+QString Workspace::GetProcessingName(unsigned int index)
+{
+    QString out = "Alg";
+    return out;
+}
+
+
+//************************************************************************
+
 void Workspace::Clear()
 {
     this->sources.clear();
     this->tracks.clear();
     this->defaultFilename = "";
     this->visible.clear();
+    this->processingList.clear();
 }
 
 void Workspace::Load(QString fina)

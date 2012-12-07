@@ -132,6 +132,9 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->dataSources->setModel(&this->sourcesModel);
     this->RegenerateSourcesList();
 
+    this->ui->processingView->setModel(&this->processingModel);
+    this->RegenerateProcessingList();
+
     this->workspace.Load(tr("/home/tim/test.work"));
     this->workspaceAsStored = this->workspace;
     this->ui->dataSources->setSelectionMode(QListView::SelectionMode::ExtendedSelection);
@@ -247,6 +250,22 @@ void MainWindow::RegenerateSourcesList()
 
             QStandardItem *item = new QStandardItem(icon, finaInfo.fileName());
             this->sourcesModel.setItem(row, column, item);
+        }
+    }
+}
+
+void MainWindow::RegenerateProcessingList()
+{
+    QIcon icon("icons/media-eject.png");
+    this->processingModel.setColumnCount(1);
+    this->processingModel.setRowCount(this->workspace.GetNumProcessing());
+    for (int row = 0; row < this->workspace.GetNumProcessing(); ++row) {
+        for (int column = 0; column < 1; ++column) {
+            QString fina = this->workspace.GetProcessingName(row);
+            QFileInfo finaInfo(fina);
+
+            QStandardItem *item = new QStandardItem(icon, finaInfo.fileName());
+            this->processingModel.setItem(row, column, item);
         }
     }
 }
@@ -431,6 +450,9 @@ void MainWindow::TrainModelPressed()
         cout << ind.row() << endl;
     }
 
+    std::tr1::shared_ptr<class Algorithm> alg(new class Algorithm);
+    this->workspace.AddProcessing(alg);
+    this->RegenerateProcessingList();
 }
 
 void MainWindow::ApplyModelPressed()

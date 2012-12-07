@@ -72,7 +72,7 @@
             </sizepolicy>
            </property>
           </widget>
-          <widget class="QListView" name="modelList"/>
+          <widget class="QListView" name="processingView"/>
          </widget>
         </item>
        </layout>

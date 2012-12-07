@@ -68,6 +68,7 @@ private:
     class Workspace workspace;
     class Workspace workspaceAsStored;
     QStandardItemModel sourcesModel;
+    QStandardItemModel processingModel;
     QMenu *annotationMenu;
 
 public slots:
@@ -79,6 +80,7 @@ public slots:
     void Update();
     void closeEvent(QCloseEvent *event);
     void RegenerateSourcesList();
+    void RegenerateProcessingList();
 
     void NewWorkspace();
     void LoadWorkspace();
