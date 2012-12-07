@@ -450,7 +450,7 @@ void MainWindow::TrainModelPressed()
         cout << ind.row() << endl;
     }
 
-    std::tr1::shared_ptr<class Algorithm> alg(new class Algorithm);
+    std::tr1::shared_ptr<class Algorithm> alg(new class Algorithm(this->eventLoop));
     this->workspace.AddProcessing(alg);
     this->RegenerateProcessingList();
 }

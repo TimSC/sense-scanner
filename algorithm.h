@@ -1,27 +1,15 @@
 #ifndef ALGORITHM_H
 #define ALGORITHM_H
 
+#include "eventloop.h"
 
-class AlgThread
+class Algorithm : public MessagableThread
 {
 public:
-    AlgThread();
-    virtual ~AlgThread();
+    Algorithm(class EventLoop *eventLoopIn);
+    virtual ~Algorithm();
 
-    int IsRunning();
-    void Start();
-    void Stop();
-    void WaitUntilStopped();
-
-protected:
-
-
-};
-
-class Algorithm : public AlgThread
-{
-public:
-    Algorithm();
+    void Update();
 };
 
 #endif // ALGORITHM_H
