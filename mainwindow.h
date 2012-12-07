@@ -76,6 +76,9 @@ public slots:
     void RemoveVideo();
     void TrainModelPressed();
     void ApplyModelPressed();
+    void PauseProcessPressed();
+    void RunProcessPressed();
+    void RemoveProcessPressed();
 
     void Update();
     void closeEvent(QCloseEvent *event);

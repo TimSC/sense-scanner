@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>310</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <layout class="QHBoxLayout" name="sourceButtons">
           <item>
            <widget class="QToolButton" name="addSourceButton">
             <property name="text">
@@ -74,6 +74,43 @@
           </widget>
           <widget class="QListView" name="processingView"/>
          </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="processingButtons">
+          <item>
+           <widget class="QToolButton" name="pauseProcessButton">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>../../../../../home/tim/dev/QtMedia/icons/media-playback-pause.png</normaloff>../../../../../home/tim/dev/QtMedia/icons/media-playback-pause.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="runProcessButton">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>../../../../../home/tim/dev/QtMedia/icons/media-playback-start.png</normaloff>../../../../../home/tim/dev/QtMedia/icons/media-playback-start.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="removeProcessButton">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>../../../../../home/tim/dev/QtMedia/icons/archive-remove.png</normaloff>../../../../../home/tim/dev/QtMedia/icons/archive-remove.png</iconset>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
@@ -351,6 +388,54 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pauseProcessButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>PauseProcessPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>64</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>154</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>runProcessButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>RunProcessPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>138</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>154</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>removeProcessButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>RemoveProcessPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>212</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>154</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>ImportVideo()</slot>
@@ -362,5 +447,8 @@
   <slot>RemoveVideo()</slot>
   <slot>TrainModelPressed()</slot>
   <slot>ApplyModelPressed()</slot>
+  <slot>PauseProcessPressed()</slot>
+  <slot>RunProcessPressed()</slot>
+  <slot>RemoveProcessPressed()</slot>
  </slots>
 </ui>

@@ -461,3 +461,20 @@ void MainWindow::ApplyModelPressed()
     QItemSelectionModel *selection = this->ui->dataSources->selectionModel();
 
 }
+
+void MainWindow::PauseProcessPressed()
+{
+    cout << "MainWindow::PauseProcessPressed()" << endl;
+}
+
+void MainWindow::RunProcessPressed()
+{
+    cout << "MainWindow::RunProcessPressed()" << endl;
+}
+
+void MainWindow::RemoveProcessPressed()
+{
+    cout << "MainWindow::RemoveProcessPressed()" << endl;
+}
+
+
