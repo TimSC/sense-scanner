@@ -4,7 +4,6 @@
 #include <QtGui/QWidget>
 #include <QtCore/QtCore>
 #include <QtGui/QtGui>
-#include <QtCore/QThread>
 #include <vector>
 #include "localmutex.h"
 #ifdef _MSC_VER
@@ -42,21 +41,15 @@ protected:
     int active;
 };
 
-class AvBinThread : public QThread
+class AvBinThread : public MessagableThread
 {
 public:
     AvBinThread(class EventLoop *eventLoopIn);
     virtual ~AvBinThread();
-    void run();
-    void HandleEvent(std::tr1::shared_ptr<class Event> ev);
-    int StopThread();
 
+    void Update();
 protected:
-    class EventReceiver *eventReceiver;
-    int stopThreads;
     class AvBinBackend avBinBackend;
-    class EventLoop *eventLoop;
-    Mutex mutex;
 };
 
 #endif // AVBINMEDIA_H

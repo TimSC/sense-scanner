@@ -235,92 +235,29 @@ void AvBinMedia::SetActive(int activeIn)
     this->active = activeIn;
 }
 
-//************************************
 
-AvBinThread::AvBinThread(class EventLoop *eventLoopIn)
+//*************************************************
+
+AvBinThread::AvBinThread(class EventLoop *eventLoopIn) : MessagableThread(eventLoopIn)
 {
-    //this->setStackSize(1024*1024*100);
-    this->eventReceiver = new EventReceiver(eventLoopIn);
-    this->eventLoop = eventLoopIn;
-    this->eventLoop->AddListener("STOP_THREADS", *eventReceiver);
-    this->stopThreads = 0;
+
     this->avBinBackend.SetEventLoop(eventLoopIn);
 }
 
 AvBinThread::~AvBinThread()
 {
-    this->StopThread();
-    if(this->eventReceiver)
-        delete this->eventReceiver;
-    this->eventReceiver = NULL;
+
 }
 
-void AvBinThread::run()
+void AvBinThread::Update()
 {
-    std::tr1::shared_ptr<class Event> startEvent (new Event("THREAD_STARTING"));
-    this->eventLoop->SendEvent(startEvent);
+    int foundEvent = 0;
 
-    int running = true;
+    //Update the backend to actually do something useful
+    foundEvent = this->avBinBackend.PlayUpdate();
 
-    while(running)
-    {
-        this->mutex.lock();
-        running = !this->stopThreads;
-        this->mutex.unlock();
-
-        //cout << "x" << this->eventReceiver.BufferSize() << endl;
-        int foundEvent = 0;
-        try
-        {
-            assert(this->eventReceiver);
-            std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
-            cout << "Event type " << ev->type << endl;
-            foundEvent = 1;
-            this->HandleEvent(ev);
-        }
-        catch(std::runtime_error e) {}
-
-        //Update the backend to actually do something useful
-        foundEvent = this->avBinBackend.PlayUpdate();
-
-        if(!foundEvent)
-            msleep(10);
-        else
-            msleep(0);
-    }
-
-    std::tr1::shared_ptr<class Event> stopEvent(new Event("THREAD_STOPPING"));
-    this->eventLoop->SendEvent(stopEvent);
-    cout << "Stopping AvBinThread" << endl;
-}
-
-void AvBinThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
-{
-    if(ev->type == "STOP_THREADS")
-    {
-        this->mutex.lock();
-        this->stopThreads = 1;
-        this->mutex.unlock();
-    }
-}
-int AvBinThread::StopThread()
-{
-    this->mutex.lock();
-    this->stopThreads = 1;
-    this->mutex.unlock();
-
-    for(int i=0;i<500;i++)
-    {
-        if(this->isFinished())
-        {
-            return 1;
-        }
-        usleep(10000); //microsec
-    }
-    if(this->isRunning())
-    {
-        cout << "Warning: terminating media thread" << endl;
-        this->terminate();
-    }
-    return 0;
+    if(!foundEvent)
+        msleep(10);
+    else
+        msleep(0);
 }

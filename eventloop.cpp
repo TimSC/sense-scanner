@@ -217,3 +217,87 @@ unsigned long long EventLoop::GetId()
     return out;
 }
 
+
+//************************************
+
+MessagableThread::MessagableThread(class EventLoop *eventLoopIn)
+{
+    this->eventReceiver = new EventReceiver(eventLoopIn);
+    this->eventLoop = eventLoopIn;
+    this->eventLoop->AddListener("STOP_THREADS", *eventReceiver);
+    this->stopThreads = 0;
+}
+
+MessagableThread::~MessagableThread()
+{
+    this->StopThread();
+    if(this->eventReceiver)
+        delete this->eventReceiver;
+    this->eventReceiver = NULL;
+}
+
+void MessagableThread::run()
+{
+    std::tr1::shared_ptr<class Event> startEvent (new Event("THREAD_STARTING"));
+    this->eventLoop->SendEvent(startEvent);
+
+    int running = true;
+
+    while(running)
+    {
+        this->mutex.lock();
+        running = !this->stopThreads;
+        this->mutex.unlock();
+
+        //cout << "x" << this->eventReceiver.BufferSize() << endl;
+
+        try
+        {
+            assert(this->eventReceiver);
+            std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
+            cout << "Event type " << ev->type << endl;
+            this->HandleEvent(ev);
+        }
+        catch(std::runtime_error e) {}
+
+        //Call child specific update function
+        this->Update();
+
+    }
+
+    std::tr1::shared_ptr<class Event> stopEvent(new Event("THREAD_STOPPING"));
+    this->eventLoop->SendEvent(stopEvent);
+    cout << "Stopping AvBinThread" << endl;
+}
+
+void MessagableThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
+{
+    if(ev->type == "STOP_THREADS")
+    {
+        this->mutex.lock();
+        this->stopThreads = 1;
+        this->mutex.unlock();
+    }
+}
+
+int MessagableThread::StopThread()
+{
+    this->mutex.lock();
+    this->stopThreads = 1;
+    this->mutex.unlock();
+
+    for(int i=0;i<500;i++)
+    {
+        if(this->isFinished())
+        {
+            return 1;
+        }
+        usleep(10000); //microsec
+    }
+    if(this->isRunning())
+    {
+        cout << "Warning: terminating media thread" << endl;
+        this->terminate();
+    }
+    return 0;
+}

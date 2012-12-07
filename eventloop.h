@@ -2,6 +2,7 @@
 #define EVENTLOOP_H
 
 #include <vector>
+#include <QtCore/QThread>
 #include <map>
 #include "localmutex.h"
 #include "localints.h"
@@ -71,6 +72,24 @@ protected:
     std::map<std::string, std::vector<EventReceiver *> > eventReceivers;
     Mutex mutex;
     unsigned long long nextId;
+};
+
+class MessagableThread : public QThread
+{
+public:
+    MessagableThread(class EventLoop *eventLoopIn);
+    virtual ~MessagableThread();
+
+    void run();
+    virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);
+    int StopThread();
+    virtual void Update()=0;
+
+protected:
+    class EventReceiver *eventReceiver;
+    int stopThreads;
+    class EventLoop *eventLoop;
+    Mutex mutex;
 };
 
 #endif // EVENTLOOP_H
