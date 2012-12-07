@@ -67,7 +67,7 @@ private:
     int threadCount;
     class Workspace workspace;
     class Workspace workspaceAsStored;
-    QStandardItemModel *sourcesModel;
+    QStandardItemModel sourcesModel;
     QMenu *annotationMenu;
 
 public slots:

@@ -129,8 +129,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowTitle("Video Cognition System");
     this->ui->widget->SetSource(this->mediaInterface);
 
-    this->sourcesModel = new QStandardItemModel(4, 1);
-    this->ui->dataSources->setModel(this->sourcesModel);
+    this->ui->dataSources->setModel(&this->sourcesModel);
     this->RegenerateSourcesList();
 
     this->workspace.Load(tr("/home/tim/test.work"));
@@ -157,9 +156,6 @@ MainWindow::~MainWindow()
 
     delete this->mediaInterface;
     this->mediaInterface = NULL;
-
-    delete this->sourcesModel;
-    this->sourcesModel = NULL;
 
     delete ui;
 }
@@ -241,18 +237,16 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::RegenerateSourcesList()
 {
-    assert(this->sourcesModel);
-
     QIcon icon("icons/media-eject.png");
-    this->sourcesModel->setColumnCount(1);
-    this->sourcesModel->setRowCount(this->workspace.GetNumSources());
+    this->sourcesModel.setColumnCount(1);
+    this->sourcesModel.setRowCount(this->workspace.GetNumSources());
     for (int row = 0; row < this->workspace.GetNumSources(); ++row) {
         for (int column = 0; column < 1; ++column) {
             QString fina = this->workspace.GetSourceName(row);
             QFileInfo finaInfo(fina);
 
             QStandardItem *item = new QStandardItem(icon, finaInfo.fileName());
-            this->sourcesModel->setItem(row, column, item);
+            this->sourcesModel.setItem(row, column, item);
         }
     }
 }
