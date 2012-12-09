@@ -276,12 +276,12 @@ void MainWindow::RegenerateProcessingList()
     QItemSelectionModel *sourceSelected = this->ui->dataSources->selectionModel();
 
     QIcon icon("icons/media-eject.png");
-    if(this->processingModel.columnCount()!= 1)
-        this->processingModel.setColumnCount(1);
+    if(this->processingModel.columnCount()!= 2)
+        this->processingModel.setColumnCount(2);
     if(this->processingModel.rowCount() != this->workspace.GetNumProcessing())
         this->processingModel.setRowCount(this->workspace.GetNumProcessing());
     for (int row = 0; row < this->workspace.GetNumProcessing(); ++row) {
-        for (int column = 0; column < 1; ++column) {
+        for (int column = 0; column < 2; ++column) {
             QString fina = this->workspace.GetProcessingName(row);
             QFileInfo finaInfo(fina);
             std::ostringstream displayLine;
@@ -480,11 +480,10 @@ void MainWindow::TrainModelPressed()
     cout << "TrainModelPressed" << endl;
     QItemSelectionModel *selection = this->ui->dataSources->selectionModel();
 
-    QModelIndexList rowList = selection->selectedRows();
-    for(unsigned int i=0;i<rowList.size();i++)
+    QModelIndexList selectList = selection->selectedIndexes();
+    for(unsigned int i=0;i<selectList.size();i++)
     {
-        QModelIndex &ind = rowList[i];
-        cout << ind.row() << endl;
+        QModelIndex &ind = selectList[i];
     }
 
     std::tr1::shared_ptr<class Algorithm> alg(new class Algorithm(this->eventLoop));
@@ -504,10 +503,10 @@ void MainWindow::PauseProcessPressed()
     cout << "MainWindow::PauseProcessPressed()" << endl;
 
     QItemSelectionModel *selection = this->ui->processingView->selectionModel();
-    QModelIndexList rowList = selection->selectedRows();
-    for(unsigned int i=0;i<rowList.size();i++)
+    QModelIndexList selectList = selection->selectedIndexes();
+    for(unsigned int i=0;i<selectList.size();i++)
     {
-        QModelIndex &ind = rowList[i];
+        QModelIndex &ind = selectList[i];
         this->workspace.PauseProcessing(ind.row());
     }
     this->RegenerateProcessingList();
@@ -518,10 +517,11 @@ void MainWindow::RunProcessPressed()
     cout << "MainWindow::RunProcessPressed()" << endl;
 
     QItemSelectionModel *selection = this->ui->processingView->selectionModel();
-    QModelIndexList rowList = selection->selectedRows();
-    for(unsigned int i=0;i<rowList.size();i++)
+    QModelIndexList selectList = selection->selectedIndexes();
+    for(unsigned int i=0;i<selectList.size();i++)
     {
-        QModelIndex &ind = rowList[i];
+        QModelIndex &ind = selectList[i];
+        cout << ind.row() << "," <<ind.column() << endl;
         this->workspace.StartProcessing(ind.row());
     }
     this->RegenerateProcessingList();
@@ -532,10 +532,10 @@ void MainWindow::RemoveProcessPressed()
     cout << "MainWindow::RemoveProcessPressed()" << endl;
 
     QItemSelectionModel *selection = this->ui->processingView->selectionModel();
-    QModelIndexList rowList = selection->selectedRows();
-    for(unsigned int i=0;i<rowList.size();i++)
+    QModelIndexList selectList = selection->selectedIndexes();
+    for(unsigned int i=0;i<selectList.size();i++)
     {
-        QModelIndex &ind = rowList[i];
+        QModelIndex &ind = selectList[i];
         this->workspace.RemoveProcessing(ind.row());
     }
     this->RegenerateProcessingList();
