@@ -10,6 +10,9 @@ public:
     virtual ~Algorithm();
 
     void Update();
+
+protected:
+    float progress;
 };
 
 #endif // ALGORITHM_H
