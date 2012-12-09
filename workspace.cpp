@@ -101,8 +101,11 @@ unsigned int Workspace::AddProcessing(std::tr1::shared_ptr<class Algorithm> alg)
 {
     alg->SetThreadId(this->nextThreadId);
     this->processingList.push_back(alg);
+    this->threadProgress.push_back(0.);
+    this->threadId.push_back(this->nextThreadId);
 
     this->nextThreadId ++;
+    return this->nextThreadId;
 }
 
 void Workspace::PauseProcessing(unsigned int num)
@@ -125,6 +128,8 @@ void Workspace::RemoveProcessing(unsigned int num)
     assert(num >= 0 && num < this->processingList.size());
     assert(!this->processingList[num]->isRunning());
     this->processingList.erase(this->processingList.begin()+num);
+    this->threadProgress.erase(this->threadProgress.begin()+num);
+    this->threadId.erase(this->threadId.begin()+num);
 }
 
 int Workspace::StartProcessing(unsigned int num)
@@ -135,6 +140,7 @@ int Workspace::StartProcessing(unsigned int num)
 
 unsigned int Workspace::GetNumProcessing()
 {
+    assert(this->processingList.size() == this->threadProgress.size());
     return this->processingList.size();
 }
 
@@ -144,6 +150,22 @@ QString Workspace::GetProcessingName(unsigned int index)
     return out;
 }
 
+void Workspace::ProcessingUpdate(unsigned int threadIdIn, float progress)
+{
+    for(unsigned int i=0;i<this->threadId.size();i++)
+    {
+        if(threadIdIn == this->threadId[i])
+        {
+            this->threadProgress[i] = progress;
+        }
+    }
+}
+
+float Workspace::GetProgress(unsigned int num)
+{
+    assert(num >= 0 && num < this->threadProgress.size());
+    return this->threadProgress[num];
+}
 
 //************************************************************************
 

@@ -12,6 +12,7 @@
 #include <QtCore/QThread>
 #include <QtGui/QDialogButtonBox>
 #include <iostream>
+#include <sstream>
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
@@ -279,8 +280,13 @@ void MainWindow::RegenerateProcessingList()
         for (int column = 0; column < 1; ++column) {
             QString fina = this->workspace.GetProcessingName(row);
             QFileInfo finaInfo(fina);
+            std::ostringstream displayLine;
+            displayLine << finaInfo.fileName().toLocal8Bit().constData();
+            displayLine << " " << this->workspace.GetProgress(row);
 
-            QStandardItem *item = new QStandardItem(icon, finaInfo.fileName());
+            QString displayLineQString;
+            displayLineQString = displayLine.str().c_str();
+            QStandardItem *item = new QStandardItem(icon, displayLineQString);
             this->processingModel.setItem(row, column, item);
         }
     }
@@ -343,10 +349,13 @@ void MainWindow::Update()
         }
         if(ev->type=="THREAD_PROGRESS_UPDATE")
         {
-            cout << "Thread progress: " << ev->data << endl;
             std::vector<std::string> args = split(ev->data.c_str(),',');
-            cout << args[0] << ":" << args[1] << endl;
-
+            this->workspace.ProcessingUpdate(atoi(args[1].c_str()), atof(args[0].c_str()));
+            for(unsigned int i=0;i<this->workspace.GetNumProcessing();i++)
+            {
+                cout << this->workspace.GetProgress(i) << endl;
+            }
+            this->RegenerateProcessingList();
         }
     }
     catch(std::runtime_error e) {flushing = 0;}

@@ -32,6 +32,8 @@ public:
     void PauseProcessing(unsigned int num);
     void RemoveProcessing(unsigned int num);
     int StartProcessing(unsigned int num);
+    void ProcessingUpdate(unsigned int threadIdIn, float progress);
+    float GetProgress(unsigned int num);
 
     unsigned int GetNumProcessing();
     QString GetProcessingName(unsigned int index);
@@ -50,6 +52,7 @@ protected:
     std::vector<bool> visible;
     unsigned int nextThreadId;
     std::vector<float> threadProgress;
+    std::vector<unsigned int> threadId;
 };
 
 #endif // WORKSPACE_H

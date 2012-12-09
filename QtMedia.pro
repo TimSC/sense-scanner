@@ -35,7 +35,10 @@ HEADERS  += mainwindow.h \
     scenecontroller.h \
     vectors.h \
     workspace.h \
-    algorithm.h
+    algorithm.h \
+    localints.h \
+    localmutex.h \
+    localsleep.h
 
 FORMS    += mainwindow.ui \
     videowidget.ui

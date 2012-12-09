@@ -9,4 +9,10 @@
 	#include <inttypes.h>
 #endif
 
+#ifdef _MSC_VER
+#define STR_TO_ULL _strtoui64
+#else
+#define STR_TO_ULL std::strtoull
+#endif
+
 #endif //__LOCALINTS_H_

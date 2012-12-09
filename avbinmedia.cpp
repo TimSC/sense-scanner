@@ -4,13 +4,9 @@
 #include <stdexcept>
 #include "eventloop.h"
 #include "mediabuffer.h"
+#include "localints.h"
 #include <sstream>
 using namespace std;
-#ifdef _MSC_VER
-#define STR_TO_ULL _strtoui64
-#else
-#define STR_TO_ULL std::strtoull
-#endif
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
 
 AvBinMedia::AvBinMedia() : AbstractMedia()
