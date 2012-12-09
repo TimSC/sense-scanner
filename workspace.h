@@ -30,6 +30,7 @@ public:
     //** Processing
     unsigned int AddProcessing(std::tr1::shared_ptr<class Algorithm> alg);
     void RemoveProcessing(unsigned int num);
+    int StartProcessing(unsigned int num);
 
     unsigned int GetNumProcessing();
     QString GetProcessingName(unsigned int index);

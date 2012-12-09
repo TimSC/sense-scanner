@@ -280,6 +280,12 @@ void MessagableThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
 }
 
+int MessagableThread::StartThread()
+{
+    this->start();
+    return 1;
+}
+
 int MessagableThread::StopThread()
 {
     this->mutex.lock();
@@ -300,4 +306,9 @@ int MessagableThread::StopThread()
         this->terminate();
     }
     return 0;
+}
+
+void MessagableThread::start (Priority priority)
+{
+    QThread::start(priority);
 }

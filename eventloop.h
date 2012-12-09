@@ -83,9 +83,12 @@ public:
     void run();
     virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);
     int StopThread();
+    int StartThread();
     virtual void Update()=0;
 
 protected:
+    void start (Priority priority = InheritPriority);
+
     class EventReceiver *eventReceiver;
     int stopThreads;
     class EventLoop *eventLoop;

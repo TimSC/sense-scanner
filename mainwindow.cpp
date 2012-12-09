@@ -114,7 +114,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Create file reader worker thread
     this->mediaThread = new AvBinThread(this->eventLoop);
-    this->mediaThread->start();
+    this->mediaThread->StartThread();
 
     this->mediaInterface = new class AvBinMedia();
     this->mediaInterface->SetEventLoop(this->eventLoop);
@@ -419,7 +419,7 @@ void MainWindow::SelectedSourceChanged(const QModelIndex ind)
 
     //Create a new source
     this->mediaThread = new AvBinThread(this->eventLoop);
-    this->mediaThread->start();
+    this->mediaThread->StartThread();
 
     //Mark media interface as active
     this->mediaInterface->SetActive(1);
@@ -470,6 +470,15 @@ void MainWindow::PauseProcessPressed()
 void MainWindow::RunProcessPressed()
 {
     cout << "MainWindow::RunProcessPressed()" << endl;
+
+    QItemSelectionModel *selection = this->ui->processingView->selectionModel();
+    QModelIndexList rowList = selection->selectedRows();
+    for(unsigned int i=0;i<rowList.size();i++)
+    {
+        QModelIndex &ind = rowList[i];
+        cout << ind.row() << endl;
+        //this->workspace.StartProcessing(ind.row());
+    }
 }
 
 void MainWindow::RemoveProcessPressed()
