@@ -19,7 +19,6 @@ Algorithm::~Algorithm()
 
 void Algorithm::Update()
 {
-    this->msleep(1000);
     this->progress += 0.01f;
     cout << "progress " << this->progress << endl;
 
@@ -37,6 +36,8 @@ void Algorithm::Update()
     tmp << this->progress << "," << this->threadId;
     openEv->data = tmp.str();
     this->eventLoop->SendEvent(openEv);
+
+    this->msleep(1000);
 }
 void Algorithm::SetThreadId(unsigned int idIn)
 {

@@ -280,19 +280,49 @@ void MainWindow::RegenerateProcessingList()
         this->processingModel.setColumnCount(2);
     if(this->processingModel.rowCount() != this->workspace.GetNumProcessing())
         this->processingModel.setRowCount(this->workspace.GetNumProcessing());
-    for (int row = 0; row < this->workspace.GetNumProcessing(); ++row) {
-        for (int column = 0; column < 2; ++column) {
+    for (int row = 0; row < this->workspace.GetNumProcessing(); ++row)
+    {
+        for (int column = 0; column < 1; ++column)
+        {
+            QStandardItem *item = this->processingModel.item(row, column);
+            if(item!=NULL)
+            {
+                continue;
+            }
+
             QString fina = this->workspace.GetProcessingName(row);
             QFileInfo finaInfo(fina);
             std::ostringstream displayLine;
             displayLine << finaInfo.fileName().toLocal8Bit().constData();
-            displayLine << " " << this->workspace.GetProgress(row);
 
             QString displayLineQString;
             displayLineQString = displayLine.str().c_str();
-            QStandardItem *item = new QStandardItem(icon, displayLineQString);
+            item = new QStandardItem(icon, displayLineQString);
             this->processingModel.setItem(row, column, item);
         }
+
+        for (int column = 1; column < 2; ++column)
+        {
+            QStandardItem *item = this->processingModel.item(row, column);
+            if(item!=NULL)
+            {
+                std::ostringstream displayLine;
+                displayLine << this->workspace.GetProgress(row);
+                item->setText(displayLine.str().c_str());
+                continue;
+            }
+
+            QString fina = this->workspace.GetProcessingName(row);
+            QFileInfo finaInfo(fina);
+            std::ostringstream displayLine;
+            displayLine << this->workspace.GetProgress(row);
+
+            QString displayLineQString;
+            displayLineQString = displayLine.str().c_str();
+            item = new QStandardItem(displayLineQString);
+            this->processingModel.setItem(row, column, item);
+        }
+
     }
 
 }
