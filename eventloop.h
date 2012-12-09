@@ -95,4 +95,10 @@ protected:
     Mutex mutex;
 };
 
+class TestThread : public MessagableThread
+{
+public:
+
+};
+
 #endif // EVENTLOOP_H

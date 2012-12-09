@@ -282,6 +282,10 @@ void MessagableThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
 int MessagableThread::StartThread()
 {
+    if(this->isRunning()) return 0;
+    this->mutex.lock();
+    this->stopThreads = 0;
+    this->mutex.unlock();
     this->start();
     return 1;
 }

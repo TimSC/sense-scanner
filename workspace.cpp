@@ -102,6 +102,15 @@ unsigned int Workspace::AddProcessing(std::tr1::shared_ptr<class Algorithm> alg)
 
 }
 
+void Workspace::PauseProcessing(unsigned int num)
+{
+    assert(num >= 0 && num < this->processingList.size());
+    if(this->processingList[num]->isRunning())
+    {
+        this->processingList[num]->StopThread();
+    }
+}
+
 void Workspace::RemoveProcessing(unsigned int num)
 {
     assert(num >= 0 && num < this->processingList.size());

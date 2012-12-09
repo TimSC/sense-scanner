@@ -465,6 +465,15 @@ void MainWindow::ApplyModelPressed()
 void MainWindow::PauseProcessPressed()
 {
     cout << "MainWindow::PauseProcessPressed()" << endl;
+
+    QItemSelectionModel *selection = this->ui->processingView->selectionModel();
+    QModelIndexList rowList = selection->selectedRows();
+    for(unsigned int i=0;i<rowList.size();i++)
+    {
+        QModelIndex &ind = rowList[i];
+        this->workspace.PauseProcessing(ind.row());
+    }
+    this->RegenerateProcessingList();
 }
 
 void MainWindow::RunProcessPressed()
