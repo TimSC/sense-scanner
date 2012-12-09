@@ -37,7 +37,7 @@ void Algorithm::Update()
     openEv->data = tmp.str();
     this->eventLoop->SendEvent(openEv);
 
-    this->msleep(1000);
+    this->msleep(10000);
 }
 void Algorithm::SetThreadId(unsigned int idIn)
 {

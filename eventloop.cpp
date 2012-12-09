@@ -313,6 +313,13 @@ int MessagableThread::StopThread()
     return 0;
 }
 
+void MessagableThread::StopThreadNonBlocking()
+{
+    this->mutex.lock();
+    this->stopThreads = 1;
+    this->mutex.unlock();
+}
+
 void MessagableThread::start (Priority priority)
 {
     QThread::start(priority);

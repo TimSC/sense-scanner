@@ -113,7 +113,7 @@ void Workspace::PauseProcessing(unsigned int num)
     assert(num >= 0 && num < this->processingList.size());
     if(this->processingList[num]->isRunning())
     {
-        this->processingList[num]->StopThread();
+        this->processingList[num]->StopThreadNonBlocking();
     }
 }
 
