@@ -168,6 +168,16 @@ float Workspace::GetProgress(unsigned int num)
     return this->threadProgress[num];
 }
 
+int Workspace::NumProcessesRunning()
+{
+    int count = 0;
+    for(unsigned int i=0;i<this->processingList.size();i++)
+    {
+        count += this->processingList[i]->isRunning();
+    }
+    return count;
+}
+
 //************************************************************************
 
 void Workspace::Clear()

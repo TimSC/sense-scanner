@@ -199,6 +199,16 @@ QString MainWindow::CheckIfDataShouldBeDiscarded(QString discardMsg)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    //Prevent shutdown if processes running
+    int numRunning = this->workspace.NumProcessesRunning();
+    if(numRunning>0)
+    {
+        cout << "Cannot shut down while running processing" << endl;
+        event->setAccepted(false);
+        return;
+    }
+
+    //Ask user if they want to save changes, if changes are present
     QString shutdownUserSelection = this->CheckIfDataShouldBeDiscarded("Close without saving");
 
     if(shutdownUserSelection == "CANCEL")

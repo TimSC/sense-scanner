@@ -34,6 +34,8 @@ public:
     int StartProcessing(unsigned int num);
     void ProcessingUpdate(unsigned int threadIdIn, float progress);
     float GetProgress(unsigned int num);
+    int NumProcessesRunning();
+
 
     unsigned int GetNumProcessing();
     QString GetProcessingName(unsigned int index);

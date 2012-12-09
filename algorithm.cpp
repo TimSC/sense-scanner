@@ -20,8 +20,6 @@ Algorithm::~Algorithm()
 void Algorithm::Update()
 {
     this->progress += 0.01f;
-    cout << "progress " << this->progress << endl;
-
     if(this->progress >= 1.f)
     {
        this->progress = 1.f;
