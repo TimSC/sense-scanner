@@ -273,9 +273,13 @@ void MainWindow::RegenerateSourcesList()
 
 void MainWindow::RegenerateProcessingList()
 {
+    QItemSelectionModel *sourceSelected = this->ui->dataSources->selectionModel();
+
     QIcon icon("icons/media-eject.png");
-    this->processingModel.setColumnCount(1);
-    this->processingModel.setRowCount(this->workspace.GetNumProcessing());
+    if(this->processingModel.columnCount()!= 1)
+        this->processingModel.setColumnCount(1);
+    if(this->processingModel.rowCount() != this->workspace.GetNumProcessing())
+        this->processingModel.setRowCount(this->workspace.GetNumProcessing());
     for (int row = 0; row < this->workspace.GetNumProcessing(); ++row) {
         for (int column = 0; column < 1; ++column) {
             QString fina = this->workspace.GetProcessingName(row);
@@ -290,6 +294,7 @@ void MainWindow::RegenerateProcessingList()
             this->processingModel.setItem(row, column, item);
         }
     }
+
 }
 
 void MainWindow::ImportVideo()
