@@ -48,6 +48,8 @@ protected:
     QString defaultFilename;
     std::vector<SimpleSceneController *> tracks;
     std::vector<bool> visible;
+    unsigned int nextThreadId;
+    std::vector<float> threadProgress;
 };
 
 #endif // WORKSPACE_H

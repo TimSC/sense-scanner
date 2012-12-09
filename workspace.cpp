@@ -10,6 +10,7 @@ using namespace std;
 Workspace::Workspace()
 {
     this->Clear();
+    nextThreadId = 1;
 }
 
 Workspace::Workspace(const Workspace &other)
@@ -98,8 +99,10 @@ QString Workspace::GetSourceName(unsigned int index)
 
 unsigned int Workspace::AddProcessing(std::tr1::shared_ptr<class Algorithm> alg)
 {
+    alg->SetThreadId(this->nextThreadId);
     this->processingList.push_back(alg);
 
+    this->nextThreadId ++;
 }
 
 void Workspace::PauseProcessing(unsigned int num)

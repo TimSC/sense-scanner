@@ -17,6 +17,21 @@
 #endif
 using namespace std;
 
+std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while(std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
+
+
+std::vector<std::string> split(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    return split(s, delim, elems);
+}
+
 //*********************************************
 
 CheckDiscardDataDialog::CheckDiscardDataDialog(QWidget *parent, QString discardMsg) : QObject(parent)
@@ -111,6 +126,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("THREAD_STARTING",*eventReceiver);
     this->eventLoop->AddListener("THREAD_STOPPING",*eventReceiver);
     this->eventLoop->AddListener("AVBIN_OPEN_RESULT",*eventReceiver);
+    this->eventLoop->AddListener("THREAD_PROGRESS_UPDATE",*eventReceiver);
 
     //Create file reader worker thread
     this->mediaThread = new AvBinThread(this->eventLoop);
@@ -324,6 +340,13 @@ void MainWindow::Update()
         if(ev->type=="AVBIN_OPEN_RESULT")
         {
             cout << "Open result: " << ev->data << endl;
+        }
+        if(ev->type=="THREAD_PROGRESS_UPDATE")
+        {
+            cout << "Thread progress: " << ev->data << endl;
+            std::vector<std::string> args = split(ev->data.c_str(),',');
+            cout << args[0] << ":" << args[1] << endl;
+
         }
     }
     catch(std::runtime_error e) {flushing = 0;}

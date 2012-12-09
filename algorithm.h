@@ -10,9 +10,11 @@ public:
     virtual ~Algorithm();
 
     void Update();
+    void SetThreadId(unsigned int idIn);
 
 protected:
     float progress;
+    unsigned int threadId;
 };
 
 #endif // ALGORITHM_H
