@@ -312,8 +312,6 @@ void MainWindow::RegenerateProcessingList()
                 continue;
             }
 
-            QString fina = this->workspace.GetProcessingName(row);
-            QFileInfo finaInfo(fina);
             std::ostringstream displayLine;
             displayLine << this->workspace.GetProgress(row);
 
@@ -510,7 +508,7 @@ void MainWindow::TrainModelPressed()
     cout << "TrainModelPressed" << endl;
     QItemSelectionModel *selection = this->ui->dataSources->selectionModel();
 
-    QModelIndexList selectList = selection->selectedIndexes();
+    QModelIndexList selectList = selection->selectedRows(0);
     for(unsigned int i=0;i<selectList.size();i++)
     {
         QModelIndex &ind = selectList[i];
@@ -533,7 +531,7 @@ void MainWindow::PauseProcessPressed()
     cout << "MainWindow::PauseProcessPressed()" << endl;
 
     QItemSelectionModel *selection = this->ui->processingView->selectionModel();
-    QModelIndexList selectList = selection->selectedIndexes();
+    QModelIndexList selectList = selection->selectedRows(0);
     for(unsigned int i=0;i<selectList.size();i++)
     {
         QModelIndex &ind = selectList[i];
@@ -547,7 +545,7 @@ void MainWindow::RunProcessPressed()
     cout << "MainWindow::RunProcessPressed()" << endl;
 
     QItemSelectionModel *selection = this->ui->processingView->selectionModel();
-    QModelIndexList selectList = selection->selectedIndexes();
+    QModelIndexList selectList = selection->selectedRows(0);
     for(unsigned int i=0;i<selectList.size();i++)
     {
         QModelIndex &ind = selectList[i];
@@ -562,7 +560,7 @@ void MainWindow::RemoveProcessPressed()
     cout << "MainWindow::RemoveProcessPressed()" << endl;
 
     QItemSelectionModel *selection = this->ui->processingView->selectionModel();
-    QModelIndexList selectList = selection->selectedIndexes();
+    QModelIndexList selectList = selection->selectedRows(0);
     for(unsigned int i=0;i<selectList.size();i++)
     {
         QModelIndex &ind = selectList[i];

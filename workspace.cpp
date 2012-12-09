@@ -119,6 +119,7 @@ void Workspace::PauseProcessing(unsigned int num)
 
 void Workspace::RemoveProcessing(unsigned int num)
 {
+    assert(num >= 0 && num < this->processingList.size());
     if(this->processingList[num]->isRunning())
     {
         cout << "Process cannot be removed while it is running" << endl;

@@ -230,6 +230,7 @@ MessagableThread::MessagableThread(class EventLoop *eventLoopIn)
 
 MessagableThread::~MessagableThread()
 {
+    cout << "MessagableThread::~MessagableThread()" << endl;
     this->StopThread();
     if(this->eventReceiver)
         delete this->eventReceiver;
