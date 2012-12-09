@@ -105,6 +105,7 @@ unsigned int Workspace::AddProcessing(std::tr1::shared_ptr<class Algorithm> alg)
 void Workspace::RemoveProcessing(unsigned int num)
 {
     assert(num >= 0 && num < this->processingList.size());
+    cout << "running " << this->processingList[num]->isRunning() << endl;
     assert(!this->processingList[num]->isRunning());
     this->processingList.erase(this->processingList.begin()+num);
 }

@@ -476,14 +476,23 @@ void MainWindow::RunProcessPressed()
     for(unsigned int i=0;i<rowList.size();i++)
     {
         QModelIndex &ind = rowList[i];
-        cout << ind.row() << endl;
-        //this->workspace.StartProcessing(ind.row());
+        this->workspace.StartProcessing(ind.row());
     }
+    this->RegenerateProcessingList();
 }
 
 void MainWindow::RemoveProcessPressed()
 {
     cout << "MainWindow::RemoveProcessPressed()" << endl;
+
+    QItemSelectionModel *selection = this->ui->processingView->selectionModel();
+    QModelIndexList rowList = selection->selectedRows();
+    for(unsigned int i=0;i<rowList.size();i++)
+    {
+        QModelIndex &ind = rowList[i];
+        this->workspace.RemoveProcessing(ind.row());
+    }
+    this->RegenerateProcessingList();
 }
 
 
