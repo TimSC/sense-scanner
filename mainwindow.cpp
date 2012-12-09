@@ -313,22 +313,36 @@ void MainWindow::RegenerateProcessingList()
 
         for (int column = 1; column < 2; ++column)
         {
+            std::ostringstream displayLine;
+            float progress = this->workspace.GetProgress(row);
+            if(this->workspace.IsProgressRunning(row))
+            {
+                if(!this->workspace.IsProcessStopFlagged(row))
+                    displayLine << "Running " << progress;
+                else
+                    displayLine << "Stopping... " << progress;
+            }
+            else
+            {
+                if(progress < 1.f)
+                {
+                    displayLine << "Stopped " <<progress;
+                }
+                else
+                    displayLine << "Done";
+            }
+
             QStandardItem *item = this->processingModel.item(row, column);
             if(item!=NULL)
             {
-                std::ostringstream displayLine;
-                displayLine << this->workspace.GetProgress(row);
                 item->setText(displayLine.str().c_str());
                 continue;
             }
-
-            std::ostringstream displayLine;
-            displayLine << this->workspace.GetProgress(row);
-
-            QString displayLineQString;
-            displayLineQString = displayLine.str().c_str();
-            item = new QStandardItem(displayLineQString);
-            this->processingModel.setItem(row, column, item);
+            else
+            {
+                item = new QStandardItem(displayLine.str().c_str());
+                this->processingModel.setItem(row, column, item);
+            }
         }
 
     }
@@ -380,11 +394,13 @@ void MainWindow::Update()
         if(ev->type=="THREAD_STARTING")
         {
             this->threadCount ++;
+            this->RegenerateProcessingList();
         }
         if(ev->type=="THREAD_STOPPING")
         {
             assert(this->threadCount > 0);
             this->threadCount --;
+            this->RegenerateProcessingList();
         }
         if(ev->type=="AVBIN_OPEN_RESULT")
         {

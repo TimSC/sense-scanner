@@ -168,12 +168,25 @@ float Workspace::GetProgress(unsigned int num)
     return this->threadProgress[num];
 }
 
+int Workspace::IsProcessStopFlagged(unsigned int num)
+{
+    assert(num >= 0 && num < this->processingList.size());
+    int stop = this->processingList[num]->IsStopFlagged();
+    return stop;
+}
+
+float Workspace::IsProgressRunning(unsigned int num)
+{
+    assert(num >= 0 && num < this->processingList.size());
+    return this->processingList[num]->isRunning();
+}
+
 int Workspace::NumProcessesRunning()
 {
     int count = 0;
     for(unsigned int i=0;i<this->processingList.size();i++)
     {
-        count += this->processingList[i]->isRunning();
+        count += this->IsProgressRunning(i);
     }
     return count;
 }

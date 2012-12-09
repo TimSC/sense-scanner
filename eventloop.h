@@ -85,6 +85,7 @@ public:
     int StopThread();
     void StopThreadNonBlocking();
     int StartThread();
+    int IsStopFlagged();
     virtual void Update()=0;
 
 protected:

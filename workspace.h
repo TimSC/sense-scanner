@@ -34,6 +34,8 @@ public:
     int StartProcessing(unsigned int num);
     void ProcessingUpdate(unsigned int threadIdIn, float progress);
     float GetProgress(unsigned int num);
+    float IsProgressRunning(unsigned int num);
+    int IsProcessStopFlagged(unsigned int num);
     int NumProcessesRunning();
 
 

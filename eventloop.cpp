@@ -320,6 +320,14 @@ void MessagableThread::StopThreadNonBlocking()
     this->mutex.unlock();
 }
 
+int MessagableThread::IsStopFlagged()
+{
+    this->mutex.lock();
+    int out = this->stopThreads;
+    this->mutex.unlock();
+    return out;
+}
+
 void MessagableThread::start (Priority priority)
 {
     QThread::start(priority);
