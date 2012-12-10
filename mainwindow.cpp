@@ -149,11 +149,15 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->dataSources->setModel(&this->sourcesModel);
     this->RegenerateSourcesList();
 
+    QStringList horLabels;
+    horLabels.push_back("Processing");
+    horLabels.push_back("Status");
+    this->processingModel.setHorizontalHeaderLabels(horLabels);
     this->ui->processingView->setModel(&this->processingModel);
     this->RegenerateProcessingList();
 
-    this->workspace.Load(tr("/home/tim/test.work"));
-    this->workspaceAsStored = this->workspace;
+    //this->workspace.Load(tr("/home/tim/test.work"));
+    //this->workspaceAsStored = this->workspace;
     this->ui->dataSources->setSelectionMode(QListView::SelectionMode::ExtendedSelection);
     this->RegenerateSourcesList();
 }
