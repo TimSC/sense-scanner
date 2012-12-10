@@ -156,8 +156,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->processingView->setModel(&this->processingModel);
     this->RegenerateProcessingList();
 
-    //this->workspace.Load(tr("/home/tim/test.work"));
-    //this->workspaceAsStored = this->workspace;
+    this->workspace.Load(tr("/home/tim/test.work"));
+    this->workspaceAsStored = this->workspace;
     this->ui->dataSources->setSelectionMode(QListView::SelectionMode::ExtendedSelection);
     this->RegenerateSourcesList();
 }
@@ -554,6 +554,22 @@ void MainWindow::ApplyModelPressed()
     cout << "ApplyModelPressed" << endl;
     QItemSelectionModel *selection = this->ui->dataSources->selectionModel();
 
+
+    QString program = "ls";
+    QStringList arguments;
+
+    QProcess *myProcess = new QProcess(this);
+    myProcess->start(program, arguments);
+    myProcess->waitForFinished();
+    QByteArray ret = myProcess->readAllStandardOutput();
+
+    QTextStream dec(&ret);
+    dec.setCodec("UTF-8");
+    QString line;
+    do {
+        line = dec.readLine();
+        cout << line.toLocal8Bit().constData() << endl;
+    } while (!line.isNull());
 }
 
 void MainWindow::PauseProcessPressed()
