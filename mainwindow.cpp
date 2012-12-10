@@ -555,21 +555,6 @@ void MainWindow::ApplyModelPressed()
     QItemSelectionModel *selection = this->ui->dataSources->selectionModel();
 
 
-    QString program = "ls";
-    QStringList arguments;
-
-    QProcess *myProcess = new QProcess(this);
-    myProcess->start(program, arguments);
-    myProcess->waitForFinished();
-    QByteArray ret = myProcess->readAllStandardOutput();
-
-    QTextStream dec(&ret);
-    dec.setCodec("UTF-8");
-    QString line;
-    do {
-        line = dec.readLine();
-        cout << line.toLocal8Bit().constData() << endl;
-    } while (!line.isNull());
 }
 
 void MainWindow::PauseProcessPressed()

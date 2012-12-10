@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <assert.h>
+#include <QtCore/QTextStream>
 using namespace std;
 
 //**********************************
@@ -53,8 +54,7 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
 
 AlgorithmProcess::~AlgorithmProcess()
 {
-
-
+    this->Stop();
 }
 
 int AlgorithmProcess::Stop()
@@ -66,18 +66,30 @@ int AlgorithmProcess::Stop()
 void AlgorithmProcess::StopNonBlocking()
 {
 
-
 }
 
 int AlgorithmProcess::Start()
 {
+    QString program = "ls";
+    QStringList arguments;
+    this->start(program, arguments);
 
+
+    this->waitForFinished();
+    QByteArray ret = this->readAllStandardOutput();
+
+    QTextStream dec(&ret);
+    dec.setCodec("UTF-8");
+    QString line;
+    do {
+        line = dec.readLine();
+        cout << line.toLocal8Bit().constData() << endl;
+    } while (!line.isNull());
 }
 
 int AlgorithmProcess::IsStopFlagged()
 {
-
-
+    return this->stopping;
 }
 
 void AlgorithmProcess::SetId(unsigned int idIn)
