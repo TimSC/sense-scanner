@@ -70,7 +70,7 @@ void AlgorithmProcess::StopNonBlocking()
 
 int AlgorithmProcess::Start()
 {
-    QString program = "ls";
+    QString program = "pwd";
     QStringList arguments;
     this->start(program, arguments);
 
