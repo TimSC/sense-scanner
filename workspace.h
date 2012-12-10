@@ -28,7 +28,7 @@ public:
     QString GetSourceName(unsigned int index);
 
     //** Processing
-    unsigned int AddProcessing(std::tr1::shared_ptr<class Algorithm> alg);
+    unsigned int AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg);
     void PauseProcessing(unsigned int num);
     void RemoveProcessing(unsigned int num);
     int StartProcessing(unsigned int num);
@@ -49,7 +49,7 @@ public:
     int HasChanged();
 
 protected:
-    std::vector<std::tr1::shared_ptr<class Algorithm> > processingList;
+    std::vector<std::tr1::shared_ptr<class AlgorithmProcess> > processingList;
     std::vector<QString> sources;
     QString defaultFilename;
     std::vector<SimpleSceneController *> tracks;

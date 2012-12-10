@@ -231,7 +231,7 @@ MessagableThread::MessagableThread(class EventLoop *eventLoopIn)
 MessagableThread::~MessagableThread()
 {
     cout << "MessagableThread::~MessagableThread()" << endl;
-    this->StopThread();
+    this->Stop();
     if(this->eventReceiver)
         delete this->eventReceiver;
     this->eventReceiver = NULL;
@@ -281,7 +281,7 @@ void MessagableThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
 }
 
-int MessagableThread::StartThread()
+int MessagableThread::Start()
 {
     if(this->isRunning()) return 0;
     this->mutex.lock();
@@ -291,7 +291,7 @@ int MessagableThread::StartThread()
     return 1;
 }
 
-int MessagableThread::StopThread()
+int MessagableThread::Stop()
 {
     this->mutex.lock();
     this->stopThreads = 1;
@@ -313,7 +313,7 @@ int MessagableThread::StopThread()
     return 0;
 }
 
-void MessagableThread::StopThreadNonBlocking()
+void MessagableThread::StopNonBlocking()
 {
     this->mutex.lock();
     this->stopThreads = 1;

@@ -2,18 +2,37 @@
 #define ALGORITHM_H
 
 #include "eventloop.h"
+#include <QtCore/QProcess>
 
-class Algorithm : public MessagableThread
+class AlgorithmThread : public MessagableThread
 {
 public:
-    Algorithm(class EventLoop *eventLoopIn);
-    virtual ~Algorithm();
+    AlgorithmThread(class EventLoop *eventLoopIn, QObject *parent);
+    virtual ~AlgorithmThread();
 
     void Update();
-    void SetThreadId(unsigned int idIn);
+    void SetId(unsigned int idIn);
 
 protected:
     float progress;
+    unsigned int threadId;
+};
+
+class AlgorithmProcess : public QProcess
+{
+public:
+    AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent);
+    virtual ~AlgorithmProcess();
+
+    int Stop();
+    void StopNonBlocking();
+    int Start();
+    int IsStopFlagged();
+    void SetId(unsigned int idIn);
+    bool isRunning();
+
+protected:
+    int stopping;
     unsigned int threadId;
 };
 

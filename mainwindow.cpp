@@ -131,7 +131,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Create file reader worker thread
     this->mediaThread = new AvBinThread(this->eventLoop);
-    this->mediaThread->StartThread();
+    this->mediaThread->Start();
 
     this->mediaInterface = new class AvBinMedia();
     this->mediaInterface->SetEventLoop(this->eventLoop);
@@ -507,14 +507,14 @@ void MainWindow::SelectedSourceChanged(const QModelIndex ind)
     this->mediaInterface->SetActive(0);
 
     //Shut down media thread and delete
-    int result = this->mediaThread->StopThread();
+    int result = this->mediaThread->Stop();
     cout << "stop thread result=" << result << endl;
     delete(this->mediaThread);
     this->mediaThread = NULL;
 
     //Create a new source
     this->mediaThread = new AvBinThread(this->eventLoop);
-    this->mediaThread->StartThread();
+    this->mediaThread->Start();
 
     //Mark media interface as active
     this->mediaInterface->SetActive(1);
@@ -544,7 +544,7 @@ void MainWindow::TrainModelPressed()
         QModelIndex &ind = selectList[i];
     }
 
-    std::tr1::shared_ptr<class Algorithm> alg(new class Algorithm(this->eventLoop));
+    std::tr1::shared_ptr<class AlgorithmProcess> alg(new class AlgorithmProcess(this->eventLoop, this));
     this->workspace.AddProcessing(alg);
     this->RegenerateProcessingList();
 }

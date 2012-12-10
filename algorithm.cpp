@@ -6,18 +6,18 @@ using namespace std;
 
 //**********************************
 
-Algorithm::Algorithm(class EventLoop *eventLoopIn) : MessagableThread(eventLoopIn)
+AlgorithmThread::AlgorithmThread(class EventLoop *eventLoopIn, QObject *parent) : MessagableThread(eventLoopIn)
 {
     this->progress = 0.f;
     this->threadId = 0;
 }
 
-Algorithm::~Algorithm()
+AlgorithmThread::~AlgorithmThread()
 {
 
 }
 
-void Algorithm::Update()
+void AlgorithmThread::Update()
 {
     this->progress += 0.01f;
     if(this->progress >= 1.f)
@@ -37,8 +37,57 @@ void Algorithm::Update()
 
     this->msleep(10000);
 }
-void Algorithm::SetThreadId(unsigned int idIn)
+void AlgorithmThread::SetId(unsigned int idIn)
 {
     assert(!this->isRunning());
     this->threadId = idIn;
+}
+
+//************************************************
+
+AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent) : QProcess(parent)
+{
+    this->stopping = 0;
+
+}
+
+AlgorithmProcess::~AlgorithmProcess()
+{
+
+
+}
+
+int AlgorithmProcess::Stop()
+{
+
+
+}
+
+void AlgorithmProcess::StopNonBlocking()
+{
+
+
+}
+
+int AlgorithmProcess::Start()
+{
+
+}
+
+int AlgorithmProcess::IsStopFlagged()
+{
+
+
+}
+
+void AlgorithmProcess::SetId(unsigned int idIn)
+{
+
+    this->threadId = idIn;
+}
+
+bool AlgorithmProcess::isRunning()
+{
+    return (this->state() == QProcess::Running);
+
 }

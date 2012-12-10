@@ -97,9 +97,9 @@ QString Workspace::GetSourceName(unsigned int index)
 
 //***********************************************************************
 
-unsigned int Workspace::AddProcessing(std::tr1::shared_ptr<class Algorithm> alg)
+unsigned int Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg)
 {
-    alg->SetThreadId(this->nextThreadId);
+    alg->SetId(this->nextThreadId);
     this->processingList.push_back(alg);
     this->threadProgress.push_back(0.);
     this->threadId.push_back(this->nextThreadId);
@@ -113,7 +113,7 @@ void Workspace::PauseProcessing(unsigned int num)
     assert(num >= 0 && num < this->processingList.size());
     if(this->processingList[num]->isRunning())
     {
-        this->processingList[num]->StopThreadNonBlocking();
+        this->processingList[num]->StopNonBlocking();
     }
 }
 
@@ -136,7 +136,7 @@ void Workspace::RemoveProcessing(unsigned int num)
 int Workspace::StartProcessing(unsigned int num)
 {
     assert(num >= 0 && num < this->processingList.size());
-    return this->processingList[num]->StartThread();
+    return this->processingList[num]->Start();
 }
 
 unsigned int Workspace::GetNumProcessing()

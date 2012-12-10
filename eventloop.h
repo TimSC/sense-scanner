@@ -82,9 +82,9 @@ public:
 
     void run();
     virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);
-    int StopThread();
-    void StopThreadNonBlocking();
-    int StartThread();
+    int Stop();
+    void StopNonBlocking();
+    int Start();
     int IsStopFlagged();
     virtual void Update()=0;
 
