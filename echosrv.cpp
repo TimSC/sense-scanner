@@ -9,6 +9,7 @@
 using namespace std;
 
 int gRunning = 1;
+int gPaused = 0;
 std::mutex gRunningMutex;
 
 class Worker
@@ -18,14 +19,23 @@ public:
     {
 		gRunningMutex.lock();
 		int running = gRunning;
+		int paused = gPaused;
 		gRunningMutex.unlock();
 		while(running)
 		{
-        	cout << "PROGRESS=0.5" << endl;
-			usleep(1000000);
+			if(!paused)
+			{
+	        	cout << "PROGRESS=0.5" << endl;
+				usleep(1000000);
+			}
+			else
+			{
+				usleep(1000);
+			}
 
 			gRunningMutex.lock();
 			running = gRunning;
+			paused = gPaused;
 			gRunningMutex.unlock();
 		}
 		
@@ -47,7 +57,25 @@ int main(int argc, char *argv[])
 
 		//Process commands
 		if(mystring == "QUIT")
+		{
+			gRunningMutex.lock();
 			gRunning = 0;
+			gRunningMutex.unlock();
+		}
+
+		if(mystring == "PAUSE")
+		{
+			gRunningMutex.lock();
+			gPaused = 1;
+			gRunningMutex.unlock();
+		}
+
+		if(mystring == "RUN")
+		{
+			gRunningMutex.lock();
+			gPaused = 0;
+			gRunningMutex.unlock();
+		}
 		//if(mystring == "GET_PROGRESS")
 		//	cout << "PROGRESS=0.5" << endl;
 
@@ -56,7 +84,7 @@ int main(int argc, char *argv[])
 		gRunningMutex.unlock();
 	}
 	
-	thr.join();
+	thr.join(); //This waits until worker thread finishes
 	cout << "FINISHED" << endl;
 }
 

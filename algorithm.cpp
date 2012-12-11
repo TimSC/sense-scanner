@@ -57,10 +57,21 @@ AlgorithmProcess::~AlgorithmProcess()
     this->Stop();
 }
 
+void AlgorithmProcess::Pause()
+{
+    this->write("PAUSE\n");
+}
+
+void AlgorithmProcess::Unpause()
+{
+    this->write("RUN\n");
+}
+
 int AlgorithmProcess::Stop()
 {
     this->write("QUIT\n");
     this->waitForFinished();
+    return 1;
 }
 
 void AlgorithmProcess::StopNonBlocking()
@@ -76,7 +87,7 @@ int AlgorithmProcess::Start()
     this->start(program, arguments);
 
     //this->waitForFinished();
-
+    return 1;
 }
 
 int AlgorithmProcess::IsStopFlagged()
@@ -105,6 +116,10 @@ void AlgorithmProcess::Update()
     do
     {
         line = dec.readLine();
+        if(line.left(9)=="PROGRESS=")
+        {
+            cout << line.mid(9).toLocal8Bit().constData() << endl;
+        }
         if(line.length()>0)
             cout << line.toLocal8Bit().constData() << endl;
     }

@@ -31,6 +31,8 @@ public:
     void SetId(unsigned int idIn);
     bool isRunning();
     void Update();
+    void Pause();
+    void Unpause();
 
 protected:
     int stopping;
