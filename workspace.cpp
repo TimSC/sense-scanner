@@ -110,20 +110,27 @@ unsigned int Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProces
 
 void Workspace::PauseProcessing(unsigned int num)
 {
-    assert(num >= 0 && num < this->processingList.size());
-    this->processingList[num]->StopNonBlocking();
+    assert(num < this->processingList.size());
+    this->processingList[num]->Pause();
 }
 
 void Workspace::RemoveProcessing(unsigned int num)
 {
-    assert(num >= 0 && num < this->processingList.size());
-    if(this->processingList[num]->GetState()!=AlgorithmProcess::STOPPED)
+    assert(num < this->processingList.size());
+
+    //Check process is ready to be removed
+    AlgorithmProcess::ProcessState state = this->processingList[num]->GetState();
+    if(state!=AlgorithmProcess::STOPPED &&
+            state!=AlgorithmProcess::PAUSED)
     {
         cout << "Process cannot be removed while it is running" << endl;
         return;
     }
 
-    assert(num >= 0 && num < this->processingList.size());
+    //If paused, stop the process
+    if(this->processingList[num]->GetState()!=AlgorithmProcess::PAUSED)
+        this->processingList[num]->Stop();
+
     assert(!this->processingList[num]->GetState()!=AlgorithmProcess::STOPPED);
     this->processingList.erase(this->processingList.begin()+num);
     this->threadProgress.erase(this->threadProgress.begin()+num);
@@ -132,7 +139,7 @@ void Workspace::RemoveProcessing(unsigned int num)
 
 int Workspace::StartProcessing(unsigned int num)
 {
-    assert(num >= 0 && num < this->processingList.size());
+    assert(num < this->processingList.size());
     return this->processingList[num]->Start();
 }
 
@@ -165,25 +172,22 @@ float Workspace::GetProgress(unsigned int num)
     return this->threadProgress[num];
 }
 
-int Workspace::IsProcessStopFlagged(unsigned int num)
+AlgorithmProcess::ProcessState Workspace::GetState(unsigned int num)
 {
-    assert(num >= 0 && num < this->processingList.size());
-    int stop = this->processingList[num]->IsStopFlagged();
-    return stop;
+    assert(num < this->processingList.size());
+    return this->processingList[num]->GetState();
+
 }
 
-float Workspace::IsProgressRunning(unsigned int num)
-{
-    assert(num >= 0 && num < this->processingList.size());
-    return this->processingList[num]->GetState()!=AlgorithmProcess::STOPPED;
-}
-
-int Workspace::NumProcessesRunning()
+int Workspace::NumProcessesBlockingShutdown()
 {
     int count = 0;
     for(unsigned int i=0;i<this->processingList.size();i++)
     {
-        count += this->IsProgressRunning(i);
+        AlgorithmProcess::ProcessState state = this->processingList[i]->GetState();
+        if(state == AlgorithmProcess::RUNNING) count += 1;
+        if(state == AlgorithmProcess::RUNNING_PAUSING) count += 1;
+        if(state == AlgorithmProcess::RUNNING_STOPPING) count += 1;
     }
     return count;
 }

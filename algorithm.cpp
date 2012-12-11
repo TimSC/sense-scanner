@@ -100,6 +100,7 @@ int AlgorithmProcess::Start()
     QStringList arguments;
     this->start(program, arguments);
 
+    this->write("RUN\n");
     //this->waitForFinished();
     return 1;
 }
@@ -135,6 +136,7 @@ void AlgorithmProcess::Update()
     do
     {
         line = dec.readLine();
+        if(line.length()==0) continue;
         if(line.left(9)=="PROGRESS=")
         {
             cout << line.mid(9).toLocal8Bit().constData() << endl;

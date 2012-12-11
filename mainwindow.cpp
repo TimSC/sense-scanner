@@ -204,8 +204,8 @@ QString MainWindow::CheckIfDataShouldBeDiscarded(QString discardMsg)
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     //Prevent shutdown if processes running
-    int numRunning = this->workspace.NumProcessesRunning();
-    if(numRunning>0)
+    int numRunningBlockingShutdown = this->workspace.NumProcessesBlockingShutdown();
+    if(numRunningBlockingShutdown>0)
     {
         cout << "Cannot shut down while running processing" << endl;
         event->setAccepted(false);
@@ -319,12 +319,13 @@ void MainWindow::RegenerateProcessingList()
         {
             std::ostringstream displayLine;
             float progress = this->workspace.GetProgress(row);
-            if(this->workspace.IsProgressRunning(row))
+            if(this->workspace.GetState(row)!=AlgorithmProcess::STOPPED)
             {
-                if(!this->workspace.IsProcessStopFlagged(row))
-                    displayLine << "Running " << progress;
-                else
-                    displayLine << "Stopping... " << progress;
+                AlgorithmProcess::ProcessState state = this->workspace.GetState(row);
+                if(state == AlgorithmProcess::RUNNING) displayLine << "Running " << progress;
+                if(state == AlgorithmProcess::RUNNING_PAUSING) displayLine << "Pausing... " << progress;
+                if(state == AlgorithmProcess::RUNNING_STOPPING) displayLine << "Stopping... " << progress;
+                if(state == AlgorithmProcess::PAUSED) displayLine << "Paused " << progress;
             }
             else
             {
@@ -597,6 +598,7 @@ void MainWindow::RemoveProcessPressed()
     for(unsigned int i=0;i<selectList.size();i++)
     {
         QModelIndex &ind = selectList[i];
+
         this->workspace.RemoveProcessing(ind.row());
     }
     this->RegenerateProcessingList();
