@@ -59,32 +59,24 @@ AlgorithmProcess::~AlgorithmProcess()
 
 int AlgorithmProcess::Stop()
 {
-
-
+    this->write("QUIT\n");
+    this->waitForFinished();
 }
 
 void AlgorithmProcess::StopNonBlocking()
 {
+    this->write("QUIT\n");
 
 }
 
 int AlgorithmProcess::Start()
 {
-    QString program = "pwd";
+    QString program = "/home/tim/dev/QtMedia/echosrv";
     QStringList arguments;
     this->start(program, arguments);
 
+    //this->waitForFinished();
 
-    this->waitForFinished();
-    QByteArray ret = this->readAllStandardOutput();
-
-    QTextStream dec(&ret);
-    dec.setCodec("UTF-8");
-    QString line;
-    do {
-        line = dec.readLine();
-        cout << line.toLocal8Bit().constData() << endl;
-    } while (!line.isNull());
 }
 
 int AlgorithmProcess::IsStopFlagged()
@@ -101,5 +93,20 @@ void AlgorithmProcess::SetId(unsigned int idIn)
 bool AlgorithmProcess::isRunning()
 {
     return (this->state() == QProcess::Running);
+}
 
+void AlgorithmProcess::Update()
+{
+    QByteArray ret = this->readAllStandardOutput();
+
+    QTextStream dec(&ret);
+    dec.setCodec("UTF-8");
+    QString line;
+    do
+    {
+        line = dec.readLine();
+        if(line.length()>0)
+            cout << line.toLocal8Bit().constData() << endl;
+    }
+    while (!line.isNull());
 }

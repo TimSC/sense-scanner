@@ -422,6 +422,8 @@ void MainWindow::Update()
         }
     }
     catch(std::runtime_error e) {flushing = 0;}
+
+    this->workspace.Update();
 }
 
 void MainWindow::NewWorkspace()

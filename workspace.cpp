@@ -304,3 +304,12 @@ void Workspace::SaveAs(QString &fina)
     this->Save();
 }
 
+
+void Workspace::Update()
+{
+    for(unsigned int i=0;i<this->processingList.size();i++)
+    {
+        this->processingList[i]->Update();
+    }
+
+}

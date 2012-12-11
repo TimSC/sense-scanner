@@ -37,7 +37,7 @@ public:
     float IsProgressRunning(unsigned int num);
     int IsProcessStopFlagged(unsigned int num);
     int NumProcessesRunning();
-
+    void Update();
 
     unsigned int GetNumProcessing();
     QString GetProcessingName(unsigned int index);

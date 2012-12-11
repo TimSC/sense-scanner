@@ -30,6 +30,7 @@ public:
     int IsStopFlagged();
     void SetId(unsigned int idIn);
     bool isRunning();
+    void Update();
 
 protected:
     int stopping;
