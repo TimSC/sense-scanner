@@ -2,7 +2,9 @@
 #include <iostream>
 #include <sstream>
 #include <assert.h>
+#include <stdexcept>
 #include <QtCore/QTextStream>
+#include <QtCore/QFile>
 using namespace std;
 
 //**********************************
@@ -89,6 +91,11 @@ void AlgorithmProcess::StopNonBlocking()
 int AlgorithmProcess::Start()
 {
     QString program = "/home/tim/dev/QtMedia/echosrv";
+    QFile programFile(program);
+    if(!programFile.exists())
+    {
+        throw std::runtime_error("Process executable not found");
+    }
     QStringList arguments;
     this->start(program, arguments);
 
