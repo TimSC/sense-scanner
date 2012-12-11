@@ -37,7 +37,7 @@ public:
     AlgorithmProcess::ProcessState GetState(unsigned int num);
 
     int NumProcessesBlockingShutdown();
-    void Update();
+    void Update(class EventLoop &ev);
 
     unsigned int GetNumProcessing();
     QString GetProcessingName(unsigned int index);

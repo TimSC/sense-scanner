@@ -306,11 +306,11 @@ void Workspace::SaveAs(QString &fina)
 }
 
 
-void Workspace::Update()
+void Workspace::Update(class EventLoop &ev)
 {
     for(unsigned int i=0;i<this->processingList.size();i++)
     {
-        this->processingList[i]->Update();
+        this->processingList[i]->Update(ev);
     }
 
 }

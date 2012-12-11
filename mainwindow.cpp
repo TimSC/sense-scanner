@@ -128,6 +128,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("THREAD_STOPPING",*eventReceiver);
     this->eventLoop->AddListener("AVBIN_OPEN_RESULT",*eventReceiver);
     this->eventLoop->AddListener("THREAD_PROGRESS_UPDATE",*eventReceiver);
+    this->eventLoop->AddListener("THREAD_STATUS_CHANGED",*eventReceiver);
 
     //Create file reader worker thread
     this->mediaThread = new AvBinThread(this->eventLoop);
@@ -421,10 +422,14 @@ void MainWindow::Update()
             }
             this->RegenerateProcessingList();
         }
+        if(ev->type=="THREAD_STATUS_CHANGED")
+        {
+            this->RegenerateProcessingList();
+        }
     }
     catch(std::runtime_error e) {flushing = 0;}
 
-    this->workspace.Update();
+    this->workspace.Update(*this->eventLoop);
 }
 
 void MainWindow::NewWorkspace()

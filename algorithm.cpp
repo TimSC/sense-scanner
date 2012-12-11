@@ -126,7 +126,7 @@ AlgorithmProcess::ProcessState AlgorithmProcess::GetState()
     return AlgorithmProcess::RUNNING;
 }
 
-void AlgorithmProcess::Update()
+void AlgorithmProcess::Update(class EventLoop &el)
 {
     QByteArray ret = this->readAllStandardOutput();
 
@@ -139,12 +139,32 @@ void AlgorithmProcess::Update()
         if(line.length()==0) continue;
         if(line.left(9)=="PROGRESS=")
         {
-            cout << line.mid(9).toLocal8Bit().constData() << endl;
+            std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_PROGRESS_UPDATE"));
+            std::ostringstream tmp;
+            tmp << line.mid(9).toLocal8Bit().constData() << "," << this->threadId;
+            openEv->data = tmp.str();
+            el.SendEvent(openEv);
         }
         if(line=="NOW_PAUSED")
+        {
             this->paused = 1;
+
+            std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
+            std::ostringstream tmp;
+            tmp << this->threadId << ",paused";
+            openEv->data = tmp.str();
+            el.SendEvent(openEv);
+        }
         if(line=="NOW_RUNNING")
+        {
             this->paused = 0;
+
+            std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
+            std::ostringstream tmp;
+            tmp << this->threadId << ",running";
+            openEv->data = tmp.str();
+            el.SendEvent(openEv);
+        }
 
         if(line.length()>0)
             cout << line.toLocal8Bit().constData() << endl;

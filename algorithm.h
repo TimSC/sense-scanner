@@ -39,7 +39,7 @@ public:
     int IsStopFlagged();
     void SetId(unsigned int idIn);
     ProcessState GetState();
-    void Update();
+    void Update(class EventLoop &ev);
     void Pause();
     void Unpause();
 
