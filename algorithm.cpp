@@ -84,8 +84,9 @@ int AlgorithmProcess::Stop()
 
 void AlgorithmProcess::StopNonBlocking()
 {
+    this->pausing = 0;
+    this->stopping = 1;
     this->write("QUIT\n");
-
 }
 
 int AlgorithmProcess::Start()
