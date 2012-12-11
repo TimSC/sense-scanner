@@ -166,8 +166,19 @@ void AlgorithmProcess::Update(class EventLoop &el)
             el.SendEvent(openEv);
         }
 
-        if(line.length()>0)
-            cout << line.toLocal8Bit().constData() << endl;
+        if(line=="FINISHED")
+        {
+            this->waitForFinished(); //Just wait for final finishing of process
+
+            std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
+            std::ostringstream tmp;
+            tmp << this->threadId << ",finished";
+            openEv->data = tmp.str();
+            el.SendEvent(openEv);
+        }
+
+        //if(line.length()>0)
+        //    cout << line.toLocal8Bit().constData() << endl;
     }
     while (!line.isNull());
 }

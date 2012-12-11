@@ -140,6 +140,11 @@ void Workspace::RemoveProcessing(unsigned int num)
 int Workspace::StartProcessing(unsigned int num)
 {
     assert(num < this->processingList.size());
+    if(this->processingList[num]->GetState() == AlgorithmProcess::PAUSED)
+    {
+        this->processingList[num]->Unpause();
+        return 1;
+    }
     return this->processingList[num]->Start();
 }
 

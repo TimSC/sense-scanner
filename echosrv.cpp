@@ -18,7 +18,10 @@ public:
 
     void operator()() const
     {
+        cout << "#Type RUN and press enter to start the algorithm" << endl;
+
 		int lastPaused = 1;
+        float progress = 0.f;
 		gRunningMutex.lock();
 		int running = gRunning;
 		int paused = gPaused;
@@ -36,13 +39,25 @@ public:
 
 			if(!paused)
 			{
-	        	cout << "PROGRESS=0.5" << endl;
-				usleep(1000000);
+                usleep(100000);
+                progress += 0.01;
 			}
 			else
 			{
 				usleep(1000);
 			}
+
+            //Check if finished
+            if(progress >= 1.f)
+            {
+                progress = 1.f;
+                gRunningMutex.lock();
+                gRunning = 0;
+                gRunningMutex.unlock();
+            }
+
+            if(!paused)
+                cout << "PROGRESS=" << progress << endl;
 
 			gRunningMutex.lock();
 			running = gRunning;
@@ -50,7 +65,11 @@ public:
 			gRunningMutex.unlock();
 		}
 		
+        cout << "FINISHED" << endl;
+        exit(0);
     }
+
+
 };
 
 int main(int argc, char *argv[])
@@ -96,6 +115,5 @@ int main(int argc, char *argv[])
 	}
 	
 	thr.join(); //This waits until worker thread finishes
-	cout << "FINISHED" << endl;
 }
 
