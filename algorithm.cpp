@@ -53,6 +53,7 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->stopping = 0;
     this->paused = 0;
     this->pausing = 0;
+    this->initDone = 0;
 }
 
 AlgorithmProcess::~AlgorithmProcess()
@@ -60,14 +61,30 @@ AlgorithmProcess::~AlgorithmProcess()
     this->Stop();
 }
 
+void AlgorithmProcess::Init()
+{
+    if(this->initDone) return;
+    QString program = "../QtMedia/echosrv";
+    QFile programFile(program);
+    if(!programFile.exists())
+    {
+        throw std::runtime_error("Process executable not found");
+    }
+    QStringList arguments;
+    this->start(program, arguments);
+    this->initDone = 1;
+}
+
 void AlgorithmProcess::Pause()
 {
+    assert(this->initDone);
     this->pausing = 1;
     this->SendCommand("PAUSE\n");
 }
 
 void AlgorithmProcess::Unpause()
 {
+    assert(this->initDone);
     this->pausing = 0;
     this->stopping = 0;
     this->SendCommand("RUN\n");
@@ -75,6 +92,7 @@ void AlgorithmProcess::Unpause()
 
 int AlgorithmProcess::Stop()
 {
+    assert(this->initDone);
     this->pausing = 0;
     this->stopping = 1;
     this->SendCommand("QUIT\n");
@@ -84,6 +102,7 @@ int AlgorithmProcess::Stop()
 
 void AlgorithmProcess::StopNonBlocking()
 {
+    assert(this->initDone);
     this->pausing = 0;
     this->stopping = 1;
     this->SendCommand("QUIT\n");
@@ -91,16 +110,8 @@ void AlgorithmProcess::StopNonBlocking()
 
 int AlgorithmProcess::Start()
 {
+    Init();
     assert(this->state() != QProcess::Running);
-    QString program = "../QtMedia/echosrv";
-    QFile programFile(program);
-    if(!programFile.exists())
-    {
-        throw std::runtime_error("Process executable not found");
-    }
-    QStringList arguments;
-    this->start(program, arguments);
-
     this->SendCommand("RUN\n");
     //this->waitForFinished();
     return 1;
@@ -129,6 +140,7 @@ AlgorithmProcess::ProcessState AlgorithmProcess::GetState()
 
 void AlgorithmProcess::Update(class EventLoop &el)
 {
+    assert(this->initDone);
     QByteArray ret = this->readAllStandardOutput();
 
     QTextStream dec(&ret);
@@ -186,6 +198,7 @@ void AlgorithmProcess::Update(class EventLoop &el)
 
 void AlgorithmProcess::SendCommand(QString cmd)
 {
+    assert(this->initDone);
     QTextStream enc(this);
     enc.setCodec("UTF-8");
     enc << cmd;

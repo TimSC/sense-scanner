@@ -554,6 +554,7 @@ void MainWindow::TrainModelPressed()
 
     //Create worker process
     std::tr1::shared_ptr<class AlgorithmProcess> alg(new class AlgorithmProcess(this->eventLoop, this));
+    alg->Init();
 
     //Configure worker process
     QString test = "<test>foobar</test>";

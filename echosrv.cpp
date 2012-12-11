@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string>
 #include <thread>
+#include <fstream>
 #include <mutex>
 #include <unistd.h>
 using namespace std;
@@ -79,11 +80,18 @@ int main(int argc, char *argv[])
 	int running = gRunning;
 	gRunningMutex.unlock();
 
+    ofstream log("log.txt");
+
 	while(running)
 	{
 		//Read standard input
 		std::string mystring;
 		cin >> mystring;
+        if(mystring.length()>0)
+        {
+            log << mystring << endl;
+            log.flush();
+        }
 
 		//Process commands
 		if(mystring == "QUIT")

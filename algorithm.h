@@ -33,6 +33,7 @@ public:
         STOPPED = 5
     };
 
+    void Init();
     int Stop();
     void StopNonBlocking();
     int Start();
@@ -49,6 +50,7 @@ protected:
     int pausing;
     int paused;
     unsigned int threadId;
+    int initDone;
 };
 
 #endif // ALGORITHM_H
