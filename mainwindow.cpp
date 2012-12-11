@@ -378,7 +378,7 @@ void MainWindow::RemoveVideo()
     for(unsigned int i=0;i<rowList.size();i++)
     {
         QModelIndex &ind = rowList[i];
-        cout << ind.row() << endl;
+        //cout << ind.row() << endl;
         this->workspace.RemoveSource(ind.row());
     }
 
@@ -418,7 +418,7 @@ void MainWindow::Update()
             this->workspace.ProcessingUpdate(atoi(args[1].c_str()), atof(args[0].c_str()));
             for(unsigned int i=0;i<this->workspace.GetNumProcessing();i++)
             {
-                cout << this->workspace.GetProgress(i) << endl;
+                //cout << this->workspace.GetProgress(i) << endl;
             }
             this->RegenerateProcessingList();
         }
@@ -588,7 +588,7 @@ void MainWindow::RunProcessPressed()
     for(unsigned int i=0;i<selectList.size();i++)
     {
         QModelIndex &ind = selectList[i];
-        cout << ind.row() << "," <<ind.column() << endl;
+        //cout << ind.row() << "," <<ind.column() << endl;
         this->workspace.StartProcessing(ind.row());
     }
     this->RegenerateProcessingList();
