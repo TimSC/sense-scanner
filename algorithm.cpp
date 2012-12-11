@@ -49,7 +49,8 @@ void AlgorithmThread::SetId(unsigned int idIn)
 AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent) : QProcess(parent)
 {
     this->stopping = 0;
-
+    this->paused = 0;
+    this->pausing = 0;
 }
 
 AlgorithmProcess::~AlgorithmProcess()
@@ -59,16 +60,21 @@ AlgorithmProcess::~AlgorithmProcess()
 
 void AlgorithmProcess::Pause()
 {
+    this->pausing = 1;
     this->write("PAUSE\n");
 }
 
 void AlgorithmProcess::Unpause()
 {
+    this->pausing = 0;
+    this->stopping = 0;
     this->write("RUN\n");
 }
 
 int AlgorithmProcess::Stop()
 {
+    this->pausing = 0;
+    this->stopping = 1;
     this->write("QUIT\n");
     this->waitForFinished();
     return 1;
@@ -101,9 +107,14 @@ void AlgorithmProcess::SetId(unsigned int idIn)
     this->threadId = idIn;
 }
 
-bool AlgorithmProcess::isRunning()
+AlgorithmProcess::ProcessState AlgorithmProcess::GetState()
 {
-    return (this->state() == QProcess::Running);
+    int running = (this->state() == QProcess::Running);
+    if(!running) return AlgorithmProcess::STOPPED;
+    if(this->paused) return AlgorithmProcess::PAUSED;
+    if(this->stopping) return AlgorithmProcess::RUNNING_STOPPING;
+    if(this->pausing) return AlgorithmProcess::RUNNING_PAUSING;
+    return AlgorithmProcess::RUNNING;
 }
 
 void AlgorithmProcess::Update()
@@ -120,6 +131,11 @@ void AlgorithmProcess::Update()
         {
             cout << line.mid(9).toLocal8Bit().constData() << endl;
         }
+        if(line=="NOW_PAUSED")
+            this->paused = 1;
+        if(line=="NOW_RUNNING")
+            this->paused = 0;
+
         if(line.length()>0)
             cout << line.toLocal8Bit().constData() << endl;
     }

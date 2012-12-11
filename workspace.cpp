@@ -111,23 +111,20 @@ unsigned int Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProces
 void Workspace::PauseProcessing(unsigned int num)
 {
     assert(num >= 0 && num < this->processingList.size());
-    if(this->processingList[num]->isRunning())
-    {
-        this->processingList[num]->StopNonBlocking();
-    }
+    this->processingList[num]->StopNonBlocking();
 }
 
 void Workspace::RemoveProcessing(unsigned int num)
 {
     assert(num >= 0 && num < this->processingList.size());
-    if(this->processingList[num]->isRunning())
+    if(this->processingList[num]->GetState()!=AlgorithmProcess::STOPPED)
     {
         cout << "Process cannot be removed while it is running" << endl;
         return;
     }
 
     assert(num >= 0 && num < this->processingList.size());
-    assert(!this->processingList[num]->isRunning());
+    assert(!this->processingList[num]->GetState()!=AlgorithmProcess::STOPPED);
     this->processingList.erase(this->processingList.begin()+num);
     this->threadProgress.erase(this->threadProgress.begin()+num);
     this->threadId.erase(this->threadId.begin()+num);
@@ -178,7 +175,7 @@ int Workspace::IsProcessStopFlagged(unsigned int num)
 float Workspace::IsProgressRunning(unsigned int num)
 {
     assert(num >= 0 && num < this->processingList.size());
-    return this->processingList[num]->isRunning();
+    return this->processingList[num]->GetState()!=AlgorithmProcess::STOPPED;
 }
 
 int Workspace::NumProcessesRunning()

@@ -24,18 +24,29 @@ public:
     AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent);
     virtual ~AlgorithmProcess();
 
+    enum ProcessState
+    {
+        PAUSED = 1,
+        RUNNING = 2,
+        RUNNING_PAUSING = 3,
+        RUNNING_STOPPING = 4,
+        STOPPED = 5
+    };
+
     int Stop();
     void StopNonBlocking();
     int Start();
     int IsStopFlagged();
     void SetId(unsigned int idIn);
-    bool isRunning();
+    ProcessState GetState();
     void Update();
     void Pause();
     void Unpause();
 
 protected:
     int stopping;
+    int pausing;
+    int paused;
     unsigned int threadId;
 };
 

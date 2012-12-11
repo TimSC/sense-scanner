@@ -9,20 +9,31 @@
 using namespace std;
 
 int gRunning = 1;
-int gPaused = 0;
+int gPaused = 1;
 std::mutex gRunningMutex;
 
 class Worker
 {
 public:
+
     void operator()() const
     {
+		int lastPaused = 1;
 		gRunningMutex.lock();
 		int running = gRunning;
 		int paused = gPaused;
 		gRunningMutex.unlock();
 		while(running)
 		{
+			if(paused != lastPaused)
+			{
+				if(paused)
+					cout << "NOW_PAUSED" << endl;
+				else
+					cout << "NOW_RUNNING" << endl;
+			}
+			lastPaused = paused;
+
 			if(!paused)
 			{
 	        	cout << "PROGRESS=0.5" << endl;
