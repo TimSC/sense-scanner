@@ -31,6 +31,24 @@ protected:
     QString shutdownUserSelection;
 };
 
+//**********************************
+
+class StopProcessingDialog : public QObject
+{
+    Q_OBJECT
+public:
+    StopProcessingDialog(QWidget *parent);
+    virtual ~StopProcessingDialog();
+
+    QString GetUserChoice();
+public slots:
+    void AnswerStop();
+    void AnswerCancel();
+protected:
+    QDialog *dialog;
+    QString userSelection;
+};
+
 //*****************************************
 
 class SourcesList : public QListView

@@ -92,6 +92,54 @@ void CheckDiscardDataDialog::ShutdownCancel()
     this->shutdownDialog->close();
 }
 
+//*************************************************
+
+StopProcessingDialog::StopProcessingDialog(QWidget *parent) : QObject(parent)
+{
+    this->dialog = new QDialog(parent);
+    QVBoxLayout topLayout(this->dialog);
+    QDialogButtonBox buttonbox;
+    QLabel question("Processing is currently running and should be stopped first.");
+    this->dialog->setLayout(&topLayout);
+    topLayout.addWidget(&question);
+    topLayout.addWidget(&buttonbox);
+    QPushButton *buttonStop = new QPushButton("Stop Processing");
+    QPushButton *buttonCancel = new QPushButton("Cancel");
+    buttonbox.addButton(buttonCancel, QDialogButtonBox::RejectRole);
+    buttonbox.addButton(buttonStop, QDialogButtonBox::ActionRole);
+    buttonCancel->setDefault(true);
+    QObject::connect(buttonStop,SIGNAL(pressed()), this, SLOT(AnswerStop()));
+    QObject::connect(buttonCancel,SIGNAL(pressed()), this, SLOT(AnswerCancel()));
+
+    //Run the dialog
+    //The variable this->shutdownUserSelection is modified at this stage!
+    this->userSelection = "CANCEL";
+    this->dialog->exec();
+}
+
+StopProcessingDialog::~StopProcessingDialog()
+{
+    this->dialog = NULL;
+}
+
+QString StopProcessingDialog::GetUserChoice()
+{
+    return this->userSelection;
+}
+
+void StopProcessingDialog::AnswerStop()
+{
+    this->userSelection = "STOP";
+    assert(this->dialog != NULL);
+    this->dialog->close();
+}
+
+void StopProcessingDialog::AnswerCancel()
+{
+    this->userSelection = "CANCEL";
+    assert(this->dialog != NULL);
+    this->dialog->close();
+}
 
 //********************************
 
@@ -209,6 +257,17 @@ void MainWindow::closeEvent(QCloseEvent *event)
     if(numRunningBlockingShutdown>0)
     {
         cout << "Cannot shut down while running processing" << endl;
+
+        class StopProcessingDialog dialog(this);
+        QString userSelection = dialog.GetUserChoice();
+
+        if(userSelection=="STOP")
+        {
+            for(unsigned int i=0;i<this->workspace.GetNumProcessing();i++)
+            {
+                this->workspace.PauseProcessing(i);
+            }
+        }
         event->setAccepted(false);
         return;
     }

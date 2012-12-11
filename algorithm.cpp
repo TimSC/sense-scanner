@@ -92,6 +92,8 @@ void AlgorithmProcess::Unpause()
 
 int AlgorithmProcess::Stop()
 {
+    if(this->state() != QProcess::Running)
+        return 0;
     assert(this->initDone);
     this->pausing = 0;
     this->stopping = 1;
@@ -111,6 +113,8 @@ void AlgorithmProcess::StopNonBlocking()
 int AlgorithmProcess::Start()
 {
     Init();
+    this->pausing = 0;
+    this->stopping = 0;
     assert(this->state() != QProcess::Running);
     this->SendCommand("RUN\n");
     //this->waitForFinished();
@@ -140,7 +144,6 @@ AlgorithmProcess::ProcessState AlgorithmProcess::GetState()
 
 void AlgorithmProcess::Update(class EventLoop &el)
 {
-    assert(this->initDone);
     QByteArray ret = this->readAllStandardOutput();
 
     QTextStream dec(&ret);
@@ -182,6 +185,7 @@ void AlgorithmProcess::Update(class EventLoop &el)
         if(line=="FINISHED")
         {
             this->waitForFinished(); //Just wait for final finishing of process
+            this->initDone = 0;
 
             std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
             std::ostringstream tmp;
