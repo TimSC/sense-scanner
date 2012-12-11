@@ -91,7 +91,7 @@ void AlgorithmProcess::StopNonBlocking()
 
 int AlgorithmProcess::Start()
 {
-    QString program = "/home/tim/dev/QtMedia/echosrv";
+    QString program = "../QtMedia/echosrv";
     QFile programFile(program);
     if(!programFile.exists())
     {
