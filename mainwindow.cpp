@@ -552,8 +552,23 @@ void MainWindow::TrainModelPressed()
         QModelIndex &ind = selectList[i];
     }
 
+    //Create worker process
     std::tr1::shared_ptr<class AlgorithmProcess> alg(new class AlgorithmProcess(this->eventLoop, this));
+
+    //Configure worker process
+    QString test = "<test>foobar</test>";
+    QString preamble = QString("XML_DATA=%1\n").arg(test.length()+1);
+    alg->SendCommand(preamble);
+    alg->SendCommand(test);
+    alg->SendCommand("\n");
+
+    //Start worker process
+    alg->Start();
+
+    //Add process to workspace
     this->workspace.AddProcessing(alg);
+
+    //Update GUI to reflect changed workspace
     this->RegenerateProcessingList();
 }
 

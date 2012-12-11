@@ -42,6 +42,7 @@ public:
     void Update(class EventLoop &ev);
     void Pause();
     void Unpause();
+    void SendCommand(QString cmd);
 
 protected:
     int stopping;

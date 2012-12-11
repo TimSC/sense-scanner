@@ -63,21 +63,21 @@ AlgorithmProcess::~AlgorithmProcess()
 void AlgorithmProcess::Pause()
 {
     this->pausing = 1;
-    this->write("PAUSE\n");
+    this->SendCommand("PAUSE\n");
 }
 
 void AlgorithmProcess::Unpause()
 {
     this->pausing = 0;
     this->stopping = 0;
-    this->write("RUN\n");
+    this->SendCommand("RUN\n");
 }
 
 int AlgorithmProcess::Stop()
 {
     this->pausing = 0;
     this->stopping = 1;
-    this->write("QUIT\n");
+    this->SendCommand("QUIT\n");
     this->waitForFinished();
     return 1;
 }
@@ -86,11 +86,12 @@ void AlgorithmProcess::StopNonBlocking()
 {
     this->pausing = 0;
     this->stopping = 1;
-    this->write("QUIT\n");
+    this->SendCommand("QUIT\n");
 }
 
 int AlgorithmProcess::Start()
 {
+    assert(this->state() != QProcess::Running);
     QString program = "../QtMedia/echosrv";
     QFile programFile(program);
     if(!programFile.exists())
@@ -100,7 +101,7 @@ int AlgorithmProcess::Start()
     QStringList arguments;
     this->start(program, arguments);
 
-    this->write("RUN\n");
+    this->SendCommand("RUN\n");
     //this->waitForFinished();
     return 1;
 }
@@ -181,4 +182,11 @@ void AlgorithmProcess::Update(class EventLoop &el)
         //    cout << line.toLocal8Bit().constData() << endl;
     }
     while (!line.isNull());
+}
+
+void AlgorithmProcess::SendCommand(QString cmd)
+{
+    QTextStream enc(this);
+    enc.setCodec("UTF-8");
+    enc << cmd;
 }
