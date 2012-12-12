@@ -216,9 +216,9 @@ void AlgorithmProcess::SendRawData(QByteArray cmd)
 
 unsigned int AlgorithmProcess::EncodedLength(QString cmd)
 {
-    QByteArray tmp;
-    QTextStream enc(tmp);
+    QString encodedCmd;
+    QTextStream enc(&encodedCmd);
     enc.setCodec("UTF-8");
     enc << cmd;
-    return tmp.length();
+    return encodedCmd.length();
 }
