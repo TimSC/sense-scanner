@@ -51,7 +51,7 @@ void AlgorithmThread::SetId(unsigned int idIn)
 AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent) : QProcess(parent)
 {
     this->stopping = 0;
-    this->paused = 0;
+    this->paused = 1;
     this->pausing = 0;
     this->initDone = 0;
 }
@@ -64,6 +64,8 @@ AlgorithmProcess::~AlgorithmProcess()
 void AlgorithmProcess::Init()
 {
     if(this->initDone) return;
+    assert(this->state() != QProcess::Running);
+
     QString program = "../QtMedia/echosrv";
     QFile programFile(program);
     if(!programFile.exists())
@@ -72,6 +74,9 @@ void AlgorithmProcess::Init()
     }
     QStringList arguments;
     this->start(program, arguments);
+    this->stopping = 0;
+    this->paused = 1;
+    this->pausing = 0;
     this->initDone = 1;
 }
 
@@ -84,6 +89,7 @@ void AlgorithmProcess::Pause()
 
 void AlgorithmProcess::Unpause()
 {
+    if(!this->paused) return;
     assert(this->initDone);
     this->pausing = 0;
     this->stopping = 0;
@@ -113,9 +119,9 @@ void AlgorithmProcess::StopNonBlocking()
 int AlgorithmProcess::Start()
 {
     Init();
+    if(!this->paused) return 0;
     this->pausing = 0;
     this->stopping = 0;
-    assert(this->state() != QProcess::Running);
     this->SendCommand("RUN\n");
     //this->waitForFinished();
     return 1;
