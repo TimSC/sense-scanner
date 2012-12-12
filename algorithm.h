@@ -44,6 +44,8 @@ public:
     void Pause();
     void Unpause();
     void SendCommand(QString cmd);
+    void SendRawData(QByteArray cmd);
+    unsigned int EncodedLength(QString cmd);
 
 protected:
     int stopping;

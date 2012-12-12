@@ -616,11 +616,10 @@ void MainWindow::TrainModelPressed()
     alg->Init();
 
     //Configure worker process
-    QString test = "<test>foobar</test>";
-    QString preamble = QString("XML_DATA=%1\n").arg(test.length()+1);
+    QByteArray test = "<test>foobar</test>\n";
+    QString preamble = QString("XML_DATA=%1\n").arg(alg->EncodedLength(test));
     alg->SendCommand(preamble);
     alg->SendCommand(test);
-    alg->SendCommand("\n");
 
     //Start worker process
     alg->Start();

@@ -114,6 +114,12 @@ int main(int argc, char *argv[])
 			gPaused = 0;
 			gRunningMutex.unlock();
 		}
+
+        /*if(mystring.substr(0, 9) == "XML_DATA=")
+        {
+            cout << "#" << atoi(mystring.substr(10)) << endl;
+        }*/
+
 		//if(mystring == "GET_PROGRESS")
 		//	cout << "PROGRESS=0.5" << endl;
 

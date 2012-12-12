@@ -207,3 +207,18 @@ void AlgorithmProcess::SendCommand(QString cmd)
     enc.setCodec("UTF-8");
     enc << cmd;
 }
+
+void AlgorithmProcess::SendRawData(QByteArray cmd)
+{
+   assert(this->initDone);
+   this->write(cmd);
+}
+
+unsigned int AlgorithmProcess::EncodedLength(QString cmd)
+{
+    QByteArray tmp;
+    QTextStream enc(tmp);
+    enc.setCodec("UTF-8");
+    enc << cmd;
+    return tmp.length();
+}
