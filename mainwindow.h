@@ -108,6 +108,7 @@ public slots:
     void SaveWorkspace();
     void SaveAsWorkspace();
     void SelectedSourceChanged(const QModelIndex current);
+    void SelectedSourceChanged(unsigned int selectedRow);
     QString CheckIfDataShouldBeDiscarded(QString discardMsg);
 
 };

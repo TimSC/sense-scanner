@@ -22,7 +22,9 @@ public:
     virtual ~AvBinMedia();
 
     virtual QSharedPointer<QImage> Get(long long unsigned ti,
-                                       long long unsigned &outFrameTi); //in milliseconds
+                                       long long unsigned &outFrameStart,
+                                       long long unsigned &outFrameEnd,
+                                       long long unsigned timeout = 5000); //in milliseconds
     virtual long long unsigned GetNumFrames();
     virtual long long unsigned Length(); //Get length (ms)
     virtual long long unsigned GetFrameStartTime(long long unsigned ti); //in milliseconds

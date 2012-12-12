@@ -45,7 +45,9 @@ public:
     virtual ~AbstractMedia() {}
 
     virtual QSharedPointer<QImage> Get(long long unsigned ti,
-                                       long long unsigned &outFrameTi)=0; //in milliseconds
+                                       long long unsigned &outFrameStart,
+                                       long long unsigned &outFrameEnd,
+                                       long long unsigned timeout = 5000)=0; //in milliseconds
 
     virtual long long unsigned GetNumFrames()=0;
     virtual long long unsigned Length()=0; //Get length (ms)

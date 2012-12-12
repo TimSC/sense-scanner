@@ -59,12 +59,15 @@ void RawImgToQImage(DecodedFrame *frame, QImage &img)
 
 
 QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
-                                       long long unsigned &outFrameTi) //in milliseconds
+                                       long long unsigned &outFrameStart,
+                                       long long unsigned &outFrameEnd,
+                                       long long unsigned timeout) //in milliseconds
 {
     assert(this->active);
     if(!this->active)
         throw runtime_error("Media interface not active");
-    outFrameTi = 0;
+    outFrameStart = 0;
+    outFrameEnd = 0;
 
     //Request the frame from the backend thread
     assert(this->eventLoop != NULL);
@@ -74,46 +77,27 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
     tmp << ti * 1000;
     getFrameEvent->data = tmp.str();
     this->eventLoop->SendEvent(getFrameEvent);
-    std::tr1::shared_ptr<class Event> frameResponse;
-    try
-    {
-        //Wait for the response from the media backend
-        assert(this->eventReceiver);
-        frameResponse = this->eventReceiver->WaitForEventId(id);
 
-        if (frameResponse->type == "AVBIN_FRAME_FAILED")
-        {
-            std::ostringstream tmp;
-            tmp << "Warning: getting frame from media backend failed at ";
-            tmp << ti;
-            throw runtime_error(tmp.str());
-        }
+    //Wait for frame response
+    assert(this->eventReceiver);
+    std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(id,timeout);
+    assert(ev->type == "AVBIN_FRAME_RESPONSE");
+    assert(ev->raw!=NULL);
 
-        if(frameResponse->type != "AVBIN_FRAME_RESPONSE")
-            throw runtime_error("Warning: incorrect response type");
+    DecodedFrame *frame = (DecodedFrame *)ev->raw;
 
-        assert(frameResponse->type == "AVBIN_FRAME_RESPONSE");
-        assert(frameResponse->raw != NULL);
-        DecodedFrame *frame = (DecodedFrame *)frameResponse->raw;
-
-        //Convert to a QImage object
-        QSharedPointer<QImage> img(new QImage(frame->width, frame->height,
-                                              QImage::Format_RGB888));
-        RawImgToQImage(frame, *img);
-        cout << "frame->timestamp " << frame->timestamp << endl;
-
-        assert(!img->isNull());
-        return img;
-    }
-    catch(std::runtime_error &err)
-    {
-        cout << "Warning: wait for frame response encountered an error" << endl;
-        cout << err.what() << endl;
-    }
+    outFrameStart = frame->timestamp;
+    outFrameEnd = frame->endTimestamp;
+    //Convert to a QImage object
+    QSharedPointer<QImage> img(new QImage(frame->width, frame->height,
+                                          QImage::Format_RGB888));
+    RawImgToQImage(frame, *img);
+    assert(!img->isNull());
+    return img;
 
     //Return something if things fail
-    QSharedPointer<QImage> img(new QImage(100, 100, QImage::Format_RGB888));
-    return img;
+    //QSharedPointer<QImage> img(new QImage(100, 100, QImage::Format_RGB888));
+    //return img;
 
 }
 
@@ -147,8 +131,8 @@ long long unsigned AvBinMedia::GetFrameStartTime(long long unsigned ti) //in mil
     if(!this->active)
         throw runtime_error("Media interface not active");
 
-    long long unsigned outFrameTi = 0;
-    QSharedPointer<QImage> out = this->Get(ti, outFrameTi);
+    long long unsigned outFrameTi = 0, outFrameEndTi = 0;
+    QSharedPointer<QImage> out = this->Get(ti, outFrameTi, outFrameEndTi);
     cout << "Frame start" << outFrameTi << endl;
     return outFrameTi;
 }

@@ -111,30 +111,7 @@ void MediaBuffer::SetSource(QSharedPointer<AbstractMedia> src)
 
 QSharedPointer<QImage> MediaBuffer::Get(long long unsigned ti) //in milliseconds
 {
-    //Check if frame is in buffer
-    if(this->buffer.contains(ti))
-        return this->buffer[ti];
-
-    //Get frame from underlying store
-    unsigned long long tiActual = 0;
-    QSharedPointer<QImage> img = this->seq->Get(ti, tiActual);
-    if(!img->isNull())
-        this->buffer[ti] = img;
-
-    //Prevent buffer bloating
-    unsigned int totalPix = 0;
-    QMapIterator<unsigned long long, QSharedPointer<QImage> > i(this->buffer);
-    while(i.hasNext())
-    {
-        i.next();
-        QSharedPointer<QImage> img = i.value();
-        assert(!img->isNull());
-        unsigned int numPix = img->width() * img->height();
-        totalPix += numPix;
-    }
-    cout << "Buffer size: " << totalPix<<endl;
-
-    return img;
+    assert(0); //Need to reimplement
 }
 
 long long unsigned MediaBuffer::GetNumFrames()

@@ -557,6 +557,11 @@ void MainWindow::SaveAsWorkspace()
 void MainWindow::SelectedSourceChanged(const QModelIndex ind)
 {
     unsigned int selectedRow = ind.row();
+    this->SelectedSourceChanged(selectedRow);
+}
+
+void MainWindow::SelectedSourceChanged(unsigned int selectedRow)
+{
     if(selectedRow < 0 && selectedRow >= this->workspace.GetNumSources())
         return;
 
@@ -620,16 +625,35 @@ void MainWindow::TrainModelPressed()
     QModelIndexList selectList = selection->selectedRows(0);
     for(unsigned int i=0;i<selectList.size();i++)
     {
+
         QModelIndex &ind = selectList[i];
+
+        //Load appropriate video
+        this->SelectedSourceChanged(ind.row());
+
+        //For each annotated frame
         SimpleSceneController *annot = this->workspace.GetTrack(ind.row());
         assert(annot!=0);
         for(unsigned int fr=0;fr<annot->NumMarkedFrames();fr++)
         {
+
+
+            //Get image data and send to process
+            this->ui->widget->Pause();
+
+            cout << annot->GetIndexTimestamp(fr) << endl;
+            unsigned long long startTimestamp = 0, endTimestamp = 0;
+            QSharedPointer<QImage> img = this->mediaInterface->Get(
+                        annot->GetIndexTimestamp(fr), startTimestamp, endTimestamp);
+
+            QString imgPreamble = QString("IMAGE_DATA=%1\n").arg(img->width() * img->height());
+            alg->SendCommand(imgPreamble);
+
+            //Get annotation data and sent it to the process
             QString annotXml;
             QTextStream test(&annotXml);
-
             annot->GetIndexAnnotationXml(fr, &test);
-            annotXml.append("\n");
+            assert(annotXml.mid(annotXml.length()-1).toLocal8Bit().constData()[0]=='\n');
 
             QString preamble = QString("XML_DATA=%1\n").arg(alg->EncodedLength(annotXml));
             alg->SendCommand(preamble);
