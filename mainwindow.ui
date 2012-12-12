@@ -84,7 +84,7 @@
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>../../../../../home/tim/dev/QtMedia/icons/media-playback-pause.png</normaloff>../../../../../home/tim/dev/QtMedia/icons/media-playback-pause.png</iconset>
+              <normaloff>icons/media-playback-pause.png</normaloff>icons/media-playback-pause.png</iconset>
             </property>
            </widget>
           </item>
@@ -95,7 +95,7 @@
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>../../../../../home/tim/dev/QtMedia/icons/media-playback-start.png</normaloff>../../../../../home/tim/dev/QtMedia/icons/media-playback-start.png</iconset>
+              <normaloff>icons/media-playback-start.png</normaloff>icons/media-playback-start.png</iconset>
             </property>
            </widget>
           </item>
@@ -106,7 +106,7 @@
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>../../../../../home/tim/dev/QtMedia/icons/archive-remove.png</normaloff>../../../../../home/tim/dev/QtMedia/icons/archive-remove.png</iconset>
+              <normaloff>icons/archive-remove.png</normaloff>icons/archive-remove.png</iconset>
             </property>
            </widget>
           </item>
