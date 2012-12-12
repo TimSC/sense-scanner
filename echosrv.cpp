@@ -117,7 +117,17 @@ int main(int argc, char *argv[])
 
         if(mystring.substr(0, 9) == "XML_DATA=")
         {
-            log << "#" << atoi(mystring.substr(9).c_str()) << endl;
+            int len = atoi(mystring.substr(9).c_str());
+            log << "#" << len << endl;
+            std::string buff;
+            while(buff.length() < len)
+            {
+                std::string tmp;
+                cin >> tmp;
+                buff.append(tmp);
+            }
+            cout << "final buffer len" << buff.length() << endl;
+            cout << buff;
         }
 
 		//if(mystring == "GET_PROGRESS")
