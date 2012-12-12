@@ -118,16 +118,17 @@ int main(int argc, char *argv[])
         if(mystring.substr(0, 9) == "XML_DATA=")
         {
             int len = atoi(mystring.substr(9).c_str());
-            log << "#" << len << endl;
+            log << "expect " << len << endl;
             std::string buff;
             while(buff.length() < len)
             {
                 std::string tmp;
                 cin >> tmp;
                 buff.append(tmp);
+                buff.append("\n");
             }
-            cout << "final buffer len" << buff.length() << endl;
-            cout << buff;
+            log << "final buffer len " << buff.length() << endl;
+            log << buff;
         }
 
 		//if(mystring == "GET_PROGRESS")
