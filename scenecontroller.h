@@ -72,6 +72,11 @@ public:
         unsigned long long endTime,
         std::vector<std::vector<float> > annot);
 
+    //Read individual frames
+    unsigned int NumMarkedFrames();
+    void GetIndexAnnotationXml(unsigned int index, QTextStream *out);
+    unsigned long long GetIndexTimestamp(unsigned int index);
+
 public slots:
     void MarkFramePressed(bool val);
     void MovePressed();

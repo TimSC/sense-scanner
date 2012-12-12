@@ -605,21 +605,37 @@ void MainWindow::TrainModelPressed()
     cout << "TrainModelPressed" << endl;
     QItemSelectionModel *selection = this->ui->dataSources->selectionModel();
 
-    QModelIndexList selectList = selection->selectedRows(0);
-    for(unsigned int i=0;i<selectList.size();i++)
-    {
-        QModelIndex &ind = selectList[i];
-    }
+
 
     //Create worker process
     std::tr1::shared_ptr<class AlgorithmProcess> alg(new class AlgorithmProcess(this->eventLoop, this));
     alg->Init();
 
     //Configure worker process
-    QString test = "<test>foobar<spam>\neggs</spam></test>\n";
-    QString preamble = QString("XML_DATA=%1\n").arg(alg->EncodedLength(test));
-    alg->SendCommand(preamble);
-    alg->SendCommand(test);
+    //QString test = "<test>foobar<spam>\neggs</spam></test>\n";
+    //QString preamble = QString("XML_DATA=%1\n").arg(alg->EncodedLength(test));
+    //alg->SendCommand(preamble);
+    //alg->SendCommand(test);
+
+    QModelIndexList selectList = selection->selectedRows(0);
+    for(unsigned int i=0;i<selectList.size();i++)
+    {
+        QModelIndex &ind = selectList[i];
+        SimpleSceneController *annot = this->workspace.GetTrack(ind.row());
+        assert(annot!=0);
+        for(unsigned int fr=0;fr<annot->NumMarkedFrames();fr++)
+        {
+            QString annotXml;
+            QTextStream test(&annotXml);
+
+            annot->GetIndexAnnotationXml(fr, &test);
+            annotXml.append("\n");
+
+            QString preamble = QString("XML_DATA=%1\n").arg(alg->EncodedLength(annotXml));
+            alg->SendCommand(preamble);
+            alg->SendCommand(annotXml);
+        }
+    }
 
     //Start worker process
     alg->Start();

@@ -118,12 +118,13 @@ int main(int argc, char *argv[])
         if(mystring.substr(0, 9) == "XML_DATA=")
         {
             int len = atoi(mystring.substr(9).c_str());
-            log << "expect " << len << endl;
+            //log << "expect " << len << endl;
             std::string buff;
             while(buff.length() < len)
             {
-                std::string tmp;
-                cin >> tmp;
+                char tmp[1024*100];
+                //log << buff.length() << endl;
+                cin.getline(tmp, 1024*100);
                 buff.append(tmp);
                 buff.append("\n");
             }
