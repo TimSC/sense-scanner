@@ -577,44 +577,44 @@ QWidget *SimpleSceneController::ControlsFactory(QWidget *parent)
     QHBoxLayout *layout = new QHBoxLayout();
 
     assert(this->markFrameButton == NULL);
-    this->markFrameButton = new QPushButton("Mark Frame");
+    this->markFrameButton = new QPushButton("Mark Frame", this->annotationControls);
     QObject::connect(this->markFrameButton, SIGNAL(toggled(bool)), this, SLOT(MarkFramePressed(bool)));
     this->markFrameButton->setCheckable(true);
     //this->markFrameButton->setChecked(true);
     layout->addWidget(this->markFrameButton);
 
-    QPushButton *button = new QPushButton("Move");
+    QPushButton *button = new QPushButton("Move", this->annotationControls);
     QObject::connect(button, SIGNAL(clicked()), this, SLOT(MovePressed()));
     button->setAutoExclusive(true);
     button->setCheckable(true);
     button->setChecked(true);
     layout->addWidget(button);
 
-    button = new QPushButton("Move All");
+    button = new QPushButton("Move All", this->annotationControls);
     QObject::connect(button, SIGNAL(clicked()), this, SLOT(MoveAllPressed()));
     button->setAutoExclusive(true);
     button->setCheckable(true);
     layout->addWidget(button);
 
-    button = new QPushButton("Add");
+    button = new QPushButton("Add", this->annotationControls);
     QObject::connect(button, SIGNAL(clicked()), this, SLOT(AddPointPressed()));
     button->setAutoExclusive(true);
     button->setCheckable(true);
     layout->addWidget(button);
 
-    button = new QPushButton("Remove");
+    button = new QPushButton("Remove", this->annotationControls);
     QObject::connect(button, SIGNAL(clicked()), this, SLOT(RemovePointPressed()));
     button->setAutoExclusive(true);
     button->setCheckable(true);
     layout->addWidget(button);
 
-    button = new QPushButton("Add Link");
+    button = new QPushButton("Add Link", this->annotationControls);
     QObject::connect(button, SIGNAL(clicked()), this, SLOT(AddLinkPressed()));
     button->setAutoExclusive(true);
     button->setCheckable(true);
     layout->addWidget(button);
 
-    button = new QPushButton("Remove Link");
+    button = new QPushButton("Remove Link", this->annotationControls);
     QObject::connect(button, SIGNAL(clicked()), this, SLOT(RemoveLinkPressed()));
     button->setAutoExclusive(true);
     button->setCheckable(true);
