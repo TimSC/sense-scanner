@@ -190,6 +190,7 @@ void AlgorithmProcess::Update(class EventLoop &el)
 
         if(line=="FINISHED")
         {
+            this->SendCommand("BYE\n");
             this->waitForFinished(); //Just wait for final finishing of process
             this->initDone = 0;
 

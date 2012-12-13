@@ -30,19 +30,22 @@ def WorkerProcess(childPipeConn):
 		if progress >= 1.:
 			progress = 1
 			running = 0
+			print "PROGRESS="+str(progress)
 
 		#print "running", running
 		sys.stdout.flush()
 	
+	childPipeConn.send("FINISHED")
 	print "FINISHED"
 	sys.stdout.flush()
+
 
 if __name__=="__main__":
 	running = 1
 	parentPipeConn, childPipeConn = multiprocessing.Pipe()
 
 	fi = open("log.txt","wt")
-	fi.write("READY")
+	fi.write("READY\n")
 	fi.flush()
 	print "READY"
 	sys.stdout.flush()
@@ -72,6 +75,11 @@ if __name__=="__main__":
 			args = sys.stdin.readline().rstrip()
 			si = int(li[11:])
 			dataBlock = sys.stdin.read(si)
+
+		if parentPipeConn.poll():
+			event = parentPipeConn.recv()
+			if event == "FINISHED":
+				running = 0
 
 	p.join()
 
