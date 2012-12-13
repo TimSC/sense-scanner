@@ -84,9 +84,11 @@ int main(int argc, char *argv[])
 
 	while(running)
 	{
+        char buff[1024*100];
+
 		//Read standard input
-		std::string mystring;
-		cin >> mystring;
+        cin.getline(buff, 1024*100);
+        std::string mystring(buff);
         if(mystring.length()>0)
         {
             log << mystring << endl;
@@ -115,21 +117,21 @@ int main(int argc, char *argv[])
 			gRunningMutex.unlock();
 		}
 
-        if(mystring.substr(0, 9) == "XML_DATA=")
+        if(mystring.substr(0,11) == "DATA_BLOCK=")
         {
-            int len = atoi(mystring.substr(9).c_str());
-            //log << "expect " << len << endl;
-            std::string buff;
-            while(buff.length() < len)
-            {
-                char tmp[1024*100];
-                //log << buff.length() << endl;
-                cin.getline(tmp, 1024*100);
-                buff.append(tmp);
-                buff.append("\n");
-            }
-            log << "final buffer len " << buff.length() << endl;
-            log << buff;
+            //Read text arguments
+            char tmp[1024*100];
+            cin.getline(tmp, 1024*100);
+            log << tmp << endl;
+
+            int len = atoi(mystring.substr(11).c_str());
+            log << "expect " << len << endl;
+            char *dataBlock = new char[len];
+
+            cin.read(dataBlock, len);
+            delete [] dataBlock;
+            log << "final buffer len " << len << endl;
+            //log << buff;
         }
 
 		//if(mystring == "GET_PROGRESS")

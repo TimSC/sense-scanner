@@ -643,11 +643,23 @@ void MainWindow::TrainModelPressed()
 
             cout << annot->GetIndexTimestamp(fr) << endl;
             unsigned long long startTimestamp = 0, endTimestamp = 0;
+            unsigned long long annotTimestamp = annot->GetIndexTimestamp(fr);
             QSharedPointer<QImage> img = this->mediaInterface->Get(
-                        annot->GetIndexTimestamp(fr), startTimestamp, endTimestamp);
+                        annotTimestamp, startTimestamp, endTimestamp);
+            int len = img->byteCount();
+            //int len = 10;
 
-            QString imgPreamble = QString("IMAGE_DATA=%1\n").arg(img->width() * img->height());
-            alg->SendCommand(imgPreamble);
+            assert(img->format() == QImage::Format_RGB888);
+            QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(len);
+            QString imgPreamble2 = QString("RGB_IMAGE_DATA TIMESTAMP=%1 HEIGHT=%2 WIDTH=%3\n").
+                    arg(annotTimestamp).
+                    arg(img->height()).
+                    arg(img->width());
+            alg->SendCommand(imgPreamble1);
+            alg->SendCommand(imgPreamble2);
+            QByteArray imgRaw((const char *)img->bits(), len);
+            alg->SendRawData(imgRaw);
+            //for (int xx=0;xx<len;xx++) alg->SendCommand("x");
 
             //Get annotation data and sent it to the process
             QString annotXml;
@@ -655,8 +667,11 @@ void MainWindow::TrainModelPressed()
             annot->GetIndexAnnotationXml(fr, &test);
             assert(annotXml.mid(annotXml.length()-1).toLocal8Bit().constData()[0]=='\n');
 
-            QString preamble = QString("XML_DATA=%1\n").arg(alg->EncodedLength(annotXml));
-            alg->SendCommand(preamble);
+            int xmlLen = alg->EncodedLength(annotXml);
+            QString preamble1 = QString("DATA_BLOCK=%1\n").arg(xmlLen);
+            QString preamble2 = QString("XML_DATA\n");
+            alg->SendCommand(preamble1);
+            alg->SendCommand(preamble2);
             alg->SendCommand(annotXml);
         }
     }
