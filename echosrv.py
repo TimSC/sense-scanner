@@ -23,7 +23,7 @@ def WorkerProcess(childPipeConn):
 		if not paused:
 			print "PROGRESS="+str(progress)
 
-                time.sleep(0.1)
+		time.sleep(0.1)
 		if not paused:
 			progress += 0.01
 
@@ -32,9 +32,10 @@ def WorkerProcess(childPipeConn):
 			running = 0
 
 		#print "running", running
+		sys.stdout.flush()
 	
 	print "FINISHED"
-	
+	sys.stdout.flush()
 
 if __name__=="__main__":
 	running = 1
@@ -49,7 +50,7 @@ if __name__=="__main__":
 		li = sys.stdin.readline().rstrip()
 
 		#print li, len(li)
-                if len(li) > 0: fi.write(li+"\n")
+		if len(li) > 0: fi.write(li+"\n")
 
 		if li == "QUIT":
 			running = 0

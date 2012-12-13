@@ -208,6 +208,8 @@ void AlgorithmProcess::Update(class EventLoop &el)
 
 void AlgorithmProcess::SendCommand(QString cmd)
 {
+    int running = (this->state() == QProcess::Running);
+    if(!running) return;
     assert(this->initDone);
     QTextStream enc(this);
     enc.setCodec("UTF-8");
@@ -216,8 +218,10 @@ void AlgorithmProcess::SendCommand(QString cmd)
 
 void AlgorithmProcess::SendRawData(QByteArray cmd)
 {
-   assert(this->initDone);
-   this->write(cmd);
+    int running = (this->state() == QProcess::Running);
+    if(!running) return;
+    assert(this->initDone);
+    this->write(cmd);
 }
 
 unsigned int AlgorithmProcess::EncodedLength(QString cmd)
