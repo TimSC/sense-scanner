@@ -10,7 +10,6 @@ def WorkerProcess(childPipeConn):
 
 		if childPipeConn.poll():
 			event = childPipeConn.recv()
-			print "RX",event
 
 			if event=="RUN":
 				print "NOW_RUNNING"
@@ -24,7 +23,7 @@ def WorkerProcess(childPipeConn):
 		if not paused:
 			print "PROGRESS="+str(progress)
 
-		time.sleep(0.01)
+                time.sleep(0.1)
 		if not paused:
 			progress += 0.01
 
@@ -38,17 +37,19 @@ def WorkerProcess(childPipeConn):
 	
 
 if __name__=="__main__":
-	print "Hello world"
 	running = 1
 	parentPipeConn, childPipeConn = multiprocessing.Pipe()
 
 	p = multiprocessing.Process(target=WorkerProcess, args=(childPipeConn, ))
 	p.start()
+
+	fi = open("log.txt","wt")
 	
 	while running:
 		li = sys.stdin.readline().rstrip()
 
 		#print li, len(li)
+                if len(li) > 0: fi.write(li+"\n")
 
 		if li == "QUIT":
 			running = 0

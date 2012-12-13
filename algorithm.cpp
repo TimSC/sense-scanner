@@ -66,13 +66,14 @@ void AlgorithmProcess::Init()
     if(this->initDone) return;
     assert(this->state() != QProcess::Running);
 
-    QString program = "../QtMedia/echosrv";
+    QString program = "/usr/bin/python";
     QFile programFile(program);
     if(!programFile.exists())
     {
         throw std::runtime_error("Process executable not found");
     }
     QStringList arguments;
+    arguments.append("../QtMedia/echosrv.py");
     this->start(program, arguments);
     this->stopping = 0;
     this->paused = 1;
