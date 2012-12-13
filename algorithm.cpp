@@ -82,7 +82,6 @@ void AlgorithmProcess::Init()
 
 void AlgorithmProcess::Pause()
 {
-    assert(this->initDone);
     this->pausing = 1;
     this->SendCommand("PAUSE\n");
 }

@@ -658,7 +658,7 @@ void MainWindow::TrainModelPressed()
             alg->SendCommand(imgPreamble1);
             alg->SendCommand(imgPreamble2);
             QByteArray imgRaw((const char *)img->bits(), len);
-            alg->SendRawData(imgRaw);
+                         alg->SendRawData(imgRaw);
             //for (int xx=0;xx<len;xx++) alg->SendCommand("x");
 
             //Get annotation data and sent it to the process
