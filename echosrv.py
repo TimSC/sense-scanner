@@ -41,16 +41,22 @@ if __name__=="__main__":
 	running = 1
 	parentPipeConn, childPipeConn = multiprocessing.Pipe()
 
+	fi = open("log.txt","wt")
+	fi.write("READY")
+	fi.flush()
+	print "READY"
+	sys.stdout.flush()
+
 	p = multiprocessing.Process(target=WorkerProcess, args=(childPipeConn, ))
 	p.start()
-
-	fi = open("log.txt","wt")
 	
 	while running:
 		li = sys.stdin.readline().rstrip()
 
 		#print li, len(li)
-		if len(li) > 0: fi.write(li+"\n")
+		if len(li) > 0: 
+			fi.write(li+"\n")
+			fi.flush()
 
 		if li == "QUIT":
 			running = 0

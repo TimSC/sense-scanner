@@ -610,8 +610,6 @@ void MainWindow::TrainModelPressed()
     cout << "TrainModelPressed" << endl;
     QItemSelectionModel *selection = this->ui->dataSources->selectionModel();
 
-
-
     //Create worker process
     std::tr1::shared_ptr<class AlgorithmProcess> alg(new class AlgorithmProcess(this->eventLoop, this));
     alg->Init();

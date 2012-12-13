@@ -208,7 +208,14 @@ void AlgorithmProcess::Update(class EventLoop &el)
 
 void AlgorithmProcess::SendCommand(QString cmd)
 {
-    int running = (this->state() == QProcess::Running);
+    QProcess::ProcessState state = this->state();
+    if(state == QProcess::Starting)
+    {
+        //Wait for program to be ready
+        this->waitForStarted();
+        state = this->state();
+    }
+    int running = (state == QProcess::Running);
     if(!running) return;
     assert(this->initDone);
     QTextStream enc(this);
