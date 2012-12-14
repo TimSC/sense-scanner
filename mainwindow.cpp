@@ -784,4 +784,11 @@ void MainWindow::RemoveProcessPressed()
     this->RegenerateProcessingList();
 }
 
-
+void MainWindow::AboutPressed()
+{
+    if(this->errMsg == NULL)
+        this->errMsg = new QMessageBox(this);
+    this->errMsg->setWindowTitle("About");
+    this->errMsg->setText("About text");
+    this->errMsg->exec();
+}

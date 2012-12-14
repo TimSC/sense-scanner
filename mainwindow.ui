@@ -147,8 +147,18 @@
     </property>
     <addaction name="actionFit_to_Window"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionWeb_Help_Pages"/>
+    <addaction name="actionSupport_Forum"/>
+    <addaction name="separator"/>
+    <addaction name="actionAbout"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuVideo"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -187,6 +197,21 @@
   <action name="actionFit_to_Window">
    <property name="text">
     <string>Fit to Window</string>
+   </property>
+  </action>
+  <action name="actionWeb_Help_Pages">
+   <property name="text">
+    <string>Web Help Pages</string>
+   </property>
+  </action>
+  <action name="actionSupport_Forum">
+   <property name="text">
+    <string>Support Forum</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
    </property>
   </action>
  </widget>
@@ -436,6 +461,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionAbout</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>AboutPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>154</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>ImportVideo()</slot>
@@ -450,5 +491,6 @@
   <slot>PauseProcessPressed()</slot>
   <slot>RunProcessPressed()</slot>
   <slot>RemoveProcessPressed()</slot>
+  <slot>AboutPressed()</slot>
  </slots>
 </ui>

@@ -112,6 +112,8 @@ public slots:
     void SelectedSourceChanged(unsigned int selectedRow);
     QString CheckIfDataShouldBeDiscarded(QString discardMsg);
 
+    void AboutPressed();
+
 };
 
 #endif // MAINWINDOW_H
