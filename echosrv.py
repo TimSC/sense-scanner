@@ -28,6 +28,7 @@ def WorkerProcess(childPipeConn):
 			if event[0]=="DATA_BLOCK":
 				args = event[1].split(" ")
 				if args[0] == "RGB_IMAGE_DATA":
+					#Decode image from raw data block
 					args.pop(0)
 					pairs = [tmp.split("=") for tmp in args]
 					argDict = dict(pairs)
@@ -47,6 +48,7 @@ def WorkerProcess(childPipeConn):
 					imgCount += 1
 
 				if args[0]=="XML_DATA":
+					#Parse XML from raw data block
 					xmlDataBlocks.append(event[2])
 					xmlfi = open("xml"+str(xmlBlocksCount)+".xml","wt")
 					xmlfi.write(event[2])
