@@ -1,6 +1,7 @@
 
 import multiprocessing, sys, time
 from PIL import Image
+import xml.etree.ElementTree as ET
 
 def WorkerProcess(childPipeConn):
 	progress = 0.
@@ -8,6 +9,7 @@ def WorkerProcess(childPipeConn):
 	paused = 1
 	imgCount = 0
 	xmlBlocksCount = 0
+	xmlTrees = []
 	imgs = {}
 	xmlDataBlocks = []
 
@@ -50,6 +52,15 @@ def WorkerProcess(childPipeConn):
 					xmlfi.write(event[2])
 					xmlBlocksCount += 1
 
+					tree = ET.fromstring(event[2])
+					xmlTrees.append(tree)
+					timestamp = float(tree.attrib['time'])
+					for child in tree:
+						pid = int(child.attrib['id'])
+						x = float(child.attrib['x'])
+						y = float(child.attrib['y'])
+						print pid, x, y
+
 		if not paused:
 			print "PROGRESS="+str(progress)
 
@@ -76,7 +87,7 @@ if __name__=="__main__":
 
 	fi = open("log.txt","wt")
 	inputlog = None
-	inputlog = open("inputlog.dat","wb")
+	#inputlog = open("inputlog.dat","wb")
 	
 	fi.write("READY\n")
 	fi.flush()
