@@ -530,6 +530,7 @@ unsigned long long SimpleSceneController::GetSeekFowardTime()
         unsigned long long diff = AbsDiff(ti, this->frameEndTime);
         if(!bestSet || diff < bestDiff)
         {
+            cout << bestFrame << "," << bestDiff << endl;
             bestDiff = diff;
             bestFrame = ti;
             bestSet = 1;
@@ -555,6 +556,7 @@ unsigned long long SimpleSceneController::GetSeekBackTime()
         unsigned long long diff = AbsDiff(ti, this->frameStartTime);
         if(!bestSet || diff < bestDiff)
         {
+            cout << bestFrame << "," << bestDiff << endl;
             bestDiff = diff;
             bestFrame = ti;
             bestSet = 1;

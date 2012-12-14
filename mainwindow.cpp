@@ -166,6 +166,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     this->threadCount = 0;
     this->annotationMenu = NULL;
+    this->errMsg = NULL;
 
     //Create inter thread message system
     this->eventLoop = new class EventLoop();
@@ -226,6 +227,9 @@ MainWindow::~MainWindow()
 
     if(this->mediaThread) delete this->mediaThread;
     this->mediaThread = NULL;
+
+    if(this->errMsg) delete this->errMsg;
+    this->errMsg = NULL;
 
     delete this->mediaInterface;
     this->mediaInterface = NULL;
@@ -610,6 +614,30 @@ void MainWindow::TrainModelPressed()
     cout << "TrainModelPressed" << endl;
     QItemSelectionModel *selection = this->ui->dataSources->selectionModel();
 
+    //Count frames, because at least one is needed to train
+    int countMarkedFrames = 0;
+    QModelIndexList selectList = selection->selectedRows(0);
+    for(unsigned int i=0;i<selectList.size();i++)
+    {
+        QModelIndex &ind = selectList[i];
+        //For each annotated frame
+        SimpleSceneController *annot = this->workspace.GetTrack(ind.row());
+        assert(annot!=0);
+        for(unsigned int fr=0;fr<annot->NumMarkedFrames();fr++)
+        {
+            countMarkedFrames ++;
+        }
+    }
+    if(countMarkedFrames==0)
+    {
+        if(this->errMsg == NULL)
+            this->errMsg = new QMessageBox(this);
+        this->errMsg->setWindowTitle("Error: No training data");
+        this->errMsg->setText("Annotate at least one frame before trying to train a model.");
+        this->errMsg->exec();
+        return;
+    }
+
     //Create worker process
     std::tr1::shared_ptr<class AlgorithmProcess> alg(new class AlgorithmProcess(this->eventLoop, this));
     alg->Init();
@@ -620,7 +648,7 @@ void MainWindow::TrainModelPressed()
     //alg->SendCommand(preamble);
     //alg->SendCommand(test);
 
-    QModelIndexList selectList = selection->selectedRows(0);
+    selectList = selection->selectedRows(0);
     for(unsigned int i=0;i<selectList.size();i++)
     {
 
@@ -634,7 +662,7 @@ void MainWindow::TrainModelPressed()
         assert(annot!=0);
         for(unsigned int fr=0;fr<annot->NumMarkedFrames();fr++)
         {
-
+            countMarkedFrames ++;
 
             //Get image data and send to process
             this->ui->widget->Pause();
@@ -675,6 +703,8 @@ void MainWindow::TrainModelPressed()
         }
     }
 
+
+
     //Start worker process
     alg->Start();
 
@@ -690,6 +720,11 @@ void MainWindow::ApplyModelPressed()
     cout << "ApplyModelPressed" << endl;
     QItemSelectionModel *selection = this->ui->dataSources->selectionModel();
 
+    if(this->errMsg == NULL)
+        this->errMsg = new QMessageBox(this);
+    this->errMsg->setWindowTitle("Error: Not implemented");
+    this->errMsg->setText("Not implemented.");
+    this->errMsg->exec();
 
 }
 

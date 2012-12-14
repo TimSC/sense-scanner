@@ -88,6 +88,7 @@ private:
     QStandardItemModel sourcesModel;
     QStandardItemModel processingModel;
     QMenu *annotationMenu;
+    QMessageBox *errMsg;
 
 public slots:
     void ImportVideo();
