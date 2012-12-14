@@ -168,6 +168,10 @@ MainWindow::MainWindow(QWidget *parent) :
     this->annotationMenu = NULL;
     this->errMsg = NULL;
 
+    //Set the window icon
+    QIcon windowIcon("icons/Charm.png");
+    this->setWindowIcon(windowIcon);
+
     //Create inter thread message system
     this->eventLoop = new class EventLoop();
 
