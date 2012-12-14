@@ -293,15 +293,21 @@ void VideoWidget::SetSceneControl(SimpleSceneController *sceneIn)
             assert(childw!=NULL);
             childw->close();
             wlayout->removeItem(citem);
+            delete childw;
         }
 
         custom->close();
         this->ui->annotationTools->removeItem(item);
+        delete custom;
     }
     if(this->sceneControl!=NULL)
         this->sceneControl->DestroyControls();
 
     //Remove previous menu controls
+
+    //Clear previous scene
+    QGraphicsScene *oldScene = this->ui->graphicsView->scene();
+    if(oldScene!=NULL) oldScene->clear();
 
     //Activate new scene button controls
     this->sceneControl = sceneIn;
