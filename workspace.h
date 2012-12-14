@@ -30,7 +30,7 @@ public:
     //** Processing
     unsigned int AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg);
     void PauseProcessing(unsigned int num);
-    void RemoveProcessing(unsigned int num);
+    int RemoveProcessing(unsigned int num);
     int StartProcessing(unsigned int num);
     void ProcessingUpdate(unsigned int threadIdIn, float progress);
     float GetProgress(unsigned int num);

@@ -767,7 +767,15 @@ void MainWindow::RemoveProcessPressed()
     {
         QModelIndex &ind = selectList[i];
 
-        this->workspace.RemoveProcessing(ind.row());
+        int ret = this->workspace.RemoveProcessing(ind.row());
+        if(ret == 0)
+        {
+            if(this->errMsg == NULL)
+                this->errMsg = new QMessageBox(this);
+            this->errMsg->setWindowTitle("Error: Process is still running");
+            this->errMsg->setText("Stop the process before trying to remove it.");
+            this->errMsg->exec();
+        }
     }
     this->RegenerateProcessingList();
 }

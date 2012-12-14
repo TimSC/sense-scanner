@@ -114,7 +114,7 @@ void Workspace::PauseProcessing(unsigned int num)
     this->processingList[num]->Pause();
 }
 
-void Workspace::RemoveProcessing(unsigned int num)
+int Workspace::RemoveProcessing(unsigned int num)
 {
     assert(num < this->processingList.size());
 
@@ -124,7 +124,7 @@ void Workspace::RemoveProcessing(unsigned int num)
             state!=AlgorithmProcess::PAUSED)
     {
         cout << "Process cannot be removed while it is running" << endl;
-        return;
+        return 0;
     }
 
     //If paused, stop the process
@@ -135,6 +135,7 @@ void Workspace::RemoveProcessing(unsigned int num)
     this->processingList.erase(this->processingList.begin()+num);
     this->threadProgress.erase(this->threadProgress.begin()+num);
     this->threadId.erase(this->threadId.begin()+num);
+    return 1;
 }
 
 int Workspace::StartProcessing(unsigned int num)
