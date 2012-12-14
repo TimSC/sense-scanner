@@ -7,9 +7,11 @@ def WorkerProcess(childPipeConn):
 	running = 1
 	paused = 1
 	imgCount = 0
+	xmlBlocksCount = 0
+	imgs = {}
+	xmlDataBlocks = []
 
 	while running:
-
 		if childPipeConn.poll():
 			event = childPipeConn.recv()
 
@@ -29,15 +31,24 @@ def WorkerProcess(childPipeConn):
 					argDict = dict(pairs)
 					if 'WIDTH' not in argDict: continue
 					if 'HEIGHT' not in argDict: continue
+					if 'TIMESTAMP' not in argDict: continue
 					width = int(argDict['WIDTH'])
 					height = int(argDict['HEIGHT'])
+					timestamp = int(argDict['TIMESTAMP'])
 					if width * height * 3 != len(event[2]): 
-						print "#Image buffer of incorrect size"
+						print "#Image buffer of incorrect size",width,height,len(event[2])
 						continue
 
-					im = Image.frombuffer("RGB", (width, height, event[2]))
+					im = Image.frombuffer("RGB", (width, height), event[2], 'raw', "RGB", 0, 1)
+					imgs[timestamp] = im
 					im.save("test"+str(imgCount)+".png")
 					imgCount += 1
+
+				if args[0]=="XML_DATA":
+					xmlDataBlocks.append(event[2])
+					xmlfi = open("xml"+str(xmlBlocksCount)+".xml","wt")
+					xmlfi.write(event[2])
+					xmlBlocksCount += 1
 
 		if not paused:
 			print "PROGRESS="+str(progress)
@@ -64,7 +75,9 @@ if __name__=="__main__":
 	parentPipeConn, childPipeConn = multiprocessing.Pipe()
 
 	fi = open("log.txt","wt")
+	inputlog = None
 	inputlog = open("inputlog.dat","wb")
+	
 	fi.write("READY\n")
 	fi.flush()
 	print "READY"
@@ -75,7 +88,7 @@ if __name__=="__main__":
 	
 	while running:
 		li = sys.stdin.readline()
-		inputlog.write(li)
+		if inputlog is not None: inputlog.write(li)
 		li = li.rstrip()
 
 		#print li, len(li)
@@ -95,19 +108,25 @@ if __name__=="__main__":
 
 		if li[0:11] == "DATA_BLOCK=":
 			args = sys.stdin.readline()
-			inputlog.write(args)
+			if inputlog is not None: inputlog.write(args)
 			args = args.rstrip()
 			si = int(li[11:])
 			fi.write(args+"\n")
+			fi.write("Attmpt to read " +str(si)+"\n")
 			fi.flush()
 			dataBlock = sys.stdin.read(si)
-			inputlog.write(dataBlock)
+			fi.write("Read block " +str(len(dataBlock))+"\n")
+			if inputlog is not None:
+				inputlog.write(dataBlock)
+				inputlog.flush()
 			parentPipeConn.send(["DATA_BLOCK", args, dataBlock])
 
 		if parentPipeConn.poll():
 			event = parentPipeConn.recv()
 			if event == "FINISHED":
 				running = 0
+
+		time.sleep(0.01)
 
 	p.join()
 

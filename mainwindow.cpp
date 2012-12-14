@@ -645,6 +645,7 @@ void MainWindow::TrainModelPressed()
             QSharedPointer<QImage> img = this->mediaInterface->Get(
                         annotTimestamp, startTimestamp, endTimestamp);
             int len = img->byteCount();
+            //cout << "Image bytes "<< len << endl;
             //int len = 10;
 
             assert(img->format() == QImage::Format_RGB888);
