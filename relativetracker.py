@@ -1,6 +1,7 @@
 
 from PIL import Image
 import time, math
+import numpy as np
 
 def BilinearSample(imgPix, x, y):
 	xfrac, xi = math.modf(x)
@@ -36,13 +37,49 @@ class PredictAxis:
 class RelativeTracker:
 	def __init__(self):
 		self.ims = []
+		self.imls = None
 		self.pointsPosLi = []
 		self.progress = 0.
+		self.maxSupportOffset = 20.
+		self.numSupportPix = 500
+		self.numTrainingOffsets = 5000
+		self.trainOffsetVar = 5.
+		self.supportPixOffsets = None
+		self.supportPixCols = None
 
 		#settings = [{'shapeNoise': 12, 'cloudEnabled': 1, 'supportMaxOffset': 39, 'trainVarianceOffset': 41, 'reg': reg}, {'shapeNoise': 1, 'cloudEnabled': 0, 'supportMaxOffset': 20, 'trainVarianceOffset': 5, 'reg': reg}] #"Classic" 0.2 settings
 
+		#numSupportPix = 500, numTrainingOffsets = 5000, 
+		#	supportMaxOffset = 90, 
+		#	trainVarianceOffset = 23, 
+		#	shapeNoise = 16.,
+		#	rotationVar = 0.1,
 
+	def Init(self):
+		#Generate random support pix offsets
+		self.supportPixOffsets = np.random.uniform(-self.maxSupportOffset, self.maxSupportOffset, (self.numSupportPix, 2))
+		
+		#Create pixel access objects
+		if self.imls is None:
+			self.imls = [im.load() for im in self.ims]
+
+		#For all training frames
+		colStore = []
+		for im, iml, imPos in zip(self.ims, self.imls, self.pointsPosLi):
+			#For all points
+			for ptCount, pt in enumerate(imPos):
+				#Store pixel intensity at annotated position
+				while ptCount >= len(colStore):
+					colStore.append([])
+				if pt is None: continue
+				col = BilinearSample(iml, pt[0], pt[1])
+				colStore[ptCount].append(col)
+		
+		#Compute average colour for each point
+		
+		
 	def AddTrainingData(self, im, pointsPos):
+		self.imls = None
 		self.ims.append(im)
 		self.pointsPosLi.append(pointsPos)
 	
@@ -56,10 +93,9 @@ class RelativeTracker:
 if __name__=="__main__":
 	im = Image.open("test0.png")
 	iml = im.load()
-	print iml[50, 50]
-	print iml[51, 50]
-	print iml[50, 51]
-	print iml[51, 51]
-
-	print BilinearSample(iml, 50.5, 50.5)
+	tracker = RelativeTracker()
+	
+	tracker.AddTrainingData(im, [(120,120),])
+	tracker.AddTrainingData(im, [(140,130),])
+	tracker.Init()
 
