@@ -46,6 +46,8 @@ class RelativeTracker:
 		self.trainOffsetVar = 5.
 		self.supportPixOffsets = None
 		self.supportPixCols = None
+		self.modelX = PredictAxis(1.,0.)
+		self.modelY = PredictAxis(0.,1.)
 
 		#settings = [{'shapeNoise': 12, 'cloudEnabled': 1, 'supportMaxOffset': 39, 'trainVarianceOffset': 41, 'reg': reg}, {'shapeNoise': 1, 'cloudEnabled': 0, 'supportMaxOffset': 20, 'trainVarianceOffset': 5, 'reg': reg}] #"Classic" 0.2 settings
 
@@ -76,8 +78,16 @@ class RelativeTracker:
 				colStore[ptCount].append(col)
 		
 		#Compute average colour for each point
+		colStoreArr = np.array(colStore)
+		self.supportPixCols = colStoreArr[:,0,:]
 		
+	def Train(self):
+		trainOffsets = np.random.randn(self.numTrainingOffsets, 2) * self.trainOffsetVar
 		
+		offset = trainOffsets[0]
+		
+
+
 	def AddTrainingData(self, im, pointsPos):
 		self.imls = None
 		self.ims.append(im)
@@ -95,7 +105,8 @@ if __name__=="__main__":
 	iml = im.load()
 	tracker = RelativeTracker()
 	
-	tracker.AddTrainingData(im, [(120,120),])
-	tracker.AddTrainingData(im, [(140,130),])
+	tracker.AddTrainingData(im, [(120,120),(50,50)])
+	tracker.AddTrainingData(im, [(140,130),(55,60)])
 	tracker.Init()
+	tracker.Train()
 
