@@ -2,6 +2,7 @@
 import multiprocessing, sys, time
 from PIL import Image
 import xml.etree.ElementTree as ET
+import relativetracker
 
 def WorkerProcess(childPipeConn):
 	progress = 0.
@@ -12,12 +13,33 @@ def WorkerProcess(childPipeConn):
 	xmlTrees = []
 	imgs = {}
 	xmlDataBlocks = []
+	tracker = None
 
 	while running:
 		if childPipeConn.poll():
 			event = childPipeConn.recv()
 
 			if event[0]=="RUN":
+				if tracker is None:
+					tracker = relativetracker.RelativeTracker()
+					for tree in xmlTrees:
+						timestamp = float(tree.attrib['time'])
+						xs, ys = [], []
+						for child in tree:
+							pid = int(child.attrib['id'])
+							x = float(child.attrib['x'])
+							y = float(child.attrib['y'])
+							while pid >= len(xs): xs.append(None)
+							while pid >= len(ys): ys.append(None)
+							xs[pid] = x
+							ys[pid] = y
+
+						if int(round(timestamp*1000.)) not in imgs:
+							print "Image for timestamp",int(round(timestamp*1000.)),"not found"
+							continue
+						im = imgs[int(round(timestamp*1000.))]
+						tracker.AddTrainingData(im, zip(xs,ys))
+
 				print "NOW_RUNNING"
 				paused = 0
 			if event[0]=="PAUSE":
@@ -66,9 +88,11 @@ def WorkerProcess(childPipeConn):
 		if not paused:
 			print "PROGRESS="+str(progress)
 
-		time.sleep(0.1)
 		if not paused:
-			progress += 0.01
+			tracker.Update()
+			progress = tracker.GetProgress()
+		else:
+			time.sleep(0.1)
 
 		if progress >= 1.:
 			progress = 1
