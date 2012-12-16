@@ -5,7 +5,9 @@
 #include "localints.h"
 using namespace std;
 #define DEFAULT_AUDIO_BUFF_SIZE 1024*1024
-#define SEEK_BEFORE_MARGIN 1000000 //microsec
+#define SEEK_BEFORE_MARGIN 100000 //Seek this time before desired frame, microsec
+#define DECODE_INITIAL_DURATION 5000000 //Duration to decode when file is loaded
+#define SEEK_TOLERANCE 1000000 //Don't seek but use playback for frames less than this time
 
 //**********************************************************
 
@@ -151,7 +153,7 @@ void AvBinBackend::DoOpenFile(int requestId)
         for(unsigned int chanNum=0;chanNum<this->timestampOfChannel.size();chanNum++)
         {
             if(this->timestampOfChannel[chanNum] == 0) done = false;
-            if(this->timestampOfChannel[chanNum] < 1000000) done = false;
+            if(this->timestampOfChannel[chanNum] < DECODE_INITIAL_DURATION) done = false;
             if(this->firstFrames[chanNum] &&
                     this->firstFrames[chanNum]->endTimestamp == 0) done = false;
         }
@@ -269,7 +271,7 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
     if(currentVidTime > 0 && time >= currentVidTime)
     {
         uint64_t diff = time - currentVidTime;
-        if(diff < 1000000 + SEEK_BEFORE_MARGIN) doSeek = 0;
+        if(diff < SEEK_TOLERANCE + SEEK_BEFORE_MARGIN) doSeek = 0;
     }
 
     if(doSeek)
@@ -281,6 +283,7 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
         else
             seekToTime = 0;
 
+        cout << "Seek to time" << seekToTime << endl;
         AVbinResult res = mod_avbin_seek_file(this->fi, seekToTime);
         assert(res == AVBIN_RESULT_OK);
         for(int chanNum=0;chanNum<this->numStreams;chanNum++)
