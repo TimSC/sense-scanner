@@ -35,6 +35,7 @@ public:
     int RequestFrame(long long unsigned ti);
     void Update(void (*frameCallback)(QImage& fr, unsigned long long startTimestamp,
                                       unsigned long long endTimestamp,
+                                      unsigned long long requestedTimestamp,
                                       void *raw), void *raw);
 
 protected:

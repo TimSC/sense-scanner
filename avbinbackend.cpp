@@ -384,6 +384,7 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
                 this->currentFrame.frame_rate_den = sinfo->video.frame_rate_den;
                 this->currentFrame.timestamp = timestamp - this->info.start_time;
                 this->currentFrame.endTimestamp = 0;
+                this->currentFrame.requestedTimestamp = time;
                 if(out.height>0) this->height = out.height;
                 if(out.width>0) this->width = out.width;
             }

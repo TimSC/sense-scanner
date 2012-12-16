@@ -170,6 +170,7 @@ int AvBinMedia::RequestFrame(long long unsigned ti) //in milliseconds
 
 void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long startTimestamp,
                                               unsigned long long endTimestamp,
+                                              unsigned long long requestTimestamp,
                                               void *raw), void *raw)
 {
     assert(this->active);
@@ -197,7 +198,9 @@ void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long sta
 
                 //Return image to calling object by callback
                 frameCallback(*img, ROUND_TIMESTAMP(frame->timestamp / 1000.),
-                              ROUND_TIMESTAMP(frame->endTimestamp / 1000.), raw);
+                              ROUND_TIMESTAMP(frame->endTimestamp / 1000.),
+                              ROUND_TIMESTAMP(frame->requestedTimestamp / 1000.),
+                              raw);
             }
 
         }

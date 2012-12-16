@@ -56,6 +56,7 @@ SimpleSceneController::SimpleSceneController(QObject *parent)
     this->mouseOver = false;
     this->frameStartTime = 0;
     this->frameEndTime = 0;
+    this->frameRequestTime = 0;
     this->scene = QSharedPointer<MouseGraphicsScene>(new MouseGraphicsScene(parent));
     this->scene->SetSceneControl(this);
     this->activePoint = -1;
@@ -201,11 +202,13 @@ void SimpleSceneController::SetAnnotationBetweenTimestamps(unsigned long long st
 }
 
 void SimpleSceneController::VideoImageChanged(QImage &fr, unsigned long long startTime,
-                                              unsigned long long endTime)
+                                              unsigned long long endTime,
+                                              unsigned long long requestedTime)
 {
     this->img = fr;
     this->frameStartTime = startTime;
     this->frameEndTime = endTime;
+    this->frameRequestTime = requestedTime;
     this->imgWidth = fr.width();
     this->imgHeight = fr.height();
 

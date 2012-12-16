@@ -45,7 +45,8 @@ public slots:
     void SeekForward();
     void TimerUpdate();
     void AsyncFrameReceived(QImage& fr, unsigned long long startTimestamp,
-                            unsigned long long endTimestamp);
+                            unsigned long long endTimestamp,
+                            unsigned long long requestTimestamp);
     void SetSceneControl(SimpleSceneController *sceneIn);
     void FitToWindow();
     void TimeChanged(QTime time);

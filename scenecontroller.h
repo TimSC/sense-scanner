@@ -36,7 +36,8 @@ public:
     bool operator!= (const SimpleSceneController &other);
 
     void VideoImageChanged(QImage &fr, unsigned long long startTime,
-                           unsigned long long endTime);
+                           unsigned long long endTime,
+                           unsigned long long requestedTime);
 
     void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
@@ -108,7 +109,7 @@ protected:
     QSharedPointer<QGraphicsPixmapItem> item;
     std::map<unsigned long long, std::vector<std::vector<float> > > pos; //contains annotation positions
     std::vector<std::vector<int> > links;
-    unsigned long long frameStartTime, frameEndTime;
+    unsigned long long frameStartTime, frameEndTime, frameRequestTime;
     int mouseOver;
     QPushButton *markFrameButton;
     std::vector<std::vector<float> > shape; //contains the default shape

@@ -26,6 +26,7 @@ public:
     unsigned int frame_rate_num, frame_rate_den;
     uint64_t timestamp; //start time
     uint64_t endTimestamp; //end time
+    uint64_t requestedTimestamp;
 
     DecodedFrame();
     DecodedFrame(const DecodedFrame &other);
@@ -56,6 +57,7 @@ public:
     virtual int RequestFrame(long long unsigned ti)=0;
     virtual void Update(void (*frameCallback)(QImage& fr, unsigned long long startTimestamp,
                                               unsigned long long endTimestamp,
+                                              unsigned long long requestedTimestamp,
                                               void *raw), void *raw)=0;
 };
 
