@@ -57,6 +57,7 @@ SimpleSceneController::SimpleSceneController(QObject *parent)
     this->frameStartTime = 0;
     this->frameEndTime = 0;
     this->frameRequestTime = 0;
+    this->annotationTime = 0;
     this->scene = QSharedPointer<MouseGraphicsScene>(new MouseGraphicsScene(parent));
     this->scene->SetSceneControl(this);
     this->activePoint = -1;
@@ -99,6 +100,8 @@ SimpleSceneController& SimpleSceneController::operator= (const SimpleSceneContro
     this->mouseOver = other.mouseOver;
     this->frameStartTime = other.frameStartTime;
     this->frameEndTime = other.frameEndTime;
+    this->frameRequestTime = other.frameRequestTime;
+    this->annotationTime = other.annotationTime;
     this->scene = QSharedPointer<MouseGraphicsScene>(new MouseGraphicsScene(other.parent()));
     this->scene->SetSceneControl(this);
     this->activePoint = other.activePoint;
@@ -124,8 +127,12 @@ bool SimpleSceneController::operator!= (const SimpleSceneController &other)
 
 int SimpleSceneController::GetAnnotationBetweenTimestamps(unsigned long long startTime,
                                                           unsigned long long endTime,
-                                                          std::vector<std::vector<float> > &annot)
+                                                          unsigned long long requestedTime,
+                                                          std::vector<std::vector<float> > &annot,
+                                                          unsigned long long &outAnnotationTime)
 {
+    //Try to find annotation within the duration of the frame
+    outAnnotationTime = 0;
     annot.clear();
     std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
     for(it = this->pos.begin(); it != this->pos.end(); it++)
@@ -133,16 +140,28 @@ int SimpleSceneController::GetAnnotationBetweenTimestamps(unsigned long long sta
         unsigned long long t = it->first;
         if(t >= startTime && t < endTime)
         {
+            outAnnotationTime = it->first;
             annot = it->second;
             return 1;
         }
     }
 
+    //If the above did not find a frame, check if there is annotation
+    //at the requested time
+    it = this->pos.find(requestedTime);
+    if(it != this->pos.end())
+    {
+        outAnnotationTime = requestedTime;
+        annot = it->second;
+        return 1;
+    }
+
+    //Failed to find annotation
     return 0;
 }
 
 vector<unsigned long long> SimpleSceneController::GetAnnotationTimesBetweenTimestamps(unsigned long long startTime,
-                                                          unsigned long long endTime)
+                                                                                      unsigned long long endTime)
 {
     vector<unsigned long long> out;
     std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
@@ -158,21 +177,12 @@ vector<unsigned long long> SimpleSceneController::GetAnnotationTimesBetweenTimes
     return out;
 }
 
-void SimpleSceneController::DeleteAnnotationBetweenTimestamps(unsigned long long startTime,
-                                                           unsigned long long endTime)
+void SimpleSceneController::DeleteAnnotationAtTimestamp(unsigned long long annotationTimeIn)
 {
-    vector<unsigned long long> toRemove;
     std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
-    for(it = this->pos.begin(); it != this->pos.end(); it++)
+    it = this->pos.find(annotationTimeIn);
+    if(it != this->pos.end())
     {
-        unsigned long long t = it->first;
-        if(t >= startTime && t < endTime)
-            toRemove.push_back(t);
-    }
-    for(unsigned int i=0;i<toRemove.size();i++)
-    {
-        it = this->pos.find(toRemove[i]);
-        assert(it != this->pos.end());
         this->pos.erase(it);
     }
 }
@@ -214,7 +224,8 @@ void SimpleSceneController::VideoImageChanged(QImage &fr, unsigned long long sta
 
     //Check if this frame is used for annotation
     std::vector<std::vector<float> > annot;
-    int isUsed = this->GetAnnotationBetweenTimestamps(startTime, endTime, annot);
+    unsigned long long getAnnotationTime = 0;
+    int isUsed = this->GetAnnotationBetweenTimestamps(startTime, endTime, requestedTime, annot, getAnnotationTime);
     if(this->markFrameButton!=NULL)
         this->markFrameButton->setChecked(isUsed);
 
@@ -225,7 +236,13 @@ void SimpleSceneController::Redraw()
 {
     //Get positions for current frame
     std::vector<std::vector<float> > currentFrame;
-    this->GetAnnotationBetweenTimestamps(this->frameStartTime, this->frameEndTime, currentFrame);
+    unsigned long long getAnnotationTime = 0;
+    this->GetAnnotationBetweenTimestamps(this->frameStartTime,
+                                         this->frameEndTime,
+                                         this->frameRequestTime,
+                                         currentFrame,
+                                         getAnnotationTime);
+    this->annotationTime = getAnnotationTime;
 
     //Recreate scene and convert image
     this->scene->clear();
@@ -287,7 +304,12 @@ void SimpleSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
     //Get current frame
     std::vector<std::vector<float> > currentFrame;
-    int isUsed = this->GetAnnotationBetweenTimestamps(this->frameStartTime, this->frameEndTime, currentFrame);
+    unsigned long long getAnnotationTime = 0;
+    int isUsed = this->GetAnnotationBetweenTimestamps(this->frameStartTime,
+                                                      this->frameEndTime,
+                                                      this->frameRequestTime,
+                                                      currentFrame,
+                                                      getAnnotationTime);
     if(!isUsed) return;
 
     if(this->mode == "MOVE" && this->activePoint >= 0 && this->leftDrag)
@@ -396,7 +418,13 @@ void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent
 
     //Get current frame
     std::vector<std::vector<float> > currentFrame;
-    int isUsed = this->GetAnnotationBetweenTimestamps(this->frameStartTime, this->frameEndTime, currentFrame);
+    unsigned long long getAnnotationTime = 0;
+    int isUsed = this->GetAnnotationBetweenTimestamps(this->frameStartTime,
+                                                      this->frameEndTime,
+                                                      this->frameRequestTime,
+                                                      currentFrame,
+                                                      getAnnotationTime);
+
     if(!isUsed) return;
 
     QPointF pos = mouseEvent->buttonDownScenePos(mouseEvent->button());
@@ -530,7 +558,7 @@ unsigned long long SimpleSceneController::GetSeekFowardTime()
         const unsigned long long &ti = it->first;
         std::vector<std::vector<float> >&framePos = it->second;
         if(ti < this->frameEndTime) continue; //Ignore frames in the past
-        unsigned long long diff = AbsDiff(ti, this->frameEndTime);
+        unsigned long long diff = AbsDiff(ti, this->annotationTime);
         if(!bestSet || diff < bestDiff)
         {
             cout << bestFrame << "," << bestDiff << endl;
@@ -556,7 +584,7 @@ unsigned long long SimpleSceneController::GetSeekBackTime()
         const unsigned long long &ti = it->first;
         std::vector<std::vector<float> >&framePos = it->second;
         if(ti >= this->frameStartTime) continue; //Ignore frames in the future
-        unsigned long long diff = AbsDiff(ti, this->frameStartTime);
+        unsigned long long diff = AbsDiff(ti, this->annotationTime);
         if(!bestSet || diff < bestDiff)
         {
             cout << bestFrame << "," << bestDiff << endl;
@@ -643,11 +671,16 @@ void SimpleSceneController::MarkFramePressed(bool val)
 {
     //Check if current frame already exists
     std::vector<std::vector<float> > currentFrame;
-    int isUsed = this->GetAnnotationBetweenTimestamps(this->frameStartTime, this->frameEndTime, currentFrame);
+    unsigned long long getAnnotationTime = 0;
+    int isUsed = this->GetAnnotationBetweenTimestamps(this->frameStartTime,
+                                                      this->frameEndTime,
+                                                      this->frameRequestTime,
+                                                      currentFrame,
+                                                      getAnnotationTime);
 
     if(val==0 && isUsed) //Deselect frame for marking
     {
-        this->DeleteAnnotationBetweenTimestamps(this->frameStartTime, this->frameEndTime);
+        this->DeleteAnnotationAtTimestamp(getAnnotationTime);
     }
     if(val==1 && !isUsed) //Enable frame annotation
     {
@@ -895,13 +928,13 @@ void SimpleSceneController::SaveShape()
 void SimpleSceneController::SetShapeFromCurentFrame()
 {
     //Get annotated times(s) in current visible frame
-    //std::vector<unsigned long long> times =
-    //    this->GetAnnotationTimesBetweenTimestamps(this->frameStartTime,
-    //    this->frameEndTime);
     std::vector<std::vector<float> > annotShape;
+    unsigned long long getAnnotationTime = 0;
     int found = GetAnnotationBetweenTimestamps(this->frameStartTime,
         this->frameEndTime,
-        annotShape);
+        this->frameRequestTime,
+        annotShape,
+        getAnnotationTime);
     if(!found) return;
 
     //Set shape from current frame
@@ -912,7 +945,12 @@ void SimpleSceneController::ResetCurentFrameShape()
 {
     //Get current frame
     std::vector<std::vector<float> > currentFrame;
-    int isUsed = this->GetAnnotationBetweenTimestamps(this->frameStartTime, this->frameEndTime, currentFrame);
+    unsigned long long getAnnotationTime = 0;
+    int isUsed = this->GetAnnotationBetweenTimestamps(this->frameStartTime,
+                                                      this->frameEndTime,
+                                                      this->frameRequestTime,
+                                                      currentFrame,
+                                                      getAnnotationTime);
     if(!isUsed) return;
 
     //Set current frame to canonical shape

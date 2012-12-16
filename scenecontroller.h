@@ -64,9 +64,10 @@ public:
 
     int GetAnnotationBetweenTimestamps(unsigned long long startTime,
         unsigned long long endTime,
-        std::vector<std::vector<float> > &annot);
-    void DeleteAnnotationBetweenTimestamps(unsigned long long startTime,
-        unsigned long long endTime);
+        unsigned long long requestedTime,
+        std::vector<std::vector<float> > &annot,
+        unsigned long long &annotationTime);
+    void DeleteAnnotationAtTimestamp(unsigned long long annotationTime);
     std::vector<unsigned long long> GetAnnotationTimesBetweenTimestamps(unsigned long long startTime,
         unsigned long long endTime);
     void SetAnnotationBetweenTimestamps(unsigned long long startTime,
@@ -110,6 +111,7 @@ protected:
     std::map<unsigned long long, std::vector<std::vector<float> > > pos; //contains annotation positions
     std::vector<std::vector<int> > links;
     unsigned long long frameStartTime, frameEndTime, frameRequestTime;
+    unsigned long long annotationTime;
     int mouseOver;
     QPushButton *markFrameButton;
     std::vector<std::vector<float> > shape; //contains the default shape
