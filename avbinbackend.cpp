@@ -5,6 +5,7 @@
 #include "localints.h"
 using namespace std;
 #define DEFAULT_AUDIO_BUFF_SIZE 1024*1024
+#define SEEK_BEFORE_MARGIN 1000000 //microsec
 
 //**********************************************************
 
@@ -268,13 +269,19 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
     if(currentVidTime > 0 && time >= currentVidTime)
     {
         uint64_t diff = time - currentVidTime;
-        if(diff < 1000000) doSeek = 0;
+        if(diff < 1000000 + SEEK_BEFORE_MARGIN) doSeek = 0;
     }
 
     if(doSeek)
     {
         //Seek in file
-        AVbinResult res = mod_avbin_seek_file(this->fi, time);
+        uint64_t seekToTime = time;
+        if(seekToTime >= SEEK_BEFORE_MARGIN)
+            seekToTime -= SEEK_BEFORE_MARGIN; //Seek to a point well before target frame
+        else
+            seekToTime = 0;
+
+        AVbinResult res = mod_avbin_seek_file(this->fi, seekToTime);
         assert(res == AVBIN_RESULT_OK);
         for(int chanNum=0;chanNum<this->numStreams;chanNum++)
             this->timestampOfChannel[chanNum] = 0;
