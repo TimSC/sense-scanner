@@ -59,6 +59,8 @@ class PredictAxis:
 		self.ClearTrainingData()
 
 	def SetTrainData(self, intensitiesIn, offsetsIn, supportPixIntIn):
+		assert len(intensitiesIn.shape) == 2
+		assert intensitiesIn.shape[0] > 0
 		self.labels = []
 		for offset in offsetsIn:
 			label = offset[0] * self.axisX + offset[1] * self.axisY
@@ -151,7 +153,10 @@ class RelativeTracker:
 			loc = framePositions[trNum]
 			if loc is None: continue
 
-			for trainCount in range(int(round(self.numTrainingOffsets / numAnnotatedFrames))):
+			trainingOnThisFrame = int(round(self.numTrainingOffsets / numAnnotatedFrames))
+			if trainingOnThisFrame == 0: trainingOnThisFrame = 1
+
+			for trainCount in range(trainingOnThisFrame):
 				#Generate random offset
 				trainOffsetsMag = np.random.randn() * self.trainOffsetVar	
 				trainOffset = RandomDirectionVector(trainOffsetsMag)
@@ -170,6 +175,9 @@ class RelativeTracker:
 
 		trainingIntensitiesArr = np.array(trainingIntensities)
 		trainingOffsetsArr = np.array(trainingOffsets)
+
+		assert len(trainingIntensitiesArr.shape) == 2
+		assert len(trainingOffsetsArr.shape) == 2
 
 		#Create a pair of axis trackers for this data and copy training data
 		axisX = PredictAxis(1.,0.)
@@ -199,9 +207,18 @@ class RelativeTracker:
 		self.ims.append(im)
 		self.pointsPosLi.append(pointsPos)
 	
+	def ClearTrainingImages(self):
+		self.ims = []
+		self.imls = None
+
 	def Update(self):
 		self.progress += 0.01
 		time.sleep(0.1)
+		if len(self.models) == 0:
+			self.Init()
+			self.Train()
+			self.ClearTrainingImages()
+			pickle.dump(self, open("tracker.dat","wb"))
 
 	def GetProgress(self):
 		return self.progress
@@ -215,5 +232,6 @@ if __name__=="__main__":
 	tracker.AddTrainingData(im, [(140,130),(20,60)])
 	tracker.Init()
 	tracker.Train()
-	pickle.dump(tracker, "tracker.dat")
+	tracker.ClearTrainingImages()
+	pickle.dump(tracker, open("tracker.dat","wb"))
 
