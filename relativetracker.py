@@ -28,8 +28,20 @@ def GetPixIntensityAtLoc(iml, supportOffsets, loc, rotation = 0.):
 		ry = math.sin(rotation) * offset[0] + math.cos(rotation) * offset[1]
 
 		#Get pixel at this location
-		out.append(iml[rx + loc[0], ry + loc[1]])
+		try:
+			out.append(iml[rx + loc[0], ry + loc[1]])
+		except IndexError:
+			return None
 	return out
+
+def ITUR6012(col): #ITU-R 601-2
+	return 0.299*col[0] + 0.587*col[1] + 0.114*col[2]
+
+def RandomDirectionVector(mag):
+	ang = np.random.uniform(0, math.pi)
+	return (math.cos(ang) * mag, math.sin(ang) * mag)
+
+#*************************************************************
 
 class PredictAxis:
 	def __init__(self, xIn, yIn):
@@ -44,9 +56,8 @@ class PredictAxis:
 	def Train(img, pts):
 		pass
 
-def ITUR6012(col): #ITU-R 601-2
-	return 0.299*col[0] + 0.587*col[1] + 0.114*col[2]
 
+#******************************************************
 
 class RelativeTracker:
 	def __init__(self):
@@ -55,13 +66,13 @@ class RelativeTracker:
 		self.pointsPosLi = []
 		self.progress = 0.
 		self.maxSupportOffset = 20.
-		self.numSupportPix = 500
-		self.numTrainingOffsets = 5000
+		self.numSupportPix = 100 #500
+		self.numTrainingOffsets = 100 #5000
 		self.trainOffsetVar = 5.
 		self.supportPixOffsets = None
 		self.supportPixCols = None
-		self.modelX = PredictAxis(1.,0.)
-		self.modelY = PredictAxis(0.,1.)
+		self.models = []#PredictAxis(1.,0.)
+		#PredictAxis(0.,1.)
 
 		#settings = [{'shapeNoise': 12, 'cloudEnabled': 1, 'supportMaxOffset': 39, 'trainVarianceOffset': 41, 'reg': reg}, {'shapeNoise': 1, 'cloudEnabled': 0, 'supportMaxOffset': 20, 'trainVarianceOffset': 5, 'reg': reg}] #"Classic" 0.2 settings
 
@@ -90,7 +101,7 @@ class RelativeTracker:
 	def GenerateTrainingForTracker(self, ind):
 		
 		#For each tracker
-		for trNum, offsets in enumerate(self.supportPixOffsets):
+		for trNum, spOffsets in enumerate(self.supportPixOffsets):
 
 			#Count number of annotated frames
 			numAnnotatedFrames = 0
@@ -102,30 +113,38 @@ class RelativeTracker:
 			for iml, framePositions in zip(self.imls, self.pointsPosLi):
 				loc = framePositions[trNum]
 				if loc is None: continue
-				supportColours = GetPixIntensityAtLoc(iml, offsets, loc)
+				supportColours = GetPixIntensityAtLoc(iml, spOffsets, loc)
+				if supportColours is None: continue
 				supportInt = []
 				for col in supportColours:
 					supportInt.append(ITUR6012(col))
 
 			#For each annotated frame
+			trainingIntensities = []
 			for iml, framePositions in zip(self.imls, self.pointsPosLi):
+				frameTrainingIntensities = []
 				loc = framePositions[trNum]
 				if loc is None: continue
-				trainOffsets = np.random.randn(self.numTrainingOffsets / numAnnotatedFrames, 2) * self.trainOffsetVar
 
-				#For each training offset
-				for trainOffset in trainOffsets:
+				for trainCount in range(int(round(self.numTrainingOffsets / numAnnotatedFrames))):
+					#Generate random offset
+					trainOffsetsMag = np.random.randn() * self.trainOffsetVar	
+					trainOffset = RandomDirectionVector(trainOffsetsMag)
 
 					#Get intensity at training offset
 					offsetLoc = (loc[0] + trainOffset[0], loc[1] + trainOffset[1])
-					supportColours = GetPixIntensityAtLoc(iml, offsets, offsetLoc)
+					supportColours = GetPixIntensityAtLoc(iml, spOffsets, offsetLoc)
+					if supportColours is None: continue
 					supportInt = []
 					for col in supportColours:
 						supportInt.append(ITUR6012(col))
 					#print trainOffset
-					#print "int", supportInt
 
-				
+					frameTrainingIntensities.append(supportInt)
+
+				trainingIntensities.extend(frameTrainingIntensities)
+
+			trainingIntensitiesArr = np.array(trainingIntensities)
 
 
 	def Train(self):
@@ -153,7 +172,7 @@ if __name__=="__main__":
 	tracker = RelativeTracker()
 	
 	tracker.AddTrainingData(im, [(120,120),(50,50)])
-	tracker.AddTrainingData(im, [(140,130),(55,60)])
+	tracker.AddTrainingData(im, [(140,130),(20,60)])
 	tracker.Init()
 	tracker.Train()
 
