@@ -74,8 +74,7 @@ class PredictAxis:
 	def Train(self, regIn, regArgs):
 		assert self.labels is not None
 		self.reg = regIn(**regArgs)
-		print self.intensities - self.supportPixInt
-		self.reg.fit(self.intensities, self.labels)
+		self.reg.fit(self.intensities - self.supportPixInt, self.labels)
 
 	def Predict(self, intensities):
 		assert self.reg is not None
@@ -96,6 +95,7 @@ class RelativeTracker:
 		self.supportPixOffsets = None
 		self.supportPixCols = None
 		self.models = []
+		self.numTrackers = None
 		
 		#settings = [{'shapeNoise': 12, 'cloudEnabled': 1, 'supportMaxOffset': 39, 'trainVarianceOffset': 41, 'reg': reg}, {'shapeNoise': 1, 'cloudEnabled': 0, 'supportMaxOffset': 20, 'trainVarianceOffset': 5, 'reg': reg}] #"Classic" 0.2 settings
 
@@ -107,13 +107,13 @@ class RelativeTracker:
 
 	def Init(self):
 		#Get number of tracking points
-		numTrackers = len(self.pointsPosLi[0])
+		self.numTrackers = len(self.pointsPosLi[0])
 		for pts in self.pointsPosLi:
-			assert len(pts) == numTrackers
+			assert len(pts) == self.numTrackers
 
 		#Generate random support pix offsets
 		self.supportPixOffsets = []
-		for count in range(numTrackers):
+		for count in range(self.numTrackers):
 			self.supportPixOffsets.append(np.random.uniform(-self.maxSupportOffset, 
 				self.maxSupportOffset, (self.numSupportPix, 2)))
 		
@@ -182,16 +182,17 @@ class RelativeTracker:
 
 	def Train(self):
 		self.models = []
-		model = self.GenerateTrainingForTracker(0)
+		for i in range(self.numTrackers):
+			model = self.GenerateTrainingForTracker(i)
 
-		regArgs = {'n_estimators':20, 'n_jobs':-1, 'compute_importances': True}
-		reg = ensemble.RandomForestRegressor
-		model[0].Train(reg, regArgs)
-		model[1].Train(reg, regArgs)
+			regArgs = {'n_estimators':20, 'n_jobs':-1, 'compute_importances': True}
+			reg = ensemble.RandomForestRegressor
+			model[0].Train(reg, regArgs)
+			model[1].Train(reg, regArgs)
 		
-		model[0].ClearTrainingData()
-		model[1].ClearTrainingData()
-
+			model[0].ClearTrainingData()
+			model[1].ClearTrainingData()
+		self.models.append(model)
 
 	def AddTrainingData(self, im, pointsPos):
 		self.imls = None
