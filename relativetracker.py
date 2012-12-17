@@ -2,6 +2,9 @@
 from PIL import Image
 import time, math
 import numpy as np
+import sklearn.tree as tree
+import sklearn.svm as svm
+import sklearn.ensemble as ensemble
 
 def BilinearSample(imgPix, x, y):
 	xfrac, xi = math.modf(x)
@@ -52,10 +55,31 @@ class PredictAxis:
 
 		self.crossX = -self.axisY
 		self.crossY = self.axisX
+		self.reg = None
+		self.ClearTrainingData()
 
-	def Train(img, pts):
+	def SetTrainData(self, intensitiesIn, offsetsIn, supportPixIntIn):
+		self.labels = []
+		for offset in offsetsIn:
+			label = offset[0] * self.axisX + offset[1] * self.axisY
+			self.labels.append(label)
+		self.intensities = intensitiesIn
+		self.supportPixInt = supportPixIntIn
+
+	def ClearTrainingData(self):
+		self.labels = None
+		self.intensities = None
+		self.supportPixInt = None
+
+	def Train(self, regIn, regArgs):
+		assert self.labels is not None
+		self.reg = regIn(**regArgs)
+		print self.intensities - self.supportPixInt
+		self.reg.fit(self.intensities, self.labels)
+
+	def Predict(self, intensities):
+		assert self.reg is not None
 		pass
-
 
 #******************************************************
 
@@ -66,14 +90,13 @@ class RelativeTracker:
 		self.pointsPosLi = []
 		self.progress = 0.
 		self.maxSupportOffset = 20.
-		self.numSupportPix = 100 #500
-		self.numTrainingOffsets = 100 #5000
+		self.numSupportPix = 10 #500
+		self.numTrainingOffsets = 10 #5000
 		self.trainOffsetVar = 5.
 		self.supportPixOffsets = None
 		self.supportPixCols = None
-		self.models = []#PredictAxis(1.,0.)
-		#PredictAxis(0.,1.)
-
+		self.models = []
+		
 		#settings = [{'shapeNoise': 12, 'cloudEnabled': 1, 'supportMaxOffset': 39, 'trainVarianceOffset': 41, 'reg': reg}, {'shapeNoise': 1, 'cloudEnabled': 0, 'supportMaxOffset': 20, 'trainVarianceOffset': 5, 'reg': reg}] #"Classic" 0.2 settings
 
 		#numSupportPix = 500, numTrainingOffsets = 5000, 
@@ -98,60 +121,76 @@ class RelativeTracker:
 		if self.imls is None:
 			self.imls = [im.load() for im in self.ims]
 
-	def GenerateTrainingForTracker(self, ind):
+	def GenerateTrainingForTracker(self, trNum):
 		
-		#For each tracker
-		for trNum, spOffsets in enumerate(self.supportPixOffsets):
+		spOffsets = self.supportPixOffsets[trNum]
 
-			#Count number of annotated frames
-			numAnnotatedFrames = 0
-			for iml, framePositions in zip(self.imls, self.pointsPosLi):
-				loc = framePositions[trNum]
-				if loc is not None: numAnnotatedFrames += 1
+		#Count number of annotated frames
+		numAnnotatedFrames = 0
+		for iml, framePositions in zip(self.imls, self.pointsPosLi):
+			loc = framePositions[trNum]
+			if loc is not None: numAnnotatedFrames += 1
 
-			#Get intensity at annotated position
-			for iml, framePositions in zip(self.imls, self.pointsPosLi):
-				loc = framePositions[trNum]
-				if loc is None: continue
-				supportColours = GetPixIntensityAtLoc(iml, spOffsets, loc)
+		#For each annotated frame, get intensity at annotated position
+		supportPixIntCollect = []
+		for iml, framePositions in zip(self.imls, self.pointsPosLi):
+			loc = framePositions[trNum]
+			if loc is None: continue
+			supportColours = GetPixIntensityAtLoc(iml, spOffsets, loc)
+			if supportColours is None: continue
+			supportInt = []
+			for col in supportColours:
+				supportInt.append(ITUR6012(col))
+			supportPixIntCollect.append(supportInt)
+		supportPixIntAv = np.array(supportPixIntCollect).mean(axis=0)
+
+		#For each annotated frame, generate training data
+		trainingIntensities = []
+		trainingOffsets = []
+		for iml, framePositions in zip(self.imls, self.pointsPosLi):
+			loc = framePositions[trNum]
+			if loc is None: continue
+
+			for trainCount in range(int(round(self.numTrainingOffsets / numAnnotatedFrames))):
+				#Generate random offset
+				trainOffsetsMag = np.random.randn() * self.trainOffsetVar	
+				trainOffset = RandomDirectionVector(trainOffsetsMag)
+
+				#Get intensity at training offset
+				offsetLoc = (loc[0] + trainOffset[0], loc[1] + trainOffset[1])
+				supportColours = GetPixIntensityAtLoc(iml, spOffsets, offsetLoc)
 				if supportColours is None: continue
 				supportInt = []
 				for col in supportColours:
 					supportInt.append(ITUR6012(col))
+				#print trainOffset
 
-			#For each annotated frame
-			trainingIntensities = []
-			for iml, framePositions in zip(self.imls, self.pointsPosLi):
-				frameTrainingIntensities = []
-				loc = framePositions[trNum]
-				if loc is None: continue
+				trainingIntensities.append(supportInt)
+				trainingOffsets.append(trainOffset)
 
-				for trainCount in range(int(round(self.numTrainingOffsets / numAnnotatedFrames))):
-					#Generate random offset
-					trainOffsetsMag = np.random.randn() * self.trainOffsetVar	
-					trainOffset = RandomDirectionVector(trainOffsetsMag)
+		trainingIntensitiesArr = np.array(trainingIntensities)
+		trainingOffsetsArr = np.array(trainingOffsets)
 
-					#Get intensity at training offset
-					offsetLoc = (loc[0] + trainOffset[0], loc[1] + trainOffset[1])
-					supportColours = GetPixIntensityAtLoc(iml, spOffsets, offsetLoc)
-					if supportColours is None: continue
-					supportInt = []
-					for col in supportColours:
-						supportInt.append(ITUR6012(col))
-					#print trainOffset
+		#Create a pair of axis trackers for this data and copy training data
+		axisX = PredictAxis(1.,0.)
+		axisX.SetTrainData(trainingIntensitiesArr, trainingOffsetsArr, supportPixIntAv)
 
-					frameTrainingIntensities.append(supportInt)
+		axisY = PredictAxis(0.,1.)
+		axisY.SetTrainData(trainingIntensitiesArr, trainingOffsetsArr, supportPixIntAv)
 
-				trainingIntensities.extend(frameTrainingIntensities)
-
-			trainingIntensitiesArr = np.array(trainingIntensities)
-
+		return (axisX, axisY)
 
 	def Train(self):
-		self.GenerateTrainingForTracker(0)
+		self.models = []
+		model = self.GenerateTrainingForTracker(0)
 
+		regArgs = {'n_estimators':20, 'n_jobs':-1, 'compute_importances': True}
+		reg = ensemble.RandomForestRegressor
+		model[0].Train(reg, regArgs)
+		model[1].Train(reg, regArgs)
 		
-		
+		model[0].ClearTrainingData()
+		model[1].ClearTrainingData()
 
 
 	def AddTrainingData(self, im, pointsPos):
