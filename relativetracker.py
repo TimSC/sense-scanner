@@ -1,6 +1,6 @@
 
 from PIL import Image
-import time, math
+import time, math, pickle
 import numpy as np
 import sklearn.tree as tree
 import sklearn.svm as svm
@@ -215,4 +215,5 @@ if __name__=="__main__":
 	tracker.AddTrainingData(im, [(140,130),(20,60)])
 	tracker.Init()
 	tracker.Train()
+	pickle.dump(tracker, "tracker.dat")
 
