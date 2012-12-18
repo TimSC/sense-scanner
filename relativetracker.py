@@ -264,15 +264,21 @@ class RelativeTracker:
 			self.models.append(model)
 		else:
 			for model in self.models:
+				trainedAModel = False
 				reg = ensemble.RandomForestRegressor
 				regArgs = {'n_estimators':20, 'n_jobs':-1, 'compute_importances': True}
 
 				if model[0].reg == None:
 					model[0].Train(reg, regArgs)
 					model[0].ClearTrainingData()
+					trainedAModel = True
 				elif model[1].reg == None:
 					model[1].Train(reg, regArgs)
 					model[1].ClearTrainingData()
+					trainedAModel= True
+
+				#Stop looking for a model to train, if one has already been done
+				if trainedAModel: break
 
 		#Determine progress of training
 		self.progress = 0.33 * len(self.models) / self.numTrackers
@@ -301,6 +307,10 @@ class RelativeTracker:
 
 	def GetProgress(self):
 		return self.progress
+
+	def ToString(self):
+		return pickle.dumps(self, protocol=pickle.HIGHEST_PROTOCOL)
+
 
 if __name__=="__main__":
 	tracker = pickle.load(open("tracker.dat","rb"))

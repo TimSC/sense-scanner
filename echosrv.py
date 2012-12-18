@@ -47,6 +47,11 @@ def WorkerProcess(childPipeConn):
 				paused = 1
 			if event[0]=="QUIT":
 				running = 0
+			if event[0]=="SAVE_MODEL":
+				if paused and tracker is not None:
+					pass
+					#print tracker.ToString()
+
 			if event[0]=="DATA_BLOCK":
 				args = event[1].split(" ")
 				if args[0] == "RGB_IMAGE_DATA":
