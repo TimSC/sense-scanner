@@ -140,6 +140,8 @@ void AlgorithmProcess::SetId(unsigned int idIn)
 
 AlgorithmProcess::ProcessState AlgorithmProcess::GetState()
 {
+    if(this->state() == QProcess::Starting)
+        return AlgorithmProcess::STARTING;
     int running = (this->state() == QProcess::Running);
     if(!running) return AlgorithmProcess::STOPPED;
     if(this->paused) return AlgorithmProcess::PAUSED;
@@ -159,6 +161,7 @@ void AlgorithmProcess::Update(class EventLoop &el)
     {
         line = dec.readLine();
         if(line.length()==0) continue;
+
         if(line.left(9)=="PROGRESS=")
         {
             std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_PROGRESS_UPDATE"));

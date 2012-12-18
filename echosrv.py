@@ -8,6 +8,7 @@ def WorkerProcess(childPipeConn):
 	progress = 0.
 	running = 1
 	paused = 1
+	training = 0
 	imgCount = 0
 	xmlBlocksCount = 0
 	xmlTrees = []
@@ -20,6 +21,15 @@ def WorkerProcess(childPipeConn):
 			event = childPipeConn.recv()
 
 			if event[0]=="RUN":
+				print "NOW_RUNNING"
+				paused = 0
+			if event[0]=="PAUSE":
+				print "NOW_PAUSED"
+				paused = 1
+			if event[0]=="QUIT":
+				running = 0
+			if event[0]=="TRAIN":
+				training = 1
 				if tracker is None:
 					tracker = relativetracker.RelativeTracker()
 					for tree in xmlTrees:
@@ -40,13 +50,6 @@ def WorkerProcess(childPipeConn):
 						im = imgs[int(round(timestamp*1000.))]
 						tracker.AddTrainingData(im, zip(xs,ys))
 
-				print "NOW_RUNNING"
-				paused = 0
-			if event[0]=="PAUSE":
-				print "NOW_PAUSED"
-				paused = 1
-			if event[0]=="QUIT":
-				running = 0
 			if event[0]=="SAVE_MODEL":
 				if paused and tracker is not None:
 					pass
@@ -90,10 +93,8 @@ def WorkerProcess(childPipeConn):
 						y = float(child.attrib['y'])
 						print pid, x, y
 
-		if not paused:
+		if not paused and training:
 			print "PROGRESS="+str(progress)
-
-		if not paused:
 			tracker.Update()
 			progress = tracker.GetProgress()
 		else:
@@ -147,6 +148,9 @@ if __name__=="__main__":
 
 		if li == "RUN":
 			parentPipeConn.send(["RUN"])
+
+		if li == "TRAIN":
+			parentPipeConn.send(["TRAIN"])
 
 		if li[0:11] == "DATA_BLOCK=":
 			args = sys.stdin.readline()

@@ -390,6 +390,7 @@ void MainWindow::RegenerateProcessingList()
             if(this->workspace.GetState(row)!=AlgorithmProcess::STOPPED)
             {
                 AlgorithmProcess::ProcessState state = this->workspace.GetState(row);
+                if(state == AlgorithmProcess::STARTING) displayLine << "Starting " << progress;
                 if(state == AlgorithmProcess::RUNNING) displayLine << "Running " << progress;
                 if(state == AlgorithmProcess::RUNNING_PAUSING) displayLine << "Pausing... " << progress;
                 if(state == AlgorithmProcess::RUNNING_STOPPING) displayLine << "Stopping... " << progress;
@@ -646,6 +647,9 @@ void MainWindow::TrainModelPressed()
     std::tr1::shared_ptr<class AlgorithmProcess> alg(new class AlgorithmProcess(this->eventLoop, this));
     alg->Init();
 
+    //Start worker process
+    alg->Start();
+
     //Configure worker process
     //QString test = "<test>foobar<spam>\neggs</spam></test>\n";
     //QString preamble = QString("XML_DATA=%1\n").arg(alg->EncodedLength(test));
@@ -707,10 +711,7 @@ void MainWindow::TrainModelPressed()
         }
     }
 
-
-
-    //Start worker process
-    alg->Start();
+    alg->SendCommand("TRAIN\n");
 
     //Add process to workspace
     this->workspace.AddProcessing(alg);

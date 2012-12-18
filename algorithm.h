@@ -27,10 +27,11 @@ public:
     enum ProcessState
     {
         PAUSED = 1,
-        RUNNING = 2,
-        RUNNING_PAUSING = 3,
-        RUNNING_STOPPING = 4,
-        STOPPED = 5
+        STARTING = 2,
+        RUNNING = 3,
+        RUNNING_PAUSING = 4,
+        RUNNING_STOPPING = 5,
+        STOPPED = 6
     };
 
     void Init();
