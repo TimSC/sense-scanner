@@ -245,21 +245,6 @@ class RelativeTracker:
 				predY = model[1].Predict(supportInt)
 				print testOffset, predX, predY
 
-	def Train(self):
-		self.models = []
-		for i in range(self.numTrackers):
-			print i, self.numTrackers
-			model = self.GenerateTrainingForTracker(i)
-
-			regArgs = {'n_estimators':20, 'n_jobs':-1, 'compute_importances': True}
-			reg = ensemble.RandomForestRegressor
-			model[0].Train(reg, regArgs)
-			model[1].Train(reg, regArgs)
-		
-			model[0].ClearTrainingData()
-			model[1].ClearTrainingData()
-		self.models.append(model)
-
 	def AddTrainingData(self, im, pointsPos):
 		self.imls = None
 		self.ims.append(im)
@@ -271,30 +256,48 @@ class RelativeTracker:
 
 	def Update(self):
 
-		other = pickle.load(open("tracker.dat","rb"))
-		self.models = other.models
-		self.supportPixOffsets = other.supportPixOffsets
-		self.supportPixCols = other.supportPixCols
-		#self.EvaluateModel(0)
-		#Create pixel access objects
-		if self.imls is None:
-			self.imls = [im.load() for im in self.ims]
-
-		test = np.copy(self.pointsPosLi[0])
-		print test.shape
-		test[0,0] += 10.
-
-		self.Predict(self.imls[0], test)
-		self.progress = 1.
-		exit(0)
-
-		self.progress += 0.01
-		time.sleep(0.1)
-		if len(self.models) == 0:
+		if self.numTrackers == None:
 			self.Init()
-			self.Train()
-			self.ClearTrainingImages()
-			pickle.dump(self, open("tracker.dat","wb"))
+
+		if len(self.models) < self.numTrackers:
+			model = self.GenerateTrainingForTracker(len(self.models))
+			self.models.append(model)
+		else:
+			for model in self.models:
+				reg = ensemble.RandomForestRegressor
+				regArgs = {'n_estimators':20, 'n_jobs':-1, 'compute_importances': True}
+
+				if model[0].reg == None:
+					model[0].Train(reg, regArgs)
+					model[0].ClearTrainingData()
+				elif model[1].reg == None:
+					model[1].Train(reg, regArgs)
+					model[1].ClearTrainingData()
+
+		#Determine progress of training
+		self.progress = 0.33 * len(self.models) / self.numTrackers
+		
+		#Determine how many models are ready
+		countTrained, countPending = 0, 0
+		for model in self.models:
+			if model[0].reg is not None: countTrained += 1
+			else: countPending += 1
+			if model[1].reg is not None: countTrained += 1
+			else: countPending += 1
+
+		#There are two axis models for each tracker
+		countTrained /= 2.
+		countPending /= 2.
+
+		self.progress += 0.67 * countTrained / self.numTrackers
+
+		#time.sleep(0.1)
+
+		if len(self.models) == self.numTrackers and \
+			countPending == 0.:
+				self.ClearTrainingImages()
+				self.progress = 1.
+				#pickle.dump(self, open("tracker.dat","wb"))
 
 	def GetProgress(self):
 		return self.progress
