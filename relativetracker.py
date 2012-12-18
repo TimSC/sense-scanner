@@ -71,7 +71,6 @@ class PredictAxis:
 	def ClearTrainingData(self):
 		self.labels = None
 		self.intensities = None
-		self.supportPixInt = None
 
 	def Train(self, regIn, regArgs):
 		assert self.labels is not None
@@ -80,7 +79,8 @@ class PredictAxis:
 
 	def Predict(self, intensities):
 		assert self.reg is not None
-		pass
+		label = self.reg.predict(intensities - self.supportPixInt)[0]
+		return (label * self.axisX, label * self.axisY)
 
 #******************************************************
 
@@ -188,6 +188,63 @@ class RelativeTracker:
 
 		return (axisX, axisY)
 
+	def Predict(self, iml, ptsPos):
+		ptsPos = np.copy(ptsPos)
+
+		for it in range(3):
+			for model, loc, spOffsets in zip(self.models, ptsPos, self.supportPixOffsets):
+				print "pred from", ptsPos
+
+				#Get intensity at training offset
+				supportColours = GetPixIntensityAtLoc(iml, spOffsets, loc)
+				if supportColours is None: continue
+				supportInt = []
+				for col in supportColours:
+					supportInt.append(ITUR6012(col))
+				#print trainOffset
+
+				predX = model[0].Predict(supportInt)
+				predY = model[1].Predict(supportInt)
+			
+				pred = (predX[0], predY[1])
+				loc[0] -= pred[0]
+				loc[1] -= pred[1]
+
+
+	def EvaluateModel(self, trNum):
+
+		spOffsets = self.supportPixOffsets[trNum]
+		model = self.models[trNum]
+
+		#Create pixel access objects
+		if self.imls is None:
+			self.imls = [im.load() for im in self.ims]
+
+		#For each annotated frame, generate test offsets
+		for iml, framePositions in zip(self.imls, self.pointsPosLi):
+			loc = framePositions[trNum]
+			if loc is None: continue
+
+			testOnThisFrame = 500
+
+			for testCount in range(testOnThisFrame):
+				#Generate random offset
+				testOffsetsMag = np.random.randn() * self.trainOffsetVar	
+				testOffset = RandomDirectionVector(testOffsetsMag)
+
+				#Get intensity at training offset
+				offsetLoc = (loc[0] + testOffset[0], loc[1] + testOffset[1])
+				supportColours = GetPixIntensityAtLoc(iml, spOffsets, offsetLoc)
+				if supportColours is None: continue
+				supportInt = []
+				for col in supportColours:
+					supportInt.append(ITUR6012(col))
+				#print trainOffset
+
+				predX = model[0].Predict(supportInt)
+				predY = model[1].Predict(supportInt)
+				print testOffset, predX, predY
+
 	def Train(self):
 		self.models = []
 		for i in range(self.numTrackers):
@@ -213,6 +270,24 @@ class RelativeTracker:
 		self.imls = None
 
 	def Update(self):
+
+		other = pickle.load(open("tracker.dat","rb"))
+		self.models = other.models
+		self.supportPixOffsets = other.supportPixOffsets
+		self.supportPixCols = other.supportPixCols
+		#self.EvaluateModel(0)
+		#Create pixel access objects
+		if self.imls is None:
+			self.imls = [im.load() for im in self.ims]
+
+		test = np.copy(self.pointsPosLi[0])
+		print test.shape
+		test[0,0] += 10.
+
+		self.Predict(self.imls[0], test)
+		self.progress = 1.
+		exit(0)
+
 		self.progress += 0.01
 		time.sleep(0.1)
 		if len(self.models) == 0:

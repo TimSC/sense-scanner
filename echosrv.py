@@ -1,5 +1,5 @@
 
-import multiprocessing, sys, time
+import multiprocessing, sys, time, pickle
 from PIL import Image
 import xml.etree.ElementTree as ET
 import relativetracker
@@ -113,7 +113,7 @@ if __name__=="__main__":
 
 	fi = open("log.txt","wt")
 	inputlog = None
-	#inputlog = open("inputlog.dat","wb")
+	#rinputlog = open("inputlog.dat","wb")
 	
 	fi.write("READY\n")
 	fi.flush()
