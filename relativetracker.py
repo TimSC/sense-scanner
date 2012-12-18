@@ -91,8 +91,8 @@ class RelativeTracker:
 		self.pointsPosLi = []
 		self.progress = 0.
 		self.maxSupportOffset = 20.
-		self.numSupportPix = 10 #500
-		self.numTrainingOffsets = 10 #5000
+		self.numSupportPix = 200 #500
+		self.numTrainingOffsets = 5000
 		self.trainOffsetVar = 5.
 		self.supportPixOffsets = None
 		self.supportPixCols = None
@@ -191,6 +191,7 @@ class RelativeTracker:
 	def Train(self):
 		self.models = []
 		for i in range(self.numTrackers):
+			print i, self.numTrackers
 			model = self.GenerateTrainingForTracker(i)
 
 			regArgs = {'n_estimators':20, 'n_jobs':-1, 'compute_importances': True}
@@ -224,6 +225,11 @@ class RelativeTracker:
 		return self.progress
 
 if __name__=="__main__":
+	tracker = pickle.load(open("tracker.dat","rb"))
+	print len(tracker.models)
+
+
+if 0:
 	im = Image.open("test0.png")
 	iml = im.load()
 	tracker = RelativeTracker()
