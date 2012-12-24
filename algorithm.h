@@ -3,6 +3,7 @@
 
 #include "eventloop.h"
 #include <QtCore/QProcess>
+#include <QtCore/QFile>
 
 class AlgorithmThread : public MessagableThread
 {
@@ -55,6 +56,7 @@ protected:
     int paused;
     unsigned int threadId;
     int initDone;
+    QFile *algOutLog;
 };
 
 #endif // ALGORITHM_H

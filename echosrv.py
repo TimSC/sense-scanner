@@ -52,8 +52,10 @@ def WorkerProcess(childPipeConn):
 
 			if event[0]=="SAVE_MODEL":
 				if paused and tracker is not None:
-					pass
-					#print tracker.ToString()
+					modelData = tracker.ToString()
+					print "DATA_BLOCK={0}".format(len(modelData))
+					print "MODEL"
+					print modelData
 
 			if event[0]=="DATA_BLOCK":
 				args = event[1].split(" ")
@@ -93,17 +95,18 @@ def WorkerProcess(childPipeConn):
 						y = float(child.attrib['y'])
 						print pid, x, y
 
-		if not paused and training:
+		if not paused and training and progress < 1.:
 			print "PROGRESS="+str(progress)
 			tracker.Update()
 			progress = tracker.GetProgress()
 		else:
 			time.sleep(0.1)
 
-		if progress >= 1.:
+		if progress >= 1. and not paused:
 			progress = 1
-			running = 0
+			paused = 1
 			print "PROGRESS="+str(progress)
+			print "NOW_PAUSED"
 
 		#print "running", running
 		sys.stdout.flush()
@@ -119,7 +122,7 @@ if __name__=="__main__":
 
 	fi = open("log.txt","wt")
 	inputlog = None
-	#rinputlog = open("inputlog.dat","wb")
+	inputlog = open("inputlog.dat","wb")
 	
 	fi.write("READY\n")
 	fi.flush()
@@ -131,7 +134,9 @@ if __name__=="__main__":
 	
 	while running:
 		li = sys.stdin.readline()
-		if inputlog is not None: inputlog.write(li)
+		if inputlog is not None: 
+			inputlog.write(li)
+			inputlog.flush()
 		li = li.rstrip()
 
 		#print li, len(li)
@@ -152,6 +157,9 @@ if __name__=="__main__":
 		if li == "TRAIN":
 			parentPipeConn.send(["TRAIN"])
 
+		if li == "SAVE_MODEL":
+			parentPipeConn.send(["SAVE_MODEL"])
+
 		if li[0:11] == "DATA_BLOCK=":
 			args = sys.stdin.readline()
 			if inputlog is not None: inputlog.write(args)
@@ -162,9 +170,9 @@ if __name__=="__main__":
 			fi.flush()
 			dataBlock = sys.stdin.read(si)
 			fi.write("Read block " +str(len(dataBlock))+"\n")
-			if inputlog is not None:
-				inputlog.write(dataBlock)
-				inputlog.flush()
+			#if inputlog is not None:
+			#	inputlog.write(dataBlock)
+			#	inputlog.flush()
 			parentPipeConn.send(["DATA_BLOCK", args, dataBlock])
 
 		if parentPipeConn.poll():

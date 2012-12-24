@@ -4,7 +4,6 @@
 #include <assert.h>
 #include <stdexcept>
 #include <QtCore/QTextStream>
-#include <QtCore/QFile>
 using namespace std;
 
 //**********************************
@@ -54,6 +53,9 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->paused = 1;
     this->pausing = 0;
     this->initDone = 0;
+    QString fina = "algout.txt";
+    this->algOutLog = new QFile(fina);
+    this->algOutLog->open(QIODevice::WriteOnly);
 }
 
 AlgorithmProcess::~AlgorithmProcess()
@@ -166,7 +168,12 @@ void AlgorithmProcess::Update(class EventLoop &el)
     {
         line = dec.readLine();
         if(line.length()==0) continue;
-
+        if(this->algOutLog != NULL)
+        {
+            this->algOutLog->write(line.toLocal8Bit().constData());
+            this->algOutLog->write("\n");
+            this->algOutLog->flush();
+        }
         if(line.left(9)=="PROGRESS=")
         {
             std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_PROGRESS_UPDATE"));
@@ -207,6 +214,19 @@ void AlgorithmProcess::Update(class EventLoop &el)
             tmp << this->threadId << ",finished";
             openEv->data = tmp.str();
             el.SendEvent(openEv);
+        }
+
+        if(line.left(10)=="DATA_BLOCK")
+        {
+            cout << "DATA_BLOCK rx " << line.toLocal8Bit().constData() << endl;
+            std::tr1::shared_ptr<class Event> openEv(new Event("ALG_DATA_BLOCK"));
+            QString dataBlockArgs = dec.readLine();
+            if(this->algOutLog != NULL)
+                this->algOutLog->write(dataBlockArgs.toLocal8Bit().constData());
+            cout << line.mid(11).toLocal8Bit().constData() << endl;
+            int blockLen = line.mid(11).toInt();
+            cout << dataBlockArgs.toLocal8Bit().constData() << endl;
+            QString blockData = dec.read(blockLen);
         }
 
         //if(line.length()>0)
