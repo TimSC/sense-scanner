@@ -4,6 +4,7 @@
 #include "eventloop.h"
 #include <QtCore/QProcess>
 #include <QtCore/QFile>
+#include <vector>
 
 class AlgorithmThread : public MessagableThread
 {
@@ -42,7 +43,7 @@ public:
     int IsStopFlagged();
     void SetId(unsigned int idIn);
     ProcessState GetState();
-    void Update(class EventLoop &ev);
+    void Update();
     void Pause();
     void Unpause();
     void SendCommand(QString cmd);
@@ -57,6 +58,9 @@ protected:
     unsigned int threadId;
     int initDone;
     QFile *algOutLog;
+    class EventLoop *eventLoop;
+    QString dataBlock;
+    int dataBlockReceived;
 };
 
 #endif // ALGORITHM_H

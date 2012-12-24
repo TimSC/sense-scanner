@@ -54,8 +54,10 @@ def WorkerProcess(childPipeConn):
 				if paused and tracker is not None:
 					modelData = tracker.ToString()
 					print "DATA_BLOCK={0}".format(len(modelData))
-					print "MODEL"
+					sys.stdout.write("MODEL\n")
+					sys.stdout.flush()
 					print modelData
+					sys.stdout.flush()
 
 			if event[0]=="DATA_BLOCK":
 				args = event[1].split(" ")

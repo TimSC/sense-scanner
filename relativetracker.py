@@ -92,7 +92,7 @@ class RelativeTracker:
 		self.progress = 0.
 		self.maxSupportOffset = 20.
 		self.numSupportPix = 200 #500
-		self.numTrainingOffsets = 5000
+		self.numTrainingOffsets = 1000#5000
 		self.trainOffsetVar = 5.
 		self.supportPixOffsets = None
 		self.supportPixCols = None

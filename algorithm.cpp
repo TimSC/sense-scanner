@@ -1,4 +1,5 @@
 #include "algorithm.h"
+#include "localsleep.h"
 #include <iostream>
 #include <sstream>
 #include <assert.h>
@@ -54,6 +55,7 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->pausing = 0;
     this->initDone = 0;
     QString fina = "algout.txt";
+    this->eventLoop = eventLoopIn;
     this->algOutLog = new QFile(fina);
     this->algOutLog->open(QIODevice::WriteOnly);
 }
@@ -81,6 +83,7 @@ void AlgorithmProcess::Init()
     this->paused = 1;
     this->pausing = 0;
     this->initDone = 1;
+    this->dataBlockReceived = 0;
 }
 
 void AlgorithmProcess::Pause()
@@ -157,9 +160,15 @@ AlgorithmProcess::ProcessState AlgorithmProcess::GetState()
     return AlgorithmProcess::RUNNING;
 }
 
-void AlgorithmProcess::Update(class EventLoop &el)
+void AlgorithmProcess::Update()
 {
     QByteArray ret = this->readAllStandardOutput();
+    if(ret.length())
+    {
+        cout << "Read from alg " << ret.length() << endl;
+
+    }
+    class EventLoop &el = *this->eventLoop;
 
     QTextStream dec(&ret);
     dec.setCodec("UTF-8");
@@ -216,17 +225,20 @@ void AlgorithmProcess::Update(class EventLoop &el)
             el.SendEvent(openEv);
         }
 
-        if(line.left(10)=="DATA_BLOCK")
+        if(line.left(11)=="DATA_BLOCK=")
         {
-            cout << "DATA_BLOCK rx " << line.toLocal8Bit().constData() << endl;
-            std::tr1::shared_ptr<class Event> openEv(new Event("ALG_DATA_BLOCK"));
+            cout << line.toLocal8Bit().constData() << endl;
             QString dataBlockArgs = dec.readLine();
             if(this->algOutLog != NULL)
                 this->algOutLog->write(dataBlockArgs.toLocal8Bit().constData());
-            cout << line.mid(11).toLocal8Bit().constData() << endl;
             int blockLen = line.mid(11).toInt();
-            cout << dataBlockArgs.toLocal8Bit().constData() << endl;
             QString blockData = dec.read(blockLen);
+
+            //std::tr1::shared_ptr<class Event> dataEv(new Event("ALG_DATA_BLOCK"));
+            //dataEv->data = blockData.constData();
+            //el.SendEvent(dataEv);
+            this->dataBlock = blockData;
+            this->dataBlockReceived = 1;
         }
 
         //if(line.length()>0)
@@ -250,6 +262,7 @@ void AlgorithmProcess::SendCommand(QString cmd)
     QTextStream enc(this);
     enc.setCodec("UTF-8");
     enc << cmd;
+    enc.flush();
 }
 
 void AlgorithmProcess::SendRawData(QByteArray cmd)
@@ -271,9 +284,26 @@ unsigned int AlgorithmProcess::EncodedLength(QString cmd)
 
 QByteArray AlgorithmProcess::GetModel()
 {
+    //Send request to algorithm process
     assert(this->paused);
+    this->dataBlock = "";
+    this->dataBlockReceived = 0;
     this->SendCommand("SAVE_MODEL\n");
+
+    //Wait for response
+    this->waitForBytesWritten(10000);
+    int count = 0;
+    while(!this->dataBlockReceived && count < 300)
+    {
+        this->Update();
+        count ++;
+    }
+    if(!this->dataBlockReceived)
+    {
+        throw std::runtime_error("Algorithm process timed out during GetModel()");
+    }
+
     QByteArray out;
-    out.append("test");
+    out.append(this->dataBlock);
     return out;
 }

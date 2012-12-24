@@ -182,6 +182,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("AVBIN_OPEN_RESULT",*eventReceiver);
     this->eventLoop->AddListener("THREAD_PROGRESS_UPDATE",*eventReceiver);
     this->eventLoop->AddListener("THREAD_STATUS_CHANGED",*eventReceiver);
+    this->eventLoop->AddListener("ALG_DATA_BLOCK",*eventReceiver);
 
     //Create file reader worker thread
     this->mediaThread = new AvBinThread(this->eventLoop);
@@ -493,6 +494,10 @@ void MainWindow::Update()
         if(ev->type=="THREAD_STATUS_CHANGED")
         {
             this->RegenerateProcessingList();
+        }
+        if(ev->type=="ALG_DATA_BLOCK")
+        {
+
         }
     }
     catch(std::runtime_error e) {flushing = 0;}
