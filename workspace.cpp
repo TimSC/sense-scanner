@@ -300,6 +300,16 @@ int Workspace::Save()
     }
 
     out << "</sources>" << endl;
+    out << "<models>" << endl;
+    for(unsigned int i=0;i<this->processingList.size();i++)
+    {
+		std::tr1::shared_ptr<class AlgorithmProcess> alg = this->processingList[i];
+        QByteArray model = alg->GetModel();
+        out << "<model>" << endl;
+        out << model.toBase64() << endl;
+        out << "</model>" << endl;
+	}
+    out << "</models>" << endl;
     out << "</workspace>" << endl;
     f.close();
     return 1;

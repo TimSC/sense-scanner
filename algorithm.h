@@ -47,6 +47,7 @@ public:
     void SendCommand(QString cmd);
     void SendRawData(QByteArray cmd);
     unsigned int EncodedLength(QString cmd);
+    QByteArray GetModel();
 
 protected:
     int stopping;

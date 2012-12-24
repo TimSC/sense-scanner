@@ -143,7 +143,12 @@ AlgorithmProcess::ProcessState AlgorithmProcess::GetState()
     if(this->state() == QProcess::Starting)
         return AlgorithmProcess::STARTING;
     int running = (this->state() == QProcess::Running);
-    if(!running) return AlgorithmProcess::STOPPED;
+    if(!running)
+    {
+        this->stopping = 0;
+        this->paused = 1;
+        return AlgorithmProcess::STOPPED;
+    }
     if(this->paused) return AlgorithmProcess::PAUSED;
     if(this->stopping) return AlgorithmProcess::RUNNING_STOPPING;
     if(this->pausing) return AlgorithmProcess::RUNNING_PAUSING;
@@ -242,4 +247,13 @@ unsigned int AlgorithmProcess::EncodedLength(QString cmd)
     enc.setCodec("UTF-8");
     enc << cmd;
     return encodedCmd.length();
+}
+
+QByteArray AlgorithmProcess::GetModel()
+{
+    assert(this->paused);
+    this->SendCommand("SAVE_MODEL\n");
+    QByteArray out;
+    out.append("test");
+    return out;
 }
