@@ -263,17 +263,36 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
     if(cmd.left(11)=="DATA_BLOCK=")
     {
         cout << cmd.toLocal8Bit().constData() << endl;
-        /*QString dataBlockArgs = dec.readLine();
-        if(this->algOutLog != NULL)
-            this->algOutLog->write(dataBlockArgs.toLocal8Bit().constData());
-        int blockLen = line.mid(11).toInt();
-        QString blockData = dec.read(blockLen);
+        QString blockArg = this->ReadLineFromBuffer();
+        while(blockArg.length()==0)
+        {
+            blockArg = this->ReadLineFromBuffer();
+        }
+        int blockLen = cmd.mid(11).toInt();
+
+        //Wait for process to write the entire data block to standard output
+        while(this->algOutBuffer.length() < blockLen)
+        {
+            //Get standard output from algorithm process
+            QByteArray ret = this->readAllStandardOutput();
+            if(ret.length()>0)
+            {
+                cout << "Read from alg " << ret.length() << endl;
+            }
+            this->algOutBuffer.append(ret);
+            //int currentLen = this->algOutBuffer.length();
+        }
+
+        cout << "blocklen " << blockLen << endl;
+        QByteArray blockData = this->algOutBuffer.left(blockLen);
+        cout << "a " << blockData.length() << endl;
+        this->algOutBuffer = this->algOutBuffer.mid(blockLen);
 
         //std::tr1::shared_ptr<class Event> dataEv(new Event("ALG_DATA_BLOCK"));
         //dataEv->data = blockData.constData();
         //el.SendEvent(dataEv);
         this->dataBlock = blockData;
-        this->dataBlockReceived = 1;*/
+        this->dataBlockReceived = 1;
     }
 
     //if(line.length()>0)
@@ -325,10 +344,10 @@ QByteArray AlgorithmProcess::GetModel()
     this->SendCommand("SAVE_MODEL\n");
 
     //Wait for response
-    this->waitForBytesWritten(10000);
     int count = 0;
-    while(!this->dataBlockReceived && count < 300)
+    while(!this->dataBlockReceived && count < 30)
     {
+        this->waitForFinished(100);
         this->Update();
         count ++;
     }
@@ -339,5 +358,6 @@ QByteArray AlgorithmProcess::GetModel()
 
     QByteArray out;
     out.append(this->dataBlock);
+    int currentLen = out.length();
     return out;
 }

@@ -61,7 +61,7 @@ protected:
     int initDone;
     QFile *algOutLog;
     class EventLoop *eventLoop;
-    QString dataBlock;
+    QByteArray dataBlock;
     int dataBlockReceived;
     QByteArray algOutBuffer;
 };
