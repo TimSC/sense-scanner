@@ -308,8 +308,8 @@ class RelativeTracker:
 	def GetProgress(self):
 		return self.progress
 
-	def ToString(self):
-		return pickle.dumps(self, protocol=pickle.HIGHEST_PROTOCOL)
+	#def ToString(self):
+	#	return pickle.dumps(self, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 if __name__=="__main__":

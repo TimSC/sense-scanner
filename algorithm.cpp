@@ -219,6 +219,7 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
         tmp << cmd.mid(9).toLocal8Bit().constData() << "," << this->threadId;
         openEv->data = tmp.str();
         el.SendEvent(openEv);
+        return;
     }
 
     if(cmd=="NOW_PAUSED")
@@ -230,6 +231,7 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
         tmp << this->threadId << ",paused";
         openEv->data = tmp.str();
         el.SendEvent(openEv);
+        return;
     }
 
     if(cmd=="NOW_RUNNING")
@@ -241,6 +243,7 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
         tmp << this->threadId << ",running";
         openEv->data = tmp.str();
         el.SendEvent(openEv);
+        return;
     }
 
     if(cmd=="FINISHED")
@@ -254,6 +257,7 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
         tmp << this->threadId << ",finished";
         openEv->data = tmp.str();
         el.SendEvent(openEv);
+        return;
     }
 
     if(cmd.left(11)=="DATA_BLOCK=")
@@ -282,10 +286,11 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
         //el.SendEvent(dataEv);
         this->dataBlock = blockData;
         this->dataBlockReceived = 1;
+        return;
     }
 
-    //if(line.length()>0)
-    //    cout << line.toLocal8Bit().constData() << endl;
+    if(cmd.length()>0)
+        cout << "Algorithm: " << cmd.toLocal8Bit().constData() << endl;
 
 }
 

@@ -29,6 +29,13 @@ def WorkerProcess(childPipeConn):
 			if event[0]=="QUIT":
 				running = 0
 			if event[0]=="TRAIN":
+				if len(imgs) == 0:
+					print "Error: No images loaded in algorithm process"
+					return
+				if len(xmlTrees) == 0:
+					print "Error: No annotated positions loaded into algorithm process"
+					return
+
 				training = 1
 				if tracker is None:
 					tracker = relativetracker.RelativeTracker()
@@ -52,7 +59,8 @@ def WorkerProcess(childPipeConn):
 
 			if event[0]=="SAVE_MODEL":
 				if paused and tracker is not None:
-					modelData = bz2.compress(tracker.ToString())
+					trackerStr = pickle.dumps(tracker, protocol=pickle.HIGHEST_PROTOCOL)
+					modelData = bz2.compress(trackerStr)
 					print "DATA_BLOCK={0}".format(len(modelData))
 					sys.stdout.write("MODEL\n")
 					sys.stdout.flush()
@@ -76,16 +84,16 @@ def WorkerProcess(childPipeConn):
 						print "#Image buffer of incorrect size",width,height,len(event[2])
 						continue
 
-					im = Image.frombuffer("RGB", (width, height), event[2], 'raw', "RGB", 0, 1)
-					imgs[timestamp] = im
-					im.save("test"+str(imgCount)+".png")
+					#im = Image.frombuffer("RGB", (width, height), event[2], 'raw', "RGB", 0, 1)
+					#imgs[timestamp] = im
+					#im.save("test"+str(imgCount)+".png")
 					imgCount += 1
 
 				if args[0]=="XML_DATA":
 					#Parse XML from raw data block
 					xmlDataBlocks.append(event[2])
-					xmlfi = open("xml"+str(xmlBlocksCount)+".xml","wt")
-					xmlfi.write(event[2])
+					#xmlfi = open("xml"+str(xmlBlocksCount)+".xml","wt")
+					#xmlfi.write(event[2])
 					xmlBlocksCount += 1
 
 					tree = ET.fromstring(event[2])
@@ -96,6 +104,10 @@ def WorkerProcess(childPipeConn):
 						x = float(child.attrib['x'])
 						y = float(child.attrib['y'])
 						print pid, x, y
+
+				if args[0]=="MODEL":
+					modelData = bz2.uncompress(event[2])
+					tracker = pickle.loads(modelData)
 
 		if not paused and training and progress < 1.:
 			print "PROGRESS="+str(progress)
@@ -164,17 +176,16 @@ if __name__=="__main__":
 
 		if li[0:11] == "DATA_BLOCK=":
 			args = sys.stdin.readline()
-			if inputlog is not None: inputlog.write(args)
+			if inputlog is not None: 
+				inputlog.write(args)
+				inputlog.flush()
 			args = args.rstrip()
 			si = int(li[11:])
 			fi.write(args+"\n")
 			fi.write("Attmpt to read " +str(si)+"\n")
 			fi.flush()
 			dataBlock = sys.stdin.read(si)
-			fi.write("Read block " +str(len(dataBlock))+"\n")
-			#if inputlog is not None:
-			#	inputlog.write(dataBlock)
-			#	inputlog.flush()
+
 			parentPipeConn.send(["DATA_BLOCK", args, dataBlock])
 
 		if parentPipeConn.poll():
