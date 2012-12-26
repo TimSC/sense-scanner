@@ -108,6 +108,7 @@ def WorkerProcess(childPipeConn):
 				if args[0]=="MODEL":
 					modelData = bz2.uncompress(event[2])
 					tracker = pickle.loads(modelData)
+					print tracker
 
 		if not paused and training and progress < 1.:
 			print "PROGRESS="+str(progress)
