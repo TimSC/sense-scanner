@@ -66,6 +66,8 @@ def WorkerProcess(childPipeConn):
 					sys.stdout.flush()
 					print modelData
 					sys.stdout.flush()
+					print "Saved data size", len(modelData)
+					print "Uncompressed size", len(trackerStr)
 
 			if event[0]=="DATA_BLOCK":
 				args = event[1].split(" ")
@@ -108,12 +110,12 @@ def WorkerProcess(childPipeConn):
 				if args[0]=="MODEL":
 					print "Loading model from string", len(event[2])
 					try:
-						modelData = bz2.uncompress(event[2])
+						modelData = bz2.decompress(event[2])
 						print "Uncompressed size", len(modelData)
 						tracker = pickle.loads(modelData)
 						print tracker
-					except:
-						print "Decompression of data failed"
+					except Exception as exErr:
+						print "Decompression of data failed", str(exErr)
 
 
 		if not paused and training and progress < 1.:

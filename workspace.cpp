@@ -210,6 +210,8 @@ void Workspace::Clear()
     this->defaultFilename = "";
     this->visible.clear();
     this->processingList.clear();
+    this->threadProgress.clear();
+    this->threadId.clear();
 }
 
 void Workspace::Load(QString fina)
