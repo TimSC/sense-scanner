@@ -84,8 +84,8 @@ def WorkerProcess(childPipeConn):
 						print "#Image buffer of incorrect size",width,height,len(event[2])
 						continue
 
-					#im = Image.frombuffer("RGB", (width, height), event[2], 'raw', "RGB", 0, 1)
-					#imgs[timestamp] = im
+					im = Image.frombuffer("RGB", (width, height), event[2], 'raw', "RGB", 0, 1)
+					imgs[timestamp] = im
 					#im.save("test"+str(imgCount)+".png")
 					imgCount += 1
 
