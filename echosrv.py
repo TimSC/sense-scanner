@@ -1,5 +1,5 @@
 
-import multiprocessing, sys, time, pickle
+import multiprocessing, sys, time, pickle, bz2
 from PIL import Image
 import xml.etree.ElementTree as ET
 import relativetracker
@@ -52,7 +52,7 @@ def WorkerProcess(childPipeConn):
 
 			if event[0]=="SAVE_MODEL":
 				if paused and tracker is not None:
-					modelData = tracker.ToString()
+					modelData = bz2.compress(tracker.ToString())
 					print "DATA_BLOCK={0}".format(len(modelData))
 					sys.stdout.write("MODEL\n")
 					sys.stdout.flush()

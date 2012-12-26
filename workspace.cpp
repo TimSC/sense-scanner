@@ -315,7 +315,6 @@ int Workspace::Save()
         {
             std::tr1::shared_ptr<class AlgorithmProcess> alg = this->processingList[i];
             QByteArray model = alg->GetModel();
-            cout << "Model size" << model.length() << endl;
             out << "<model>" << endl;
             out << model.toBase64() << endl;
             out << "</model>" << endl;

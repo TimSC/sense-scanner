@@ -197,10 +197,6 @@ void AlgorithmProcess::Update()
 {
     //Get standard output from algorithm process
     QByteArray ret = this->readAllStandardOutput();
-    if(ret.length()>0)
-    {
-        cout << "Read from alg " << ret.length() << endl;
-    }
     this->algOutBuffer.append(ret);
 
     while(true)
@@ -262,7 +258,6 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
 
     if(cmd.left(11)=="DATA_BLOCK=")
     {
-        cout << cmd.toLocal8Bit().constData() << endl;
         QString blockArg = this->ReadLineFromBuffer();
         while(blockArg.length()==0)
         {
@@ -275,17 +270,11 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
         {
             //Get standard output from algorithm process
             QByteArray ret = this->readAllStandardOutput();
-            if(ret.length()>0)
-            {
-                cout << "Read from alg " << ret.length() << endl;
-            }
             this->algOutBuffer.append(ret);
             //int currentLen = this->algOutBuffer.length();
         }
 
-        cout << "blocklen " << blockLen << endl;
         QByteArray blockData = this->algOutBuffer.left(blockLen);
-        cout << "a " << blockData.length() << endl;
         this->algOutBuffer = this->algOutBuffer.mid(blockLen);
 
         //std::tr1::shared_ptr<class Event> dataEv(new Event("ALG_DATA_BLOCK"));
