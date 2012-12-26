@@ -62,6 +62,7 @@ def WorkerProcess(childPipeConn):
 
 			if event[0]=="SAVE_MODEL":
 				if paused and tracker is not None:
+					tracker.PrepareForPickle()
 					trackerStr = pickle.dumps(tracker, protocol=pickle.HIGHEST_PROTOCOL)
 					modelData = bz2.compress(trackerStr)
 					print "DATA_BLOCK={0}".format(len(modelData))
@@ -116,6 +117,7 @@ def WorkerProcess(childPipeConn):
 						modelData = bz2.decompress(event[2])
 						print "Uncompressed size", len(modelData)
 						tracker = pickle.loads(modelData)
+						tracker.PostUnPickle()
 						print tracker
 					except Exception as exErr:
 						print "Decompression of data failed", str(exErr)

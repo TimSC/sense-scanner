@@ -88,6 +88,7 @@ class RelativeTracker:
 	def __init__(self):
 		self.ims = []
 		self.imls = None
+		self.imsStr = None
 		self.pointsPosLi = []
 		self.progress = 0.
 		self.maxSupportOffset = 20.
@@ -311,6 +312,21 @@ class RelativeTracker:
 	#def ToString(self):
 	#	return pickle.dumps(self, protocol=pickle.HIGHEST_PROTOCOL)
 
+	def PrepareForPickle(self):
+		assert self.imsStr is None
+		self.imsStr = []
+		for im in self.ims:
+			self.imsStr.append(dict(data=im.tostring(), size=im.size, mode=im.mode))
+		self.ims = None
+		self.imls = None
+
+	def PostUnPickle(self):
+		assert self.imsStr is not None
+		ims, imls=[], []
+		for ims in self.imsStr:
+			im = Image.fromstring(**image)
+			ims.append(im)
+			imls.append(im.load())
 
 if __name__=="__main__":
 	tracker = pickle.load(open("tracker.dat","rb"))
