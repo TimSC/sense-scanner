@@ -61,6 +61,7 @@ protected:
     class EventLoop *eventLoop;
     QString dataBlock;
     int dataBlockReceived;
+    QByteArray algOutBuffer;
 };
 
 #endif // ALGORITHM_H

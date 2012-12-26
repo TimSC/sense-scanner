@@ -162,13 +162,13 @@ AlgorithmProcess::ProcessState AlgorithmProcess::GetState()
 
 void AlgorithmProcess::Update()
 {
+    class EventLoop &el = *this->eventLoop;
     QByteArray ret = this->readAllStandardOutput();
-    if(ret.length())
+    if(ret.length()<0)
     {
         cout << "Read from alg " << ret.length() << endl;
-
+        algOutBuffer.append(ret);
     }
-    class EventLoop &el = *this->eventLoop;
 
     QTextStream dec(&ret);
     dec.setCodec("UTF-8");
