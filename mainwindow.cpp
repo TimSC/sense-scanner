@@ -395,7 +395,11 @@ void MainWindow::RegenerateProcessingList()
                 if(state == AlgorithmProcess::RUNNING) displayLine << "Running " << progress;
                 if(state == AlgorithmProcess::RUNNING_PAUSING) displayLine << "Pausing... " << progress;
                 if(state == AlgorithmProcess::RUNNING_STOPPING) displayLine << "Stopping... " << progress;
-                if(state == AlgorithmProcess::PAUSED) displayLine << "Paused " << progress;
+                if(state == AlgorithmProcess::PAUSED)
+                {
+                    if(progress<1.f) displayLine << "Paused " << progress;
+                    else displayLine << "Done " << progress;
+                }
             }
             else
             {
