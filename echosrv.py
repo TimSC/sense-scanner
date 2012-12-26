@@ -106,9 +106,15 @@ def WorkerProcess(childPipeConn):
 						print pid, x, y
 
 				if args[0]=="MODEL":
-					modelData = bz2.uncompress(event[2])
-					tracker = pickle.loads(modelData)
-					print tracker
+					print "Loading model from string", len(event[2])
+					try:
+						modelData = bz2.uncompress(event[2])
+						print "Uncompressed size", len(modelData)
+						tracker = pickle.loads(modelData)
+						print tracker
+					except:
+						print "Decompression of data failed"
+
 
 		if not paused and training and progress < 1.:
 			print "PROGRESS="+str(progress)
@@ -183,7 +189,7 @@ if __name__=="__main__":
 			args = args.rstrip()
 			si = int(li[11:])
 			fi.write(args+"\n")
-			fi.write("Attmpt to read " +str(si)+"\n")
+			fi.write("Attempt to read " +str(si)+"\n")
 			fi.flush()
 			dataBlock = sys.stdin.read(si)
 

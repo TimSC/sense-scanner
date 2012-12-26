@@ -283,8 +283,7 @@ void Workspace::Load(QString fina)
                     QDomElement modelEle = modelNode.toElement(); // try to convert the node to an element.
                     if(modelEle.tagName() != "model") {modelNode = modelNode.nextSibling(); continue;}
 
-                    QByteArray modelData;
-                    modelData.fromBase64(modelEle.text().toLocal8Bit().constData());
+                    QByteArray modelData = QByteArray::fromBase64(modelEle.text().toLocal8Bit().constData());
                     std::tr1::shared_ptr<class AlgorithmProcess> alg(
                                 new class AlgorithmProcess(this->eventLoop, this));
                     alg->Init();
