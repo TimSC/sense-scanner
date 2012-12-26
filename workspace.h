@@ -2,20 +2,23 @@
 #define WORKSPACE_H
 
 #include <vector>
+#include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtCore/QSharedPointer>
 #include "mediabuffer.h"
 #include "scenecontroller.h"
 #include "algorithm.h"
 
-class Workspace
+class Workspace : public QObject
 {
+    Q_OBJECT
 public:
-    Workspace();
-    Workspace(const Workspace &other);
-    virtual ~Workspace();
+    explicit Workspace();
+    explicit Workspace(const Workspace &other);
     Workspace& operator= (const Workspace &other);
     bool operator!= (const Workspace &other);
+
+    void SetEventLoop(class EventLoop &eventLoopIn);
 
     //** Sources
     unsigned int AddSource(QString &fina);
@@ -37,7 +40,7 @@ public:
     AlgorithmProcess::ProcessState GetState(unsigned int num);
 
     int NumProcessesBlockingShutdown();
-    void Update(class EventLoop &ev);
+    void Update();
 
     unsigned int GetNumProcessing();
     QString GetProcessingName(unsigned int index);
@@ -49,14 +52,17 @@ public:
     int HasChanged();
 
 protected:
-    std::vector<std::tr1::shared_ptr<class AlgorithmProcess> > processingList;
     std::vector<QString> sources;
     QString defaultFilename;
     std::vector<SimpleSceneController *> tracks;
     std::vector<bool> visible;
     unsigned int nextThreadId;
+
+    std::vector<std::tr1::shared_ptr<class AlgorithmProcess> > processingList;
     std::vector<float> threadProgress;
+
     std::vector<unsigned int> threadId;
+    class EventLoop *eventLoop;
 };
 
 #endif // WORKSPACE_H

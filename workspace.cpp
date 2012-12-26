@@ -7,21 +7,19 @@
 #include <iostream>
 using namespace std;
 
-Workspace::Workspace()
+Workspace::Workspace() : QObject()
 {
     this->Clear();
     nextThreadId = 1;
+    this->eventLoop = NULL;
 }
 
-Workspace::Workspace(const Workspace &other)
+Workspace::Workspace(const Workspace &other) : QObject()
 {
     this->operator =(other);
 }
 
-Workspace::~Workspace()
-{
 
-}
 
 Workspace& Workspace::operator= (const Workspace &other)
 {
@@ -52,6 +50,11 @@ bool Workspace::operator!= (const Workspace &other)
         if(*tracks[i] != *other.tracks[i]) return true;
     }
     return false;
+}
+
+void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
+{
+    this->eventLoop = &eventLoopIn;
 }
 
 unsigned int Workspace::AddSource(QString &fina)
@@ -271,6 +274,33 @@ void Workspace::Load(QString fina)
                 }
 
             }
+
+            if(e.tagName() == "models")
+            {
+                QDomNode modelNode = e.firstChild();
+                while(!modelNode.isNull())
+                {
+                    QDomElement modelEle = modelNode.toElement(); // try to convert the node to an element.
+                    if(modelEle.tagName() != "model") {modelNode = modelNode.nextSibling(); continue;}
+
+                    QByteArray modelData;
+                    modelData.fromBase64(modelEle.text().toLocal8Bit().constData());
+                    std::tr1::shared_ptr<class AlgorithmProcess> alg(
+                                new class AlgorithmProcess(this->eventLoop, this));
+                    alg->Init();
+                    alg->Start();
+
+                    QString modelPreamble1 = QString("DATA_BLOCK=%1\n").arg(modelData.length());
+                    QString modelPreamble2 = QString("MODEL\n");
+                    alg->SendCommand(modelPreamble1);
+                    alg->SendCommand(modelPreamble2);
+                    alg->SendRawData(modelData);
+
+                    this->AddProcessing(alg);
+                    modelNode = modelNode.nextSibling();
+                }
+
+            }
         }
         n = n.nextSibling();
     }
@@ -336,8 +366,7 @@ void Workspace::SaveAs(QString &fina)
     this->Save();
 }
 
-
-void Workspace::Update(class EventLoop &ev)
+void Workspace::Update()
 {
     for(unsigned int i=0;i<this->processingList.size();i++)
     {

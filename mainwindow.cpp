@@ -174,6 +174,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Create inter thread message system
     this->eventLoop = new class EventLoop();
+    this->workspace.SetEventLoop(*this->eventLoop);
 
     //Create event listener
     this->eventReceiver = new class EventReceiver(this->eventLoop);
@@ -506,7 +507,7 @@ void MainWindow::Update()
     }
     catch(std::runtime_error e) {flushing = 0;}
 
-    this->workspace.Update(*this->eventLoop);
+    this->workspace.Update();
 }
 
 void MainWindow::NewWorkspace()
@@ -702,7 +703,7 @@ void MainWindow::TrainModelPressed()
             alg->SendCommand(imgPreamble1);
             alg->SendCommand(imgPreamble2);
             QByteArray imgRaw((const char *)img->bits(), len);
-                         alg->SendRawData(imgRaw);
+            alg->SendRawData(imgRaw);
             //for (int xx=0;xx<len;xx++) alg->SendCommand("x");
 
             //Get annotation data and sent it to the process
