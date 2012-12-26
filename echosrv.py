@@ -15,6 +15,7 @@ def WorkerProcess(childPipeConn):
 	imgs = {}
 	xmlDataBlocks = []
 	tracker = None
+	getProgress = False
 
 	while running:
 		if childPipeConn.poll():
@@ -28,6 +29,8 @@ def WorkerProcess(childPipeConn):
 				paused = 1
 			if event[0]=="QUIT":
 				running = 0
+			if event[0]=="GET_PROGRESS":
+				getProgress = True
 			if event[0]=="TRAIN":
 				if len(imgs) == 0:
 					print "Error: No images loaded in algorithm process"
@@ -117,16 +120,16 @@ def WorkerProcess(childPipeConn):
 					except Exception as exErr:
 						print "Decompression of data failed", str(exErr)
 
-
-		if not paused and training and progress < 1.:
-			print "PROGRESS="+str(progress)
+		if (not paused and training and progress < 1.) or getProgress:
 			tracker.Update()
 			progress = tracker.GetProgress()
+			print "PROGRESS="+str(progress)
+			getProgress = False
 		else:
 			time.sleep(0.1)
 
 		if progress >= 1. and not paused:
-			progress = 1
+			progress = 1.
 			paused = 1
 			print "PROGRESS="+str(progress)
 			print "NOW_PAUSED"
@@ -179,6 +182,9 @@ if __name__=="__main__":
 
 		if li == "TRAIN":
 			parentPipeConn.send(["TRAIN"])
+
+		if li == "GET_PROGRESS":
+			parentPipeConn.send(["GET_PROGRESS"])
 
 		if li == "SAVE_MODEL":
 			parentPipeConn.send(["SAVE_MODEL"])

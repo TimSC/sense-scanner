@@ -291,11 +291,15 @@ void Workspace::Load(QString fina)
                     alg->Init();
                     alg->Start();
 
+                    //Send data to algorithm process
                     QString modelPreamble1 = QString("DATA_BLOCK=%1\n").arg(modelData.length());
                     QString modelPreamble2 = QString("MODEL\n");
                     alg->SendCommand(modelPreamble1);
                     alg->SendCommand(modelPreamble2);
                     alg->SendRawData(modelData);
+
+                    //Ask process to provide progress update
+                    alg->SendCommand("GET_PROGRESS\n");
 
                     this->AddProcessing(alg);
                     modelNode = modelNode.nextSibling();
