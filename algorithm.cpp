@@ -160,91 +160,125 @@ AlgorithmProcess::ProcessState AlgorithmProcess::GetState()
     return AlgorithmProcess::RUNNING;
 }
 
+QString AlgorithmProcess::ReadLineFromBuffer()
+{
+    //Check if a new line has occured
+    int newLinePos = -1;
+    for(unsigned i=0;i<this->algOutBuffer.length();i++)
+    {
+        if(this->algOutBuffer[i]=='\n' && newLinePos == -1)
+        {
+            newLinePos = i;
+        }
+    }
+
+    //If no new line found, so return
+    if(newLinePos==-1)
+    {
+        QString empty;
+        return empty;
+    }
+
+    //Extract a string for recent command
+    QString cmd = this->algOutBuffer.left(newLinePos);
+    this->algOutBuffer = this->algOutBuffer.mid(newLinePos+1);
+
+    if(this->algOutLog != NULL)
+    {
+        this->algOutLog->write(cmd.toLocal8Bit().constData());
+        this->algOutLog->write("\n");
+        this->algOutLog->flush();
+    }
+
+    return cmd;
+}
+
 void AlgorithmProcess::Update()
 {
-    class EventLoop &el = *this->eventLoop;
+    //Get standard output from algorithm process
     QByteArray ret = this->readAllStandardOutput();
-    if(ret.length()<0)
+    if(ret.length()>0)
     {
         cout << "Read from alg " << ret.length() << endl;
-        algOutBuffer.append(ret);
     }
+    this->algOutBuffer.append(ret);
 
-    QTextStream dec(&ret);
-    dec.setCodec("UTF-8");
-    QString line;
-    do
+    while(true)
     {
-        line = dec.readLine();
-        if(line.length()==0) continue;
-        if(this->algOutLog != NULL)
-        {
-            this->algOutLog->write(line.toLocal8Bit().constData());
-            this->algOutLog->write("\n");
-            this->algOutLog->flush();
-        }
-        if(line.left(9)=="PROGRESS=")
-        {
-            std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_PROGRESS_UPDATE"));
-            std::ostringstream tmp;
-            tmp << line.mid(9).toLocal8Bit().constData() << "," << this->threadId;
-            openEv->data = tmp.str();
-            el.SendEvent(openEv);
-        }
-        if(line=="NOW_PAUSED")
-        {
-            this->paused = 1;
-
-            std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
-            std::ostringstream tmp;
-            tmp << this->threadId << ",paused";
-            openEv->data = tmp.str();
-            el.SendEvent(openEv);
-        }
-        if(line=="NOW_RUNNING")
-        {
-            this->paused = 0;
-
-            std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
-            std::ostringstream tmp;
-            tmp << this->threadId << ",running";
-            openEv->data = tmp.str();
-            el.SendEvent(openEv);
-        }
-
-        if(line=="FINISHED")
-        {
-            this->SendCommand("BYE\n");
-            this->waitForFinished(); //Just wait for final finishing of process
-            this->initDone = 0;
-
-            std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
-            std::ostringstream tmp;
-            tmp << this->threadId << ",finished";
-            openEv->data = tmp.str();
-            el.SendEvent(openEv);
-        }
-
-        if(line.left(11)=="DATA_BLOCK=")
-        {
-            cout << line.toLocal8Bit().constData() << endl;
-            QString dataBlockArgs = dec.readLine();
-            if(this->algOutLog != NULL)
-                this->algOutLog->write(dataBlockArgs.toLocal8Bit().constData());
-            int blockLen = line.mid(11).toInt();
-            QString blockData = dec.read(blockLen);
-
-            //std::tr1::shared_ptr<class Event> dataEv(new Event("ALG_DATA_BLOCK"));
-            //dataEv->data = blockData.constData();
-            //el.SendEvent(dataEv);
-            this->dataBlock = blockData;
-            this->dataBlockReceived = 1;
-        }
-
-        //if(line.length()>0)
-        //    cout << line.toLocal8Bit().constData() << endl;
+        QString cmd = ReadLineFromBuffer();
+        if(cmd.length() == 0) return;
+        this->ProcessAlgOutput(cmd);
     }
-    while (!line.isNull());
+}
+
+void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
+{
+    class EventLoop &el = *this->eventLoop;
+    if(cmd.length()==0) return;
+
+    if(cmd.left(9)=="PROGRESS=")
+    {
+        std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_PROGRESS_UPDATE"));
+        std::ostringstream tmp;
+        tmp << cmd.mid(9).toLocal8Bit().constData() << "," << this->threadId;
+        openEv->data = tmp.str();
+        el.SendEvent(openEv);
+    }
+
+    if(cmd=="NOW_PAUSED")
+    {
+        this->paused = 1;
+
+        std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
+        std::ostringstream tmp;
+        tmp << this->threadId << ",paused";
+        openEv->data = tmp.str();
+        el.SendEvent(openEv);
+    }
+
+    if(cmd=="NOW_RUNNING")
+    {
+        this->paused = 0;
+
+        std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
+        std::ostringstream tmp;
+        tmp << this->threadId << ",running";
+        openEv->data = tmp.str();
+        el.SendEvent(openEv);
+    }
+
+    if(cmd=="FINISHED")
+    {
+        this->SendCommand("BYE\n");
+        this->waitForFinished(); //Just wait for final finishing of process
+        this->initDone = 0;
+
+        std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
+        std::ostringstream tmp;
+        tmp << this->threadId << ",finished";
+        openEv->data = tmp.str();
+        el.SendEvent(openEv);
+    }
+
+    if(cmd.left(11)=="DATA_BLOCK=")
+    {
+        cout << cmd.toLocal8Bit().constData() << endl;
+        /*QString dataBlockArgs = dec.readLine();
+        if(this->algOutLog != NULL)
+            this->algOutLog->write(dataBlockArgs.toLocal8Bit().constData());
+        int blockLen = line.mid(11).toInt();
+        QString blockData = dec.read(blockLen);
+
+        //std::tr1::shared_ptr<class Event> dataEv(new Event("ALG_DATA_BLOCK"));
+        //dataEv->data = blockData.constData();
+        //el.SendEvent(dataEv);
+        this->dataBlock = blockData;
+        this->dataBlockReceived = 1;*/
+    }
+
+    //if(line.length()>0)
+    //    cout << line.toLocal8Bit().constData() << endl;
+
 }
 
 void AlgorithmProcess::SendCommand(QString cmd)

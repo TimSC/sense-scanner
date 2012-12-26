@@ -43,7 +43,9 @@ public:
     int IsStopFlagged();
     void SetId(unsigned int idIn);
     ProcessState GetState();
+    QString ReadLineFromBuffer();
     void Update();
+    void ProcessAlgOutput(QString &cmd);
     void Pause();
     void Unpause();
     void SendCommand(QString cmd);
