@@ -334,7 +334,7 @@ QByteArray AlgorithmProcess::GetModel()
 
     //Wait for response
     int count = 0;
-    while(!this->dataBlockReceived && count < 30)
+    while(!this->dataBlockReceived)
     {
         this->waitForFinished(100);
         this->Update();
