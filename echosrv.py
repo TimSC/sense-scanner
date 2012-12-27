@@ -64,6 +64,7 @@ def WorkerProcess(childPipeConn):
 				if paused and tracker is not None:
 					tracker.PrepareForPickle()
 					trackerStr = pickle.dumps(tracker, protocol=pickle.HIGHEST_PROTOCOL)
+					tracker.PostUnPickle()
 					modelData = bz2.compress(trackerStr)
 					print "DATA_BLOCK={0}".format(len(modelData))
 					sys.stdout.write("MODEL\n")

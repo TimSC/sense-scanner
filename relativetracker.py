@@ -109,6 +109,8 @@ class RelativeTracker:
 		#	rotationVar = 0.1,
 
 	def Init(self):
+		assert self.ims is not None
+
 		#Get number of tracking points
 		self.numTrackers = len(self.pointsPosLi[0])
 		for pts in self.pointsPosLi:
@@ -213,6 +215,7 @@ class RelativeTracker:
 
 
 	def EvaluateModel(self, trNum):
+		assert self.ims is not None
 
 		spOffsets = self.supportPixOffsets[trNum]
 		model = self.models[trNum]
@@ -247,13 +250,16 @@ class RelativeTracker:
 				print testOffset, predX, predY
 
 	def AddTrainingData(self, im, pointsPos):
+		assert self.ims is not None
 		self.imls = None
 		self.ims.append(im)
 		self.pointsPosLi.append(pointsPos)
 	
 	def ClearTrainingImages(self):
+		assert self.ims is not None
 		self.ims = []
 		self.imls = None
+		self.imsStr = None
 
 	def Update(self):
 
