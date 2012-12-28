@@ -49,14 +49,13 @@ protected:
 class AvBinThread : public MessagableThread
 {
 public:
-    AvBinThread(class EventLoop *eventLoopIn);
+    AvBinThread();
     virtual ~AvBinThread();
-    void SetId(int idIn);
+    void SetEventLoop(class EventLoop *eventLoopIn);
 
     void Update();
 protected:
     class AvBinBackend avBinBackend;
-    int id;
 };
 
 #endif // AVBINMEDIA_H

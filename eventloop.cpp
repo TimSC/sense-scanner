@@ -148,6 +148,7 @@ EventLoop::~EventLoop()
 
 void EventLoop::SendEvent(std::tr1::shared_ptr<class Event> event)
 {
+    assert(this!=NULL);
     //cout << "Sent event "<< event->type << endl;
     //Get a local copy of listeners
     this->mutex.lock();
@@ -220,12 +221,11 @@ unsigned long long EventLoop::GetId()
 
 //************************************
 
-MessagableThread::MessagableThread(class EventLoop *eventLoopIn)
+MessagableThread::MessagableThread()
 {
-    this->eventReceiver = new EventReceiver(eventLoopIn);
-    this->eventLoop = eventLoopIn;
-    this->eventLoop->AddListener("STOP_THREADS", *eventReceiver);
+    this->eventReceiver = NULL;
     this->stopThreads = 0;
+    this->id = 0;
 }
 
 MessagableThread::~MessagableThread()
@@ -237,8 +237,19 @@ MessagableThread::~MessagableThread()
     this->eventReceiver = NULL;
 }
 
+void MessagableThread::SetEventLoop(class EventLoop *eventLoopIn)
+{
+    if(this->eventReceiver!=NULL)
+        delete this->eventReceiver;
+    this->eventReceiver = new EventReceiver(eventLoopIn);
+    this->eventLoop = eventLoopIn;
+    QString eventName = QString("STOP_THREADS%1").arg(this->id);
+    this->eventLoop->AddListener(eventName.toLocal8Bit().constData(), *eventReceiver);
+}
+
 void MessagableThread::run()
 {
+    assert(this->eventLoop!=NULL);
     std::tr1::shared_ptr<class Event> startEvent (new Event("THREAD_STARTING"));
     this->eventLoop->SendEvent(startEvent);
 
@@ -331,4 +342,14 @@ int MessagableThread::IsStopFlagged()
 void MessagableThread::start (Priority priority)
 {
     QThread::start(priority);
+}
+
+void MessagableThread::SetId(int idIn)
+{
+    this->id = idIn;
+}
+
+int MessagableThread::GetId()
+{
+    return this->id;
 }

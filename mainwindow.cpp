@@ -186,12 +186,14 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("ALG_DATA_BLOCK",*eventReceiver);
 
     //Create file reader worker thread
-    this->mediaThreadFront = new AvBinThread(this->eventLoop);
+    this->mediaThreadFront = new AvBinThread();
     this->mediaThreadFront->SetId(0);
+    this->mediaThreadFront->SetEventLoop(this->eventLoop);
     this->mediaThreadFront->Start();
 
-    this->mediaThreadBack = new AvBinThread(this->eventLoop);
+    this->mediaThreadBack = new AvBinThread();
     this->mediaThreadBack->SetId(1);
+    this->mediaThreadBack->SetEventLoop(this->eventLoop);
     this->mediaThreadBack->Start();
 
     this->mediaInterfaceFront = new class AvBinMedia();
@@ -608,6 +610,7 @@ void MainWindow::ChangeVidSource(AvBinThread **mediaThread,
 {
     //Mark media interface as inactive
     mediaInterface->SetActive(0);
+    int threadId = (*mediaThread)->GetId();
 
     //Shut down media thread and delete
     int result = (*mediaThread)->Stop();
@@ -616,7 +619,9 @@ void MainWindow::ChangeVidSource(AvBinThread **mediaThread,
     *mediaThread = NULL;
 
     //Create a new source
-    *mediaThread = new AvBinThread(this->eventLoop);
+    *mediaThread = new AvBinThread();
+    (*mediaThread)->SetId(threadId);
+    (*mediaThread)->SetEventLoop(this->eventLoop);
     (*mediaThread)->Start();
 
     //Mark media interface as active

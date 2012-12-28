@@ -233,10 +233,9 @@ void AvBinMedia::SetActive(int activeIn)
 
 //*************************************************
 
-AvBinThread::AvBinThread(class EventLoop *eventLoopIn) : MessagableThread(eventLoopIn)
+AvBinThread::AvBinThread() : MessagableThread()
 {
 
-    this->avBinBackend.SetEventLoop(eventLoopIn);
 }
 
 AvBinThread::~AvBinThread()
@@ -257,7 +256,8 @@ void AvBinThread::Update()
         msleep(0);
 }
 
-void AvBinThread::SetId(int idIn)
+void AvBinThread::SetEventLoop(class EventLoop *eventLoopIn)
 {
-    this->id = idIn;
+    this->avBinBackend.SetEventLoop(eventLoopIn);
+    MessagableThread::SetEventLoop(eventLoopIn);
 }

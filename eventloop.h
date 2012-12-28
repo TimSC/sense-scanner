@@ -63,6 +63,7 @@ class EventLoop
 public:
     EventLoop();
     virtual ~EventLoop();
+
     void SendEvent(std::tr1::shared_ptr<class Event> event);
     void AddListener(std::string type, class EventReceiver &rx);
     void RemoveListener(class EventReceiver &rx);
@@ -77,9 +78,10 @@ protected:
 class MessagableThread : public QThread
 {
 public:
-    MessagableThread(class EventLoop *eventLoopIn);
+    MessagableThread();
     virtual ~MessagableThread();
 
+    void SetEventLoop(class EventLoop *eventLoopIn);
     void run();
     virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);
     int Stop();
@@ -87,6 +89,8 @@ public:
     int Start();
     int IsStopFlagged();
     virtual void Update()=0;
+    void SetId(int idIn);
+    int GetId();
 
 protected:
     void start (Priority priority = InheritPriority);
@@ -95,6 +99,7 @@ protected:
     int stopThreads;
     class EventLoop *eventLoop;
     Mutex mutex;
+    int id;
 };
 
 #endif // EVENTLOOP_H

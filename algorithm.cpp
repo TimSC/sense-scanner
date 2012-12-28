@@ -9,7 +9,7 @@ using namespace std;
 
 //**********************************
 
-AlgorithmThread::AlgorithmThread(class EventLoop *eventLoopIn, QObject *parent) : MessagableThread(eventLoopIn)
+AlgorithmThread::AlgorithmThread(class EventLoop *eventLoopIn, QObject *parent) : MessagableThread()
 {
     this->progress = 0.f;
     this->threadId = 0;
