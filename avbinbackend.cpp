@@ -69,7 +69,8 @@ void AvBinBackend::DoOpenFile(int requestId)
     this->fi = mod_avbin_open_filename(this->filename.c_str());
 
     //Create an event with the result
-    std::tr1::shared_ptr<class Event> resultEvent(new Event("AVBIN_OPEN_RESULT", requestId));
+    QString eventName = QString("AVBIN_OPEN_RESULT%1").arg(this->id);
+    std::tr1::shared_ptr<class Event> resultEvent(new Event(eventName.toLocal8Bit().constData(), requestId));
     assert(this->eventLoop);
     std::ostringstream tmp;
     tmp << (this->fi != NULL);
@@ -447,9 +448,12 @@ void AvBinBackend::SetEventLoop(class EventLoop *eventLoopIn)
     {
         this->eventReceiver = new class EventReceiver(eventLoopIn);
         this->eventLoop = eventLoopIn;
-        this->eventLoop->AddListener("AVBIN_OPEN_FILE", *this->eventReceiver);
-        this->eventLoop->AddListener("AVBIN_GET_DURATION", *this->eventReceiver);
-        this->eventLoop->AddListener("AVBIN_GET_FRAME", *this->eventReceiver);
+        QString eventName = QString("AVBIN_OPEN_FILE%1").arg(this->id);
+        this->eventLoop->AddListener(eventName.toLocal8Bit().constData(), *this->eventReceiver);
+        QString eventName2 = QString("AVBIN_GET_DURATION%1").arg(this->id);
+        this->eventLoop->AddListener(eventName2.toLocal8Bit().constData(), *this->eventReceiver);
+        QString eventName3 = QString("AVBIN_GET_FRAME%1").arg(this->id);
+        this->eventLoop->AddListener(eventName3.toLocal8Bit().constData(), *this->eventReceiver);
     }
 }
 
@@ -504,17 +508,19 @@ int AvBinBackend::PlayUpdate()
 
 void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
-    if(ev->type=="AVBIN_OPEN_FILE")
+    QString evType(ev->type.c_str());
+    if(evType.left(15)=="AVBIN_OPEN_FILE")
     {
         this->OpenFile(ev->data.c_str(), ev->id);
     }
-    if(ev->type=="AVBIN_GET_DURATION")
+    if(evType.left(18)=="AVBIN_GET_DURATION")
     {
         assert(this->eventLoop);
         try
         {
+            QString eventName = QString("AVBIN_DURATION_RESPONSE%1").arg(this->id);
             std::tr1::shared_ptr<class Event> response(
-                        new Event("AVBIN_DURATION_RESPONSE", ev->id));
+                        new Event(eventName.toLocal8Bit().constData(), ev->id));
             std::ostringstream tmp;
             tmp << this->Length();
             response->data = tmp.str();
@@ -522,15 +528,17 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         }
         catch (runtime_error &err)
         {
-            std::tr1::shared_ptr<class Event> fail(new Event("AVBIN_REQUEST_FAILED", ev->id));
+            QString eventName = QString("AVBIN_REQUEST_FAILED%1").arg(this->id);
+            std::tr1::shared_ptr<class Event> fail(new Event(eventName.toLocal8Bit().constData(), ev->id));
             fail->data = err.what();
             this->eventLoop->SendEvent(fail);
         }
     }
-    if(ev->type=="AVBIN_GET_FRAME")
+    if(evType.left(15)=="AVBIN_GET_FRAME")
     {
         unsigned long long ti = STR_TO_ULL(ev->data.c_str(),NULL,10);
-        std::tr1::shared_ptr<class Event> response(new Event("AVBIN_FRAME_RESPONSE", ev->id));
+        QString eventName = QString("AVBIN_FRAME_RESPONSE%1").arg(this->id);
+        std::tr1::shared_ptr<class Event> response(new Event(eventName.toLocal8Bit().constData(), ev->id));
         class DecodedFrame* decodedFrame = new DecodedFrame();
         response->raw = (uint8_t*) decodedFrame;
         int found = this->GetFrame(ti, *decodedFrame);
@@ -548,9 +556,10 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         {
             if(this->width==0 || this->height==0)
             {
-            //Something went wrong, so a failure event is generated
-            std::tr1::shared_ptr<class Event> fail(new Event("AVBIN_FRAME_FAILED", ev->id));
-            this->eventLoop->SendEvent(fail);
+                //Something went wrong, so a failure event is generated
+                QString eventName = QString("AVBIN_FRAME_FAILED%1").arg(this->id);
+                std::tr1::shared_ptr<class Event> fail(new Event(eventName.toLocal8Bit().constData(), ev->id));
+                this->eventLoop->SendEvent(fail);
             }
 
             //Return a placeholder image
