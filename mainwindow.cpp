@@ -186,12 +186,19 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("ALG_DATA_BLOCK",*eventReceiver);
 
     //Create file reader worker thread
-    this->mediaThread = new AvBinThread(this->eventLoop);
-    this->mediaThread->Start();
+    this->mediaThreadFront = new AvBinThread(this->eventLoop);
+    this->mediaThreadFront->Start();
 
-    this->mediaInterface = new class AvBinMedia();
-    this->mediaInterface->SetEventLoop(this->eventLoop);
-    this->mediaInterface->SetActive(1);
+    this->mediaThreadBack = new AvBinThread(this->eventLoop);
+    this->mediaThreadBack->Start();
+
+    this->mediaInterfaceFront = new class AvBinMedia();
+    this->mediaInterfaceFront->SetEventLoop(this->eventLoop);
+    this->mediaInterfaceFront->SetActive(1);
+
+    this->mediaInterfaceBack = new class AvBinMedia();
+    this->mediaInterfaceBack->SetEventLoop(this->eventLoop);
+    this->mediaInterfaceBack->SetActive(1);
 
     //Start event buffer timer
     this->timer = new QTimer();
@@ -200,7 +207,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
     this->setWindowTitle("Video Cognition System");
-    this->ui->widget->SetSource(this->mediaInterface);
+    this->ui->widget->SetSource(this->mediaInterfaceFront);
 
     this->ui->dataSources->setModel(&this->sourcesModel);
     this->RegenerateSourcesList();
@@ -231,14 +238,20 @@ MainWindow::~MainWindow()
     delete this->eventReceiver;
     this->eventReceiver = NULL;
 
-    if(this->mediaThread) delete this->mediaThread;
-    this->mediaThread = NULL;
+    if(this->mediaThreadFront) delete this->mediaThreadFront;
+    this->mediaThreadFront = NULL;
+
+    if(this->mediaThreadBack) delete this->mediaThreadBack;
+    this->mediaThreadBack = NULL;
 
     if(this->errMsg) delete this->errMsg;
     this->errMsg = NULL;
 
-    delete this->mediaInterface;
-    this->mediaInterface = NULL;
+    delete this->mediaInterfaceFront;
+    this->mediaInterfaceFront = NULL;
+
+    delete this->mediaInterfaceBack;
+    this->mediaInterfaceBack = NULL;
 
     delete ui;
 }
@@ -307,7 +320,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     this->ui->widget->SetSource(nullSrc);
 
     //Mark media interface as inactive
-    this->mediaInterface->SetActive(0);
+    this->mediaInterfaceFront->SetActive(0);
 
     //Signal worker threads to stop
     cout << "Signal worker threads to stop" << endl;
@@ -328,10 +341,16 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 
     //If threads still running, terminate them
-    if(this->mediaThread->isRunning())
+    if(this->mediaThreadFront->isRunning())
     {
-        cout << "Warning: terminating media tread" << endl;
-        this->mediaThread->terminate();
+        cout << "Warning: terminating front buffer media tread" << endl;
+        this->mediaThreadFront->terminate();
+    }
+
+    if(this->mediaThreadBack->isRunning())
+    {
+        cout << "Warning: terminating back buffer media tread" << endl;
+        this->mediaThreadBack->terminate();
     }
 
     //Continu shut down in parent object
@@ -595,23 +614,29 @@ void MainWindow::SelectedSourceChanged(unsigned int selectedRow)
     this->ui->widget->Pause();
 
     //Mark media interface as inactive
-    this->mediaInterface->SetActive(0);
+    this->mediaInterfaceFront->SetActive(0);
 
     //Shut down media thread and delete
-    int result = this->mediaThread->Stop();
+    int result = this->mediaThreadFront->Stop();
     cout << "stop thread result=" << result << endl;
-    delete(this->mediaThread);
-    this->mediaThread = NULL;
+    delete(this->mediaThreadFront);
+    this->mediaThreadFront = NULL;
+
+    result = this->mediaThreadBack->Stop();
+    cout << "stop thread result=" << result << endl;
+    delete(this->mediaThreadBack);
+    this->mediaThreadBack = NULL;
+
 
     //Create a new source
-    this->mediaThread = new AvBinThread(this->eventLoop);
-    this->mediaThread->Start();
+    this->mediaThreadFront = new AvBinThread(this->eventLoop);
+    this->mediaThreadFront->Start();
 
     //Mark media interface as active
-    this->mediaInterface->SetActive(1);
+    this->mediaInterfaceFront->SetActive(1);
 
     cout << "Opening " << fina.toLocal8Bit().constData() << endl;
-    this->mediaInterface->OpenFile(fina.toLocal8Bit().constData());
+    this->mediaInterfaceFront->OpenFile(fina.toLocal8Bit().constData());
 
     //Update scene controller
     SimpleSceneController *scene = this->workspace.GetTrack(selectedRow);
@@ -620,7 +645,7 @@ void MainWindow::SelectedSourceChanged(unsigned int selectedRow)
     this->annotationMenu = scene->MenuFactory(this->menuBar());
 
     //Set widget to use this source
-    this->ui->widget->SetSource(this->mediaInterface);
+    this->ui->widget->SetSource(this->mediaInterfaceFront);
 
 }
 
@@ -688,7 +713,7 @@ void MainWindow::TrainModelPressed()
             cout << annot->GetIndexTimestamp(fr) << endl;
             unsigned long long startTimestamp = 0, endTimestamp = 0;
             unsigned long long annotTimestamp = annot->GetIndexTimestamp(fr);
-            QSharedPointer<QImage> img = this->mediaInterface->Get(
+            QSharedPointer<QImage> img = this->mediaInterfaceFront->Get(
                         annotTimestamp, startTimestamp, endTimestamp);
             int len = img->byteCount();
             //cout << "Image bytes "<< len << endl;
