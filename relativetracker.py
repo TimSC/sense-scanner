@@ -328,11 +328,11 @@ class RelativeTracker:
 
 	def PostUnPickle(self):
 		assert self.imsStr is not None
-		ims, imls=[], []
+		self.ims, self.imls=[], []
 		for ims in self.imsStr:
 			im = Image.fromstring(**image)
-			ims.append(im)
-			imls.append(im.load())
+			self.ims.append(im)
+			self.imls.append(im.load())
 
 if __name__=="__main__":
 	tracker = pickle.load(open("tracker.dat","rb"))
