@@ -160,13 +160,13 @@ AlgorithmProcess::ProcessState AlgorithmProcess::GetState()
     return AlgorithmProcess::RUNNING;
 }
 
-QString AlgorithmProcess::ReadLineFromBuffer()
+QString AlgorithmProcess::ReadLineFromBuffer(QByteArray &buff)
 {
     //Check if a new line has occured
     int newLinePos = -1;
-    for(unsigned i=0;i<this->algOutBuffer.length();i++)
+    for(unsigned i=0;i<buff.length();i++)
     {
-        if(this->algOutBuffer[i]=='\n' && newLinePos == -1)
+        if(buff[i]=='\n' && newLinePos == -1)
         {
             newLinePos = i;
         }
@@ -180,10 +180,10 @@ QString AlgorithmProcess::ReadLineFromBuffer()
     }
 
     //Extract a string for recent command
-    QString cmd = this->algOutBuffer.left(newLinePos);
-    this->algOutBuffer = this->algOutBuffer.mid(newLinePos+1);
+    QString cmd = buff.left(newLinePos);
+    buff = buff.mid(newLinePos+1);
 
-    if(this->algOutLog != NULL)
+    if(buff != NULL)
     {
         this->algOutLog->write(cmd.toLocal8Bit().constData());
         this->algOutLog->write("\n");
@@ -201,9 +201,20 @@ void AlgorithmProcess::Update()
 
     while(true)
     {
-        QString cmd = ReadLineFromBuffer();
-        if(cmd.length() == 0) return;
+        QString cmd = ReadLineFromBuffer(this->algOutBuffer);
+        if(cmd.length() == 0) break;
         this->ProcessAlgOutput(cmd);
+    }
+
+    //Get errors from console error out
+    ret = this->readAllStandardError();
+    this->algErrBuffer.append(ret);
+
+    while(true)
+    {
+        QString err = ReadLineFromBuffer(this->algErrBuffer);
+        if(err.length() == 0) break;
+        cout << "Algorithm Error: " << err.toLocal8Bit().constData() << endl;
     }
 }
 
@@ -262,10 +273,10 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
 
     if(cmd.left(11)=="DATA_BLOCK=")
     {
-        QString blockArg = this->ReadLineFromBuffer();
+        QString blockArg = this->ReadLineFromBuffer(this->algOutBuffer);
         while(blockArg.length()==0)
         {
-            blockArg = this->ReadLineFromBuffer();
+            blockArg = this->ReadLineFromBuffer(this->algOutBuffer);
         }
         int blockLen = cmd.mid(11).toInt();
 

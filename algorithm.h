@@ -43,7 +43,7 @@ public:
     int IsStopFlagged();
     void SetId(unsigned int idIn);
     ProcessState GetState();
-    QString ReadLineFromBuffer();
+    QString ReadLineFromBuffer(QByteArray &buff);
     void Update();
     void ProcessAlgOutput(QString &cmd);
     void Pause();
@@ -64,6 +64,7 @@ protected:
     QByteArray dataBlock;
     int dataBlockReceived;
     QByteArray algOutBuffer;
+    QByteArray algErrBuffer;
 };
 
 #endif // ALGORITHM_H
