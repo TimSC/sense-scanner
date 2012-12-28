@@ -31,6 +31,7 @@ public:
     void SetEventLoop(class EventLoop *eventLoopIn);
     int OpenFile(QString fina);
     void SetActive(int activeIn);
+    void SetId(int idIn);
 
     int RequestFrame(long long unsigned ti);
     void Update(void (*frameCallback)(QImage& fr, unsigned long long startTimestamp,
@@ -42,6 +43,7 @@ protected:
     class EventReceiver *eventReceiver;
     class EventLoop *eventLoop;
     int active;
+    int id;
 };
 
 class AvBinThread : public MessagableThread
@@ -49,10 +51,12 @@ class AvBinThread : public MessagableThread
 public:
     AvBinThread(class EventLoop *eventLoopIn);
     virtual ~AvBinThread();
+    void SetId(int idIn);
 
     void Update();
 protected:
     class AvBinBackend avBinBackend;
+    int id;
 };
 
 #endif // AVBINMEDIA_H

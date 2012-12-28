@@ -187,16 +187,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Create file reader worker thread
     this->mediaThreadFront = new AvBinThread(this->eventLoop);
+    this->mediaThreadFront->SetId(0);
     this->mediaThreadFront->Start();
 
     this->mediaThreadBack = new AvBinThread(this->eventLoop);
+    this->mediaThreadBack->SetId(1);
     this->mediaThreadBack->Start();
 
     this->mediaInterfaceFront = new class AvBinMedia();
+    this->mediaInterfaceFront->SetId(0);
     this->mediaInterfaceFront->SetEventLoop(this->eventLoop);
     this->mediaInterfaceFront->SetActive(1);
 
     this->mediaInterfaceBack = new class AvBinMedia();
+    this->mediaInterfaceBack->SetId(1);
     this->mediaInterfaceBack->SetEventLoop(this->eventLoop);
     this->mediaInterfaceBack->SetActive(1);
 

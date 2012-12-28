@@ -14,6 +14,7 @@ AvBinMedia::AvBinMedia() : AbstractMedia()
     this->eventReceiver = NULL;
     this->eventLoop = NULL;
     this->active = 0;
+    this->id = 0;
 }
 
 AvBinMedia::~AvBinMedia()
@@ -29,8 +30,9 @@ int AvBinMedia::OpenFile(QString fina)
     if(!this->active)
         throw runtime_error("Media interface not active");
     assert(this->eventLoop);
-    unsigned long long id = this->eventLoop->GetId();
-    std::tr1::shared_ptr<class Event> openEv(new Event("AVBIN_OPEN_FILE", id));
+    unsigned long long evid = this->eventLoop->GetId();
+    QString eventName = QString("AVBIN_OPEN_FILE%1").arg(this->id);
+    std::tr1::shared_ptr<class Event> openEv(new Event(eventName.toLocal8Bit().constData(), evid));
     openEv->data = fina.toLocal8Bit().constData();
     this->eventLoop->SendEvent(openEv);
     return 1;
@@ -57,6 +59,10 @@ void RawImgToQImage(DecodedFrame *frame, QImage &img)
         }
 }
 
+void AvBinMedia::SetId(int idIn)
+{
+    this->id = idIn;
+}
 
 QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
                                        long long unsigned &outFrameStart,
@@ -71,8 +77,9 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
 
     //Request the frame from the backend thread
     assert(this->eventLoop != NULL);
-    unsigned long long id = this->eventLoop->GetId();
-    std::tr1::shared_ptr<class Event> getFrameEvent(new Event("AVBIN_GET_FRAME", id));
+    unsigned long long evid = this->eventLoop->GetId();
+    QString eventName = QString("AVBIN_GET_FRAME%1").arg(this->id);
+    std::tr1::shared_ptr<class Event> getFrameEvent(new Event(eventName.toLocal8Bit().constData(), evid));
     std::ostringstream tmp;
     tmp << ti * 1000;
     getFrameEvent->data = tmp.str();
@@ -116,8 +123,9 @@ long long unsigned AvBinMedia::Length() //Get length (ms)
     if(!this->active)
         throw runtime_error("Media interface not active");
 
-    unsigned long long id = this->eventLoop->GetId();
-    std::tr1::shared_ptr<class Event> durationEvent(new Event("AVBIN_GET_DURATION", id));
+    unsigned long long evid = this->eventLoop->GetId();
+    QString eventName = QString("AVBIN_GET_DURATION%1").arg(this->id);
+    std::tr1::shared_ptr<class Event> durationEvent(new Event(eventName.toLocal8Bit().constData(), evid));
     this->eventLoop->SendEvent(durationEvent);
     assert(this->eventReceiver);
     std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(id);
@@ -143,9 +151,12 @@ void AvBinMedia::SetEventLoop(class EventLoop *eventLoopIn)
     {
         this->eventReceiver = new class EventReceiver(eventLoopIn);
         this->eventLoop = eventLoopIn;
-        this->eventLoop->AddListener("AVBIN_DURATION_RESPONSE", *this->eventReceiver);
-        this->eventLoop->AddListener("AVBIN_FRAME_RESPONSE", *this->eventReceiver);
-        this->eventLoop->AddListener("AVBIN_FRAME_FAILED", *this->eventReceiver);
+        QString eventName = QString("AVBIN_DURATION_RESPONSE%1").arg(this->id);
+        this->eventLoop->AddListener(eventName.toLocal8Bit().constData(), *this->eventReceiver);
+        QString eventName2 = QString("AVBIN_FRAME_RESPONSE%1").arg(this->id);
+        this->eventLoop->AddListener(eventName2.toLocal8Bit().constData(), *this->eventReceiver);
+        QString eventName3 = QString("AVBIN_FRAME_FAILED%1").arg(this->id);
+        this->eventLoop->AddListener(eventName3.toLocal8Bit().constData(), *this->eventReceiver);
     }
 }
 
@@ -159,8 +170,9 @@ int AvBinMedia::RequestFrame(long long unsigned ti) //in milliseconds
 
     //Request the frame from the backend thread
     assert(this->eventLoop != NULL);
-    unsigned long long id = this->eventLoop->GetId();
-    std::tr1::shared_ptr<class Event> getFrameEvent(new Event("AVBIN_GET_FRAME", id));
+    unsigned long long evid = this->eventLoop->GetId();
+    QString eventName = QString("AVBIN_GET_FRAME%1").arg(this->id);
+    std::tr1::shared_ptr<class Event> getFrameEvent(new Event(eventName.toLocal8Bit().constData(), evid));
     std::ostringstream tmp;
     tmp << ti * 1000;
     getFrameEvent->data = tmp.str();
@@ -243,4 +255,9 @@ void AvBinThread::Update()
         msleep(10);
     else
         msleep(0);
+}
+
+void AvBinThread::SetId(int idIn)
+{
+    this->id = idIn;
 }
