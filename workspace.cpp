@@ -350,8 +350,12 @@ int Workspace::Save()
         {
             std::tr1::shared_ptr<class AlgorithmProcess> alg = this->processingList[i];
             QByteArray model = alg->GetModel();
+            QByteArray modelBase64 = model.toBase64();
             out << "<model>" << endl;
-            out << model.toBase64() << endl;
+            for(unsigned int pos=0;pos<modelBase64.length();pos+=512)
+            {
+                out << modelBase64.mid(pos, 512) << endl;
+            }
             out << "</model>" << endl;
         }
         catch(std::runtime_error err)
