@@ -733,13 +733,24 @@ void MainWindow::TrainModelPressed()
 void MainWindow::ApplyModelPressed()
 {
     cout << "ApplyModelPressed" << endl;
-    QItemSelectionModel *selection = this->ui->dataSources->selectionModel();
+    QItemSelectionModel *modelSelection = this->ui->processingView->selectionModel();
+    QItemSelectionModel *srcSelection = this->ui->dataSources->selectionModel();
+    assert(modelSelection!=NULL);
+    assert(srcSelection!=NULL);
+    QModelIndexList modelSelList = modelSelection->selectedRows(0);
+    QModelIndexList srcSelList = srcSelection->selectedRows(0);
 
-    if(this->errMsg == NULL)
-        this->errMsg = new QMessageBox(this);
-    this->errMsg->setWindowTitle("Error: Not implemented");
-    this->errMsg->setText("Not implemented.");
-    this->errMsg->exec();
+    for(unsigned int i=0;i<srcSelList.size();i++)
+    {
+        QModelIndex &ind = srcSelList[i];
+        cout << "src "<< ind.row() << "," << ind.column() << endl;
+    }
+
+    for(unsigned int i=0;i<modelSelList.size();i++)
+    {
+        QModelIndex &ind = modelSelList[i];
+        cout << "model "<< ind.row() << "," << ind.column() << endl;
+    }
 
 }
 
