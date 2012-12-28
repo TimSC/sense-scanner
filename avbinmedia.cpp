@@ -128,8 +128,9 @@ long long unsigned AvBinMedia::Length() //Get length (ms)
     std::tr1::shared_ptr<class Event> durationEvent(new Event(eventName.toLocal8Bit().constData(), evid));
     this->eventLoop->SendEvent(durationEvent);
     assert(this->eventReceiver);
-    std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(id);
-    assert(ev->type == "AVBIN_DURATION_RESPONSE");
+    std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(evid);
+    QString eventNameRx = QString("AVBIN_DURATION_RESPONSE%1").arg(this->id);
+    assert(ev->type == eventNameRx.toLocal8Bit().constData());
     return ROUND_TIMESTAMP(STR_TO_ULL(ev->data.c_str(),NULL,10) / 1000.);
 }
 
