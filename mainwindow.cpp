@@ -598,6 +598,30 @@ void MainWindow::SelectedSourceChanged(const QModelIndex ind)
     this->SelectedSourceChanged(selectedRow);
 }
 
+void MainWindow::ChangeVidSource(AvBinThread **mediaThread,
+    AvBinMedia *mediaInterface,
+    QString fina)
+{
+    //Mark media interface as inactive
+    mediaInterface->SetActive(0);
+
+    //Shut down media thread and delete
+    int result = (*mediaThread)->Stop();
+    cout << "stop thread result=" << result << endl;
+    delete(*mediaThread);
+    *mediaThread = NULL;
+
+    //Create a new source
+    *mediaThread = new AvBinThread(this->eventLoop);
+    (*mediaThread)->Start();
+
+    //Mark media interface as active
+    mediaInterface->SetActive(1);
+
+    cout << "Opening " << fina.toLocal8Bit().constData() << endl;
+    mediaInterface->OpenFile(fina.toLocal8Bit().constData());
+}
+
 void MainWindow::SelectedSourceChanged(unsigned int selectedRow)
 {
     if(selectedRow < 0 && selectedRow >= this->workspace.GetNumSources())
@@ -613,30 +637,7 @@ void MainWindow::SelectedSourceChanged(unsigned int selectedRow)
     //Pause video
     this->ui->widget->Pause();
 
-    //Mark media interface as inactive
-    this->mediaInterfaceFront->SetActive(0);
-
-    //Shut down media thread and delete
-    int result = this->mediaThreadFront->Stop();
-    cout << "stop thread result=" << result << endl;
-    delete(this->mediaThreadFront);
-    this->mediaThreadFront = NULL;
-
-    result = this->mediaThreadBack->Stop();
-    cout << "stop thread result=" << result << endl;
-    delete(this->mediaThreadBack);
-    this->mediaThreadBack = NULL;
-
-
-    //Create a new source
-    this->mediaThreadFront = new AvBinThread(this->eventLoop);
-    this->mediaThreadFront->Start();
-
-    //Mark media interface as active
-    this->mediaInterfaceFront->SetActive(1);
-
-    cout << "Opening " << fina.toLocal8Bit().constData() << endl;
-    this->mediaInterfaceFront->OpenFile(fina.toLocal8Bit().constData());
+    this->ChangeVidSource(&this->mediaThreadFront, this->mediaInterfaceFront, fina);
 
     //Update scene controller
     SimpleSceneController *scene = this->workspace.GetTrack(selectedRow);

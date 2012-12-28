@@ -110,6 +110,9 @@ public slots:
     void LoadWorkspace();
     void SaveWorkspace();
     void SaveAsWorkspace();
+    void ChangeVidSource(AvBinThread **mediaThread,
+                         AvBinMedia *mediaInterface,
+                         QString fina);
     void SelectedSourceChanged(const QModelIndex current);
     void SelectedSourceChanged(unsigned int selectedRow);
     QString CheckIfDataShouldBeDiscarded(QString discardMsg);
