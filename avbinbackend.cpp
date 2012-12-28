@@ -25,6 +25,7 @@ AvBinBackend::AvBinBackend()
     this->eventLoop = NULL;
     this->audioBuffer = NULL;
     this->audioBufferSize = 0;
+    this->id = 0;
 }
 
 AvBinBackend::AvBinBackend(const AvBinBackend &other)
@@ -450,6 +451,11 @@ void AvBinBackend::SetEventLoop(class EventLoop *eventLoopIn)
         this->eventLoop->AddListener("AVBIN_GET_DURATION", *this->eventReceiver);
         this->eventLoop->AddListener("AVBIN_GET_FRAME", *this->eventReceiver);
     }
+}
+
+void AvBinBackend::SetId(int idIn)
+{
+    this->id = idIn;
 }
 
 int AvBinBackend::PlayUpdate()

@@ -52,6 +52,7 @@ public:
     AvBinThread();
     virtual ~AvBinThread();
     void SetEventLoop(class EventLoop *eventLoopIn);
+    void SetId(int idIn);
 
     void Update();
 protected:

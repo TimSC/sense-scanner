@@ -261,3 +261,9 @@ void AvBinThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->avBinBackend.SetEventLoop(eventLoopIn);
     MessagableThread::SetEventLoop(eventLoopIn);
 }
+
+void AvBinThread::SetId(int idIn)
+{
+    this->avBinBackend.SetId(idIn);
+    MessagableThread::SetId(idIn);
+}

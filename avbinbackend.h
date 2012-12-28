@@ -46,6 +46,7 @@ public:
     void PrintAVbinFileInfo(AVbinFileInfo &info);
     void PrintAVbinStreamInfo(AVbinStreamInfo &info);
     void SetEventLoop(class EventLoop *eventLoopIn);
+    void SetId(int idIn);
 
 protected:
     AVbinFile *fi;
@@ -68,6 +69,7 @@ protected:
 
     uint8_t *audioBuffer;
     unsigned audioBufferSize;
+    int id;
 };
 
 #endif // AVBINBACKEND_H
