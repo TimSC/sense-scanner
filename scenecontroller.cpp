@@ -58,6 +58,7 @@ SimpleSceneController::SimpleSceneController(QObject *parent)
     this->frameEndTime = 0;
     this->frameRequestTime = 0;
     this->annotationTime = 0;
+    this->annotationTimeSet = false;
     this->scene = QSharedPointer<MouseGraphicsScene>(new MouseGraphicsScene(parent));
     this->scene->SetSceneControl(this);
     this->activePoint = -1;
@@ -102,6 +103,7 @@ SimpleSceneController& SimpleSceneController::operator= (const SimpleSceneContro
     this->frameEndTime = other.frameEndTime;
     this->frameRequestTime = other.frameRequestTime;
     this->annotationTime = other.annotationTime;
+    this->annotationTimeSet = other.annotationTimeSet;
     this->scene = QSharedPointer<MouseGraphicsScene>(new MouseGraphicsScene(other.parent()));
     this->scene->SetSceneControl(this);
     this->activePoint = other.activePoint;
@@ -237,12 +239,13 @@ void SimpleSceneController::Redraw()
     //Get positions for current frame
     std::vector<std::vector<float> > currentFrame;
     unsigned long long getAnnotationTime = 0;
-    this->GetAnnotationBetweenTimestamps(this->frameStartTime,
+    int found = this->GetAnnotationBetweenTimestamps(this->frameStartTime,
                                          this->frameEndTime,
                                          this->frameRequestTime,
                                          currentFrame,
                                          getAnnotationTime);
     this->annotationTime = getAnnotationTime;
+    this->annotationTimeSet = found;
 
     //Recreate scene and convert image
     this->scene->clear();
@@ -549,6 +552,11 @@ unsigned long long AbsDiff(unsigned long long a, unsigned long long b)
 
 unsigned long long SimpleSceneController::GetSeekFowardTime()
 {
+    assert(this!=NULL);
+    unsigned long long queryTime = this->annotationTime;
+    if(!this->annotationTimeSet)
+        queryTime = this->frameRequestTime;
+
     unsigned long long bestDiff = 0;
     unsigned long long bestFrame = 0;
     int bestSet = 0;
@@ -557,14 +565,14 @@ unsigned long long SimpleSceneController::GetSeekFowardTime()
     {
         const unsigned long long &ti = it->first;
         std::vector<std::vector<float> >&framePos = it->second;
-        if(ti < this->frameEndTime) continue; //Ignore frames in the past
-        unsigned long long diff = AbsDiff(ti, this->annotationTime);
+        if(ti <= queryTime) continue; //Ignore frames in the past
+        unsigned long long diff = AbsDiff(ti, queryTime);
         if(!bestSet || diff < bestDiff)
         {
-            cout << bestFrame << "," << bestDiff << endl;
             bestDiff = diff;
             bestFrame = ti;
             bestSet = 1;
+            cout << bestFrame << "," << bestDiff << endl;
         }
     }
     if(bestSet)
@@ -575,6 +583,10 @@ unsigned long long SimpleSceneController::GetSeekFowardTime()
 unsigned long long SimpleSceneController::GetSeekBackTime()
 {
     assert(this!=NULL);
+    unsigned long long queryTime = this->annotationTime;
+    if(!this->annotationTimeSet)
+        queryTime = this->frameRequestTime;
+
     unsigned long long bestDiff = 0;
     unsigned long long bestFrame = 0;
     int bestSet = 0;
@@ -583,8 +595,8 @@ unsigned long long SimpleSceneController::GetSeekBackTime()
     {
         const unsigned long long &ti = it->first;
         std::vector<std::vector<float> >&framePos = it->second;
-        if(ti >= this->frameStartTime) continue; //Ignore frames in the future
-        unsigned long long diff = AbsDiff(ti, this->annotationTime);
+        if(ti >= queryTime) continue; //Ignore frames in the future
+        unsigned long long diff = AbsDiff(ti, queryTime);
         if(!bestSet || diff < bestDiff)
         {
             cout << bestFrame << "," << bestDiff << endl;

@@ -112,6 +112,7 @@ protected:
     std::vector<std::vector<int> > links;
     unsigned long long frameStartTime, frameEndTime, frameRequestTime;
     unsigned long long annotationTime;
+    int annotationTimeSet;
     int mouseOver;
     QPushButton *markFrameButton;
     std::vector<std::vector<float> > shape; //contains the default shape
