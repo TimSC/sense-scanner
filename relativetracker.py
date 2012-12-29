@@ -329,8 +329,8 @@ class RelativeTracker:
 	def PostUnPickle(self):
 		assert self.imsStr is not None
 		self.ims, self.imls=[], []
-		for ims in self.imsStr:
-			im = Image.fromstring(**image)
+		for imDat in self.imsStr:
+			im = Image.fromstring(**imDat)
 			self.ims.append(im)
 			self.imls.append(im.load())
 
