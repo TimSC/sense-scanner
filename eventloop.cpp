@@ -243,7 +243,7 @@ void MessagableThread::SetEventLoop(class EventLoop *eventLoopIn)
         delete this->eventReceiver;
     this->eventReceiver = new EventReceiver(eventLoopIn);
     this->eventLoop = eventLoopIn;
-    QString eventName = QString("STOP_THREADS%1").arg(this->id);
+    QString eventName = QString("STOP_THREADS");
     this->eventLoop->AddListener(eventName.toLocal8Bit().constData(), *eventReceiver);
 }
 
@@ -284,7 +284,8 @@ void MessagableThread::run()
 
 void MessagableThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
-    if(ev->type == "STOP_THREADS")
+    QString evType = ev->type.c_str();
+    if(evType.left(12) == "STOP_THREADS")
     {
         this->mutex.lock();
         this->stopThreads = 1;
