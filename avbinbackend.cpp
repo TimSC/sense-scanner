@@ -476,7 +476,8 @@ int AvBinBackend::PlayUpdate()
         std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
         //cout << "Event type " << ev->type << endl;
         foundEvent++;
-        if(ev->type == "AVBIN_GET_FRAME")
+        QString evType = ev->type.c_str();
+        if(evType.left(15) == "AVBIN_GET_FRAME")
             this->incomingFrameRequests.push_back(ev);
         else
             this->HandleEvent(ev);
