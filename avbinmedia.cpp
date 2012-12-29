@@ -199,7 +199,8 @@ void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long sta
         {
             assert(this->eventReceiver);
             std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
-            if(ev->type == "AVBIN_FRAME_RESPONSE")
+            QString evType = ev->type.c_str();
+            if(evType.left(20) == "AVBIN_FRAME_RESPONSE")
             {
                 DecodedFrame *frame = (DecodedFrame *)ev->raw;
 
