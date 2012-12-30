@@ -14,6 +14,7 @@ def WorkerProcess(childPipeConn):
 	xmlTrees = []
 	imgs = {}
 	xmlDataBlocks = []
+	modelReady = False
 	tracker = None
 	getProgress = False
 
@@ -32,13 +33,14 @@ def WorkerProcess(childPipeConn):
 			if event[0]=="GET_PROGRESS":
 				getProgress = True
 			if event[0]=="TRAIN":
-				if len(imgs) == 0:
+				if len(imgs) == 0 and not modelReady:
 					print "Error: No images loaded in algorithm process"
 					return
-				if len(xmlTrees) == 0:
+				if len(xmlTrees) == 0 and not modelReady:
 					print "Error: No annotated positions loaded into algorithm process"
 					return
 
+				modelReady = 1
 				training = 1
 				if tracker is None:
 					tracker = relativetracker.RelativeTracker()
@@ -120,6 +122,7 @@ def WorkerProcess(childPipeConn):
 						tracker = pickle.loads(modelData)
 						tracker.PostUnPickle()
 						print tracker
+						modelReady = True
 					except Exception as exErr:
 						print "Decompression of data failed", str(exErr)
 
