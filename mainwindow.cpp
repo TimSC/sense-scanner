@@ -799,17 +799,31 @@ void MainWindow::ApplyModelToAnnotation(std::tr1::shared_ptr<class AlgorithmProc
     //Get subsequent frames
     while(nextTi < srcDuration * 1000)
     {
+        if(nextTi == 55030000)
+        {
+            nextTi = 55030000;
+        }
+
+        unsigned long long milsec = (unsigned long long)(nextTi / 1000. + 0.5);
         try
         {
             img = this->mediaInterfaceBack->Get(
-                    (unsigned long long)(nextTi / 1000. + 0.5),
-                    startTimestamp, endTimestamp);
-            cout << "startTimestamp " << startTimestamp << endl;
-            cout << "endTimestamp " << endTimestamp << endl;
+                    milsec,
+                    startTimestamp,
+                    endTimestamp);
+            cout << "req " << milsec << "(" <<startTimestamp<< "," << endTimestamp<<")"<< endl;
         }
         catch (std::runtime_error &err)
         {
-            cout << "Timeout getting frame " << nextTi << endl;
+            cout << "Error getting frame " << nextTi << endl;
+            break;
+        }
+
+        if(endTimestamp < milsec)
+        {
+            cout << "nextTi " << nextTi << endl;
+            cout << "srcDuration " << srcDuration << endl;
+            throw runtime_error("Earlier frame found than was requested");
         }
 
         //Estimate mid time of next frame

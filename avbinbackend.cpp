@@ -555,25 +555,10 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         }
         else
         {
-            if(this->width==0 || this->height==0)
-            {
-                //Something went wrong, so a failure event is generated
-                QString eventName = QString("AVBIN_FRAME_FAILED%1").arg(this->id);
-                std::tr1::shared_ptr<class Event> fail(new Event(eventName.toLocal8Bit().constData(), ev->id));
-                this->eventLoop->SendEvent(fail);
-            }
-
-            //Return a placeholder image
-            unsigned int w = this->width;
-            unsigned int h = this->height;
-            if(w == 0) w = 100; //Prevent a zero sized image
-            if(h == 0) h = 100;
-            unsigned buffSize = h*w*3;
-            decodedFrame->AllocateSize(buffSize);
-            decodedFrame->height = h;
-            decodedFrame->width = w;
-            response->rawSize = sizeof(class DecodedFrame);
-            this->eventLoop->SendEvent(response);
+            //Something went wrong, so a failure event is generated
+            QString eventName = QString("AVBIN_FRAME_FAILED%1").arg(this->id);
+            std::tr1::shared_ptr<class Event> fail(new Event(eventName.toLocal8Bit().constData(), ev->id));
+            this->eventLoop->SendEvent(fail);
         }
     }
 }
