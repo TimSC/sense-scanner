@@ -289,7 +289,7 @@ void Workspace::Load(QString fina)
                     std::tr1::shared_ptr<class AlgorithmProcess> alg(
                                 new class AlgorithmProcess(this->eventLoop, this));
                     alg->Init();
-                    alg->Start();
+                    alg->Pause();
 
                     //Send data to algorithm process
                     QString modelPreamble1 = QString("DATA_BLOCK=%1\n").arg(modelData.length());
