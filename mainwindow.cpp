@@ -773,6 +773,51 @@ void MainWindow::TrainModelPressed()
 void MainWindow::ApplyModelToAnnotation(std::tr1::shared_ptr<class AlgorithmProcess> alg)
 {
 
+    //Get duration
+    long long unsigned srcDuration = this->mediaInterfaceBack->Length();
+
+    //Get first frame
+    QSharedPointer<QImage> img;
+    unsigned long long startTimestamp = 0, endTimestamp = 0;
+    try
+    {
+        img = this->mediaInterfaceBack->Get(
+                0, startTimestamp, endTimestamp);
+        cout << "startTimestamp " << startTimestamp << endl;
+        cout << "endTimestamp " << endTimestamp << endl;
+    }
+    catch (std::runtime_error &err)
+    {
+        cout << "Timeout getting frame 0" << endl;
+    }
+
+    //Estimate mid time of next frame
+    unsigned long long frameDuration = endTimestamp - startTimestamp;
+    unsigned long long avTi = (unsigned long long)(0.5 * (startTimestamp + endTimestamp) + 0.5);
+    unsigned long long nextTi = avTi + frameDuration;
+
+    //Get subsequent frames
+    while(nextTi < srcDuration * 1000)
+    {
+        try
+        {
+            img = this->mediaInterfaceBack->Get(
+                    nextTi, startTimestamp, endTimestamp);
+            cout << "startTimestamp " << startTimestamp << endl;
+            cout << "endTimestamp " << endTimestamp << endl;
+        }
+        catch (std::runtime_error &err)
+        {
+            cout << "Timeout getting frame " << nextTi << endl;
+        }
+
+        //Estimate mid time of next frame
+        frameDuration = endTimestamp - startTimestamp;
+        avTi = (unsigned long long)(0.5 * (startTimestamp + endTimestamp) + 0.5);
+        nextTi = avTi + frameDuration;
+    }
+
+
     /*assert(img->format() == QImage::Format_RGB888);
     QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(len);
     QString imgPreamble2 = QString("RGB_IMAGE_DATA TIMESTAMP=%1 HEIGHT=%2 WIDTH=%3\n").

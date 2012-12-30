@@ -89,6 +89,11 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
     assert(this->eventReceiver);
     std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(evid,timeout);
     QString evType = ev->type.c_str();
+    if(evType.left(18) == "AVBIN_FRAME_FAILED")
+    {
+        throw runtime_error("Get frame failed");
+    }
+
     assert(evType.left(20) == "AVBIN_FRAME_RESPONSE");
     assert(ev->raw!=NULL);
 
