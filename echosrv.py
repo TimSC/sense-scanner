@@ -35,10 +35,10 @@ def WorkerProcess(childPipeConn):
 			if event[0]=="TRAIN":
 				if len(imgs) == 0 and not modelReady:
 					print "Error: No images loaded in algorithm process"
-					return
+					continue
 				if len(xmlTrees) == 0 and not modelReady:
 					print "Error: No annotated positions loaded into algorithm process"
-					return
+					continue
 
 				modelReady = 1
 				training = 1
