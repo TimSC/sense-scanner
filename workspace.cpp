@@ -111,6 +111,11 @@ unsigned int Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProces
     return this->nextThreadId;
 }
 
+std::tr1::shared_ptr<class AlgorithmProcess> Workspace::GetProcessing(unsigned int num)
+{
+    return this->processingList[num];
+}
+
 void Workspace::PauseProcessing(unsigned int num)
 {
     assert(num < this->processingList.size());

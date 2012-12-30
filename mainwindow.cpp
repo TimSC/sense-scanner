@@ -770,6 +770,21 @@ void MainWindow::TrainModelPressed()
     this->RegenerateProcessingList();
 }
 
+void MainWindow::ApplyModelToAnnotation(std::tr1::shared_ptr<class AlgorithmProcess> alg)
+{
+
+    /*assert(img->format() == QImage::Format_RGB888);
+    QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(len);
+    QString imgPreamble2 = QString("RGB_IMAGE_DATA TIMESTAMP=%1 HEIGHT=%2 WIDTH=%3\n").
+            arg(annotTimestamp).
+            arg(img->height()).
+            arg(img->width());
+    alg->SendCommand(imgPreamble1);
+    alg->SendCommand(imgPreamble2);
+    QByteArray imgRaw((const char *)img->bits(), len);
+    alg->SendRawData(imgRaw);*/
+}
+
 void MainWindow::ApplyModelPressed()
 {
     cout << "ApplyModelPressed" << endl;
@@ -784,12 +799,19 @@ void MainWindow::ApplyModelPressed()
     {
         QModelIndex &ind = srcSelList[i];
         cout << "src "<< ind.row() << "," << ind.column() << endl;
-    }
 
-    for(unsigned int i=0;i<modelSelList.size();i++)
-    {
-        QModelIndex &ind = modelSelList[i];
-        cout << "model "<< ind.row() << "," << ind.column() << endl;
+        //Load appropriate video
+        QString fina = this->workspace.GetSourceName(ind.row());
+        this->ChangeVidSource(&this->mediaThreadBack,this->mediaInterfaceBack,fina);
+
+        //Apply models to selected video
+        for(unsigned int i=0;i<modelSelList.size();i++)
+        {
+            QModelIndex &mind = modelSelList[i];
+            cout << "model "<< mind.row() << "," << mind.column() << endl;
+            std::tr1::shared_ptr<class AlgorithmProcess> alg = this->workspace.GetProcessing(mind.row());
+            this->ApplyModelToAnnotation(alg);
+        }
     }
 
 }

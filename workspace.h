@@ -32,6 +32,7 @@ public:
 
     //** Processing
     unsigned int AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg);
+    std::tr1::shared_ptr<class AlgorithmProcess> GetProcessing(unsigned int num);
     void PauseProcessing(unsigned int num);
     int RemoveProcessing(unsigned int num);
     int StartProcessing(unsigned int num);

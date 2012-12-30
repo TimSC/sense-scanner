@@ -96,6 +96,7 @@ public slots:
     void ImportVideo();
     void RemoveVideo();
     void TrainModelPressed();
+    void ApplyModelToAnnotation(std::tr1::shared_ptr<class AlgorithmProcess> alg);
     void ApplyModelPressed();
     void PauseProcessPressed();
     void RunProcessPressed();
