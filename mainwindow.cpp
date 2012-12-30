@@ -776,6 +776,9 @@ void MainWindow::ApplyModelToAnnotation(std::tr1::shared_ptr<class AlgorithmProc
     //Get duration
     long long unsigned srcDuration = this->mediaInterfaceBack->Length();
 
+    //Check algorithm is ready to work
+    //TODO
+
     //Get first frame
     QSharedPointer<QImage> img;
     unsigned long long startTimestamp = 0, endTimestamp = 0;
@@ -806,6 +809,20 @@ void MainWindow::ApplyModelToAnnotation(std::tr1::shared_ptr<class AlgorithmProc
                     milsec,
                     startTimestamp,
                     endTimestamp);
+
+            assert(img->format() == QImage::Format_RGB888);
+            QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(img->byteCount());
+            QString imgPreamble2 = QString("RGB_IMAGE_DATA TIMESTAMP=%1 HEIGHT=%2 WIDTH=%3\n").
+                    arg(milsec).
+                    arg(img->height()).
+                    arg(img->width());
+            alg->SendCommand(imgPreamble1);
+            alg->SendCommand(imgPreamble2);
+            QByteArray imgRaw((const char *)img->bits(), img->byteCount());
+            alg->SendRawData(imgRaw);
+
+            //Wait for response
+
         }
         catch (std::runtime_error &err)
         {
@@ -824,16 +841,7 @@ void MainWindow::ApplyModelToAnnotation(std::tr1::shared_ptr<class AlgorithmProc
     }
 
 
-    /*assert(img->format() == QImage::Format_RGB888);
-    QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(len);
-    QString imgPreamble2 = QString("RGB_IMAGE_DATA TIMESTAMP=%1 HEIGHT=%2 WIDTH=%3\n").
-            arg(annotTimestamp).
-            arg(img->height()).
-            arg(img->width());
-    alg->SendCommand(imgPreamble1);
-    alg->SendCommand(imgPreamble2);
-    QByteArray imgRaw((const char *)img->bits(), len);
-    alg->SendRawData(imgRaw);*/
+
 }
 
 void MainWindow::ApplyModelPressed()

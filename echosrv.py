@@ -12,7 +12,8 @@ def WorkerProcess(childPipeConn):
 	imgCount = 0
 	xmlBlocksCount = 0
 	xmlTrees = []
-	imgs = {}
+	trainImgs = {}
+	currentFrame = None
 	xmlDataBlocks = []
 	modelReady = False
 	tracker = None
@@ -33,7 +34,7 @@ def WorkerProcess(childPipeConn):
 			if event[0]=="GET_PROGRESS":
 				getProgress = True
 			if event[0]=="TRAIN":
-				if len(imgs) == 0 and not modelReady:
+				if len(trainImgs) == 0 and not modelReady:
 					print "Error: No images loaded in algorithm process"
 					continue
 				if len(xmlTrees) == 0 and not modelReady:
@@ -56,10 +57,10 @@ def WorkerProcess(childPipeConn):
 							xs[pid] = x
 							ys[pid] = y
 
-						if int(round(timestamp*1000.)) not in imgs:
+						if int(round(timestamp*1000.)) not in trainImgs:
 							print "Image for timestamp",int(round(timestamp*1000.)),"not found"
 							continue
-						im = imgs[int(round(timestamp*1000.))]
+						im = trainImgs[int(round(timestamp*1000.))]
 						tracker.AddTrainingData(im, zip(xs,ys))
 
 			if event[0]=="SAVE_MODEL":
@@ -94,7 +95,13 @@ def WorkerProcess(childPipeConn):
 						continue
 
 					im = Image.frombuffer("RGB", (width, height), event[2], 'raw', "RGB", 0, 1)
-					imgs[timestamp] = im
+					if not training:
+						print "Store image"
+						trainImgs[timestamp] = im
+					else:
+						print "Replace current image"
+						currentFrame = im
+						#im.save("currentimg"+str(imgCount)+".png")
 					#im.save("test"+str(imgCount)+".png")
 					imgCount += 1
 
