@@ -333,6 +333,7 @@ class RelativeTracker:
 			im = Image.fromstring(**imDat)
 			self.ims.append(im)
 			self.imls.append(im.load())
+		self.imsStr = None
 
 if __name__=="__main__":
 	tracker = pickle.load(open("tracker.dat","rb"))
