@@ -723,8 +723,17 @@ void MainWindow::TrainModelPressed()
             cout << annot->GetIndexTimestamp(fr) << endl;
             unsigned long long startTimestamp = 0, endTimestamp = 0;
             unsigned long long annotTimestamp = annot->GetIndexTimestamp(fr);
-            QSharedPointer<QImage> img = this->mediaInterfaceFront->Get(
+            QSharedPointer<QImage> img;
+            try
+            {
+                img = this->mediaInterfaceFront->Get(
                         annotTimestamp, startTimestamp, endTimestamp);
+            }
+            catch (std::runtime_error &err)
+            {
+                cout << "Timeout getting frame " << annotTimestamp << endl;
+                continue;
+            }
             int len = img->byteCount();
             //cout << "Image bytes "<< len << endl;
             //int len = 10;
