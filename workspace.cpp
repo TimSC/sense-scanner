@@ -289,7 +289,7 @@ void Workspace::Load(QString fina)
                     std::tr1::shared_ptr<class AlgorithmProcess> alg(
                                 new class AlgorithmProcess(this->eventLoop, this));
                     alg->Init();
-                    alg->Pause();
+                    alg->Pause(); //Start paused
 
                     //Send data to algorithm process
                     QString modelPreamble1 = QString("DATA_BLOCK=%1\n").arg(modelData.length());
@@ -297,6 +297,8 @@ void Workspace::Load(QString fina)
                     alg->SendCommand(modelPreamble1);
                     alg->SendCommand(modelPreamble2);
                     alg->SendRawData(modelData);
+
+                    alg->SendCommand("TRAIN\n"); //Continue to train if needed
 
                     //Ask process to provide progress update
                     alg->SendCommand("GET_PROGRESS\n");
