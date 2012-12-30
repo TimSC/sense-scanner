@@ -792,9 +792,9 @@ void MainWindow::ApplyModelToAnnotation(std::tr1::shared_ptr<class AlgorithmProc
     }
 
     //Estimate mid time of next frame
-    unsigned long long frameDuration = endTimestamp - startTimestamp;
-    unsigned long long avTi = (unsigned long long)(0.5 * (startTimestamp + endTimestamp) + 0.5);
-    unsigned long long nextTi = avTi + frameDuration;
+    unsigned long long frameDuration = endTimestamp - startTimestamp; //microsec
+    unsigned long long avTi = (unsigned long long)(0.5 * (startTimestamp + endTimestamp) + 0.5); //microsec
+    unsigned long long nextTi = avTi + frameDuration; //microsec
 
     //Get subsequent frames
     while(nextTi < srcDuration * 1000)
@@ -802,7 +802,8 @@ void MainWindow::ApplyModelToAnnotation(std::tr1::shared_ptr<class AlgorithmProc
         try
         {
             img = this->mediaInterfaceBack->Get(
-                    nextTi, startTimestamp, endTimestamp);
+                    (unsigned long long)(nextTi / 1000. + 0.5),
+                    startTimestamp, endTimestamp);
             cout << "startTimestamp " << startTimestamp << endl;
             cout << "endTimestamp " << endTimestamp << endl;
         }
