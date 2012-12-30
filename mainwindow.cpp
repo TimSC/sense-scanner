@@ -696,19 +696,15 @@ void MainWindow::TrainModelPressed()
     alg->Start();
 
     //Configure worker process
-    //QString test = "<test>foobar<spam>\neggs</spam></test>\n";
-    //QString preamble = QString("XML_DATA=%1\n").arg(alg->EncodedLength(test));
-    //alg->SendCommand(preamble);
-    //alg->SendCommand(test);
-
     selectList = selection->selectedRows(0);
     for(unsigned int i=0;i<selectList.size();i++)
     {
 
         QModelIndex &ind = selectList[i];
+        QString fina = this->workspace.GetSourceName(ind.row());
 
         //Load appropriate video
-        this->SelectedSourceChanged(ind.row());
+        this->ChangeVidSource(&this->mediaThreadBack,this->mediaInterfaceBack,fina);
 
         //For each annotated frame
         SimpleSceneController *annot = this->workspace.GetTrack(ind.row());
@@ -726,7 +722,7 @@ void MainWindow::TrainModelPressed()
             QSharedPointer<QImage> img;
             try
             {
-                img = this->mediaInterfaceFront->Get(
+                img = this->mediaInterfaceBack->Get(
                         annotTimestamp, startTimestamp, endTimestamp);
             }
             catch (std::runtime_error &err)
