@@ -650,6 +650,7 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
 
     //Update scene controller
     SimpleSceneController *scene = this->workspace.GetTrack(selectedRow);
+    cout << scene << endl;
     this->ui->widget->SetSceneControl(scene);
 
     this->annotationMenu = scene->MenuFactory(this->menuBar());
@@ -878,7 +879,6 @@ void MainWindow::ApplyModelPressed()
             QModelIndex &mind = modelSelList[i];
             cout << "model "<< mind.row() << "," << mind.column() << endl;
             std::tr1::shared_ptr<class AlgorithmProcess> alg = this->workspace.GetProcessing(mind.row());
-            this->ApplyModelToAnnotation(alg);
 
             this->workspace.AddAutoAnnot(uid.toString(), alg->GetUid());
         }

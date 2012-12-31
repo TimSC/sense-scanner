@@ -319,7 +319,11 @@ void VideoWidget::SetSceneControl(SimpleSceneController *sceneIn)
     this->sceneControl = sceneIn;
     if(this->sceneControl!=NULL)
     {
-        this->ui->graphicsView->setScene(&*this->sceneControl->GetScene());
+        QSharedPointer<MouseGraphicsScene> scene = this->sceneControl->GetScene();
+        if(!scene.isNull())
+            this->ui->graphicsView->setScene(&*scene);
+        else
+            this->ui->graphicsView->setScene(NULL);
         this->ui->annotationTools->addWidget(this->sceneControl->ControlsFactory(this));
     }
     else

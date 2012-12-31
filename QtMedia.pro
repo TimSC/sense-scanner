@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     avbinapi.cpp \
     scenecontroller.cpp \
     workspace.cpp \
-    algorithm.cpp
+    algorithm.cpp \
+    annotation.cpp
 
 HEADERS  += mainwindow.h \
     videowidget.h \
@@ -38,7 +39,8 @@ HEADERS  += mainwindow.h \
     algorithm.h \
     localints.h \
     localmutex.h \
-    localsleep.h
+    localsleep.h \
+    annotation.h
 
 FORMS    += mainwindow.ui \
     videowidget.ui

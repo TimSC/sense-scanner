@@ -8,15 +8,7 @@
 #include "mediabuffer.h"
 #include "scenecontroller.h"
 #include "algorithm.h"
-
-class AnnotThread : public MessagableThread
-{
-public:
-    AnnotThread() {};
-    virtual ~AnnotThread() {};
-    void Update() {};
-
-};
+#include "annotation.h"
 
 class Workspace : public QObject
 {
@@ -66,11 +58,7 @@ public:
 
 protected:
     //Sources and annotation data
-    std::vector<QString> sources;
-    std::vector<std::tr1::shared_ptr<class AnnotThread> > annotThreads;
-    std::vector<SimpleSceneController *> tracks;
-    std::vector<bool> visible;
-    std::vector<QUuid> annotUids;
+    std::vector<std::tr1::shared_ptr<class Annotation> > annotations;
 
     QString defaultFilename;
     unsigned int nextThreadId;

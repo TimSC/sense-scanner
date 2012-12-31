@@ -19,38 +19,22 @@ Workspace::Workspace(const Workspace &other) : QObject()
     this->operator =(other);
 }
 
-
-
 Workspace& Workspace::operator= (const Workspace &other)
 {
-    sources = other.sources;
-    annotUids = other.annotUids;
+    annotations = other.annotations;
     defaultFilename = other.defaultFilename;
-    visible = other.visible;
     processingList = other.processingList;
-    tracks.clear();
-    for(unsigned int i=0;i<other.tracks.size();i++)
-    {
-        QObject *par = other.tracks[i]->parent();
-        SimpleSceneController *tr = new SimpleSceneController(par);
-        *tr = *other.tracks[i];
-        tracks.push_back(tr);
-    }
+
     return *this;
 }
 
 bool Workspace::operator!= (const Workspace &other)
 {
     if(defaultFilename != other.defaultFilename) return true;
-    if(tracks.size() != other.tracks.size()) return true;
-    if(sources != other.sources) return true;
-    if(visible != other.visible) return true;
+    if(this->annotations.size() != other.annotations.size()) return true;
+    for(unsigned int i=0;i<this->annotations.size();i++)
+        if(annotations[i] != other.annotations[i]) return true;
     if(processingList != other.processingList) return true;
-    if(annotUids != other.annotUids) return true;
-    for(unsigned int i=0;i<other.tracks.size();i++)
-    {
-        if(*tracks[i] != *other.tracks[i]) return true;
-    }
     return false;
 }
 
@@ -61,28 +45,15 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
 
 unsigned int Workspace::AddSource(QString &fina, QString UidStr)
 {
-    this->sources.push_back(fina);
-    std::tr1::shared_ptr<class AnnotThread> annotThread;
-    this->annotThreads.push_back(annotThread);
-    QUuid uid(UidStr);
-    this->annotUids.push_back(uid);
-
-    SimpleSceneController *scenePtr = new SimpleSceneController(0);
-    this->tracks.push_back(scenePtr);
-    this->visible.push_back(true);
-
-    return this->sources.size();
+    class Annotation ann;
+    ann.source = fina;
+    return this->annotations.size();
 }
 
 void Workspace::RemoveSource(unsigned int num)
 {
-    assert(num < this->visible.size());
-    this->visible.erase(this->visible.begin()+num);
-    this->tracks.erase(this->tracks.begin()+num);
-    this->sources.erase(this->sources.begin()+num);
-    assert(num < this->annotThreads.size());
-    this->annotThreads.erase(this->annotThreads.begin()+num);
-    this->annotUids.erase(this->annotUids.begin()+num);
+    assert(num < this->annotations.size());
+    this->annotations.erase(this->annotations.begin()+num);
 }
 
 unsigned int Workspace::AddAutoAnnot(QString annotUid, QString algUid)
@@ -91,49 +62,35 @@ unsigned int Workspace::AddAutoAnnot(QString annotUid, QString algUid)
     int basedOnAnnot = FindAnnotWithUid(annotUidObj);
     assert(basedOnAnnot>=0 && basedOnAnnot < this->GetNumSources());
 
-    std::tr1::shared_ptr<class AnnotThread> ann(new class AnnotThread);
-    ann = this->annotThreads[basedOnAnnot];
-    this->annotThreads.push_back(ann);
+    class Annotation &parent = *this->annotations[basedOnAnnot];
 
-    this->sources.push_back(this->GetSourceName(basedOnAnnot));
-    QUuid uid(QUuid::createUuid());
-    this->annotUids.push_back(uid);
-
-    SimpleSceneController *scenePtr = new SimpleSceneController(0);
-    scenePtr = this->tracks[basedOnAnnot];
-    this->tracks.push_back(scenePtr);
-    this->visible.push_back(true);
-
-    return this->sources.size();
+    std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
+    ann->source = parent.source;
+    ann->uid = QUuid::createUuid();
+    this->annotations.push_back(ann);
+    return this->annotations.size();
 }
-
-/*void Workspace::SetTrack(unsigned int trackNum, SimpleSceneController *track)
-{
-    this->tracks[trackNum] = track;
-}*/
 
 SimpleSceneController *Workspace::GetTrack(unsigned int trackNum)
 {
-    assert(this->tracks.size() == this->sources.size());
-    return this->tracks[trackNum];
+    return this->annotations[trackNum]->GetTrack();
 }
-
 
 unsigned int Workspace::GetNumSources()
 {
-    return this->sources.size();
+    return this->annotations.size();
 }
 
 QString Workspace::GetSourceName(unsigned int index)
 {
-    assert(index < this->sources.size());
-    return this->sources[index];
+    assert(index < this->annotations.size());
+    return this->annotations[index]->source;
 }
 
 QUuid Workspace::GetAnnotUid(unsigned int index)
 {
-    assert(index < this->sources.size());
-    return this->annotUids[index];
+    assert(index < this->annotations.size());
+    return this->annotations[index]->uid;
 }
 
 //***********************************************************************
@@ -186,9 +143,9 @@ int Workspace::RemoveProcessing(unsigned int num)
 
 int Workspace::FindAnnotWithUid(QUuid uidIn)
 {
-    for(unsigned int i=0;i<this->annotUids.size();i++)
+    for(unsigned int i=0;i<this->annotations.size();i++)
     {
-        if(this->annotUids[i] == uidIn)
+        if(this->annotations[i]->uid == uidIn)
             return i;
     }
     return -1;
@@ -258,12 +215,8 @@ int Workspace::NumProcessesBlockingShutdown()
 
 void Workspace::Clear()
 {
-    this->sources.clear();
-    this->annotUids.clear();
-    this->annotThreads.clear();
-    this->tracks.clear();
+    this->annotations.clear();
     this->defaultFilename = "";
-    this->visible.clear();
     this->processingList.clear();
     this->threadProgress.clear();
     this->threadId.clear();
@@ -308,15 +261,12 @@ void Workspace::Load(QString fina)
                     QString sourceFiNa = sourceEle.attribute("file");
                     QString sourceFiNaAbs = dir.absoluteFilePath(sourceFiNa);
                     QFileInfo fileInfo(sourceFiNaAbs);
-                    this->sources.push_back(fileInfo.absoluteFilePath());
-                    this->visible.push_back(true);
+                    std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
+                    ann->source = fileInfo.absoluteFilePath();
 
                     QString uidStr = sourceEle.attribute("uid");
                     QUuid uid(uidStr);
-                    this->annotUids.push_back(uid);
-
-                    std::tr1::shared_ptr<class AnnotThread> annotThread;
-                    this->annotThreads.push_back(annotThread);
+                    ann->uid = uid;
 
                     SimpleSceneController *track =
                             new SimpleSceneController(NULL);
@@ -334,7 +284,9 @@ void Workspace::Load(QString fina)
 
                     }
 
-                    this->tracks.push_back(track);
+
+                    ann->SetTrack(track);
+                    this->annotations.push_back(ann);
                     sourceNode = sourceNode.nextSibling();
                 }
 
@@ -381,9 +333,6 @@ void Workspace::Load(QString fina)
 
 int Workspace::Save()
 {
-    assert(this->tracks.size()==this->sources.size());
-    assert(this->annotUids.size()==this->sources.size());
-
     if(this->defaultFilename.length()==0)
         return 0;
     QFileInfo pathInfo(this->defaultFilename);
@@ -397,13 +346,13 @@ int Workspace::Save()
     out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;
     out << "<workspace>" << endl;
     out << "<sources>" << endl;
-    for(unsigned int i=0;i<this->sources.size();i++)
+    for(unsigned int i=0;i<this->annotations.size();i++)
     {
         try
         {
-            out << "\t<source id=\""<<i<<"\" uid=\""<<Qt::escape(this->annotUids[i])<<"\" file=\""<<
-                   Qt::escape(dir.relativeFilePath(this->sources[i]))<<"\">" << endl;
-            this->tracks[i]->WriteAnnotationXml(out);
+            out << "\t<source id=\""<<i<<"\" uid=\""<<Qt::escape(this->annotations[i]->uid)<<"\" file=\""<<
+                   Qt::escape(dir.relativeFilePath(this->annotations[i]->source))<<"\">" << endl;
+            this->annotations[i]->GetTrack()->WriteAnnotationXml(out);
             out << "\t</source>" << endl;
         }
         catch(std::runtime_error err)
