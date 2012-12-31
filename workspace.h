@@ -54,6 +54,8 @@ public:
 
 protected:
     std::vector<QString> sources;
+    std::vector<std::tr1::shared_ptr<class AnnotThread> > annotThreads;
+
     QString defaultFilename;
     std::vector<SimpleSceneController *> tracks;
     std::vector<bool> visible;

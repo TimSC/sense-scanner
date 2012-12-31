@@ -774,7 +774,7 @@ void MainWindow::ApplyModelToAnnotation(std::tr1::shared_ptr<class AlgorithmProc
 {
 
     //Get duration
-    long long unsigned srcDuration = this->mediaInterfaceBack->Length();
+    /*long long unsigned srcDuration = this->mediaInterfaceBack->Length();
 
     //Check algorithm is ready to work
     //TODO
@@ -811,8 +811,6 @@ void MainWindow::ApplyModelToAnnotation(std::tr1::shared_ptr<class AlgorithmProc
                     startTimestamp,
                     endTimestamp);
 
-            //alg->SendCommand("TEST\n");
-            cout << img->height() << "," << img->width() << endl;
             assert(img->format() == QImage::Format_RGB888);
             QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(img->byteCount());
             QString imgPreamble2 = QString("RGB_IMAGE_DATA TIMESTAMP=%1 HEIGHT=%2 WIDTH=%3\n").
@@ -848,7 +846,7 @@ void MainWindow::ApplyModelToAnnotation(std::tr1::shared_ptr<class AlgorithmProc
         nextTi = avTi + frameDuration;
     }
 
-
+*/
 
 }
 
@@ -878,8 +876,12 @@ void MainWindow::ApplyModelPressed()
             cout << "model "<< mind.row() << "," << mind.column() << endl;
             std::tr1::shared_ptr<class AlgorithmProcess> alg = this->workspace.GetProcessing(mind.row());
             this->ApplyModelToAnnotation(alg);
+
+            QString fina = this->workspace.GetSourceName(ind.row());
+            this->workspace.AddSource(fina);
         }
     }
+    this->RegenerateSourcesList();
 
 }
 

@@ -60,6 +60,8 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
 unsigned int Workspace::AddSource(QString &fina)
 {
     this->sources.push_back(fina);
+    std::tr1::shared_ptr<class AnnotThread> annotThread;
+    this->annotThreads.push_back(annotThread);
 
     SimpleSceneController *scenePtr = new SimpleSceneController(0);
     this->tracks.push_back(scenePtr);
@@ -73,6 +75,7 @@ void Workspace::RemoveSource(unsigned int num)
     this->visible.erase(this->visible.begin()+num);
     this->tracks.erase(this->tracks.begin()+num);
     this->sources.erase(this->sources.begin()+num);
+    this->annotThreads.erase(this->annotThreads.begin()+num);
 }
 
 /*void Workspace::SetTrack(unsigned int trackNum, SimpleSceneController *track)
@@ -338,7 +341,8 @@ int Workspace::Save()
     {
         try
         {
-            out << "\t<source id=\""<<i<<"\" file=\""<<Qt::escape(dir.relativeFilePath(this->sources[i]))<<"\">" << endl;
+            out << "\t<source id=\""<<i<<"\" file=\""<<
+                   Qt::escape(dir.relativeFilePath(this->sources[i]))<<"\">" << endl;
             this->tracks[i]->WriteAnnotationXml(out);
             out << "\t</source>" << endl;
         }
