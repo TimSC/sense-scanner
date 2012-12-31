@@ -18,10 +18,17 @@ def WorkerProcess(childPipeConn):
 	modelReady = False
 	tracker = None
 	getProgress = False
+	aliveClock = time.time()
 
 	while running:
+		timeNow = time.time()
+		if timeNow > aliveClock + 1.:
+			print "ALIVE"
+			aliveClock = timeNow
+
 		if childPipeConn.poll():
 			event = childPipeConn.recv()
+			print "Event rx", event[0]
 
 			if event[0]=="RUN":
 				print "NOW_RUNNING"
@@ -104,6 +111,7 @@ def WorkerProcess(childPipeConn):
 						#im.save("currentimg"+str(imgCount)+".png")
 					#im.save("test"+str(imgCount)+".png")
 					imgCount += 1
+				print "DATA_BLOCK_PROCESSED"
 
 				if args[0]=="XML_DATA":
 					#Parse XML from raw data block
@@ -183,24 +191,12 @@ if __name__=="__main__":
 			fi.write(li+"\n")
 			fi.flush()
 
+		handled = 0
+
 		if li == "QUIT":
 			running = 0
 			parentPipeConn.send(["QUIT"])
-
-		if li == "PAUSE":
-			parentPipeConn.send(["PAUSE"])
-
-		if li == "RUN":
-			parentPipeConn.send(["RUN"])
-
-		if li == "TRAIN":
-			parentPipeConn.send(["TRAIN"])
-
-		if li == "GET_PROGRESS":
-			parentPipeConn.send(["GET_PROGRESS"])
-
-		if li == "SAVE_MODEL":
-			parentPipeConn.send(["SAVE_MODEL"])
+			handled = 1
 
 		if li[0:11] == "DATA_BLOCK=":
 			args = sys.stdin.readline()
@@ -215,6 +211,11 @@ if __name__=="__main__":
 			dataBlock = sys.stdin.read(si)
 
 			parentPipeConn.send(["DATA_BLOCK", args, dataBlock])
+			handled = 1
+
+		#Send all misc commands to worker thread
+		if not handled:
+			parentPipeConn.send([li,])
 
 		if parentPipeConn.poll():
 			event = parentPipeConn.recv()
