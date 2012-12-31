@@ -869,6 +869,7 @@ void MainWindow::ApplyModelPressed()
 
         //Load appropriate video
         QString fina = this->workspace.GetSourceName(ind.row());
+        QUuid uid = this->workspace.GetAnnotUid(ind.row());
         this->ChangeVidSource(&this->mediaThreadBack,this->mediaInterfaceBack,fina);
 
         //Apply models to selected video
@@ -879,7 +880,7 @@ void MainWindow::ApplyModelPressed()
             std::tr1::shared_ptr<class AlgorithmProcess> alg = this->workspace.GetProcessing(mind.row());
             this->ApplyModelToAnnotation(alg);
 
-            //this->workspace.AddAutoAnnot(ind.row(), mind.row());
+            this->workspace.AddAutoAnnot(uid.toString(), alg->GetUid());
         }
     }
     this->RegenerateSourcesList();

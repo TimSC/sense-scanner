@@ -85,6 +85,28 @@ void Workspace::RemoveSource(unsigned int num)
     this->annotUids.erase(this->annotUids.begin()+num);
 }
 
+unsigned int Workspace::AddAutoAnnot(QString annotUid, QString algUid)
+{
+    QUuid annotUidObj(annotUid);
+    int basedOnAnnot = FindAnnotWithUid(annotUidObj);
+    assert(basedOnAnnot>=0 && basedOnAnnot < this->GetNumSources());
+
+    std::tr1::shared_ptr<class AnnotThread> ann(new class AnnotThread);
+    ann = this->annotThreads[basedOnAnnot];
+    this->annotThreads.push_back(ann);
+
+    this->sources.push_back(this->GetSourceName(basedOnAnnot));
+    QUuid uid(QUuid::createUuid());
+    this->annotUids.push_back(uid);
+
+    SimpleSceneController *scenePtr = new SimpleSceneController(0);
+    scenePtr = this->tracks[basedOnAnnot];
+    this->tracks.push_back(scenePtr);
+    this->visible.push_back(true);
+
+    return this->sources.size();
+}
+
 /*void Workspace::SetTrack(unsigned int trackNum, SimpleSceneController *track)
 {
     this->tracks[trackNum] = track;
@@ -106,6 +128,12 @@ QString Workspace::GetSourceName(unsigned int index)
 {
     assert(index < this->sources.size());
     return this->sources[index];
+}
+
+QUuid Workspace::GetAnnotUid(unsigned int index)
+{
+    assert(index < this->sources.size());
+    return this->annotUids[index];
 }
 
 //***********************************************************************
@@ -154,6 +182,16 @@ int Workspace::RemoveProcessing(unsigned int num)
     this->threadProgress.erase(this->threadProgress.begin()+num);
     this->threadId.erase(this->threadId.begin()+num);
     return 1;
+}
+
+int Workspace::FindAnnotWithUid(QUuid uidIn)
+{
+    for(unsigned int i=0;i<this->annotUids.size();i++)
+    {
+        if(this->annotUids[i] == uidIn)
+            return i;
+    }
+    return -1;
 }
 
 int Workspace::StartProcessing(unsigned int num)

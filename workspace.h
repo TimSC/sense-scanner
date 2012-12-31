@@ -9,6 +9,15 @@
 #include "scenecontroller.h"
 #include "algorithm.h"
 
+class AnnotThread : public MessagableThread
+{
+public:
+    AnnotThread() {};
+    virtual ~AnnotThread() {};
+    void Update() {};
+
+};
+
 class Workspace : public QObject
 {
     Q_OBJECT
@@ -20,15 +29,18 @@ public:
 
     void SetEventLoop(class EventLoop &eventLoopIn);
 
-    //** Sources
+    //** Sources and annotations
     unsigned int AddSource(QString &fina, QString UidStr);
     void RemoveSource(unsigned int num);
+    unsigned int AddAutoAnnot(QString annotUid, QString algUid);
+    int FindAnnotWithUid(QUuid uidIn);
 
     //void SetTrack(unsigned int trackNum, SimpleSceneController *track);
     SimpleSceneController *GetTrack(unsigned int trackNum);
 
     unsigned int GetNumSources();
     QString GetSourceName(unsigned int index);
+    QUuid GetAnnotUid(unsigned int index);
 
     //** Processing
     unsigned int AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg);
