@@ -366,3 +366,13 @@ QByteArray AlgorithmProcess::GetModel()
     int currentLen = out.length();
     return out;
 }
+
+QUuid AlgorithmProcess::GetUid()
+{
+    return this->uid;
+}
+
+void AlgorithmProcess::SetUid(QUuid newUid)
+{
+    this->uid = newUid;
+}

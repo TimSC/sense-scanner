@@ -115,7 +115,7 @@ public slots:
                          AvBinMedia *mediaInterface,
                          QString fina);
     void SelectedSourceChanged(const QModelIndex current);
-    void SelectedSourceChanged(unsigned int selectedRow);
+    void SelectedSourceChanged(int selectedRow);
     QString CheckIfDataShouldBeDiscarded(QString discardMsg);
 
     void AboutPressed();

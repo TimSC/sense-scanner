@@ -4,6 +4,7 @@
 #include "eventloop.h"
 #include <QtCore/QProcess>
 #include <QtCore/QFile>
+#include <QtCore/QUuid>
 #include <vector>
 
 class AlgorithmThread : public MessagableThread
@@ -52,6 +53,8 @@ public:
     void SendRawData(QByteArray cmd);
     unsigned int EncodedLength(QString cmd);
     QByteArray GetModel();
+    QUuid GetUid();
+    void SetUid(QUuid newUid);
 
 protected:
     int stopping;
@@ -65,6 +68,7 @@ protected:
     int dataBlockReceived;
     QByteArray algOutBuffer;
     QByteArray algErrBuffer;
+    QUuid uid;
 };
 
 #endif // ALGORITHM_H

@@ -21,7 +21,7 @@ public:
     void SetEventLoop(class EventLoop &eventLoopIn);
 
     //** Sources
-    unsigned int AddSource(QString &fina);
+    unsigned int AddSource(QString &fina, QString UidStr);
     void RemoveSource(unsigned int num);
 
     //void SetTrack(unsigned int trackNum, SimpleSceneController *track);
@@ -53,19 +53,22 @@ public:
     int HasChanged();
 
 protected:
+    //Sources and annotation data
     std::vector<QString> sources;
     std::vector<std::tr1::shared_ptr<class AnnotThread> > annotThreads;
-
-    QString defaultFilename;
     std::vector<SimpleSceneController *> tracks;
     std::vector<bool> visible;
-    unsigned int nextThreadId;
+    std::vector<QUuid> annotUids;
 
+    QString defaultFilename;
+    unsigned int nextThreadId;
+    class EventLoop *eventLoop;
+
+    //Processing data
     std::vector<std::tr1::shared_ptr<class AlgorithmProcess> > processingList;
     std::vector<float> threadProgress;
-
     std::vector<unsigned int> threadId;
-    class EventLoop *eventLoop;
+
 };
 
 #endif // WORKSPACE_H

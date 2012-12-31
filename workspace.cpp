@@ -24,6 +24,7 @@ Workspace::Workspace(const Workspace &other) : QObject()
 Workspace& Workspace::operator= (const Workspace &other)
 {
     sources = other.sources;
+    annotUids = other.annotUids;
     defaultFilename = other.defaultFilename;
     visible = other.visible;
     processingList = other.processingList;
@@ -45,6 +46,7 @@ bool Workspace::operator!= (const Workspace &other)
     if(sources != other.sources) return true;
     if(visible != other.visible) return true;
     if(processingList != other.processingList) return true;
+    if(annotUids != other.annotUids) return true;
     for(unsigned int i=0;i<other.tracks.size();i++)
     {
         if(*tracks[i] != *other.tracks[i]) return true;
@@ -57,11 +59,13 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
     this->eventLoop = &eventLoopIn;
 }
 
-unsigned int Workspace::AddSource(QString &fina)
+unsigned int Workspace::AddSource(QString &fina, QString UidStr)
 {
     this->sources.push_back(fina);
     std::tr1::shared_ptr<class AnnotThread> annotThread;
     this->annotThreads.push_back(annotThread);
+    QUuid uid(UidStr);
+    this->annotUids.push_back(uid);
 
     SimpleSceneController *scenePtr = new SimpleSceneController(0);
     this->tracks.push_back(scenePtr);
@@ -72,10 +76,13 @@ unsigned int Workspace::AddSource(QString &fina)
 
 void Workspace::RemoveSource(unsigned int num)
 {
+    assert(num < this->visible.size());
     this->visible.erase(this->visible.begin()+num);
     this->tracks.erase(this->tracks.begin()+num);
     this->sources.erase(this->sources.begin()+num);
+    assert(num < this->annotThreads.size());
     this->annotThreads.erase(this->annotThreads.begin()+num);
+    this->annotUids.erase(this->annotUids.begin()+num);
 }
 
 /*void Workspace::SetTrack(unsigned int trackNum, SimpleSceneController *track)
@@ -214,6 +221,8 @@ int Workspace::NumProcessesBlockingShutdown()
 void Workspace::Clear()
 {
     this->sources.clear();
+    this->annotUids.clear();
+    this->annotThreads.clear();
     this->tracks.clear();
     this->defaultFilename = "";
     this->visible.clear();
@@ -263,6 +272,14 @@ void Workspace::Load(QString fina)
                     QFileInfo fileInfo(sourceFiNaAbs);
                     this->sources.push_back(fileInfo.absoluteFilePath());
                     this->visible.push_back(true);
+
+                    QString uidStr = sourceEle.attribute("uid");
+                    QUuid uid(uidStr);
+                    this->annotUids.push_back(uid);
+
+                    std::tr1::shared_ptr<class AnnotThread> annotThread;
+                    this->annotThreads.push_back(annotThread);
+
                     SimpleSceneController *track =
                             new SimpleSceneController(NULL);
 
@@ -311,6 +328,9 @@ void Workspace::Load(QString fina)
                     //Ask process to provide progress update
                     alg->SendCommand("GET_PROGRESS\n");
 
+                    QString uidStr = modelEle.attribute("uid");
+                    QUuid uid(uidStr);
+                    alg->SetUid(uid);
                     this->AddProcessing(alg);
                     modelNode = modelNode.nextSibling();
                 }
@@ -324,6 +344,8 @@ void Workspace::Load(QString fina)
 int Workspace::Save()
 {
     assert(this->tracks.size()==this->sources.size());
+    assert(this->annotUids.size()==this->sources.size());
+
     if(this->defaultFilename.length()==0)
         return 0;
     QFileInfo pathInfo(this->defaultFilename);
@@ -341,7 +363,7 @@ int Workspace::Save()
     {
         try
         {
-            out << "\t<source id=\""<<i<<"\" file=\""<<
+            out << "\t<source id=\""<<i<<"\" uid=\""<<Qt::escape(this->annotUids[i])<<"\" file=\""<<
                    Qt::escape(dir.relativeFilePath(this->sources[i]))<<"\">" << endl;
             this->tracks[i]->WriteAnnotationXml(out);
             out << "\t</source>" << endl;
@@ -362,7 +384,7 @@ int Workspace::Save()
             std::tr1::shared_ptr<class AlgorithmProcess> alg = this->processingList[i];
             QByteArray model = alg->GetModel();
             QByteArray modelBase64 = model.toBase64();
-            out << "<model>" << endl;
+            out << "<model uid=\""<< alg->GetUid() <<"\">" << endl;
             for(unsigned int pos=0;pos<modelBase64.length();pos+=512)
             {
                 out << modelBase64.mid(pos, 512) << endl;

@@ -461,8 +461,8 @@ void MainWindow::ImportVideo()
       tr("Import Video"), "", tr("Video Files (*.avi *.mov *.mkv *.wmf *.webm *.flv *.mp4 *.rm *.asf *.wmv)"));
     if(fileName.length() == 0) return;
 
-    unsigned int sourceId = this->workspace.AddSource(fileName);
-
+    QUuid uid = QUuid::createUuid();
+    unsigned int sourceId = this->workspace.AddSource(fileName, uid.toString());
 
     this->RegenerateSourcesList();
 }
@@ -600,7 +600,7 @@ void MainWindow::SaveAsWorkspace()
 
 void MainWindow::SelectedSourceChanged(const QModelIndex ind)
 {
-    unsigned int selectedRow = ind.row();
+    int selectedRow = ind.row();
     this->SelectedSourceChanged(selectedRow);
 }
 
@@ -631,7 +631,7 @@ void MainWindow::ChangeVidSource(AvBinThread **mediaThread,
     mediaInterface->OpenFile(fina.toLocal8Bit().constData());
 }
 
-void MainWindow::SelectedSourceChanged(unsigned int selectedRow)
+void MainWindow::SelectedSourceChanged(int selectedRow)
 {
     if(selectedRow < 0 && selectedRow >= this->workspace.GetNumSources())
         return;
@@ -690,6 +690,8 @@ void MainWindow::TrainModelPressed()
 
     //Create worker process
     std::tr1::shared_ptr<class AlgorithmProcess> alg(new class AlgorithmProcess(this->eventLoop, this));
+    alg->SetUid(QUuid::createUuid());
+
     alg->Init();
 
     //Start worker process
@@ -877,8 +879,7 @@ void MainWindow::ApplyModelPressed()
             std::tr1::shared_ptr<class AlgorithmProcess> alg = this->workspace.GetProcessing(mind.row());
             this->ApplyModelToAnnotation(alg);
 
-            QString fina = this->workspace.GetSourceName(ind.row());
-            this->workspace.AddSource(fina);
+            //this->workspace.AddAutoAnnot(ind.row(), mind.row());
         }
     }
     this->RegenerateSourcesList();
