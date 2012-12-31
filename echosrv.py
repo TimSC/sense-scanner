@@ -19,16 +19,16 @@ def WorkerProcess(childPipeConn):
 	tracker = None
 	getProgress = False
 	aliveClock = time.time()
+	aliveMsgEnabled = False
 
 	while running:
 		timeNow = time.time()
-		if timeNow > aliveClock + 1.:
+		if timeNow > aliveClock + 1. and aliveMsgEnabled:
 			print "ALIVE"
 			aliveClock = timeNow
 
 		if childPipeConn.poll():
 			event = childPipeConn.recv()
-			print "Event rx", event[0]
 
 			if event[0]=="RUN":
 				print "NOW_RUNNING"

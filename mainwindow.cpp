@@ -811,8 +811,9 @@ void MainWindow::ApplyModelToAnnotation(std::tr1::shared_ptr<class AlgorithmProc
                     startTimestamp,
                     endTimestamp);
 
-            alg->SendCommand("TEST\n");
-            /*assert(img->format() == QImage::Format_RGB888);
+            //alg->SendCommand("TEST\n");
+            cout << img->height() << "," << img->width() << endl;
+            assert(img->format() == QImage::Format_RGB888);
             QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(img->byteCount());
             QString imgPreamble2 = QString("RGB_IMAGE_DATA TIMESTAMP=%1 HEIGHT=%2 WIDTH=%3\n").
                     arg(milsec).
@@ -821,7 +822,7 @@ void MainWindow::ApplyModelToAnnotation(std::tr1::shared_ptr<class AlgorithmProc
             alg->SendCommand(imgPreamble1);
             alg->SendCommand(imgPreamble2);
             QByteArray imgRaw((const char *)img->bits(), img->byteCount());
-            alg->SendRawData(imgRaw);*/
+            alg->SendRawData(imgRaw);
 
             //Wait for response
             for(int i=0;i<10;i++)
@@ -830,7 +831,6 @@ void MainWindow::ApplyModelToAnnotation(std::tr1::shared_ptr<class AlgorithmProc
                 LocalSleep::msleep(100);
             }
 
-            break;
         }
         catch (std::runtime_error &err)
         {
