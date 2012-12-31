@@ -26,6 +26,7 @@ public:
     bool operator!= (const Annotation &other);
     void Clear();
     void SetTrack(class SimpleSceneController *trackIn);
+    void CloneTrack(class SimpleSceneController *trackIn);
     class SimpleSceneController *GetTrack();
 
     bool visible;

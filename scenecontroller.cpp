@@ -117,6 +117,7 @@ SimpleSceneController& SimpleSceneController::operator= (const SimpleSceneContro
     this->annotationControls = NULL;
     this->pos = other.pos; //contains annotation positions
     this->shape = other.shape; //contains the default shape
+    this->links = other.links;
 	return *this;
 }
 

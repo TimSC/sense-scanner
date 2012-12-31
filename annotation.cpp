@@ -51,6 +51,13 @@ void Annotation::SetTrack(class SimpleSceneController *trackIn)
     this->track = trackIn;
 }
 
+void Annotation::CloneTrack(class SimpleSceneController *trackIn)
+{
+    this->SetTrack(NULL);
+    this->track = new class SimpleSceneController(trackIn->parent());
+    *this->track = *trackIn;
+}
+
 class SimpleSceneController *Annotation::GetTrack()
 {
     return this->track;

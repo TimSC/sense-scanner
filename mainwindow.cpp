@@ -650,9 +650,9 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
 
     //Update scene controller
     SimpleSceneController *scene = this->workspace.GetTrack(selectedRow);
-    cout << scene << endl;
     this->ui->widget->SetSceneControl(scene);
 
+    assert(scene!=NULL);
     this->annotationMenu = scene->MenuFactory(this->menuBar());
 
     //Set widget to use this source

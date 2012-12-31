@@ -67,6 +67,7 @@ unsigned int Workspace::AddAutoAnnot(QString annotUid, QString algUid)
     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
     ann->source = parent.source;
     ann->uid = QUuid::createUuid();
+    ann->CloneTrack(parent.GetTrack());
     this->annotations.push_back(ann);
     return this->annotations.size();
 }
