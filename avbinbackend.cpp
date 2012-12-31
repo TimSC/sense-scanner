@@ -66,7 +66,10 @@ void AvBinBackend::DoOpenFile(int requestId)
     assert(this->streams.size() == 0);
 
     //Open file
+    //This function is not thread safe, so lock a protection mutex
+    this->openlock.lock();
     this->fi = mod_avbin_open_filename(this->filename.c_str());
+    this->openlock.unlock();
 
     //Create an event with the result
     QString eventName = QString("AVBIN_OPEN_RESULT%1").arg(this->id);
