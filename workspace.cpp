@@ -49,6 +49,7 @@ unsigned int Workspace::AddSource(QString &fina, QString UidStr)
     ann->source = fina;
     SimpleSceneController *scenePtr = new SimpleSceneController(0);
     ann->SetTrack(scenePtr);
+    ann->annotThread->SetEventLoop(this->eventLoop);
     this->annotations.push_back(ann);
     return this->annotations.size();
 }
