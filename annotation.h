@@ -7,10 +7,10 @@
 class AnnotThread : public MessagableThread
 {
 public:
-    AnnotThread() {};
-    virtual ~AnnotThread() {};
+    AnnotThread();
+    virtual ~AnnotThread();
 
-    void Update() {};
+    void Update();
 
 protected:
 

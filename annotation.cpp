@@ -1,5 +1,25 @@
 #include "annotation.h"
 #include "scenecontroller.h"
+#include <iostream>
+using namespace std;
+
+AnnotThread::AnnotThread()
+{
+
+}
+
+AnnotThread::~AnnotThread()
+{
+
+}
+
+void AnnotThread::Update()
+{
+    //cout << "x" << (unsigned long)this << endl;
+    this->msleep(100);
+}
+
+//*****************************************************
 
 Annotation::Annotation()
 {
