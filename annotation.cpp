@@ -23,6 +23,7 @@ Annotation& Annotation::operator= (const Annotation &other)
     QObject *par = other.track->parent();
     this->SetTrack(new SimpleSceneController(par));
     *this->track = *other.track;
+    return *this;
 }
 
 bool Annotation::operator!= (const Annotation &other)
