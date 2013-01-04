@@ -271,6 +271,7 @@ void Workspace::Load(QString fina)
 
                     QString uidStr = sourceEle.attribute("uid");
                     QUuid uid(uidStr);
+                    if(uid.isNull()) uid = uid.createUuid();
                     ann->uid = uid;
 
                     SimpleSceneController *track =
@@ -325,6 +326,7 @@ void Workspace::Load(QString fina)
 
                     QString uidStr = modelEle.attribute("uid");
                     QUuid uid(uidStr);
+                    if(uid.isNull()) uid = uid.createUuid();
                     alg->SetUid(uid);
                     this->AddProcessing(alg);
                     modelNode = modelNode.nextSibling();
