@@ -47,6 +47,8 @@ unsigned int Workspace::AddSource(QString &fina, QString UidStr)
 {
     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
     ann->source = fina;
+    SimpleSceneController *scenePtr = new SimpleSceneController(0);
+    ann->SetTrack(scenePtr);
     this->annotations.push_back(ann);
     return this->annotations.size();
 }
