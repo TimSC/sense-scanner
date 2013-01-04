@@ -49,7 +49,7 @@ unsigned int Workspace::AddSource(QString &fina, QString UidStr)
     ann->source = fina;
     SimpleSceneController *scenePtr = new SimpleSceneController(0);
     ann->SetTrack(scenePtr);
-    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread);
+    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann));
     annotThread->SetEventLoop(this->eventLoop);
     annotThread->Start();
     ann->annotThread = annotThread;
@@ -75,9 +75,10 @@ unsigned int Workspace::AddAutoAnnot(QString annotUid, QString algUid)
     ann->source = parent.source;
     ann->uid = QUuid::createUuid();
     ann->CloneTrack(parent.GetTrack());
-    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread);
+    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann));
     annotThread->SetEventLoop(this->eventLoop);
     annotThread->Start();
+    ann->SetAlgUid(algUid);
     ann->annotThread = annotThread;
 
     this->annotations.push_back(ann);
@@ -284,7 +285,7 @@ void Workspace::Load(QString fina)
                     ann->uid = uid;
 
                     //Start annot worker thread
-                    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread);
+                    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann));
                     annotThread->SetEventLoop(this->eventLoop);
                     annotThread->Start();
                     ann->annotThread = annotThread;

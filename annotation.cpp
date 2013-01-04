@@ -1,11 +1,12 @@
 #include "annotation.h"
 #include "scenecontroller.h"
+#include <assert.h>
 #include <iostream>
 using namespace std;
 
-AnnotThread::AnnotThread()
+AnnotThread::AnnotThread(class Annotation *annIn)
 {
-
+    this->parentAnn = annIn;
 }
 
 AnnotThread::~AnnotThread()
@@ -16,6 +17,11 @@ AnnotThread::~AnnotThread()
 void AnnotThread::Update()
 {
     //cout << "x" << (unsigned long)this << endl;
+    assert(this->parentAnn != NULL);
+    QUuid algUid = this->parentAnn->GetAlgUid();
+    if(!algUid.isNull())
+        cout << algUid.toString().toLocal8Bit().constData() << endl;
+
     this->msleep(100);
 }
 
@@ -37,6 +43,7 @@ Annotation& Annotation::operator= (const Annotation &other)
     source = other.source;
     uid = other.uid;
     visible = other.visible;
+    algUid = other.algUid;
     if(this->track) delete this->track;
     this->track = NULL;
 
@@ -52,6 +59,7 @@ bool Annotation::operator!= (const Annotation &other)
     if(visible != other.visible) return true;
     if(uid != other.uid) return true;
     if(track != other.track) return true;
+    if(algUid != other.algUid) return true;
     return false;
 }
 
@@ -61,6 +69,7 @@ void Annotation::Clear()
     this->visible = true;
     QUuid uidBlank;
     this->uid = uidBlank;
+    this->algUid = algUid;
     this->source = "";
     std::tr1::shared_ptr<class AnnotThread> thd;
     this->annotThread = thd;
@@ -82,4 +91,20 @@ void Annotation::CloneTrack(class SimpleSceneController *trackIn)
 class SimpleSceneController *Annotation::GetTrack()
 {
     return this->track;
+}
+
+
+void Annotation::SetAlgUid(QUuid uidIn)
+{
+    this->lock.lock();
+    this->algUid = uidIn;
+    this->lock.unlock();
+}
+
+QUuid Annotation::GetAlgUid()
+{
+    this->lock.lock();
+    QUuid out = this->algUid;
+    this->lock.unlock();
+    return out;
 }
