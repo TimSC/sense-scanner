@@ -45,8 +45,9 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
 
 unsigned int Workspace::AddSource(QString &fina, QString UidStr)
 {
-    class Annotation ann;
-    ann.source = fina;
+    std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
+    ann->source = fina;
+    this->annotations.push_back(ann);
     return this->annotations.size();
 }
 
