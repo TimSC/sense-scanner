@@ -604,8 +604,9 @@ void MainWindow::SelectedSourceChanged(const QModelIndex ind)
     this->SelectedSourceChanged(selectedRow);
 }
 
-void MainWindow::ChangeVidSource(AvBinThread **mediaThread,
+void ChangeVidSource(AvBinThread **mediaThread,
     AvBinMedia *mediaInterface,
+    class EventLoop *eventLoop,
     QString fina)
 {
     //Mark media interface as inactive
@@ -621,7 +622,7 @@ void MainWindow::ChangeVidSource(AvBinThread **mediaThread,
     //Create a new source
     *mediaThread = new AvBinThread();
     (*mediaThread)->SetId(threadId);
-    (*mediaThread)->SetEventLoop(this->eventLoop);
+    (*mediaThread)->SetEventLoop(eventLoop);
     (*mediaThread)->Start();
 
     //Mark media interface as active
@@ -646,7 +647,7 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
     //Pause video
     this->ui->widget->Pause();
 
-    this->ChangeVidSource(&this->mediaThreadFront, this->mediaInterfaceFront, fina);
+    ChangeVidSource(&this->mediaThreadFront, this->mediaInterfaceFront, this->eventLoop, fina);
 
     //Update scene controller
     SimpleSceneController *scene = this->workspace.GetTrack(selectedRow);
@@ -707,7 +708,7 @@ void MainWindow::TrainModelPressed()
         QString fina = this->workspace.GetSourceName(ind.row());
 
         //Load appropriate video
-        this->ChangeVidSource(&this->mediaThreadBack,this->mediaInterfaceBack,fina);
+        ChangeVidSource(&this->mediaThreadBack,this->mediaInterfaceBack,this->eventLoop,fina);
 
         //For each annotated frame
         SimpleSceneController *annot = this->workspace.GetTrack(ind.row());
@@ -871,7 +872,7 @@ void MainWindow::ApplyModelPressed()
         //Load appropriate video
         QString fina = this->workspace.GetSourceName(ind.row());
         QUuid uid = this->workspace.GetAnnotUid(ind.row());
-        this->ChangeVidSource(&this->mediaThreadBack,this->mediaInterfaceBack,fina);
+        ChangeVidSource(&this->mediaThreadBack,this->mediaInterfaceBack,this->eventLoop,fina);
 
         //Apply models to selected video
         for(unsigned int i=0;i<modelSelList.size();i++)

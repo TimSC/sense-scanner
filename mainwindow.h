@@ -67,6 +67,11 @@ signals:
 
 //***************************************
 
+void ChangeVidSource(AvBinThread **mediaThread,
+                     AvBinMedia *mediaInterface,
+                     class EventLoop *eventLoop,
+                     QString fina);
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -111,9 +116,7 @@ public slots:
     void LoadWorkspace();
     void SaveWorkspace();
     void SaveAsWorkspace();
-    void ChangeVidSource(AvBinThread **mediaThread,
-                         AvBinMedia *mediaInterface,
-                         QString fina);
+
     void SelectedSourceChanged(const QModelIndex current);
     void SelectedSourceChanged(int selectedRow);
     QString CheckIfDataShouldBeDiscarded(QString discardMsg);
