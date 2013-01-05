@@ -22,6 +22,9 @@ void AnnotThread::Update()
     if(!algUid.isNull())
         cout << algUid.toString().toLocal8Bit().constData() << endl;
 
+    class SimpleSceneController *track = this->parentAnn->GetTrack();
+
+
     this->msleep(100);
 }
 
@@ -90,9 +93,11 @@ void Annotation::CloneTrack(class SimpleSceneController *trackIn)
 
 class SimpleSceneController *Annotation::GetTrack()
 {
-    return this->track;
+    this->lock.lock();
+    class SimpleSceneController *out = this->track;
+    this->lock.unlock();
+    return out;
 }
-
 
 void Annotation::SetAlgUid(QUuid uidIn)
 {
@@ -105,6 +110,21 @@ QUuid Annotation::GetAlgUid()
 {
     this->lock.lock();
     QUuid out = this->algUid;
+    this->lock.unlock();
+    return out;
+}
+
+void Annotation::SetSource(QString sourceIn)
+{
+    this->lock.lock();
+    this->source = sourceIn;
+    this->lock.unlock();
+}
+
+QString Annotation::GetSource()
+{
+    this->lock.lock();
+    QString out = this->source;
     this->lock.unlock();
     return out;
 }

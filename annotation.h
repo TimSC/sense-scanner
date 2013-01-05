@@ -33,15 +33,18 @@ public:
     void SetAlgUid(QUuid uidIn); //Thread safe
     QUuid GetAlgUid(); //Thread safe
 
+    void SetSource(QString uidIn); //Thread safe
+    QString GetSource(); //Thread safe
+
     bool visible;
     QUuid uid;
-    QString source;
     std::tr1::shared_ptr<class AnnotThread> annotThread;
 
 protected:
     QMutex lock;
     class SimpleSceneController * track;
     QUuid algUid;
+    QString source;
 };
 
 

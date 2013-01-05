@@ -46,7 +46,7 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
 unsigned int Workspace::AddSource(QString &fina, QString UidStr)
 {
     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
-    ann->source = fina;
+    ann->SetSource(fina);
     SimpleSceneController *scenePtr = new SimpleSceneController(0);
     ann->SetTrack(scenePtr);
     std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann));
@@ -72,7 +72,7 @@ unsigned int Workspace::AddAutoAnnot(QString annotUid, QString algUid)
     class Annotation &parent = *this->annotations[basedOnAnnot];
 
     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
-    ann->source = parent.source;
+    ann->SetSource(parent.GetSource());
     ann->uid = QUuid::createUuid();
     ann->CloneTrack(parent.GetTrack());
     std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann));
@@ -98,7 +98,7 @@ unsigned int Workspace::GetNumSources()
 QString Workspace::GetSourceName(unsigned int index)
 {
     assert(index < this->annotations.size());
-    return this->annotations[index]->source;
+    return this->annotations[index]->GetSource();
 }
 
 QUuid Workspace::GetAnnotUid(unsigned int index)
@@ -276,7 +276,7 @@ void Workspace::Load(QString fina)
                     QString sourceFiNaAbs = dir.absoluteFilePath(sourceFiNa);
                     QFileInfo fileInfo(sourceFiNaAbs);
                     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
-                    ann->source = fileInfo.absoluteFilePath();
+                    ann->SetSource(fileInfo.absoluteFilePath());
 
                     //Set UID
                     QString uidStr = sourceEle.attribute("uid");
@@ -374,7 +374,7 @@ int Workspace::Save()
         try
         {
             out << "\t<source id=\""<<i<<"\" uid=\""<<Qt::escape(this->annotations[i]->uid)<<"\" file=\""<<
-                   Qt::escape(dir.relativeFilePath(this->annotations[i]->source))<<"\">" << endl;
+                   Qt::escape(dir.relativeFilePath(this->annotations[i]->GetSource()))<<"\">" << endl;
             this->annotations[i]->GetTrack()->WriteAnnotationXml(out);
             out << "\t</source>" << endl;
         }
