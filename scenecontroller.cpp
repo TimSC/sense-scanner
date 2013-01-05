@@ -120,9 +120,9 @@ SimpleSceneController& SimpleSceneController::operator= (const SimpleSceneContro
     this->pos = other.pos; //contains annotation positions
     this->shape = other.shape; //contains the default shape
     this->links = other.links;
-	return *this;
 
     this->lock.unlock();
+    return *this;
 
 }
 
@@ -874,7 +874,11 @@ void SimpleSceneController::LoadShape()
     //Get input filename from user
     QString fileName = QFileDialog::getOpenFileName(0,
         tr("Load Shape"), "", tr("Shapes (*.shape)"));
-    if(fileName.length() == 0) return;
+    if(fileName.length() == 0)
+    {
+        this->lock.unlock();
+        return;
+    }
 
     //Parse XML to DOM
     QFile f(fileName);
@@ -1061,6 +1065,7 @@ void SimpleSceneController::SaveAnnotation()
 
 void SimpleSceneController::ReadAnnotationXml(QDomElement &elem)
 {
+    this->lock.lock();
     this->shape.clear();
     this->links.clear();
     this->pos.clear();
@@ -1085,7 +1090,7 @@ void SimpleSceneController::ReadAnnotationXml(QDomElement &elem)
         }
         n = n.nextSibling();
     }
-
+    this->lock.unlock();
 }
 
 void SimpleSceneController::WriteAnnotationXml(QTextStream &out)
@@ -1117,7 +1122,11 @@ QSharedPointer<MouseGraphicsScene> SimpleSceneController::GetScene()
 
 unsigned int SimpleSceneController::NumMarkedFrames()
 {
-    return this->pos.size();
+
+    this->lock.lock();
+    unsigned int out = this->pos.size();
+    this->lock.unlock();
+    return out;
 }
 
 void SimpleSceneController::GetIndexAnnotationXml(unsigned int index, QTextStream *out)
@@ -1136,8 +1145,11 @@ void SimpleSceneController::GetIndexAnnotationXml(unsigned int index, QTextStrea
 
 unsigned long long SimpleSceneController::GetIndexTimestamp(unsigned int index)
 {
+    this->lock.lock();
     std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it = this->pos.begin();
     for(unsigned int i=0;i<index;i++)
         it ++;
-    return it->first;
+    unsigned long long out = it->first;
+    this->lock.unlock();
+    return out;
 }

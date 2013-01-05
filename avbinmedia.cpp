@@ -258,9 +258,10 @@ void AvBinThread::Update()
 
     //Update the backend to actually do something useful
     foundEvent = this->avBinBackend.PlayUpdate();
+    cout << "AvBinThread::Update()" << (unsigned long)this << endl;
 
     if(!foundEvent)
-        msleep(10);
+        msleep(1000);
     else
         msleep(0);
 }

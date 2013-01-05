@@ -343,7 +343,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     {
         this->Update();
         if(this->threadCount == 0) break;
-        LocalSleep::usleep(10000); //microsec
+        LocalSleep::msleep(10); //millisec
     }
 
     //If threads still running, terminate them
