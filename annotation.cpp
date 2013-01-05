@@ -20,8 +20,11 @@ void AnnotThread::Update()
     assert(this->parentAnn != NULL);
     QUuid algUid = this->parentAnn->GetAlgUid();
     if(!algUid.isNull())
+    {
+        cout << this->parentAnn->GetSource().toLocal8Bit().constData() << endl;
         cout << algUid.toString().toLocal8Bit().constData() << endl;
 
+    }
     class SimpleSceneController *track = this->parentAnn->GetTrack();
 
 
