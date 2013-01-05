@@ -67,11 +67,6 @@ signals:
 
 //***************************************
 
-void ChangeVidSource(AvBinThread **mediaThread,
-                     AvBinMedia *mediaInterface,
-                     class EventLoop *eventLoop,
-                     QString fina);
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT

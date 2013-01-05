@@ -277,3 +277,34 @@ void AvBinThread::SetId(int idIn)
     this->avBinBackend.SetId(idIn);
     MessagableThread::SetId(idIn);
 }
+
+
+//************************************************
+
+void ChangeVidSource(AvBinThread **mediaThread,
+    AvBinMedia *mediaInterface,
+    class EventLoop *eventLoop,
+    QString fina)
+{
+    //Mark media interface as inactive
+    mediaInterface->SetActive(0);
+    int threadId = (*mediaThread)->GetId();
+
+    //Shut down media thread and delete
+    int result = (*mediaThread)->Stop();
+    cout << "stop thread result=" << result << endl;
+    delete(*mediaThread);
+    *mediaThread = NULL;
+
+    //Create a new source
+    *mediaThread = new AvBinThread();
+    (*mediaThread)->SetId(threadId);
+    (*mediaThread)->SetEventLoop(eventLoop);
+    (*mediaThread)->Start();
+
+    //Mark media interface as active
+    mediaInterface->SetActive(1);
+
+    cout << "Opening " << fina.toLocal8Bit().constData() << endl;
+    mediaInterface->OpenFile(fina.toLocal8Bit().constData());
+}

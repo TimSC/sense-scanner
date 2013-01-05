@@ -59,4 +59,9 @@ protected:
     class AvBinBackend avBinBackend;
 };
 
+void ChangeVidSource(AvBinThread **mediaThread,
+                     AvBinMedia *mediaInterface,
+                     class EventLoop *eventLoop,
+                     QString fina);
+
 #endif // AVBINMEDIA_H
