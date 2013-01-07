@@ -12,13 +12,16 @@ int gavBinInitCompleted = 0;
 
 AVbinResult mod_avbin_init()
 {
+    avbinOpenMutex.lock();
     if(!gavBinInitCompleted)
     {
         AVbinResult ret = avbin_init();
         if(ret == AVBIN_RESULT_OK)
             gavBinInitCompleted = 1;
+        avbinOpenMutex.unlock();
         return ret;
     }
+    avbinOpenMutex.unlock();
     return AVBIN_RESULT_OK;
 }
 
@@ -89,6 +92,7 @@ HINSTANCE ghinst = 0;
 
 AVbinResult mod_avbin_init()
 {
+    avbinOpenMutex.lock();
 	if(ghinst==0) ghinst = LoadLibrary("avbin11-32.dll");
 	assert(ghinst != NULL);
 	
@@ -102,19 +106,23 @@ AVbinResult mod_avbin_init()
         AVbinResult ret = (*func)();
         if(ret == AVBIN_RESULT_OK)
             gavBinInitCompleted = 1;
+        avbinOpenMutex.unlock();
         return ret;
     }
+    avbinOpenMutex.unlock();
     return AVBIN_RESULT_OK;
 }
 
 AVbinFile* mod_avbin_open_filename(const char *filename)
 {
+    avbinOpenMutex.lock();
 	assert(ghinst != NULL);
 	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_open_filename" );
 	assert(rawfunc != (FARPROC)NULL);
 
 	AVbinFile* (*func)(const char *filename)=0;
 	func = (AVbinFile* (*)(const char *filename)) rawfunc;
+    avbinOpenMutex.unlock();
 	return (*func)(filename);
 }
 
@@ -185,16 +193,19 @@ int mod_avbin_decode_audio(AVbinStream *stream, uint8_t *data_in, size_t size_in
 }
 AVbinStream* mod_avbin_open_stream(AVbinFile *file, int stream_index)
 {
+    avbinOpenMutex.lock();
 	assert(ghinst != NULL);
 	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_open_stream" );
 	assert(rawfunc != (FARPROC)NULL);
 
 	AVbinStream* (*func)(AVbinFile *, int)=0;
 	func = (AVbinStream* (*)(AVbinFile *, int)) rawfunc;
+    avbinOpenMutex.unlock();
 	return (*func)(file, stream_index);
 }
 void mod_avbin_close_stream(AVbinStream *stream)
 {
+    avbinOpenMutex.lock();
 	assert(ghinst != NULL);
 	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_close_stream" );
 	assert(rawfunc != (FARPROC)NULL);
@@ -202,10 +213,12 @@ void mod_avbin_close_stream(AVbinStream *stream)
 	void (*func)(AVbinStream *)=0;
 	func = (void (*)(AVbinStream *)) rawfunc;
 	(*func)(stream);	
+    avbinOpenMutex.unlock();
 }
 
 void mod_avbin_close_file(AVbinFile *file)
 {
+    avbinOpenMutex.lock();
 	assert(ghinst != NULL);
 	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_close_file" );
 	assert(rawfunc != (FARPROC)NULL);
@@ -213,5 +226,6 @@ void mod_avbin_close_file(AVbinFile *file)
 	void (*func)(AVbinFile *)=0;
 	func = (void (*)(AVbinFile *)) rawfunc;
 	(*func)(file);		
+    avbinOpenMutex.unlock();
 }
 #endif
