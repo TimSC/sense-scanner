@@ -376,3 +376,4 @@ void AlgorithmProcess::SetUid(QUuid newUid)
 {
     this->uid = newUid;
 }
+

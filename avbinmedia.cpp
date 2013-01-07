@@ -143,7 +143,6 @@ QSharedPointer<QImage> AvBinMedia::Get(QString source,
 long long unsigned AvBinMedia::Length(QString source) //Get length (ms)
 {
     this->lock.lock();
-
     //Check source is what is currently loaded
     this->ChangeVidSource(source);
 
@@ -152,10 +151,17 @@ long long unsigned AvBinMedia::Length(QString source) //Get length (ms)
     std::tr1::shared_ptr<class Event> durationEvent(new Event(eventName.toLocal8Bit().constData(), evid));
     this->eventLoop->SendEvent(durationEvent);
     assert(this->eventReceiver);
-    this->lock.unlock();
+    std::tr1::shared_ptr<class Event> ev;
+    try
+    {
+        ev = this->eventReceiver->WaitForEventId(evid);
+    }
+    catch(std::runtime_error &err)
+    {
+        this->lock.unlock();
+        throw std::runtime_error(err.what());
+    }
 
-    std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(evid);
-    this->lock.lock();
     QString eventNameRx = QString("AVBIN_DURATION_RESPONSE%1").arg(this->id);
     this->lock.unlock();
     assert(ev->type == eventNameRx.toLocal8Bit().constData());
@@ -251,17 +257,12 @@ void AvBinMedia::ChangeVidSource(QString fina)
     this->mediaThread = new AvBinThread();
     this->mediaThread->SetId(threadId);
     this->mediaThread->SetEventLoop(this->eventLoop);
-    if(fina.length()>0)
-    {
-        this->mediaThread->Start();
-    }
+    this->mediaThread->Start();
 
     cout << "Opening " << fina.toLocal8Bit().constData() << endl;
     this->OpenFile(fina.toLocal8Bit().constData());
     this->currentFina = fina;
 }
-
-
 
 //*************************************************
 
@@ -277,11 +278,15 @@ AvBinThread::~AvBinThread()
 
 void AvBinThread::Update()
 {
+    //if(id==1)
+    //{
+    //    cout << "AvBinThread::Update()" << this->id <<"\t"<< (unsigned long)this << endl;
+    //}
+
     int foundEvent = 0;
 
     //Update the backend to actually do something useful
     foundEvent = this->avBinBackend.PlayUpdate();
-    cout << "AvBinThread::Update()" << this->id <<"\t"<< (unsigned long)this << endl;
 
     if(!foundEvent)
         msleep(10);
@@ -300,7 +305,6 @@ void AvBinThread::SetId(int idIn)
     this->avBinBackend.SetId(idIn);
     MessagableThread::SetId(idIn);
 }
-
 
 //************************************************
 

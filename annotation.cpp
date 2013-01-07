@@ -37,13 +37,15 @@ void AnnotThread::Update()
         int err = 0;
         try
         {
-            this->srcDuration = this->mediaInterface->Length(src);
+            err = 1;
+            //this->srcDuration = this->mediaInterface->Length(src);
         }
         catch (std::runtime_error &errMsg)
         {
             err = 1;
         }
         if(!err) this->srcDurationSet = 1;
+        this->msleep(100);
         return;
     }
 /*

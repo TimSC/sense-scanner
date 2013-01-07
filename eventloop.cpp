@@ -277,7 +277,7 @@ void MessagableThread::run()
 
     std::tr1::shared_ptr<class Event> stopEvent(new Event("THREAD_STOPPING"));
     this->eventLoop->SendEvent(stopEvent);
-    cout << "Stopping AvBinThread" << endl;
+    cout << "Messagable thread has returned" << endl;
 }
 
 void MessagableThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
