@@ -9,12 +9,29 @@
 using namespace std;
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
 
-AvBinMedia::AvBinMedia() : AbstractMedia()
+AvBinMedia::AvBinMedia(int idIn, class EventLoop *eventLoopIn) : AbstractMedia()
 {
     this->eventReceiver = NULL;
-    this->eventLoop = NULL;
-    this->active = 0;
-    this->id = 0;
+    this->eventLoop = eventLoopIn;
+    this->id = idIn;
+    this->mediaThread = NULL;
+
+    if(this->eventReceiver == NULL)
+    {
+        this->eventReceiver = new class EventReceiver(eventLoopIn);
+        this->eventLoop = eventLoopIn;
+        QString eventName = QString("AVBIN_DURATION_RESPONSE%1").arg(this->id);
+        this->eventLoop->AddListener(eventName.toLocal8Bit().constData(), *this->eventReceiver);
+        QString eventName2 = QString("AVBIN_FRAME_RESPONSE%1").arg(this->id);
+        this->eventLoop->AddListener(eventName2.toLocal8Bit().constData(), *this->eventReceiver);
+        QString eventName3 = QString("AVBIN_FRAME_FAILED%1").arg(this->id);
+        this->eventLoop->AddListener(eventName3.toLocal8Bit().constData(), *this->eventReceiver);
+    }
+
+    this->mediaThread = new AvBinThread();
+    this->mediaThread->SetId(this->id);
+    this->mediaThread->SetEventLoop(this->eventLoop);
+    this->mediaThread->Start();
 }
 
 AvBinMedia::~AvBinMedia()
@@ -22,13 +39,13 @@ AvBinMedia::~AvBinMedia()
     cout << "AvBinMedia::~AvBinMedia()" << endl;
     if(this->eventReceiver) delete this->eventReceiver;
     this->eventReceiver = NULL;
+    if(this->mediaThread!=NULL)
+        delete this->mediaThread;
+    this->mediaThread = NULL;
 }
 
 int AvBinMedia::OpenFile(QString fina)
 {
-    assert(this->active);
-    if(!this->active)
-        throw runtime_error("Media interface not active");
     assert(this->eventLoop);
     unsigned long long evid = this->eventLoop->GetId();
     QString eventName = QString("AVBIN_OPEN_FILE%1").arg(this->id);
@@ -59,21 +76,28 @@ void RawImgToQImage(DecodedFrame *frame, QImage &img)
         }
 }
 
-void AvBinMedia::SetId(int idIn)
+void AvBinMedia::TerminateThread()
 {
-    this->id = idIn;
+    if(this->mediaThread!=NULL && this->mediaThread->isRunning())
+    {
+        cout << "Warning: terminating buffer media tread" << endl;
+        this->mediaThread->terminate();
+    }
 }
 
-QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
+QSharedPointer<QImage> AvBinMedia::Get(QString source,
+                                       long long unsigned ti,
                                        long long unsigned &outFrameStart,
                                        long long unsigned &outFrameEnd,
                                        long long unsigned timeout) //in milliseconds
 {
-    assert(this->active);
-    if(!this->active)
-        throw runtime_error("Media interface not active");
+
+    this->lock.lock();
     outFrameStart = 0;
     outFrameEnd = 0;
+
+    //Check source is what is currently loaded
+    this->ChangeVidSource(source);
 
     //Request the frame from the backend thread
     assert(this->eventLoop != NULL);
@@ -91,6 +115,7 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
     QString evType = ev->type.c_str();
     if(evType.left(18) == "AVBIN_FRAME_FAILED")
     {
+        this->lock.unlock();
         throw runtime_error("Get frame failed");
     }
 
@@ -105,6 +130,7 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
     QSharedPointer<QImage> img(new QImage(frame->width, frame->height,
                                           QImage::Format_RGB888));
     RawImgToQImage(frame, *img);
+    this->lock.unlock();
     assert(!img->isNull());
     return img;
 
@@ -114,66 +140,41 @@ QSharedPointer<QImage> AvBinMedia::Get(long long unsigned ti,
 
 }
 
-long long unsigned AvBinMedia::GetNumFrames()
+long long unsigned AvBinMedia::Length(QString source) //Get length (ms)
 {
-    assert(this->active);
-    if(!this->active)
-        throw runtime_error("Media interface not active");
-    assert(0); //Not implemented
-	return 0;
-}
+    this->lock.lock();
 
-long long unsigned AvBinMedia::Length() //Get length (ms)
-{
-    assert(this->active);
-    if(!this->active)
-        throw runtime_error("Media interface not active");
+    //Check source is what is currently loaded
+    this->ChangeVidSource(source);
 
     unsigned long long evid = this->eventLoop->GetId();
     QString eventName = QString("AVBIN_GET_DURATION%1").arg(this->id);
     std::tr1::shared_ptr<class Event> durationEvent(new Event(eventName.toLocal8Bit().constData(), evid));
     this->eventLoop->SendEvent(durationEvent);
     assert(this->eventReceiver);
+    this->lock.unlock();
+
     std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(evid);
+    this->lock.lock();
     QString eventNameRx = QString("AVBIN_DURATION_RESPONSE%1").arg(this->id);
+    this->lock.unlock();
     assert(ev->type == eventNameRx.toLocal8Bit().constData());
     return ROUND_TIMESTAMP(STR_TO_ULL(ev->data.c_str(),NULL,10) / 1000.);
 }
 
-long long unsigned AvBinMedia::GetFrameStartTime(long long unsigned ti) //in milliseconds
+long long unsigned AvBinMedia::GetFrameStartTime(QString source, long long unsigned ti) //in milliseconds
 {
-    assert(this->active);
-    if(!this->active)
-        throw runtime_error("Media interface not active");
-
     long long unsigned outFrameTi = 0, outFrameEndTi = 0;
-    QSharedPointer<QImage> out = this->Get(ti, outFrameTi, outFrameEndTi);
+    QSharedPointer<QImage> out = this->Get(source, ti, outFrameTi, outFrameEndTi);
     cout << "Frame start" << outFrameTi << endl;
     return outFrameTi;
 }
 
-void AvBinMedia::SetEventLoop(class EventLoop *eventLoopIn)
-{
-    if(this->eventReceiver == NULL)
-    {
-        this->eventReceiver = new class EventReceiver(eventLoopIn);
-        this->eventLoop = eventLoopIn;
-        QString eventName = QString("AVBIN_DURATION_RESPONSE%1").arg(this->id);
-        this->eventLoop->AddListener(eventName.toLocal8Bit().constData(), *this->eventReceiver);
-        QString eventName2 = QString("AVBIN_FRAME_RESPONSE%1").arg(this->id);
-        this->eventLoop->AddListener(eventName2.toLocal8Bit().constData(), *this->eventReceiver);
-        QString eventName3 = QString("AVBIN_FRAME_FAILED%1").arg(this->id);
-        this->eventLoop->AddListener(eventName3.toLocal8Bit().constData(), *this->eventReceiver);
-    }
-}
-
 //*******************************************
 
-int AvBinMedia::RequestFrame(long long unsigned ti) //in milliseconds
+int AvBinMedia::RequestFrame(QString source, long long unsigned ti) //in milliseconds
 {
-    assert(this->active);
-    if(!this->active)
-        throw runtime_error("Media interface not active");
+    this->lock.lock();
 
     //Request the frame from the backend thread
     assert(this->eventLoop != NULL);
@@ -184,6 +185,7 @@ int AvBinMedia::RequestFrame(long long unsigned ti) //in milliseconds
     tmp << ti * 1000;
     getFrameEvent->data = tmp.str();
     this->eventLoop->SendEvent(getFrameEvent);
+    this->lock.unlock();
     return id;
 }
 
@@ -192,9 +194,6 @@ void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long sta
                                               unsigned long long requestTimestamp,
                                               void *raw), void *raw)
 {
-    assert(this->active);
-    if(!this->active)
-        throw runtime_error("Media interface not active");
 
     //Check for new frames from media backend.
     int checking = 1;
@@ -234,10 +233,32 @@ void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long sta
 
 }
 
-void AvBinMedia::SetActive(int activeIn)
+void AvBinMedia::ChangeVidSource(QString fina)
 {
-    this->active = activeIn;
+    if(fina == this->currentFina) return;
+    assert(this->mediaThread != NULL);
+
+    //Mark media interface as inactive
+    int threadId = this->mediaThread->GetId();
+
+    //Shut down media thread and delete
+    int result = this->mediaThread->Stop();
+    cout << "stop thread result=" << result << endl;
+    delete this->mediaThread;
+    this->mediaThread = NULL;
+
+    //Create a new source
+    this->mediaThread = new AvBinThread();
+    this->mediaThread->SetId(threadId);
+    this->mediaThread->SetEventLoop(eventLoop);
+    this->mediaThread->Start();
+
+    //Mark media interface as active
+
+    cout << "Opening " << fina.toLocal8Bit().constData() << endl;
+    this->OpenFile(fina.toLocal8Bit().constData());
 }
+
 
 
 //*************************************************
@@ -281,30 +302,3 @@ void AvBinThread::SetId(int idIn)
 
 //************************************************
 
-void ChangeVidSource(AvBinThread **mediaThread,
-    AvBinMedia *mediaInterface,
-    class EventLoop *eventLoop,
-    QString fina)
-{
-    //Mark media interface as inactive
-    mediaInterface->SetActive(0);
-    int threadId = (*mediaThread)->GetId();
-
-    //Shut down media thread and delete
-    int result = (*mediaThread)->Stop();
-    cout << "stop thread result=" << result << endl;
-    delete(*mediaThread);
-    *mediaThread = NULL;
-
-    //Create a new source
-    *mediaThread = new AvBinThread();
-    (*mediaThread)->SetId(threadId);
-    (*mediaThread)->SetEventLoop(eventLoop);
-    (*mediaThread)->Start();
-
-    //Mark media interface as active
-    mediaInterface->SetActive(1);
-
-    cout << "Opening " << fina.toLocal8Bit().constData() << endl;
-    mediaInterface->OpenFile(fina.toLocal8Bit().constData());
-}

@@ -69,14 +69,15 @@ VideoWidget::~VideoWidget()
     delete ui;
 }
 
-void VideoWidget::SetSource(AbstractMedia *src)
+void VideoWidget::SetSource(AbstractMedia *src, QString finaIn)
 {
     this->seq = src;
     this->mediaLength = 0;
+    this->fina = finaIn;
 
     if(this->seq!=NULL) try
     {
-        this->mediaLength = this->seq->Length();
+        this->mediaLength = this->seq->Length(this->fina);
     }
     catch (std::runtime_error &e)
     {
@@ -108,7 +109,7 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
     //Get image from sequence
     try
     {
-        this->seq->RequestFrame(ti);
+        this->seq->RequestFrame(this->fina, ti);
     }
     catch(std::runtime_error &err)
     {

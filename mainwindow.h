@@ -77,9 +77,7 @@ public:
     
 private:
     Ui::MainWindow *ui;
-    AvBinThread *mediaThreadFront;
     AvBinMedia *mediaInterfaceFront;
-    AvBinThread *mediaThreadBack;
     AvBinMedia *mediaInterfaceBack;
     class EventLoop *eventLoop;
     class EventReceiver *eventReceiver;

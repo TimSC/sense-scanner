@@ -186,25 +186,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("ALG_DATA_BLOCK",*eventReceiver);
 
     //Create file reader worker thread
-    this->mediaThreadFront = new AvBinThread();
-    this->mediaThreadFront->SetId(0);
-    this->mediaThreadFront->SetEventLoop(this->eventLoop);
-    this->mediaThreadFront->Start();
-
-    this->mediaThreadBack = new AvBinThread();
-    this->mediaThreadBack->SetId(1);
-    this->mediaThreadBack->SetEventLoop(this->eventLoop);
-    this->mediaThreadBack->Start();
-
-    this->mediaInterfaceFront = new class AvBinMedia();
-    this->mediaInterfaceFront->SetId(0);
-    this->mediaInterfaceFront->SetEventLoop(this->eventLoop);
-    this->mediaInterfaceFront->SetActive(1);
-
-    this->mediaInterfaceBack = new class AvBinMedia();
-    this->mediaInterfaceBack->SetId(1);
-    this->mediaInterfaceBack->SetEventLoop(this->eventLoop);
-    this->mediaInterfaceBack->SetActive(1);
+    this->mediaInterfaceFront = new class AvBinMedia(0, this->eventLoop);
+    this->mediaInterfaceBack = new class AvBinMedia(1, this->eventLoop);
 
     //Start event buffer timer
     this->timer = new QTimer();
@@ -213,7 +196,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
     this->setWindowTitle("Video Cognition System");
-    this->ui->widget->SetSource(this->mediaInterfaceFront);
+    this->ui->widget->SetSource(this->mediaInterfaceFront,"");
 
     this->ui->dataSources->setModel(&this->sourcesModel);
     this->RegenerateSourcesList();
@@ -243,12 +226,6 @@ MainWindow::~MainWindow()
 
     delete this->eventReceiver;
     this->eventReceiver = NULL;
-
-    if(this->mediaThreadFront) delete this->mediaThreadFront;
-    this->mediaThreadFront = NULL;
-
-    if(this->mediaThreadBack) delete this->mediaThreadBack;
-    this->mediaThreadBack = NULL;
 
     if(this->errMsg) delete this->errMsg;
     this->errMsg = NULL;
@@ -323,10 +300,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     //Disconnect video widget from media source
     cout << "Disconnect video from source" << endl;
     AbstractMedia *nullSrc = NULL;
-    this->ui->widget->SetSource(nullSrc);
-
-    //Mark media interface as inactive
-    this->mediaInterfaceFront->SetActive(0);
+    this->ui->widget->SetSource(nullSrc,"");
 
     //Signal worker threads to stop
     cout << "Signal worker threads to stop" << endl;
@@ -347,17 +321,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 
     //If threads still running, terminate them
-    if(this->mediaThreadFront->isRunning())
-    {
-        cout << "Warning: terminating front buffer media tread" << endl;
-        this->mediaThreadFront->terminate();
-    }
-
-    if(this->mediaThreadBack->isRunning())
-    {
-        cout << "Warning: terminating back buffer media tread" << endl;
-        this->mediaThreadBack->terminate();
-    }
+    this->mediaInterfaceFront->TerminateThread();
+    this->mediaInterfaceBack->TerminateThread();
 
     //Continu shut down in parent object
     cout << "Continuing shut down of QT framework" << endl;
@@ -619,7 +584,7 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
     //Pause video
     this->ui->widget->Pause();
 
-    ChangeVidSource(&this->mediaThreadFront, this->mediaInterfaceFront, this->eventLoop, fina);
+    //this->mediaInterfaceFront->ChangeVidSource(&this->mediaThreadFront, fina);
 
     //Update scene controller
     SimpleSceneController *scene = this->workspace.GetTrack(selectedRow);
@@ -629,7 +594,7 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
     this->annotationMenu = scene->MenuFactory(this->menuBar());
 
     //Set widget to use this source
-    this->ui->widget->SetSource(this->mediaInterfaceFront);
+    this->ui->widget->SetSource(this->mediaInterfaceFront, fina);
 
 }
 
@@ -679,9 +644,6 @@ void MainWindow::TrainModelPressed()
         QModelIndex &ind = selectList[i];
         QString fina = this->workspace.GetSourceName(ind.row());
 
-        //Load appropriate video
-        ChangeVidSource(&this->mediaThreadBack,this->mediaInterfaceBack,this->eventLoop,fina);
-
         //For each annotated frame
         SimpleSceneController *annot = this->workspace.GetTrack(ind.row());
         assert(annot!=0);
@@ -698,7 +660,7 @@ void MainWindow::TrainModelPressed()
             QSharedPointer<QImage> img;
             try
             {
-                img = this->mediaInterfaceBack->Get(
+                img = this->mediaInterfaceBack->Get(fina,
                         annotTimestamp, startTimestamp, endTimestamp);
             }
             catch (std::runtime_error &err)
@@ -764,7 +726,7 @@ void MainWindow::ApplyModelPressed()
         //Load appropriate video
         QString fina = this->workspace.GetSourceName(ind.row());
         QUuid uid = this->workspace.GetAnnotUid(ind.row());
-        ChangeVidSource(&this->mediaThreadBack,this->mediaInterfaceBack,this->eventLoop,fina);
+        //ChangeVidSource(&this->mediaThreadBack,this->mediaInterfaceBack,this->eventLoop,fina);
 
         //Apply models to selected video
         for(unsigned int i=0;i<modelSelList.size();i++)

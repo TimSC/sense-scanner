@@ -37,7 +37,7 @@ public:
     virtual ~VideoWidget();
 
 public slots:
-    void SetSource(AbstractMedia *src);
+    void SetSource(AbstractMedia *src, QString finaIn);
     void SliderMoved(int newValue);
     void Pause();
     void Play();
@@ -64,6 +64,7 @@ protected:
     long long unsigned mediaLength;
     int fitWindowToNextFrame;
     long long unsigned lastRequestedTime;
+    QString fina;
 
 private:
     Ui::VideoWidget *ui;

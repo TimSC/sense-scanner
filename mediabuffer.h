@@ -45,42 +45,20 @@ public:
     explicit AbstractMedia() {}
     virtual ~AbstractMedia() {}
 
-    virtual QSharedPointer<QImage> Get(long long unsigned ti,
+    virtual QSharedPointer<QImage> Get(QString source,
+                                       long long unsigned ti,
                                        long long unsigned &outFrameStart,
                                        long long unsigned &outFrameEnd,
                                        long long unsigned timeout = 5000)=0; //in milliseconds
 
-    virtual long long unsigned GetNumFrames()=0;
-    virtual long long unsigned Length()=0; //Get length (ms)
-    virtual long long unsigned GetFrameStartTime(long long unsigned ti)=0; //in milliseconds
+    virtual long long unsigned Length(QString source)=0; //Get length (ms)
+    virtual long long unsigned GetFrameStartTime(QString source, long long unsigned ti)=0; //in milliseconds
 
-    virtual int RequestFrame(long long unsigned ti)=0;
+    virtual int RequestFrame(QString source, long long unsigned ti)=0;
     virtual void Update(void (*frameCallback)(QImage& fr, unsigned long long startTimestamp,
                                               unsigned long long endTimestamp,
                                               unsigned long long requestedTimestamp,
                                               void *raw), void *raw)=0;
-};
-
-class MediaBuffer: public AbstractMedia
-{
-public:
-    explicit MediaBuffer(QSharedPointer<AbstractMedia> src);
-    virtual ~MediaBuffer();
-
-    void SetSource(QSharedPointer<AbstractMedia> src);
-
-    QSharedPointer<QImage> Get(long long unsigned ti); //in milliseconds
-    long long unsigned GetNumFrames();
-    long long unsigned Length(); //Get length (ms)
-    long long unsigned GetFrameStartTime(long long unsigned ti); //in milliseconds
-
-signals:
-    
-protected:
-    QSharedPointer<AbstractMedia> seq;
-    QMap<unsigned long long, QSharedPointer<QImage> > buffer;
-public slots:
-    
 };
 
 #endif // MEDIABUFFER_H
