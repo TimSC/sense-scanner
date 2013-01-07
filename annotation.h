@@ -15,7 +15,8 @@ public:
 
 protected:
     class Annotation *parentAnn;
-
+    int srcDurationSet;
+    long long unsigned srcDuration;
 };
 
 class Annotation
