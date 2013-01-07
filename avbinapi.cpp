@@ -52,7 +52,8 @@ AVbinResult mod_avbin_read(AVbinFile *file, AVbinPacket *packet)
 
 int mod_avbin_decode_video(AVbinStream *stream, uint8_t *data_in, size_t size_in, uint8_t *data_out)
 {
-	return avbin_decode_video(stream, data_in, size_in, data_out);
+    int ret = avbin_decode_video(stream, data_in, size_in, data_out);
+    return ret;
 }
 
 int mod_avbin_decode_audio(AVbinStream *stream, uint8_t *data_in, size_t size_in, uint8_t *data_out, int *size_out)
@@ -61,16 +62,23 @@ int mod_avbin_decode_audio(AVbinStream *stream, uint8_t *data_in, size_t size_in
 }
 AVbinStream* mod_avbin_open_stream(AVbinFile *file, int stream_index)
 {
-	return avbin_open_stream(file, stream_index);
+    avbinOpenMutex.lock();
+    AVbinStream *str = avbin_open_stream(file, stream_index);
+    avbinOpenMutex.unlock();
+    return str;
 }
 void mod_avbin_close_stream(AVbinStream *stream)
 {
+    avbinOpenMutex.lock();
 	avbin_close_stream(stream);
+    avbinOpenMutex.unlock();
 }
 
 void mod_avbin_close_file(AVbinFile *file)
 {
+    avbinOpenMutex.lock();
 	avbin_close_file(file);
+    avbinOpenMutex.unlock();
 }
 
 #endif //_MSC_VER
