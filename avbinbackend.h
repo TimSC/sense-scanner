@@ -71,7 +71,6 @@ protected:
     uint8_t *audioBuffer;
     unsigned audioBufferSize;
     int id;
-    Mutex openlock;
 };
 
 #endif // AVBINBACKEND_H

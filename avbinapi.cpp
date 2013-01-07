@@ -1,10 +1,12 @@
 #include <assert.h>
 #include "avbinapi.h"
+#include <QtCore/QMutex>
 #ifdef _MSC_VER
 #include <Windows.h>
 #endif
 
 int gavBinInitCompleted = 0;
+QMutex avbinOpenMutex;
 
 #ifndef _MSC_VER
 
@@ -22,7 +24,10 @@ AVbinResult mod_avbin_init()
 
 AVbinFile* mod_avbin_open_filename(const char *filename)
 {
-	return avbin_open_filename(filename);
+    avbinOpenMutex.lock();
+    AVbinFile *fi = avbin_open_filename(filename);
+    avbinOpenMutex.unlock();
+    return fi;
 }
 
 AVbinResult mod_avbin_file_info(AVbinFile *file, AVbinFileInfo *info)
