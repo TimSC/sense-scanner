@@ -4,11 +4,12 @@
 #include <QtCore/QUuid>
 #include <QtCore/QMutex>
 #include "eventloop.h"
+#include "avbinmedia.h"
 
 class AnnotThread : public MessagableThread
 {
 public:
-    AnnotThread(class Annotation *annIn);
+    AnnotThread(class Annotation *annIn, class AvBinMedia *mediaIn);
     virtual ~AnnotThread();
 
     void Update();
@@ -17,6 +18,7 @@ protected:
     class Annotation *parentAnn;
     int srcDurationSet;
     long long unsigned srcDuration;
+    class AvBinMedia *media;
 };
 
 class Annotation

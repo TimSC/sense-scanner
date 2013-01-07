@@ -171,7 +171,9 @@ void AvBinBackend::DoOpenFile(int requestId)
                 this->currentFrame.AllocateSize(requiredBuffSize);
 
             assert(this->currentFrame.buff);
+            this->openlock.lock();
             int32_t ret = mod_avbin_decode_video(stream, packet.data, packet.size, this->currentFrame.buff);
+            this->openlock.unlock();
             int error = (ret == -1);
             if(!error)
             {

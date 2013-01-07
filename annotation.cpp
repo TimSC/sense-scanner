@@ -4,9 +4,10 @@
 #include <iostream>
 using namespace std;
 
-AnnotThread::AnnotThread(class Annotation *annIn)
+AnnotThread::AnnotThread(class Annotation *annIn, class AvBinMedia *mediaIn)
 {
     this->parentAnn = annIn;
+    this->media = mediaIn;
     this->srcDurationSet = 0;
     this->srcDuration = 0;
 }
@@ -21,18 +22,28 @@ void AnnotThread::Update()
     //cout << "x" << (unsigned long)this << endl;
     assert(this->parentAnn != NULL);
     QUuid algUid = this->parentAnn->GetAlgUid();
+    QString source = this->parentAnn->GetSource();
     if(!algUid.isNull())
     {
-        //cout << this->parentAnn->GetSource().toLocal8Bit().constData() << endl;
-        //cout << algUid.toString().toLocal8Bit().constData() << endl;
+        cout << this->parentAnn->GetSource().toLocal8Bit().constData() << endl;
+        cout << algUid.toString().toLocal8Bit().constData() << endl;
 
     }
     class SimpleSceneController *track = this->parentAnn->GetTrack();
 
-/*    if(!this->srcDurationSet)
+    if(!this->srcDurationSet)
     {
-        this->srcDuration = this->mediaInterfaceBack->Length();
-        this->srcDurationSet = 1;
+        int err = 0;
+        try
+        {
+            this->srcDuration = this->media->Length(source);
+        }
+        catch (std::runtime_error &errMsg)
+        {
+            err = 1;
+        }
+
+        if(!err) this->srcDurationSet = 1;
         return;
     }
 
@@ -44,7 +55,7 @@ void AnnotThread::Update()
     unsigned long long startTimestamp = 0, endTimestamp = 0;
     try
     {
-        img = this->mediaInterfaceBack->Get(
+        img = this->media->Get(source,
                 0, startTimestamp, endTimestamp);
         cout << "startTimestamp " << startTimestamp << endl;
         cout << "endTimestamp " << endTimestamp << endl;
@@ -53,7 +64,7 @@ void AnnotThread::Update()
     {
         cout << "Timeout getting frame 0" << endl;
     }
-*/
+
     //Estimate mid time of next frame
     /*unsigned long long frameDuration = endTimestamp - startTimestamp; //microsec
     unsigned long long avTi = (unsigned long long)(0.5 * (startTimestamp + endTimestamp) + 0.5); //microsec
