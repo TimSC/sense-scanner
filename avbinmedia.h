@@ -52,10 +52,9 @@ public:
                                       unsigned long long requestedTimestamp,
                                       void *raw), void *raw);
 
-    void ChangeVidSource(QString fina);
-
 protected:
     int OpenFile(QString fina);
+    void ChangeVidSource(QString fina);
 
     class EventReceiver *eventReceiver;
     class EventLoop *eventLoop;
