@@ -1,9 +1,11 @@
 #include <assert.h>
 #include "avbinapi.h"
+#include <QtCore/QMutex>
 #ifdef _MSC_VER
 #include <Windows.h>
 #endif
 
+QMutex avbinOpenMutex;
 int gavBinInitCompleted = 0;
 
 #ifndef _MSC_VER
@@ -22,7 +24,10 @@ AVbinResult mod_avbin_init()
 
 AVbinFile* mod_avbin_open_filename(const char *filename)
 {
-	return avbin_open_filename(filename);
+    avbinOpenMutex.lock();
+    AVbinFile *fi = avbin_open_filename(filename);
+    avbinOpenMutex.unlock();
+    return fi;
 }
 
 AVbinResult mod_avbin_file_info(AVbinFile *file, AVbinFileInfo *info)
@@ -56,16 +61,23 @@ int mod_avbin_decode_audio(AVbinStream *stream, uint8_t *data_in, size_t size_in
 }
 AVbinStream* mod_avbin_open_stream(AVbinFile *file, int stream_index)
 {
-	return avbin_open_stream(file, stream_index);
+    avbinOpenMutex.lock();
+    AVbinStream* ret = avbin_open_stream(file, stream_index);
+    avbinOpenMutex.unlock();
+    return ret;
 }
 void mod_avbin_close_stream(AVbinStream *stream)
 {
+    avbinOpenMutex.lock();
 	avbin_close_stream(stream);
+    avbinOpenMutex.unlock();
 }
 
 void mod_avbin_close_file(AVbinFile *file)
 {
+    avbinOpenMutex.lock();
 	avbin_close_file(file);
+    avbinOpenMutex.unlock();
 }
 
 #endif //_MSC_VER
