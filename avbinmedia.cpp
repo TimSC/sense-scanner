@@ -250,13 +250,15 @@ void AvBinMedia::ChangeVidSource(QString fina)
     //Create a new source
     this->mediaThread = new AvBinThread();
     this->mediaThread->SetId(threadId);
-    this->mediaThread->SetEventLoop(eventLoop);
-    this->mediaThread->Start();
-
-    //Mark media interface as active
+    this->mediaThread->SetEventLoop(this->eventLoop);
+    if(fina.length()>0)
+    {
+        this->mediaThread->Start();
+    }
 
     cout << "Opening " << fina.toLocal8Bit().constData() << endl;
     this->OpenFile(fina.toLocal8Bit().constData());
+    this->currentFina = fina;
 }
 
 
@@ -279,7 +281,7 @@ void AvBinThread::Update()
 
     //Update the backend to actually do something useful
     foundEvent = this->avBinBackend.PlayUpdate();
-    //cout << "AvBinThread::Update()" << (unsigned long)this << endl;
+    cout << "AvBinThread::Update()" << this->id <<"\t"<< (unsigned long)this << endl;
 
     if(!foundEvent)
         msleep(10);

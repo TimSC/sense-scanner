@@ -261,8 +261,6 @@ void MessagableThread::run()
         running = !this->stopThreads;
         this->mutex.unlock();
 
-        //cout << "x" << this->eventReceiver.BufferSize() << endl;
-
         try
         {
             assert(this->eventReceiver);
@@ -319,7 +317,7 @@ int MessagableThread::Stop()
     }
     if(this->isRunning())
     {
-        cout << "Warning: terminating media thread" << endl;
+        cout << "Warning: terminating messagable thread" << endl;
         this->terminate();
     }
     return 0;

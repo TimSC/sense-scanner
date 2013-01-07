@@ -32,13 +32,21 @@ void AnnotThread::Update()
     }
     class SimpleSceneController *track = this->parentAnn->GetTrack();
 
-/*    if(!this->srcDurationSet)
+    if(!this->srcDurationSet)
     {
-        this->srcDuration = this->mediaInterface->Length(src);
-        this->srcDurationSet = 1;
+        int err = 0;
+        try
+        {
+            this->srcDuration = this->mediaInterface->Length(src);
+        }
+        catch (std::runtime_error &errMsg)
+        {
+            err = 1;
+        }
+        if(!err) this->srcDurationSet = 1;
         return;
     }
-
+/*
     //Check algorithm is ready to work
     //TODO
 

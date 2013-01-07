@@ -56,7 +56,8 @@ int AvBinBackend::OpenFile(const char *filenameIn, int requestId)
     assert(this->fi == NULL);
 
     this->filename = filenameIn;
-    this->DoOpenFile();
+    if(strlen(filenameIn) > 0)
+        this->DoOpenFile();
     return 1;
 }
 
