@@ -37,8 +37,8 @@ void AnnotThread::Update()
         int err = 0;
         try
         {
-            err = 1;
-            //this->srcDuration = this->mediaInterface->Length(src);
+            this->srcDuration = this->mediaInterface->Length(src);
+            cout << "Annot thread found length " << this->srcDuration << endl;
         }
         catch (std::runtime_error &errMsg)
         {
