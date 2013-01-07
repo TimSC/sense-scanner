@@ -8,7 +8,7 @@
 class AnnotThread : public MessagableThread
 {
 public:
-    AnnotThread(class Annotation *annIn);
+    AnnotThread(class Annotation *annIn, class AvBinMedia* mediaInterface);
     virtual ~AnnotThread();
 
     void Update();
@@ -17,6 +17,7 @@ protected:
     class Annotation *parentAnn;
     int srcDurationSet;
     long long unsigned srcDuration;
+    class AvBinMedia* mediaInterface;
 };
 
 class Annotation

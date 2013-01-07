@@ -22,9 +22,9 @@ public:
     void SetEventLoop(class EventLoop &eventLoopIn);
 
     //** Sources and annotations
-    unsigned int AddSource(QString &fina, QString UidStr);
+    unsigned int AddSource(QString &fina, QString UidStr, class AvBinMedia* mediaInterface);
     void RemoveSource(unsigned int num);
-    unsigned int AddAutoAnnot(QString annotUid, QString algUid);
+    unsigned int AddAutoAnnot(QString annotUid, QString algUid, class AvBinMedia* mediaInterface);
     int FindAnnotWithUid(QUuid uidIn);
 
     //void SetTrack(unsigned int trackNum, SimpleSceneController *track);
@@ -51,7 +51,7 @@ public:
     QString GetProcessingName(unsigned int index);
 
     void Clear();
-    void Load(QString fina);
+    void Load(QString fina, class AvBinMedia* mediaInterface);
     int Save();
     void SaveAs(QString &fina);
     int HasChanged();

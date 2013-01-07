@@ -1,14 +1,16 @@
 #include "annotation.h"
 #include "scenecontroller.h"
+#include "avbinmedia.h"
 #include <assert.h>
 #include <iostream>
 using namespace std;
 
-AnnotThread::AnnotThread(class Annotation *annIn)
+AnnotThread::AnnotThread(class Annotation *annIn, class AvBinMedia* mediaInterfaceIn)
 {
     this->parentAnn = annIn;
     this->srcDurationSet = 0;
     this->srcDuration = 0;
+    this->mediaInterface = mediaInterfaceIn;
 }
 
 AnnotThread::~AnnotThread()
@@ -21,6 +23,7 @@ void AnnotThread::Update()
     //cout << "x" << (unsigned long)this << endl;
     assert(this->parentAnn != NULL);
     QUuid algUid = this->parentAnn->GetAlgUid();
+    QString src = this->parentAnn->GetSource();
     if(!algUid.isNull())
     {
         //cout << this->parentAnn->GetSource().toLocal8Bit().constData() << endl;
@@ -31,7 +34,7 @@ void AnnotThread::Update()
 
 /*    if(!this->srcDurationSet)
     {
-        this->srcDuration = this->mediaInterfaceBack->Length();
+        this->srcDuration = this->mediaInterface->Length(src);
         this->srcDurationSet = 1;
         return;
     }

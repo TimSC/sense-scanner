@@ -43,13 +43,13 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
     this->eventLoop = &eventLoopIn;
 }
 
-unsigned int Workspace::AddSource(QString &fina, QString UidStr)
+unsigned int Workspace::AddSource(QString &fina, QString UidStr, class AvBinMedia* mediaInterface)
 {
     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
     ann->SetSource(fina);
     SimpleSceneController *scenePtr = new SimpleSceneController(0);
     ann->SetTrack(scenePtr);
-    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann));
+    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann, mediaInterface));
     annotThread->SetEventLoop(this->eventLoop);
     annotThread->Start();
     ann->annotThread = annotThread;
@@ -63,7 +63,7 @@ void Workspace::RemoveSource(unsigned int num)
     this->annotations.erase(this->annotations.begin()+num);
 }
 
-unsigned int Workspace::AddAutoAnnot(QString annotUid, QString algUid)
+unsigned int Workspace::AddAutoAnnot(QString annotUid, QString algUid, class AvBinMedia* mediaInterface)
 {
     QUuid annotUidObj(annotUid);
     int basedOnAnnot = FindAnnotWithUid(annotUidObj);
@@ -75,7 +75,7 @@ unsigned int Workspace::AddAutoAnnot(QString annotUid, QString algUid)
     ann->SetSource(parent.GetSource());
     ann->uid = QUuid::createUuid();
     ann->CloneTrack(parent.GetTrack());
-    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann));
+    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann, mediaInterface));
     annotThread->SetEventLoop(this->eventLoop);
     annotThread->Start();
     ann->SetAlgUid(algUid);
@@ -236,7 +236,7 @@ void Workspace::Clear()
     this->threadId.clear();
 }
 
-void Workspace::Load(QString fina)
+void Workspace::Load(QString fina, class AvBinMedia* mediaInterface)
 {
     this->Clear();
     this->defaultFilename = fina;
@@ -285,7 +285,7 @@ void Workspace::Load(QString fina)
                     ann->uid = uid;
 
                     //Start annot worker thread
-                    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann));
+                    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann, mediaInterface));
                     annotThread->SetEventLoop(this->eventLoop);
                     annotThread->Start();
                     ann->annotThread = annotThread;

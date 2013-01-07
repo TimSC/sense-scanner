@@ -208,7 +208,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->processingView->setModel(&this->processingModel);
     this->RegenerateProcessingList();
 
-    this->workspace.Load(tr("/home/tim/test.work"));
+    this->workspace.Load(tr("/home/tim/test.work"), this->mediaInterfaceBack);
     this->workspaceAsStored = this->workspace;
     this->ui->dataSources->setSelectionMode(QListView::SelectionMode::ExtendedSelection);
     this->RegenerateSourcesList();
@@ -427,7 +427,7 @@ void MainWindow::ImportVideo()
     if(fileName.length() == 0) return;
 
     QUuid uid = QUuid::createUuid();
-    unsigned int sourceId = this->workspace.AddSource(fileName, uid.toString());
+    unsigned int sourceId = this->workspace.AddSource(fileName, uid.toString(), this->mediaInterfaceBack);
 
     this->RegenerateSourcesList();
 }
@@ -540,7 +540,7 @@ void MainWindow::LoadWorkspace()
       tr("Load Workspace"), "", tr("Workspaces (*.work)"));
     if(fileName.length() == 0) return;
 
-    this->workspace.Load(fileName);
+    this->workspace.Load(fileName, this->mediaInterfaceBack);
     this->workspaceAsStored = this->workspace;
     this->RegenerateSourcesList();
 }
@@ -735,7 +735,7 @@ void MainWindow::ApplyModelPressed()
             cout << "model "<< mind.row() << "," << mind.column() << endl;
             std::tr1::shared_ptr<class AlgorithmProcess> alg = this->workspace.GetProcessing(mind.row());
 
-            this->workspace.AddAutoAnnot(uid.toString(), alg->GetUid());
+            this->workspace.AddAutoAnnot(uid.toString(), alg->GetUid(), this->mediaInterfaceBack);
         }
     }
     this->RegenerateSourcesList();
