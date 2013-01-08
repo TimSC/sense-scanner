@@ -24,8 +24,6 @@ AnnotThread::~AnnotThread()
 
 void AnnotThread::Update()
 {
-    this->parentAnn->SetActiveStateDesired(1);
-
     int isActive = this->parentAnn->GetActive();
     if(!isActive)
     {
@@ -137,6 +135,10 @@ void AnnotThread::Update()
         nextTi = avTi + frameDuration;
         return;
     }
+    else
+    {
+        this->parentAnn->SetActiveStateDesired(0);
+    }
 
 
 
@@ -151,7 +153,7 @@ Annotation::Annotation()
     this->track = NULL;
     this->visible = true;
     this->active = 0;
-    this->activeStateDesired = 0;
+    this->activeStateDesired = 1;
 }
 
 Annotation::~Annotation()
