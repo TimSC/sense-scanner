@@ -441,13 +441,13 @@ void Workspace::Update()
         count += ann->GetActive();
     }
 
-    if(count == 0)
+    for(unsigned int i=0;i<this->annotations.size();i++)
     {
-        for(unsigned int i=0;i<this->annotations.size();i++)
+        std::tr1::shared_ptr<class Annotation> ann = this->annotations[i];
+        if(ann->GetActiveStateDesired() && count == 0)
         {
-            std::tr1::shared_ptr<class Annotation> ann = this->annotations[i];
-            if(ann->GetActiveStateDesired())
-                ann->SetActive(1);
+            ann->SetActive(1);
+            count ++;
         }
     }
 
