@@ -94,7 +94,7 @@ void AnnotThread::Update()
         unsigned long long milsec = (unsigned long long)(nextTi / 1000. + 0.5);
         try
         {
-            cout << "Current time " << milsec << endl;
+            cout << "Current time " << milsec << "," << src.toLocal8Bit().constData() << endl;
             img = this->mediaInterface->Get(src,
                     milsec,
                     this->currentStartTimestamp,
@@ -121,11 +121,13 @@ void AnnotThread::Update()
         }
         catch (std::runtime_error &err)
         {
+            this->parentAnn->SetActiveStateDesired(0);
             return;
         }
 
         if(this->currentEndTimestamp < milsec)
         {
+            this->parentAnn->SetActiveStateDesired(0);
             throw runtime_error("Earlier frame found than was requested");
         }
 
