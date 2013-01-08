@@ -42,6 +42,12 @@ public:
     void SetSource(QString uidIn); //Thread safe
     QString GetSource(); //Thread safe
 
+    void SetActive(int activeIn);
+    int GetActive();
+
+    void SetActiveStateDesired(int desiredIn);
+    int GetActiveStateDesired();
+
     bool visible;
     QUuid uid;
     std::tr1::shared_ptr<class AnnotThread> annotThread;
@@ -51,6 +57,8 @@ protected:
     class SimpleSceneController * track;
     QUuid algUid;
     QString source;
+    int active;
+    int activeStateDesired;
 };
 
 

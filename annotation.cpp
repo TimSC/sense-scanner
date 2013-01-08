@@ -24,6 +24,9 @@ AnnotThread::~AnnotThread()
 
 void AnnotThread::Update()
 {
+    int isActive = this->parentAnn->GetActive();
+    if(!isActive) return;
+
     //cout << "x" << (unsigned long)this << endl;
     assert(this->parentAnn != NULL);
     QUuid algUid = this->parentAnn->GetAlgUid();
@@ -141,6 +144,8 @@ Annotation::Annotation()
 {
     this->track = NULL;
     this->visible = true;
+    this->active = 0;
+    this->activeStateDesired = 0;
 }
 
 Annotation::~Annotation()
@@ -235,3 +240,36 @@ QString Annotation::GetSource()
     this->lock.unlock();
     return out;
 }
+
+void Annotation::SetActive(int activeIn)
+{
+    this->lock.lock();
+    this->active = activeIn;
+    this->lock.unlock();
+}
+
+int Annotation::GetActive()
+{
+    this->lock.lock();
+    int out = this->active;
+    this->lock.unlock();
+    return out;
+}
+
+void Annotation::SetActiveStateDesired(int desiredIn)
+{
+    this->lock.lock();
+    this->activeStateDesired = desiredIn;
+    this->lock.unlock();
+}
+
+int Annotation::GetActiveStateDesired()
+{
+    this->lock.lock();
+    int out = this->activeStateDesired;
+    this->lock.unlock();
+    return out;
+}
+
+
+
