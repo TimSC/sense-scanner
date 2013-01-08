@@ -11,6 +11,10 @@ AnnotThread::AnnotThread(class Annotation *annIn, class AvBinMedia* mediaInterfa
     this->srcDurationSet = 0;
     this->srcDuration = 0;
     this->mediaInterface = mediaInterfaceIn;
+
+    this->currentStartTimestamp = 0;
+    this->currentEndTimestamp = 0;
+    this->currentTimeSet = 0;
 }
 
 AnnotThread::~AnnotThread()
@@ -45,28 +49,32 @@ void AnnotThread::Update()
             err = 1;
         }
         if(!err) this->srcDurationSet = 1;
-        this->msleep(100);
         return;
     }
-/*
+
     //Check algorithm is ready to work
     //TODO
 
-    //Get first frame
-    QSharedPointer<QImage> img;
-    unsigned long long startTimestamp = 0, endTimestamp = 0;
-    try
+    if(!currentTimeSet)
     {
-        img = this->mediaInterfaceBack->Get(
-                0, startTimestamp, endTimestamp);
-        cout << "startTimestamp " << startTimestamp << endl;
-        cout << "endTimestamp " << endTimestamp << endl;
+        //Get first frame
+        QSharedPointer<QImage> img;
+        try
+        {
+            img = this->mediaInterface->Get(src,
+                    0, this->currentStartTimestamp, this->currentEndTimestamp);
+            cout << "startTimestamp " << this->currentStartTimestamp << endl;
+            cout << "endTimestamp " << this->currentEndTimestamp << endl;
+        }
+        catch (std::runtime_error &err)
+        {
+            cout << "Timeout getting frame 0" << endl;
+            return;
+        }
+        currentTimeSet = 1;
+        return;
     }
-    catch (std::runtime_error &err)
-    {
-        cout << "Timeout getting frame 0" << endl;
-    }
-*/
+
     //Estimate mid time of next frame
     /*unsigned long long frameDuration = endTimestamp - startTimestamp; //microsec
     unsigned long long avTi = (unsigned long long)(0.5 * (startTimestamp + endTimestamp) + 0.5); //microsec

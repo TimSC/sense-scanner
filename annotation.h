@@ -18,6 +18,10 @@ protected:
     int srcDurationSet;
     long long unsigned srcDuration;
     class AvBinMedia* mediaInterface;
+
+    unsigned long long currentStartTimestamp, currentEndTimestamp;
+    int currentTimeSet;
+
 };
 
 class Annotation
