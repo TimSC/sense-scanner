@@ -146,6 +146,14 @@ long long unsigned AvBinMedia::Length(QString source) //Get length (ms)
     //Check source is what is currently loaded
     this->ChangeVidSource(source);
 
+    //For null source, return zero
+    if(this->currentFina.length()==0)
+    {
+        this->lock.unlock();
+        return 0;
+    }
+
+    //Send message to avbin back end
     unsigned long long evid = this->eventLoop->GetId();
     QString eventName = QString("AVBIN_GET_DURATION%1").arg(this->id);
     std::tr1::shared_ptr<class Event> durationEvent(new Event(eventName.toLocal8Bit().constData(), evid));

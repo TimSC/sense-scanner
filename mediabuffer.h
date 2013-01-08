@@ -49,7 +49,7 @@ public:
                                        long long unsigned ti,
                                        long long unsigned &outFrameStart,
                                        long long unsigned &outFrameEnd,
-                                       long long unsigned timeout = 5000)=0; //in milliseconds
+                                       long long unsigned timeout = 50000)=0; //in milliseconds
 
     virtual long long unsigned Length(QString source)=0; //Get length (ms)
     virtual long long unsigned GetFrameStartTime(QString source, long long unsigned ti)=0; //in milliseconds
