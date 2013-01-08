@@ -76,23 +76,24 @@ void AnnotThread::Update()
     }
 
     //Estimate mid time of next frame
-    /*unsigned long long frameDuration = endTimestamp - startTimestamp; //microsec
-    unsigned long long avTi = (unsigned long long)(0.5 * (startTimestamp + endTimestamp) + 0.5); //microsec
+    unsigned long long frameDuration = this->currentEndTimestamp - this->currentStartTimestamp; //microsec
+    unsigned long long avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5); //microsec
     unsigned long long nextTi = avTi + frameDuration; //microsec
 
     //Get subsequent frames
-    while(nextTi < srcDuration * 1000)
+    if(nextTi < srcDuration * 1000)
     {
+        QSharedPointer<QImage> img;
         unsigned long long milsec = (unsigned long long)(nextTi / 1000. + 0.5);
         try
         {
             cout << "Current time " << milsec << endl;
-            img = this->mediaInterfaceBack->Get(
+            img = this->mediaInterface->Get(src,
                     milsec,
-                    startTimestamp,
-                    endTimestamp);
+                    this->currentStartTimestamp,
+                    this->currentEndTimestamp);
 
-            assert(img->format() == QImage::Format_RGB888);
+            /*assert(img->format() == QImage::Format_RGB888);
             QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(img->byteCount());
             QString imgPreamble2 = QString("RGB_IMAGE_DATA TIMESTAMP=%1 HEIGHT=%2 WIDTH=%3\n").
                     arg(milsec).
@@ -108,26 +109,27 @@ void AnnotThread::Update()
             {
                 this->Update();
                 LocalSleep::msleep(100);
-            }
+            }*/
 
         }
         catch (std::runtime_error &err)
         {
-            break;
+            return;
         }
 
-        if(endTimestamp < milsec)
+        if(this->currentEndTimestamp < milsec)
         {
             throw runtime_error("Earlier frame found than was requested");
         }
 
         //Estimate mid time of next frame
-        frameDuration = endTimestamp - startTimestamp;
-        avTi = (unsigned long long)(0.5 * (startTimestamp + endTimestamp) + 0.5);
+        frameDuration = this->currentEndTimestamp - this->currentStartTimestamp;
+        avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5);
         nextTi = avTi + frameDuration;
+        return;
     }
 
-*/
+
 
 
     this->msleep(100);
