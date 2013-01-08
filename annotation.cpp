@@ -24,8 +24,14 @@ AnnotThread::~AnnotThread()
 
 void AnnotThread::Update()
 {
+    this->parentAnn->SetActiveStateDesired(1);
+
     int isActive = this->parentAnn->GetActive();
-    if(!isActive) return;
+    if(!isActive)
+    {
+        this->msleep(100);
+        return;
+    }
 
     //cout << "x" << (unsigned long)this << endl;
     assert(this->parentAnn != NULL);
