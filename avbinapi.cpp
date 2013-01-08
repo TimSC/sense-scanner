@@ -45,7 +45,10 @@ AVbinResult mod_avbin_stream_info(AVbinFile *file, int stream_index, AVbinStream
 
 AVbinResult mod_avbin_seek_file(AVbinFile *file, AVbinTimestamp timestamp)
 {
-	return avbin_seek_file(file, timestamp);
+    avbinOpenMutex.lock();
+    AVbinResult ret = avbin_seek_file(file, timestamp);
+    avbinOpenMutex.unlock();
+    return ret;
 }
 
 AVbinResult mod_avbin_read(AVbinFile *file, AVbinPacket *packet)
