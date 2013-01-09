@@ -5,6 +5,9 @@
 #include <iostream>
 using namespace std;
 
+int gNumAnnotThreads = 0;
+QMutex lockGNumAnnotThreads;
+
 AnnotThread::AnnotThread(class Annotation *annIn, class AvBinMedia* mediaInterfaceIn)
 {
     this->parentAnn = annIn;
@@ -15,11 +18,19 @@ AnnotThread::AnnotThread(class Annotation *annIn, class AvBinMedia* mediaInterfa
     this->currentStartTimestamp = 0;
     this->currentEndTimestamp = 0;
     this->currentTimeSet = 0;
+
+    lockGNumAnnotThreads.lock();
+    gNumAnnotThreads ++;
+    lockGNumAnnotThreads.unlock();
 }
 
 AnnotThread::~AnnotThread()
 {
+    lockGNumAnnotThreads.lock();
+    gNumAnnotThreads --;
 
+    cout << "AnnotThread::~AnnotThread()," << gNumAnnotThreads << " remain" << endl;
+    lockGNumAnnotThreads.unlock();
 }
 
 void AnnotThread::Update()
@@ -30,8 +41,8 @@ void AnnotThread::Update()
         this->msleep(100);
         return;
     }
-
     //cout << "x" << (unsigned long)this << endl;
+
     assert(this->parentAnn != NULL);
     QUuid algUid = this->parentAnn->GetAlgUid();
     QString src = this->parentAnn->GetSource();
@@ -150,7 +161,8 @@ void AnnotThread::Update()
 
 void AnnotThread::Finished()
 {
-    cout << "AnnotThread::Finished()" << endl;
+    QString src = this->parentAnn->GetSource();
+    cout << "AnnotThread::Finished()" << src.toLocal8Bit().constData() << endl;
 
 }
 

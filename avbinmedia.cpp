@@ -112,8 +112,18 @@ QSharedPointer<QImage> AvBinMedia::Get(QString source,
     this->eventLoop->SendEvent(getFrameEvent);
 
     //Wait for frame response
+    std::tr1::shared_ptr<class Event> ev;
     assert(this->eventReceiver);
-    std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(evid,timeout);
+    try
+    {
+        ev = this->eventReceiver->WaitForEventId(evid,timeout);
+    }
+    catch(std::runtime_error e)
+    {
+        this->lock.unlock();
+        throw runtime_error(e.what());
+    }
+
     QString evType = ev->type.c_str();
     if(evType.left(18) == "AVBIN_FRAME_FAILED")
     {
@@ -319,7 +329,6 @@ void AvBinThread::SetId(int idIn)
 void AvBinThread::Finished()
 {
     cout << "AvBinThread::Finished" << endl;
-
 }
 
 //************************************************

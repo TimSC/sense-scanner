@@ -89,6 +89,7 @@ std::tr1::shared_ptr<class Event> EventReceiver::WaitForEventId(unsigned long lo
     unsigned waitingTime = 0;
     while(waitingTime < timeOutMs)
     {
+        //cout << "Waiting..." << (unsigned long)this << endl;
         this->mutex.lock();
         //For each message in the buffer
         for(unsigned i=0; i<this->eventBuffer.size(); i++)
