@@ -446,7 +446,6 @@ int SimpleSceneController::NearestLink(float x, float y, std::vector<std::vector
 void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     cout << "mousePressEvent" << endl;
-    this->lock.lock();
     assert(mouseEvent);
 
     //Get current frame
@@ -477,6 +476,7 @@ void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent
         p.push_back(pos.y());
 
         //Apply change to existing annotation frames
+        this->lock.lock();
         std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
         for(it=this->pos.begin(); it != this->pos.end();it++)
         {
@@ -484,6 +484,7 @@ void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent
             frame.push_back(p);
             assert(frame.size() == this->shape.size() + 1);
         }
+        this->lock.unlock();
 
         //Apply to currunt shape template
         this->shape.push_back(p);
@@ -545,7 +546,6 @@ void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent
     if(button==Qt::LeftButton)
         this->leftDrag = 1;
 
-    this->lock.unlock();
 }
 
 void SimpleSceneController::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent)
