@@ -284,11 +284,16 @@ void Workspace::Load(QString fina, class AvBinMedia* mediaInterface)
                     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
                     ann->SetSource(fileInfo.absoluteFilePath());
 
-                    //Set UID
+                    //Set source UID
                     QString uidStr = sourceEle.attribute("uid");
                     QUuid uid(uidStr);
                     if(uid.isNull()) uid = uid.createUuid();
                     ann->uid = uid;
+
+                    //Set alg Uid
+                    QString algStr = sourceEle.attribute("alg");
+                    QUuid alg(algStr);
+                    ann->SetAlgUid(alg);
 
                     //Start annot worker thread
                     std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann, mediaInterface));

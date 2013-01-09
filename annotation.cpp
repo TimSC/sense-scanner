@@ -25,6 +25,18 @@ AnnotThread::~AnnotThread()
 
 void AnnotThread::Update()
 {
+    //Check if this thread should be active and access the video
+    assert(this->parentAnn != NULL);
+    QUuid algUid = this->parentAnn->GetAlgUid();
+    QString src = this->parentAnn->GetSource();
+    if(algUid.isNull())
+    {
+        //cout << this->parentAnn->GetSource().toLocal8Bit().constData() << endl;
+        //cout << algUid.toString().toLocal8Bit().constData() << endl;
+        this->parentAnn->SetActiveStateDesired(0);
+        return;
+    }
+
     int isActive = this->parentAnn->GetActive();
     if(!isActive)
     {
@@ -32,15 +44,9 @@ void AnnotThread::Update()
         return;
     }
 
-    assert(this->parentAnn != NULL);
-    QUuid algUid = this->parentAnn->GetAlgUid();
-    QString src = this->parentAnn->GetSource();
-    if(!algUid.isNull())
-    {
-        //cout << this->parentAnn->GetSource().toLocal8Bit().constData() << endl;
-        //cout << algUid.toString().toLocal8Bit().constData() << endl;
 
-    }
+
+
     class SimpleSceneController *track = this->parentAnn->GetTrack();
 
     if(!this->srcDurationSet)
