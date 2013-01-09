@@ -41,7 +41,6 @@ void AnnotThread::Update()
         this->msleep(100);
         return;
     }
-    //cout << "x" << (unsigned long)this << endl;
 
     assert(this->parentAnn != NULL);
     QUuid algUid = this->parentAnn->GetAlgUid();
@@ -152,9 +151,6 @@ void AnnotThread::Update()
     {
         this->parentAnn->SetActiveStateDesired(0);
     }
-
-
-
 
     this->msleep(100);
 }

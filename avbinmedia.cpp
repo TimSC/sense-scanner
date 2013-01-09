@@ -98,6 +98,17 @@ QSharedPointer<QImage> AvBinMedia::Get(QString source,
     outFrameStart = 0;
     outFrameEnd = 0;
 
+    if(this->mediaThread->IsStopFlagged())
+    {
+        this->lock.unlock();
+        throw runtime_error("Worker thread has been stopped");
+    }
+    if(!this->mediaThread->isRunning())
+    {
+        this->lock.unlock();
+        throw runtime_error("Worker thread is not running");
+    }
+
     //Check source is what is currently loaded
     this->ChangeVidSource(source);
 
@@ -155,6 +166,18 @@ QSharedPointer<QImage> AvBinMedia::Get(QString source,
 long long unsigned AvBinMedia::Length(QString source) //Get length (ms)
 {
     this->lock.lock();
+
+    if(this->mediaThread->IsStopFlagged())
+    {
+        this->lock.unlock();
+        throw runtime_error("Worker thread has been stopped");
+    }
+    if(!this->mediaThread->isRunning())
+    {
+        this->lock.unlock();
+        throw runtime_error("Worker thread is not running");
+    }
+
     //Check source is what is currently loaded
     this->ChangeVidSource(source);
 
@@ -201,6 +224,17 @@ long long unsigned AvBinMedia::GetFrameStartTime(QString source, long long unsig
 int AvBinMedia::RequestFrame(QString source, long long unsigned ti) //in milliseconds
 {
     this->lock.lock();
+
+    if(this->mediaThread->IsStopFlagged())
+    {
+        this->lock.unlock();
+        throw runtime_error("Worker thread has been stopped");
+    }
+    if(!this->mediaThread->isRunning())
+    {
+        this->lock.unlock();
+        throw runtime_error("Worker thread is not running");
+    }
 
     //Request the frame from the backend thread
     assert(this->eventLoop != NULL);
@@ -299,10 +333,8 @@ AvBinThread::~AvBinThread()
 
 void AvBinThread::Update()
 {
-    if(id==1)
-    {
-        cout << "AvBinThread::Update()" << this->id <<"\t"<< (unsigned long)this << endl;
-    }
+
+    //cout << "AvBinThread::Update()" << this->id <<"\t"<< (unsigned long)this << endl;
 
     int foundEvent = 0;
 
