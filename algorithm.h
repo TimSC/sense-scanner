@@ -7,20 +7,6 @@
 #include <QtCore/QUuid>
 #include <vector>
 
-class AlgorithmThread : public MessagableThread
-{
-public:
-    AlgorithmThread(class EventLoop *eventLoopIn, QObject *parent);
-    virtual ~AlgorithmThread();
-
-    void Update();
-    void SetId(unsigned int idIn);
-
-protected:
-    float progress;
-    unsigned int threadId;
-};
-
 class AlgorithmProcess : public QProcess
 {
 public:
@@ -55,6 +41,7 @@ public:
     QByteArray GetModel();
     QUuid GetUid();
     void SetUid(QUuid newUid);
+    void HandleEvent(std::tr1::shared_ptr<class Event> ev);
 
 protected:
     int stopping;
@@ -64,6 +51,7 @@ protected:
     int initDone;
     QFile *algOutLog;
     class EventLoop *eventLoop;
+    class EventReceiver *eventReceiver;
     QByteArray dataBlock;
     int dataBlockReceived;
     QByteArray algOutBuffer;

@@ -72,6 +72,8 @@ void AnnotThread::Update()
                     0, this->currentStartTimestamp, this->currentEndTimestamp);
             cout << "startTimestamp " << this->currentStartTimestamp << endl;
             cout << "endTimestamp " << this->currentEndTimestamp << endl;
+
+            this->ImageToProcess(img, 0);
         }
         catch (std::runtime_error &err)
         {
@@ -138,20 +140,29 @@ void AnnotThread::Finished()
 
 void AnnotThread::ImageToProcess(QSharedPointer<QImage> img, unsigned long long milsec)
 {
-    /*QUuid algUid = this->parentAnn->GetAlgUid();
+    QUuid algUid = this->parentAnn->GetAlgUid();
     assert(img->format() == QImage::Format_RGB888);
-    QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(img->byteCount());
+
+    assert(this->eventLoop!=NULL);
+    std::tr1::shared_ptr<class Event> openEv(new Event("PREDICT_FRAME_REQUEST"));
+    //std::ostringstream tmp;
+    //tmp << this->progress << "," << this->threadId;
+    //openEv->data = tmp.str();
+    this->eventLoop->SendEvent(openEv);
+
+    /*QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(img->byteCount());
     QString imgPreamble2 = QString("RGB_IMAGE_DATA TIMESTAMP=%1 HEIGHT=%2 WIDTH=%3\n").
             arg(milsec).
             arg(img->height()).
-            arg(img->width());
-    alg->SendCommand(imgPreamble1);
-    alg->SendCommand(imgPreamble2);
-    QByteArray imgRaw((const char *)img->bits(), img->byteCount());
-    alg->SendRawData(imgRaw);
+            arg(img->width());*/
+    //alg->SendCommand(imgPreamble1);
+    //alg->SendCommand(imgPreamble2);
+    //QByteArray imgRaw((const char *)img->bits(), img->byteCount());
+    //alg->SendRawData(imgRaw);
+
 
     //Wait for response
-    for(int i=0;i<10;i++)
+    /*for(int i=0;i<10;i++)
     {
         this->Update();
         LocalSleep::msleep(100);

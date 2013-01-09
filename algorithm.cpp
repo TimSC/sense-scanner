@@ -7,45 +7,6 @@
 #include <QtCore/QTextStream>
 using namespace std;
 
-//**********************************
-
-AlgorithmThread::AlgorithmThread(class EventLoop *eventLoopIn, QObject *parent) : MessagableThread()
-{
-    this->progress = 0.f;
-    this->threadId = 0;
-}
-
-AlgorithmThread::~AlgorithmThread()
-{
-
-}
-
-void AlgorithmThread::Update()
-{
-    this->progress += 0.01f;
-    if(this->progress >= 1.f)
-    {
-       this->progress = 1.f;
-       this->mutex.lock();
-       this->stopThreads = 1;
-       this->mutex.unlock();
-    }
-
-    assert(this->eventLoop);
-    std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_PROGRESS_UPDATE"));
-    std::ostringstream tmp;
-    tmp << this->progress << "," << this->threadId;
-    openEv->data = tmp.str();
-    this->eventLoop->SendEvent(openEv);
-
-    this->msleep(10000);
-}
-void AlgorithmThread::SetId(unsigned int idIn)
-{
-    assert(!this->isRunning());
-    this->threadId = idIn;
-}
-
 //************************************************
 
 AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent) : QProcess(parent)
@@ -58,11 +19,16 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->eventLoop = eventLoopIn;
     this->algOutLog = new QFile(fina);
     this->algOutLog->open(QIODevice::WriteOnly);
+    this->eventReceiver = new class EventReceiver(this->eventLoop);
+    this->eventLoop->AddListener("PREDICT_FRAME_REQUEST", *this->eventReceiver);
 }
 
 AlgorithmProcess::~AlgorithmProcess()
 {
     this->Stop();
+    if(this->eventReceiver != NULL)
+        delete this->eventReceiver;
+    this->eventReceiver = NULL;
 }
 
 void AlgorithmProcess::Init()
@@ -195,6 +161,20 @@ QString AlgorithmProcess::ReadLineFromBuffer(QByteArray &buff)
 
 void AlgorithmProcess::Update()
 {
+    //Process events from application
+    int flushEvents = 1;
+    while(flushEvents)
+    try
+    {
+        assert(this->eventReceiver);
+        std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
+        this->HandleEvent(ev);
+    }
+    catch(std::runtime_error e)
+    {
+        flushEvents = 0;
+    }
+
     //Get standard output from algorithm process
     QByteArray ret = this->readAllStandardOutput();
     this->algOutBuffer.append(ret);
@@ -216,6 +196,14 @@ void AlgorithmProcess::Update()
         if(err.length() == 0) break;
         cout << "Algorithm Error: " << err.toLocal8Bit().constData() << endl;
     }
+
+
+}
+
+void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
+{
+    cout << "Event type " << ev->type << endl;
+
 }
 
 void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
