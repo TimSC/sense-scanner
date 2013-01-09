@@ -14,7 +14,6 @@ Event::Event()
     this->type = "UNKNOWN";
     this->id = 0;
     this->raw = NULL;
-    this->rawSize = 0;
 }
 
 Event::Event(std::string typeIn, unsigned long long idIn)
@@ -22,7 +21,6 @@ Event::Event(std::string typeIn, unsigned long long idIn)
     this->type = typeIn;
     this->id = idIn;
     this->raw = NULL;
-    this->rawSize = 0;
 }
 
 Event::Event(const Event& other)
@@ -31,17 +29,15 @@ Event::Event(const Event& other)
     this->id = other.id;
     this->data = other.data;
     this->raw = other.raw; //Note: this is a raw pointer
-    this->rawSize = other.rawSize;
 }
 
 Event::~Event()
 {
     if(this->raw!=NULL)
     {
-        class Deletable *obj = (class Deletable *)raw;
-        delete obj;
+        delete this->raw;
     }
-    raw = NULL;
+    this->raw = NULL;
 }
 
 //************************************************

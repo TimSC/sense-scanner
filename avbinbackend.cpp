@@ -543,7 +543,7 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         QString eventName = QString("AVBIN_FRAME_RESPONSE%1").arg(this->id);
         std::tr1::shared_ptr<class Event> response(new Event(eventName.toLocal8Bit().constData(), ev->id));
         class DecodedFrame* decodedFrame = new DecodedFrame();
-        response->raw = (uint8_t*) decodedFrame;
+        response->raw = decodedFrame;
         int found = this->GetFrame(ti, *decodedFrame);
         if(found)
         {
@@ -552,7 +552,6 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             assert(decodedFrame->buffSize > 0);
             assert(decodedFrame->width > 0);
             assert(decodedFrame->height > 0);
-            response->rawSize = sizeof(class DecodedFrame);
             this->eventLoop->SendEvent(response);
         }
         else

@@ -35,8 +35,8 @@ public:
     std::string data;
 
     //Raw binary data
-    uint8_t *raw;
-    unsigned long long rawSize;
+    class Deletable *raw;
+
 };
 
 class EventReceiver
