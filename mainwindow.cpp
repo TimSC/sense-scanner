@@ -334,17 +334,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::RegenerateSourcesList()
 {
-    //Get currently selected row
-    int selRowIndex = -1;
-    QItemSelectionModel *sourceSelected = this->ui->dataSources->selectionModel();
-    assert(sourceSelected!=NULL);
-    QModelIndexList rowList = sourceSelected->selectedRows();
-    for(unsigned int i=0;i<rowList.size();i++)
-    {
-        QModelIndex &ind = rowList[i];
-        selRowIndex = i;
-    }
-
     //Update GUI list
     QIcon icon("icons/media-eject.png");
     this->sourcesModel.setColumnCount(1);
@@ -359,11 +348,6 @@ void MainWindow::RegenerateSourcesList()
         }
     }
 
-    //Ensure at least one source is selected
-    /*if(rowList.length()>0 && selRowIndex == -1)
-        selRowIndex = 0;
-    if(selRowIndex>=0)
-        sourceSelected->setCurrentIndex(rowList[0], QItemSelectionModel::Current);*/
 }
 
 void MainWindow::RegenerateProcessingList()
