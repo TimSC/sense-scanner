@@ -380,7 +380,12 @@ int Workspace::Save()
         try
         {
             out << "\t<source id=\""<<i<<"\" uid=\""<<Qt::escape(this->annotations[i]->uid)<<"\" file=\""<<
-                   Qt::escape(dir.relativeFilePath(this->annotations[i]->GetSource()))<<"\">" << endl;
+                   Qt::escape(dir.relativeFilePath(this->annotations[i]->GetSource()))<<"\"";
+            QUuid uid = this->annotations[i]->GetAlgUid();
+            if(!uid.isNull())
+                out << " alg=\"" << uid.toString().toLocal8Bit().constData() << "\"";;
+
+            out << ">" << endl;
             this->annotations[i]->GetTrack()->WriteAnnotationXml(out);
             out << "\t</source>" << endl;
         }
