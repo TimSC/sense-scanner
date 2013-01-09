@@ -37,6 +37,23 @@ public:
     void FastSwap(class DecodedFrame &other);
 };
 
+class ProcessingRequest : public Deletable
+{
+public:
+    uint8_t *buff;
+    unsigned int buffSize;
+
+    std::vector<std::vector<std::vector<float> > > pos;
+
+    ProcessingRequest();
+    ProcessingRequest(const ProcessingRequest &other);
+    ProcessingRequest& operator=(const ProcessingRequest& other);
+    virtual ~ProcessingRequest();
+
+    void AllocateSize(unsigned int size);
+
+};
+
 typedef std::tr1::function<void (const class DecodedFrame&)> FrameCallback;
 
 class AbstractMedia
