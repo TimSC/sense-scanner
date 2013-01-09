@@ -144,11 +144,13 @@ void AnnotThread::ImageToProcess(QSharedPointer<QImage> img, unsigned long long 
     assert(img->format() == QImage::Format_RGB888);
 
     assert(this->eventLoop!=NULL);
-    std::tr1::shared_ptr<class Event> openEv(new Event("PREDICT_FRAME_REQUEST"));
+    std::tr1::shared_ptr<class Event> requestEv(new Event("PREDICT_FRAME_REQUEST"));
     //std::ostringstream tmp;
     //tmp << this->progress << "," << this->threadId;
     //openEv->data = tmp.str();
-    this->eventLoop->SendEvent(openEv);
+    requestEv->data = algUid.toString().toLocal8Bit().constData();
+
+    this->eventLoop->SendEvent(requestEv);
 
     /*QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(img->byteCount());
     QString imgPreamble2 = QString("RGB_IMAGE_DATA TIMESTAMP=%1 HEIGHT=%2 WIDTH=%3\n").

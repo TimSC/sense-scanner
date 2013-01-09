@@ -203,7 +203,7 @@ void AlgorithmProcess::Update()
 void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
     cout << "Event type " << ev->type << endl;
-
+    cout << ev->data.c_str() << endl;
 }
 
 void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
