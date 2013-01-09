@@ -155,11 +155,8 @@ void AnnotThread::ImageToProcess(QSharedPointer<QImage> img, unsigned long long 
     //tmp << this->progress << "," << this->threadId;
     //openEv->data = tmp.str();
     class ProcessingRequest *req = new class ProcessingRequest;
-    req->AllocateSize(img->byteCount());
-    memcpy(req->buff, img->data_ptr(), img->byteCount());
-
+    req->img = img;
     requestEv->raw = req;
-
     requestEv->data = algUid.toString().toLocal8Bit().constData();
 
     this->eventLoop->SendEvent(requestEv);

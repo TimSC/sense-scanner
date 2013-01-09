@@ -203,6 +203,8 @@ void AlgorithmProcess::Update()
 void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
     cout << "Event type " << ev->type << endl;
+    if(QString(ev->data.c_str()) != this->uid.toString()) return; //Check if this is the appropriate algorithm
+
     cout << ev->data.c_str() << endl;
 }
 

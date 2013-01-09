@@ -99,8 +99,7 @@ void DecodedFrame::FastSwap(class DecodedFrame &other)
 
 ProcessingRequest::ProcessingRequest()
 {
-    this->buff = NULL;
-    this->buffSize = 0;
+
 }
 
 ProcessingRequest::ProcessingRequest(const ProcessingRequest &other)
@@ -110,33 +109,12 @@ ProcessingRequest::ProcessingRequest(const ProcessingRequest &other)
 
 ProcessingRequest& ProcessingRequest::operator=(const ProcessingRequest& other)
 {
-    this->AllocateSize(other.buffSize);
-    if(this->buff == NULL)
-    {
-        throw runtime_error("Bad alloc detected when allocating buffer");
-    }
-    memcpy(this->buff, other.buff, other.buffSize);
+    this->img = other.img; //Smart pointer
     this->pos = other.pos;
     return *this;
 }
 
 ProcessingRequest::~ProcessingRequest()
 {
-    if(this->buff != NULL) delete [] this->buff;
-    this->buffSize = 0;
-}
 
-void ProcessingRequest::AllocateSize(unsigned int size)
-{
-    if(this->buff) delete [] this->buff;
-    this->buff = NULL;
-    try
-    {
-        this->buff = new uint8_t[size];
-        this->buffSize = size;
-    }
-    catch(bad_alloc &err)
-    {
-        cout << "Error: Bad alloc" << endl;
-    }
 }
