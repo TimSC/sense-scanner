@@ -24,6 +24,7 @@ public:
     void SetId(int idIn);
 
     void Update();
+    void Finished();
 protected:
     class AvBinBackend avBinBackend;
 };

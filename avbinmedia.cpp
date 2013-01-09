@@ -316,5 +316,11 @@ void AvBinThread::SetId(int idIn)
     MessagableThread::SetId(idIn);
 }
 
+void AvBinThread::Finished()
+{
+    cout << "AvBinThread::Finished" << endl;
+
+}
+
 //************************************************
 

@@ -148,6 +148,12 @@ void AnnotThread::Update()
     this->msleep(100);
 }
 
+void AnnotThread::Finished()
+{
+    cout << "AnnotThread::Finished()" << endl;
+
+}
+
 //*****************************************************
 
 Annotation::Annotation()

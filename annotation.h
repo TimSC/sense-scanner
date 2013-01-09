@@ -12,6 +12,7 @@ public:
     virtual ~AnnotThread();
 
     void Update();
+    void Finished();
 
 protected:
     class Annotation *parentAnn;

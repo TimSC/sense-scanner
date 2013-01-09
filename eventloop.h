@@ -55,7 +55,6 @@ protected:
     std::vector<std::tr1::shared_ptr<class Event> > eventBuffer;
     Mutex mutex;
     class EventLoop *el;
-    int debug;
 };
 
 
@@ -92,6 +91,7 @@ public:
     virtual void Update()=0;
     void SetId(int idIn);
     int GetId();
+    virtual void Finished()=0;
 
 protected:
     void start (Priority priority = InheritPriority);

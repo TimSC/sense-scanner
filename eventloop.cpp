@@ -45,7 +45,6 @@ Event::~Event()
 EventReceiver::EventReceiver(class EventLoop *elIn)
 {
     this->el = elIn;
-    debug = 0;
 }
 
 EventReceiver::~EventReceiver()
@@ -90,7 +89,6 @@ std::tr1::shared_ptr<class Event> EventReceiver::WaitForEventId(unsigned long lo
     unsigned waitingTime = 0;
     while(waitingTime < timeOutMs)
     {
-        this->debug = 1;
         this->mutex.lock();
         //For each message in the buffer
         for(unsigned i=0; i<this->eventBuffer.size(); i++)
@@ -299,7 +297,7 @@ void MessagableThread::run()
 
     std::tr1::shared_ptr<class Event> stopEvent(new Event("THREAD_STOPPING"));
     this->eventLoop->SendEvent(stopEvent);
-    cout << "Messagable thread has returned" << endl;
+    this->Finished();
 }
 
 void MessagableThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
