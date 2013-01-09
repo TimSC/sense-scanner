@@ -21,6 +21,8 @@ Workspace::Workspace(const Workspace &other) : QObject()
 
 Workspace& Workspace::operator= (const Workspace &other)
 {
+    this->annotations.clear();
+
     annotations = other.annotations;
     defaultFilename = other.defaultFilename;
     processingList = other.processingList;
@@ -33,7 +35,7 @@ bool Workspace::operator!= (const Workspace &other)
     if(defaultFilename != other.defaultFilename) return true;
     if(this->annotations.size() != other.annotations.size()) return true;
     for(unsigned int i=0;i<this->annotations.size();i++)
-        if(annotations[i] != other.annotations[i]) return true;
+        if(*annotations[i] != *other.annotations[i]) return true;
     if(processingList != other.processingList) return true;
     return false;
 }

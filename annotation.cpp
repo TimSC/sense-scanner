@@ -186,7 +186,7 @@ bool Annotation::operator!= (const Annotation &other)
     if(source != other.source) return true;
     if(visible != other.visible) return true;
     if(uid != other.uid) return true;
-    if(track != other.track) return true;
+    if(*track != *other.track) return true;
     if(algUid != other.algUid) return true;
     return false;
 }
