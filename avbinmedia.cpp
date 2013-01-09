@@ -82,7 +82,7 @@ void AvBinMedia::TerminateThread()
 {
     if(this->mediaThread!=NULL && this->mediaThread->isRunning())
     {
-        cout << "Warning: terminating buffer media tread" << endl;
+        cout << "Warning: terminating buffer media thread " << this->id<<endl;
         this->mediaThread->terminate();
     }
 }
@@ -221,6 +221,12 @@ void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long sta
                                               void *raw), void *raw)
 {
 
+    if(this->id)
+    {
+        cout << "AvBinMedia::Update()" << this->id <<"\t"<< (unsigned long)this << endl;
+        cout << this->currentFina.toLocal8Bit().constData() << endl;
+    }
+
     //Check for new frames from media backend.
     int checking = 1;
     //cout << "GUI receive queue " << this->eventReceiver->BufferSize() << endl;
@@ -247,6 +253,11 @@ void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long sta
                               ROUND_TIMESTAMP(frame->endTimestamp / 1000.),
                               ROUND_TIMESTAMP(frame->requestedTimestamp / 1000.),
                               raw);
+            }
+
+            if(evType=="STOP_THREADS")
+            {
+                cout << "Stop!!!" << endl;
             }
 
         }
