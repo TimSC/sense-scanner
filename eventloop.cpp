@@ -45,6 +45,7 @@ Event::~Event()
 EventReceiver::EventReceiver(class EventLoop *elIn)
 {
     this->el = elIn;
+    debug = 0;
 }
 
 EventReceiver::~EventReceiver()
@@ -89,9 +90,12 @@ std::tr1::shared_ptr<class Event> EventReceiver::WaitForEventId(unsigned long lo
     unsigned waitingTime = 0;
     while(waitingTime < timeOutMs)
     {
+        this->debug = 1;
         this->mutex.lock();
+        //For each message in the buffer
         for(unsigned i=0; i<this->eventBuffer.size(); i++)
         {
+            //Check there ID numbers
             std::tr1::shared_ptr<class Event> ev = this->eventBuffer[i];
             if(ev->id == idIn)
             {
@@ -102,9 +106,21 @@ std::tr1::shared_ptr<class Event> EventReceiver::WaitForEventId(unsigned long lo
 
             }
         }
+
+        //Check if threads are stopping
+        for(unsigned i=0; i<this->eventBuffer.size(); i++)
+        {
+            std::tr1::shared_ptr<class Event> ev = this->eventBuffer[i];
+            if(ev->type == "STOP_THREADS")
+            {
+                this->mutex.unlock();
+                throw std::runtime_error("Stop threads encountered, wait aborted");
+            }
+        }
+
         this->mutex.unlock();
 
-        LocalSleep::usleep(10000);
+        LocalSleep::msleep(10);
         waitingTime += 10;
     }
 
@@ -152,6 +168,7 @@ void EventLoop::SendEvent(std::tr1::shared_ptr<class Event> event)
     //cout << "Sent event "<< event->type << endl;
     //Get a local copy of listeners
     this->mutex.lock();
+
     std::map<std::string, std::vector<EventReceiver *> >::iterator it =
             this->eventReceivers.find(event->type);
     if(it == this->eventReceivers.end())
@@ -167,11 +184,16 @@ void EventLoop::SendEvent(std::tr1::shared_ptr<class Event> event)
     for(unsigned i=0;i<eventListeners.size();i++)
     {
         eventListeners[i]->AddMessage(event);
+
+        if(event->type=="STOP_THREADS")
+            cout << "Dispatch STOP_THREADS to " << (unsigned long)eventListeners[i] << endl;
     }
 }
 
 void EventLoop::AddListener(std::string type, class EventReceiver &rx)
 {
+    //cout << "Add listener " << type.c_str() << "," << (unsigned long)&rx << endl;
+
     this->mutex.lock();
     std::map<std::string, std::vector<EventReceiver *> >::iterator it = this->eventReceivers.find(type);
     if(it == this->eventReceivers.end())

@@ -55,6 +55,7 @@ protected:
     std::vector<std::tr1::shared_ptr<class Event> > eventBuffer;
     Mutex mutex;
     class EventLoop *el;
+    int debug;
 };
 
 

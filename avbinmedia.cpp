@@ -26,6 +26,8 @@ AvBinMedia::AvBinMedia(int idIn, class EventLoop *eventLoopIn) : AbstractMedia()
         this->eventLoop->AddListener(eventName2.toLocal8Bit().constData(), *this->eventReceiver);
         QString eventName3 = QString("AVBIN_FRAME_FAILED%1").arg(this->id);
         this->eventLoop->AddListener(eventName3.toLocal8Bit().constData(), *this->eventReceiver);
+        QString eventName4("STOP_THREADS");
+        this->eventLoop->AddListener(eventName4.toLocal8Bit().constData(), *this->eventReceiver);
     }
 
     this->mediaThread = new AvBinThread();
