@@ -3,6 +3,8 @@
 
 #include <QtCore/QUuid>
 #include <QtCore/QMutex>
+#include <QtCore/QSharedPointer>
+#include <QtGui/QImage>
 #include "eventloop.h"
 
 class AnnotThread : public MessagableThread
@@ -15,6 +17,10 @@ public:
     void Finished();
 
 protected:
+
+    void ImageToProcess(QSharedPointer<QImage> img,
+                        unsigned long long milsec);
+
     class Annotation *parentAnn;
     int srcDurationSet;
     long long unsigned srcDuration;
