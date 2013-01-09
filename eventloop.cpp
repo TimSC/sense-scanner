@@ -13,7 +13,7 @@ Event::Event()
 {
     this->type = "UNKNOWN";
     this->id = 0;
-    this->raw = 0;
+    this->raw = NULL;
     this->rawSize = 0;
 }
 
@@ -21,7 +21,7 @@ Event::Event(std::string typeIn, unsigned long long idIn)
 {
     this->type = typeIn;
     this->id = idIn;
-    this->raw = 0;
+    this->raw = NULL;
     this->rawSize = 0;
 }
 
@@ -36,9 +36,12 @@ Event::Event(const Event& other)
 
 Event::~Event()
 {
-    if(this->raw)
-        delete (class DecodedFrame *)raw;
-    raw = 0;
+    if(this->raw!=NULL)
+    {
+        class Deletable *obj = (class Deletable *)raw;
+        delete obj;
+    }
+    raw = NULL;
 }
 
 //************************************************
