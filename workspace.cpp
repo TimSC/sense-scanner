@@ -22,10 +22,14 @@ Workspace::Workspace(const Workspace &other) : QObject()
 Workspace& Workspace::operator= (const Workspace &other)
 {
     this->annotations.clear();
-
-    annotations = other.annotations;
-    defaultFilename = other.defaultFilename;
-    processingList = other.processingList;
+    for(unsigned int i=0;i<other.annotations.size();i++)
+    {
+        std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
+        *ann = *other.annotations[i];
+        this->annotations.push_back(ann);
+    }
+    this->defaultFilename = other.defaultFilename;
+    this->processingList = other.processingList;
 
     return *this;
 }
