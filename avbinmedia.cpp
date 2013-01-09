@@ -26,8 +26,8 @@ AvBinMedia::AvBinMedia(int idIn, class EventLoop *eventLoopIn) : AbstractMedia()
         this->eventLoop->AddListener(eventName2.toLocal8Bit().constData(), *this->eventReceiver);
         QString eventName3 = QString("AVBIN_FRAME_FAILED%1").arg(this->id);
         this->eventLoop->AddListener(eventName3.toLocal8Bit().constData(), *this->eventReceiver);
-        QString eventName4("STOP_THREADS");
-        this->eventLoop->AddListener(eventName4.toLocal8Bit().constData(), *this->eventReceiver);
+        //QString eventName4("STOP_THREADS");
+        //this->eventLoop->AddListener(eventName4.toLocal8Bit().constData(), *this->eventReceiver);
     }
 
     this->mediaThread = new AvBinThread();
@@ -221,11 +221,7 @@ void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long sta
                                               void *raw), void *raw)
 {
 
-    if(this->id)
-    {
-        cout << "AvBinMedia::Update()" << this->id <<"\t"<< (unsigned long)this << endl;
-        cout << this->currentFina.toLocal8Bit().constData() << endl;
-    }
+    //Update to check for async frames send to video widget
 
     //Check for new frames from media backend.
     int checking = 1;
@@ -254,12 +250,6 @@ void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long sta
                               ROUND_TIMESTAMP(frame->requestedTimestamp / 1000.),
                               raw);
             }
-
-            if(evType=="STOP_THREADS")
-            {
-                cout << "Stop!!!" << endl;
-            }
-
         }
         catch(runtime_error &err)
         {
@@ -309,10 +299,10 @@ AvBinThread::~AvBinThread()
 
 void AvBinThread::Update()
 {
-    //if(id==1)
-    //{
-    //    cout << "AvBinThread::Update()" << this->id <<"\t"<< (unsigned long)this << endl;
-    //}
+    if(id==1)
+    {
+        cout << "AvBinThread::Update()" << this->id <<"\t"<< (unsigned long)this << endl;
+    }
 
     int foundEvent = 0;
 

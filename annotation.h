@@ -49,6 +49,8 @@ public:
     void SetActiveStateDesired(int desiredIn);
     int GetActiveStateDesired();
 
+    void Terminate();
+
     bool visible;
     QUuid uid;
     std::tr1::shared_ptr<class AnnotThread> annotThread;

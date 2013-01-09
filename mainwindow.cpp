@@ -324,6 +324,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
     this->mediaInterfaceFront->TerminateThread();
     this->mediaInterfaceBack->TerminateThread();
 
+    this->workspace.TerminateThreads();
+
+
     //Continu shut down in parent object
     cout << "Continuing shut down of QT framework" << endl;
     QMainWindow::closeEvent(event);

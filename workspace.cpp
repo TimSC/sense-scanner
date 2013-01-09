@@ -452,3 +452,12 @@ void Workspace::Update()
     }
 
 }
+
+void Workspace::TerminateThreads()
+{
+    for(unsigned int i=0;i<this->annotations.size();i++)
+    {
+        std::tr1::shared_ptr<class Annotation> ann = this->annotations[i];
+        ann->Terminate();
+    }
+}

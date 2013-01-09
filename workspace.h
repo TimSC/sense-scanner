@@ -55,6 +55,7 @@ public:
     int Save();
     void SaveAs(QString &fina);
     int HasChanged();
+    void TerminateThreads();
 
 protected:
     //Sources and annotation data

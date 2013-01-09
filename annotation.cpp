@@ -300,4 +300,11 @@ int Annotation::GetActiveStateDesired()
 }
 
 
-
+void Annotation::Terminate()
+{
+    if(this->annotThread->isRunning())
+    {
+        cout << "Warning: terminating annot thread " << this->source.toLocal8Bit().constData() << endl;
+        this->annotThread->terminate();
+    }
+}

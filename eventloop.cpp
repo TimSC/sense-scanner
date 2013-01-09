@@ -282,35 +282,20 @@ void MessagableThread::run()
         running = !this->stopThreads;
         this->mutex.unlock();
 
-        if(id==1)
-        {
-            cout << "zz" << endl;
-        }
-        else
-            cout << "aa" << endl;
-
-        {
         try
         {
             assert(this->eventReceiver);
             std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
             cout << "Event type " << ev->type << endl;
             this->HandleEvent(ev);
-
-            //Call child specific update function
-            this->Update();
         }
         catch(std::runtime_error e)
         {
-            cout << "No message found" << this->id << endl;
 
-            //Call child specific update function
-            this->Update();
-        }
         }
 
-
-
+        //Call child specific update function
+        this->Update();
     }
 
     std::tr1::shared_ptr<class Event> stopEvent(new Event("THREAD_STOPPING"));
