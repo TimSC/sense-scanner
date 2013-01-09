@@ -35,12 +35,18 @@ AVbinFile* mod_avbin_open_filename(const char *filename)
 
 AVbinResult mod_avbin_file_info(AVbinFile *file, AVbinFileInfo *info)
 {
-	return avbin_file_info(file, info);
+    avbinOpenMutex.lock();
+    AVbinResult out = avbin_file_info(file, info);
+    avbinOpenMutex.unlock();
+    return out;
 }
 
 AVbinResult mod_avbin_stream_info(AVbinFile *file, int stream_index, AVbinStreamInfo *info)
 {
-    return avbin_stream_info(file, stream_index, info);
+    avbinOpenMutex.lock();
+    AVbinResult out = avbin_stream_info(file, stream_index, info);
+    avbinOpenMutex.unlock();
+    return out;
 }
 
 AVbinResult mod_avbin_seek_file(AVbinFile *file, AVbinTimestamp timestamp)
@@ -53,17 +59,26 @@ AVbinResult mod_avbin_seek_file(AVbinFile *file, AVbinTimestamp timestamp)
 
 AVbinResult mod_avbin_read(AVbinFile *file, AVbinPacket *packet)
 {
-	return avbin_read(file, packet);
+    avbinOpenMutex.lock();
+    AVbinResult out = avbin_read(file, packet);
+    avbinOpenMutex.unlock();
+    return out;
 }
 
 int mod_avbin_decode_video(AVbinStream *stream, uint8_t *data_in, size_t size_in, uint8_t *data_out)
 {
-	return avbin_decode_video(stream, data_in, size_in, data_out);
+    avbinOpenMutex.lock();
+    int out = avbin_decode_video(stream, data_in, size_in, data_out);
+    avbinOpenMutex.unlock();
+    return out;
 }
 
 int mod_avbin_decode_audio(AVbinStream *stream, uint8_t *data_in, size_t size_in, uint8_t *data_out, int *size_out)
 {
-	return avbin_decode_audio(stream, data_in, size_in, data_out, size_out);
+    avbinOpenMutex.lock();
+    int out = avbin_decode_audio(stream, data_in, size_in, data_out, size_out);
+    avbinOpenMutex.unlock();
+    return out;
 }
 AVbinStream* mod_avbin_open_stream(AVbinFile *file, int stream_index)
 {
@@ -125,74 +140,93 @@ AVbinFile* mod_avbin_open_filename(const char *filename)
 
 	AVbinFile* (*func)(const char *filename)=0;
 	func = (AVbinFile* (*)(const char *filename)) rawfunc;
+    AVbinFile*out = (*func)(filename);
     avbinOpenMutex.unlock();
-	return (*func)(filename);
+    return out;
 }
 
 AVbinResult mod_avbin_file_info(AVbinFile *file, AVbinFileInfo *info)
 {
+    avbinOpenMutex.lock();
 	assert(ghinst != NULL);
 	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_file_info" );
 	assert(rawfunc != (FARPROC)NULL);
 
 	AVbinResult (*func)(AVbinFile *, AVbinFileInfo *)=0;
 	func = (AVbinResult (*)(AVbinFile *, AVbinFileInfo *)) rawfunc;
-	return (*func)(file, info);
+    AVbinResult out = (*func)(file, info);
+    avbinOpenMutex.unlock();
+    return out;
 }
 
 AVbinResult mod_avbin_stream_info(AVbinFile *file, int stream_index, AVbinStreamInfo *info)
 {
+    avbinOpenMutex.lock();
 	assert(ghinst != NULL);
 	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_stream_info" );
 	assert(rawfunc != (FARPROC)NULL);
 
 	AVbinResult (*func)(AVbinFile *, int, AVbinStreamInfo *)=0;
 	func = (AVbinResult (*)(AVbinFile *, int, AVbinStreamInfo *)) rawfunc;
-	return (*func)(file, stream_index, info);
+    AVbinResult out = (*func)(file, stream_index, info);
+    avbinOpenMutex.unlock();
+    return out;
 }
 
 AVbinResult mod_avbin_seek_file(AVbinFile *file, AVbinTimestamp timestamp)
 {
+    avbinOpenMutex.lock();
 	assert(ghinst != NULL);
 	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_seek_file" );
 	assert(rawfunc != (FARPROC)NULL);
 
 	AVbinResult (*func)(AVbinFile *, AVbinTimestamp)=0;
 	func = (AVbinResult (*)(AVbinFile *, AVbinTimestamp)) rawfunc;
-	return (*func)(file, timestamp);
+    AVbinResult out = (*func)(file, timestamp);
+    avbinOpenMutex.unlock();
+    return out;
 }
 
 AVbinResult mod_avbin_read(AVbinFile *file, AVbinPacket *packet)
 {
+    avbinOpenMutex.lock();
 	assert(ghinst != NULL);
 	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_read" );
 	assert(rawfunc != (FARPROC)NULL);
 
 	AVbinResult (*func)(AVbinFile *, AVbinPacket *)=0;
 	func = (AVbinResult (*)(AVbinFile *, AVbinPacket *)) rawfunc;
-	return (*func)(file, packet);
+    AVbinResult out = (*func)(file, packet);
+    avbinOpenMutex.unlock();
+    return out;
 }
 
 int mod_avbin_decode_video(AVbinStream *stream, uint8_t *data_in, size_t size_in, uint8_t *data_out)
 {
+    avbinOpenMutex.lock();
 	assert(ghinst != NULL);
 	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_decode_video" );
 	assert(rawfunc != (FARPROC)NULL);
 
 	int (*func)(AVbinStream *, uint8_t *, size_t, uint8_t *)=0;
 	func = (int (*)(AVbinStream *, uint8_t *, size_t, uint8_t *)) rawfunc;
-	return (*func)(stream, data_in, size_in, data_out);
+    int out = (*func)(stream, data_in, size_in, data_out);
+    avbinOpenMutex.unlock();
+    return out;
 }
 
 int mod_avbin_decode_audio(AVbinStream *stream, uint8_t *data_in, size_t size_in, uint8_t *data_out, int *size_out)
 {
+    avbinOpenMutex.lock();
 	assert(ghinst != NULL);
 	FARPROC rawfunc = GetProcAddress ( ghinst , "avbin_decode_audio" );
 	assert(rawfunc != (FARPROC)NULL);
 
 	int (*func)(AVbinStream *, uint8_t *, size_t, uint8_t *, int *)=0;
 	func = (int (*)(AVbinStream *, uint8_t *, size_t, uint8_t *, int *)) rawfunc;
-	return (*func)(stream, data_in, size_in, data_out, size_out);
+    int out = (*func)(stream, data_in, size_in, data_out, size_out);
+    avbinOpenMutex.unlock();
+    return out;
 }
 AVbinStream* mod_avbin_open_stream(AVbinFile *file, int stream_index)
 {
@@ -203,8 +237,9 @@ AVbinStream* mod_avbin_open_stream(AVbinFile *file, int stream_index)
 
 	AVbinStream* (*func)(AVbinFile *, int)=0;
 	func = (AVbinStream* (*)(AVbinFile *, int)) rawfunc;
+    AVbinStream* out= (*func)(file, stream_index);
     avbinOpenMutex.unlock();
-	return (*func)(file, stream_index);
+    return out;
 }
 void mod_avbin_close_stream(AVbinStream *stream)
 {
