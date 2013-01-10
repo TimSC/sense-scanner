@@ -212,15 +212,20 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         assert(req!=NULL);
         QSharedPointer<QImage> img = req->img;
 
-        QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(img->byteCount());
-        QString imgPreamble2 = QString("RGB_IMAGE_DATA TIMESTAMP=%1 HEIGHT=%2 WIDTH=%3\n").
-                arg(0).
+        QString xml="<stuff></stuff>";
+        QByteArray xmlBytes(xml.toUtf8().constData());
+
+        QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(img->byteCount()+xmlBytes.length());
+        QString imgPreamble2 = QString("RGB_IMAGE_AND_XML HEIGHT=%1 WIDTH=%2 IMGBYTES=%3 XMLBYTES=%4\n").
                 arg(img->height()).
-                arg(img->width());
+                arg(img->width()).
+                arg(img->byteCount()).
+                arg(xmlBytes.length());
         this->SendCommand(imgPreamble1);
         this->SendCommand(imgPreamble2);
         QByteArray imgRaw((const char *)img->bits(), img->byteCount());
         this->SendRawData(imgRaw);
+        this->SendRawData(xmlBytes);
     }
 }
 

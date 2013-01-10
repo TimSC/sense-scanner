@@ -103,13 +103,9 @@ def WorkerProcess(childPipeConn):
 
 					im = Image.frombuffer("RGB", (width, height), event[2], 'raw', "RGB", 0, 1)
 					if not training:
+						#Pre-training image collection
 						print "Store image"
 						trainImgs[timestamp] = im
-					else:
-						print "Replace current image"
-						currentFrame = im
-						#im.save("currentimg"+str(imgCount)+".png")
-					#im.save("test"+str(imgCount)+".png")
 					imgCount += 1
 				print "DATA_BLOCK_PROCESSED"
 
@@ -140,6 +136,31 @@ def WorkerProcess(childPipeConn):
 						modelReady = True
 					except Exception as exErr:
 						print "Decompression of data failed", str(exErr)
+
+				if args[0] == "RGB_IMAGE_AND_XML":
+					#Decode image from raw data block
+					args.pop(0)
+					pairs = [tmp.split("=") for tmp in args]
+					argDict = dict(pairs)
+					if 'WIDTH' not in argDict: continue
+					if 'HEIGHT' not in argDict: continue
+					if 'IMGBYTES' not in argDict: continue
+					if 'XMLBYTES' not in argDict: continue
+					width = int(argDict['WIDTH'])
+					height = int(argDict['HEIGHT'])
+					imgBytes = int(argDict['IMGBYTES'])
+					xmlBytes = int(argDict['XMLBYTES'])
+					if width * height * 3 != imgBytes: 
+						print "#Image buffer of incorrect size",width,height,len(event[2])
+						continue
+
+					im = Image.frombuffer("RGB", (width, height), event[2][:imgBytes], 'raw', "RGB", 0, 1)
+					if training:
+						#Post-training phase
+						print "Store image"
+						im.save("alg.jpg")
+					imgCount += 1
+				print "DATA_BLOCK_PROCESSED"
 
 		if (not paused and training and progress < 1.) or getProgress:
 			tracker.Update()
