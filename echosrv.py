@@ -159,26 +159,29 @@ def WorkerProcess(childPipeConn):
 						print "Store image"
 						im.save("alg.jpg")
 
+						outXml = "<prediction>\n"
 						xmlData = event[2][imgBytes:imgBytes+xmlBytes].decode('utf8')
 						tree = ET.fromstring(xmlData)
 						for model in tree:
+							outXml += " <model>\n"
 							modelList = []
 							for pt in model:
 								modelList.append((float(pt.attrib['x']), float(pt.attrib['y'])))
 
 							pred = tracker.Predict(im, modelList)
-							outXml = "<prediction>\n"
+							
 							for pt in pred:
-								outXml += " <pt x=\""+str(pt[0])+"\" y=\""+str(pt[1])+"\"/>\n"
+								outXml += "  <pt x=\""+str(pt[0])+"\" y=\""+str(pt[1])+"\"/>\n"
+							outXml += " </model>\n"
 
-							outXml += "</prediction>\n"
-							outXmlEnc = outXml.encode('utf-8')
+						outXml += "</prediction>\n"
+						outXmlEnc = outXml.encode('utf-8')
 
-							print "XML_BLOCK={0}".format(len(outXmlEnc))
-							sys.stdout.write("PREDICTION_RESPONSE\n")
-							sys.stdout.flush()
-							print outXmlEnc
-							sys.stdout.flush()
+						print "XML_BLOCK={0}".format(len(outXmlEnc))
+						sys.stdout.write("PREDICTION_RESPONSE\n")
+						sys.stdout.flush()
+						print outXmlEnc
+						sys.stdout.flush()
 
 					else:
 						print "ALG_NOT_READY"
