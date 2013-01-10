@@ -211,8 +211,24 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         class ProcessingRequest *req = (class ProcessingRequest *)ev->raw;
         assert(req!=NULL);
         QSharedPointer<QImage> img = req->img;
+        std::vector<std::vector<std::vector<float> > > &pos = req->pos;
 
-        QString xml="<stuff></stuff>";
+        QString xml="<predict>\n";
+        for(unsigned int i=0;i<pos.size();i++)
+        {
+            std::vector<std::vector<float> > &model = pos[i];
+            xml+=" <model>\n";
+            for(unsigned j=0;j<model.size();j++)
+            {
+                std::vector<float> &pt = model[j];
+                assert(pt.size() == 2);
+                xml+=QString("  <pt x=\"%1\" y=\"%2\">\n").arg(pt[0]).arg(pt[1]);
+            }
+            xml+=" </model>\n";
+        }
+
+
+        xml+="</predict>\n";
         QByteArray xmlBytes(xml.toUtf8().constData());
 
         QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(img->byteCount()+xmlBytes.length());
