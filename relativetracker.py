@@ -336,7 +336,8 @@ class RelativeTracker:
 		self.imsStr = None
 
 	def Predict(self, img, prevModel):
-		print "here", prevModel
+
+		return prevModel #Null behaviour
 
 if __name__=="__main__":
 	tracker = pickle.load(open("tracker.dat","rb"))

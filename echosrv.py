@@ -166,7 +166,20 @@ def WorkerProcess(childPipeConn):
 							for pt in model:
 								modelList.append((float(pt.attrib['x']), float(pt.attrib['y'])))
 
-							tracker.Predict(im, modelList)
+							pred = tracker.Predict(im, modelList)
+							outXml = "<prediction>\n"
+							for pt in pred:
+								outXml += " <pt x=\""+str(pt[0])+"\" y=\""+str(pt[1])+"\"/>\n"
+
+							outXml += "</prediction>\n"
+							outXmlEnc = outXml.encode('utf-8')
+
+							print "XML_BLOCK={0}".format(len(outXmlEnc))
+							sys.stdout.write("PREDICTION_RESPONSE\n")
+							sys.stdout.flush()
+							print outXmlEnc
+							sys.stdout.flush()
+
 					else:
 						print "ALG_NOT_READY"
 
