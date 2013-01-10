@@ -159,6 +159,10 @@ def WorkerProcess(childPipeConn):
 						#Post-training phase
 						print "Store image"
 						im.save("alg.jpg")
+
+						xmlData = event[2][imgBytes:imgBytes+xmlBytes]
+						print "algxml:",xmlData.decode('utf8')
+
 					imgCount += 1
 				print "DATA_BLOCK_PROCESSED"
 
