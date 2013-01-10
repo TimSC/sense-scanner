@@ -107,7 +107,6 @@ def WorkerProcess(childPipeConn):
 						print "Store image"
 						trainImgs[timestamp] = im
 					imgCount += 1
-				print "DATA_BLOCK_PROCESSED"
 
 				if args[0]=="XML_DATA":
 					#Parse XML from raw data block
@@ -160,10 +159,12 @@ def WorkerProcess(childPipeConn):
 						print "Store image"
 						im.save("alg.jpg")
 
-						xmlData = event[2][imgBytes:imgBytes+xmlBytes]
-						print "algxml:",xmlData.decode('utf8')
+						xmlData = event[2][imgBytes:imgBytes+xmlBytes].decode('utf8')
+						#print "algxml:",xmlData
+						tracker.Predict(im, xmlData)
+					else:
+						print "ALG_NOT_READY"
 
-					imgCount += 1
 				print "DATA_BLOCK_PROCESSED"
 
 		if (not paused and training and progress < 1.) or getProgress:
