@@ -19,7 +19,7 @@ public:
 protected:
 
     void ImageToProcess(QSharedPointer<QImage> img,
-                        unsigned long long milsec);
+                        std::vector<std::vector<float> > &model);
 
     class Annotation *parentAnn;
     int srcDurationSet;
@@ -28,7 +28,8 @@ protected:
 
     unsigned long long currentStartTimestamp, currentEndTimestamp;
     int currentTimeSet;
-
+    std::vector<std::vector<float> > currentModel;
+    int currentModelSet;
 };
 
 class Annotation

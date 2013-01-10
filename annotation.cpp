@@ -16,6 +16,7 @@ AnnotThread::AnnotThread(class Annotation *annIn, class AvBinMedia* mediaInterfa
     this->currentStartTimestamp = 0;
     this->currentEndTimestamp = 0;
     this->currentTimeSet = 0;
+    this->currentModelSet = 0;
 }
 
 AnnotThread::~AnnotThread()
@@ -29,6 +30,7 @@ void AnnotThread::Update()
     assert(this->parentAnn != NULL);
     QUuid algUid = this->parentAnn->GetAlgUid();
     QString src = this->parentAnn->GetSource();
+
     if(algUid.isNull())
     {
         //cout << this->parentAnn->GetSource().toLocal8Bit().constData() << endl;
@@ -45,6 +47,7 @@ void AnnotThread::Update()
     }
 
     class SimpleSceneController *track = this->parentAnn->GetTrack();
+    assert(track!=NULL);
 
     if(!this->srcDurationSet)
     {
@@ -76,7 +79,26 @@ void AnnotThread::Update()
             cout << "startTimestamp " << this->currentStartTimestamp << endl;
             cout << "endTimestamp " << this->currentEndTimestamp << endl;
 
-            this->ImageToProcess(img, 0);
+            //Check if annotation is in this frame
+            std::vector<std::vector<float> > foundAnnot;
+            unsigned long long foundAnnotationTime;
+            int found = track->GetAnnotationBetweenTimestamps(this->currentStartTimestamp,
+                                                  this->currentEndTimestamp,
+                                                  0,
+                                                  foundAnnot,
+                                                  foundAnnotationTime);
+
+            if(found)
+            {
+                //Update current model from annotation
+                this->currentModel = foundAnnot;
+                this->currentModelSet = 1;
+            }
+            else
+            {
+                //If not annotation here, make a prediction
+                this->ImageToProcess(img, this->currentModel);
+            }
         }
         catch (std::runtime_error &err)
         {
@@ -104,9 +126,6 @@ void AnnotThread::Update()
                     milsec,
                     this->currentStartTimestamp,
                     this->currentEndTimestamp);
-
-            this->ImageToProcess(img, milsec);
-
         }
         catch (std::runtime_error &err)
         {
@@ -118,6 +137,27 @@ void AnnotThread::Update()
         {
             this->parentAnn->SetActiveStateDesired(0);
             throw runtime_error("Earlier frame found than was requested");
+        }
+
+        //Check if annotation is in this frame
+        std::vector<std::vector<float> > foundAnnot;
+        unsigned long long foundAnnotationTime;
+        int found = track->GetAnnotationBetweenTimestamps(this->currentStartTimestamp,
+                                              this->currentEndTimestamp,
+                                              0,
+                                              foundAnnot,
+                                              foundAnnotationTime);
+
+        if(found)
+        {
+            //Update current model from annotation
+            this->currentModel = foundAnnot;
+            this->currentModelSet = 1;
+        }
+        else
+        {
+            //If not annotation here, make a prediction
+            this->ImageToProcess(img, this->currentModel);
         }
 
         //Estimate mid time of next frame
@@ -141,7 +181,8 @@ void AnnotThread::Finished()
 
 }
 
-void AnnotThread::ImageToProcess(QSharedPointer<QImage> img, unsigned long long milsec)
+void AnnotThread::ImageToProcess(QSharedPointer<QImage> img,
+                                 std::vector<std::vector<float> > &model)
 {
     QUuid algUid = this->parentAnn->GetAlgUid();
     assert(img->format() == QImage::Format_RGB888);
@@ -150,6 +191,8 @@ void AnnotThread::ImageToProcess(QSharedPointer<QImage> img, unsigned long long 
     std::tr1::shared_ptr<class Event> requestEv(new Event("PREDICT_FRAME_REQUEST"));
     class ProcessingRequest *req = new class ProcessingRequest;
     req->img = img;
+    req->pos.clear();
+    req->pos.push_back(model);
     requestEv->raw = req;
     requestEv->data = algUid.toString().toLocal8Bit().constData();
 
