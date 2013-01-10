@@ -616,6 +616,9 @@ void MainWindow::TrainModelPressed()
         return;
     }
 
+    //Suspend access from annot threads to media interface (for now)
+    this->workspace.SetAnnotThreadsInactive();
+
     //Create worker process
     std::tr1::shared_ptr<class AlgorithmProcess> alg(new class AlgorithmProcess(this->eventLoop, this));
     alg->SetUid(QUuid::createUuid());

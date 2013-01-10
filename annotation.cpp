@@ -44,9 +44,6 @@ void AnnotThread::Update()
         return;
     }
 
-
-
-
     class SimpleSceneController *track = this->parentAnn->GetTrack();
 
     if(!this->srcDurationSet)
@@ -151,9 +148,6 @@ void AnnotThread::ImageToProcess(QSharedPointer<QImage> img, unsigned long long 
 
     assert(this->eventLoop!=NULL);
     std::tr1::shared_ptr<class Event> requestEv(new Event("PREDICT_FRAME_REQUEST"));
-    //std::ostringstream tmp;
-    //tmp << this->progress << "," << this->threadId;
-    //openEv->data = tmp.str();
     class ProcessingRequest *req = new class ProcessingRequest;
     req->img = img;
     requestEv->raw = req;

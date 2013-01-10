@@ -477,3 +477,12 @@ void Workspace::TerminateThreads()
         ann->Terminate();
     }
 }
+
+void Workspace::SetAnnotThreadsInactive()
+{
+    for(unsigned int i=0;i<this->annotations.size();i++)
+    {
+        std::tr1::shared_ptr<class Annotation> ann = this->annotations[i];
+        ann->SetActive(0);
+    }
+}
