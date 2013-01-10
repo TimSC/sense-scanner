@@ -182,6 +182,7 @@ def WorkerProcess(childPipeConn):
 						sys.stdout.flush()
 						print outXmlEnc
 						sys.stdout.flush()
+						print "FLUSH"
 
 					else:
 						print "ALG_NOT_READY"

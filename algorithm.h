@@ -52,8 +52,12 @@ protected:
     QFile *algOutLog;
     class EventLoop *eventLoop;
     class EventReceiver *eventReceiver;
+
     QByteArray dataBlock;
     int dataBlockReceived;
+    QString xmlBlock;
+    int xmlBlockReceived;
+
     QByteArray algOutBuffer;
     QByteArray algErrBuffer;
     QUuid uid;

@@ -17,6 +17,9 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->paused = 1;
     this->pausing = 0;
     this->initDone = 0;
+    this->dataBlockReceived = 0;
+    this->xmlBlockReceived = 0;
+
     QString fina = "algout.txt";
     this->eventLoop = eventLoopIn;
     this->algOutLog = new QFile(fina);
@@ -52,6 +55,7 @@ void AlgorithmProcess::Init()
     this->pausing = 0;
     this->initDone = 1;
     this->dataBlockReceived = 0;
+    this->xmlBlockReceived = 0;
 }
 
 void AlgorithmProcess::Pause()
@@ -324,6 +328,38 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
         //el.SendEvent(dataEv);
         this->dataBlock = blockData;
         this->dataBlockReceived = 1;
+        return;
+    }
+
+    if(cmd.left(10)=="XML_BLOCK=")
+    {
+        QString blockArg = this->ReadLineFromBuffer(this->algOutBuffer);
+        while(blockArg.length()==0)
+        {
+            blockArg = this->ReadLineFromBuffer(this->algOutBuffer);
+        }
+        int blockLen = cmd.mid(10).toInt();
+
+        //Wait for process to write the entire data block to standard output
+        while(this->algOutBuffer.length() < blockLen)
+        {
+            //Get standard output from algorithm process
+            QByteArray ret = this->readAllStandardOutput();
+            this->algOutBuffer.append(ret);
+            //int currentLen = this->algOutBuffer.length();
+        }
+
+        QByteArray blockData = this->algOutBuffer.left(blockLen);
+        this->algOutBuffer = this->algOutBuffer.mid(blockLen);
+
+        //std::tr1::shared_ptr<class Event> dataEv(new Event("ALG_DATA_BLOCK"));
+        //dataEv->data = blockData.constData();
+        //el.SendEvent(dataEv);
+        QTextStream dec(blockData);
+        dec.setCodec("UTF-8");
+        this->xmlBlock = dec.readAll();
+        cout << this->xmlBlock.toLocal8Bit().constData() << endl;
+        this->xmlBlockReceived = 1;
         return;
     }
 
