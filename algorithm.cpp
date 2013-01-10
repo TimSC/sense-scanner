@@ -1,10 +1,12 @@
 #include "algorithm.h"
 #include "localsleep.h"
+#include "mediabuffer.h"
 #include <iostream>
 #include <sstream>
 #include <assert.h>
 #include <stdexcept>
 #include <QtCore/QTextStream>
+#include <QtCore/QSharedPointer>
 using namespace std;
 
 //************************************************
@@ -202,10 +204,24 @@ void AlgorithmProcess::Update()
 
 void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
-    cout << "Event type " << ev->type << endl;
     if(QString(ev->data.c_str()) != this->uid.toString()) return; //Check if this is the appropriate algorithm
 
-    cout << ev->data.c_str() << endl;
+    if(ev->type == "PREDICT_FRAME_REQUEST")
+    {
+        class ProcessingRequest *req = (class ProcessingRequest *)ev->raw;
+        assert(req!=NULL);
+        QSharedPointer<QImage> img = req->img;
+
+        QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(img->byteCount());
+        QString imgPreamble2 = QString("RGB_IMAGE_DATA TIMESTAMP=%1 HEIGHT=%2 WIDTH=%3\n").
+                arg(0).
+                arg(img->height()).
+                arg(img->width());
+        this->SendCommand(imgPreamble1);
+        this->SendCommand(imgPreamble2);
+        QByteArray imgRaw((const char *)img->bits(), img->byteCount());
+        this->SendRawData(imgRaw);
+    }
 }
 
 void AlgorithmProcess::ProcessAlgOutput(QString &cmd)

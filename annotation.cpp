@@ -155,23 +155,12 @@ void AnnotThread::ImageToProcess(QSharedPointer<QImage> img, unsigned long long 
 
     this->eventLoop->SendEvent(requestEv);
 
-    /*QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(img->byteCount());
-    QString imgPreamble2 = QString("RGB_IMAGE_DATA TIMESTAMP=%1 HEIGHT=%2 WIDTH=%3\n").
-            arg(milsec).
-            arg(img->height()).
-            arg(img->width());*/
-    //alg->SendCommand(imgPreamble1);
-    //alg->SendCommand(imgPreamble2);
-    //QByteArray imgRaw((const char *)img->bits(), img->byteCount());
-    //alg->SendRawData(imgRaw);
-
-
     //Wait for response
-    /*for(int i=0;i<10;i++)
+    for(int i=0;i<10;i++)
     {
-        this->Update();
+        //this->Update();
         LocalSleep::msleep(100);
-    }*/
+    }
 }
 
 //*****************************************************
