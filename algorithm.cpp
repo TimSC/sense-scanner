@@ -222,7 +222,7 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             {
                 std::vector<float> &pt = model[j];
                 assert(pt.size() == 2);
-                xml+=QString("  <pt x=\"%1\" y=\"%2\">\n").arg(pt[0]).arg(pt[1]);
+                xml+=QString("  <pt x=\"%1\" y=\"%2\" />\n").arg(pt[0]).arg(pt[1]);
             }
             xml+=" </model>\n";
         }

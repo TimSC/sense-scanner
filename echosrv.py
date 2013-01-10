@@ -160,8 +160,13 @@ def WorkerProcess(childPipeConn):
 						im.save("alg.jpg")
 
 						xmlData = event[2][imgBytes:imgBytes+xmlBytes].decode('utf8')
-						#print "algxml:",xmlData
-						tracker.Predict(im, xmlData)
+						tree = ET.fromstring(xmlData)
+						for model in tree:
+							modelList = []
+							for pt in model:
+								modelList.append((float(pt.attrib['x']), float(pt.attrib['y'])))
+
+							tracker.Predict(im, modelList)
 					else:
 						print "ALG_NOT_READY"
 
