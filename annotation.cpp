@@ -6,6 +6,8 @@
 #include <iostream>
 using namespace std;
 
+#define TO_MILLISEC(x) (unsigned long long)(x / 1000. + 0.5)
+
 AnnotThread::AnnotThread(class Annotation *annIn, class AvBinMedia* mediaInterfaceIn)
 {
     this->parentAnn = annIn;
@@ -82,8 +84,8 @@ void AnnotThread::Update()
             //Check if annotation is in this frame
             std::vector<std::vector<float> > foundAnnot;
             unsigned long long foundAnnotationTime;
-            int found = track->GetAnnotationBetweenTimestamps(this->currentStartTimestamp,
-                                                  this->currentEndTimestamp,
+            int found = track->GetAnnotationBetweenTimestamps(TO_MILLISEC(this->currentStartTimestamp),
+                                                  TO_MILLISEC(this->currentEndTimestamp),
                                                   0,
                                                   foundAnnot,
                                                   foundAnnotationTime);
@@ -118,7 +120,7 @@ void AnnotThread::Update()
     if(nextTi < srcDuration * 1000)
     {
         QSharedPointer<QImage> img;
-        unsigned long long milsec = (unsigned long long)(nextTi / 1000. + 0.5);
+        unsigned long long milsec = TO_MILLISEC(nextTi);
         try
         {
             cout << "Current time " << milsec << "," << src.toLocal8Bit().constData() << endl;
@@ -142,9 +144,9 @@ void AnnotThread::Update()
         //Check if annotation is in this frame
         std::vector<std::vector<float> > foundAnnot;
         unsigned long long foundAnnotationTime;
-        int found = track->GetAnnotationBetweenTimestamps(this->currentStartTimestamp,
-                                              this->currentEndTimestamp,
-                                              0,
+        int found = track->GetAnnotationBetweenTimestamps(TO_MILLISEC(this->currentStartTimestamp),
+                                              TO_MILLISEC(this->currentEndTimestamp),
+                                              milsec,
                                               foundAnnot,
                                               foundAnnotationTime);
 
