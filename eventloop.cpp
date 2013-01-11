@@ -294,8 +294,13 @@ void MessagableThread::run()
 
         }
 
+        //Check again if running
+        this->mutex.lock();
+        running = !this->stopThreads;
+        this->mutex.unlock();
+
         //Call child specific update function
-        this->Update();
+        if(running) this->Update();
     }
 
     std::tr1::shared_ptr<class Event> stopEvent(new Event("THREAD_STOPPING"));
