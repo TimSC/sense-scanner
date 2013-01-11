@@ -50,7 +50,6 @@ public:
     std::tr1::shared_ptr<class Event> PopEvent();
     std::tr1::shared_ptr<class Event> WaitForEventId(unsigned long long id,
                                unsigned timeOutMs = 50000);
-
 protected:
     std::vector<std::tr1::shared_ptr<class Event> > eventBuffer;
     Mutex mutex;

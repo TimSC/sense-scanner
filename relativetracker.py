@@ -213,6 +213,7 @@ class RelativeTracker:
 				loc[0] -= pred[0]
 				loc[1] -= pred[1]
 
+		return ptsPos
 
 	def EvaluateModel(self, trNum):
 		assert self.ims is not None
@@ -334,10 +335,6 @@ class RelativeTracker:
 			self.ims.append(im)
 			self.imls.append(im.load())
 		self.imsStr = None
-
-	def Predict(self, img, prevModel):
-
-		return prevModel #Null behaviour
 
 if __name__=="__main__":
 	tracker = pickle.load(open("tracker.dat","rb"))
