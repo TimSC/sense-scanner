@@ -377,13 +377,23 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
             QDomElement e = n.toElement(); // try to convert the node to an element.
             if(!e.isNull())
             {
-                if(e.tagName() == "model")
+                if(e.tagName() != "model") continue;
+                QDomNode ptNode = e.firstChild();
+                while(!ptNode.isNull())
                 {
-                    cout << "tag" << e.tagName().toLocal8Bit().constData() << endl;
-
+                    QDomElement ptEl = ptNode.toElement(); // try to convert the node to an element.
+                    if(!ptEl.isNull())
+                    {
+                        if(ptEl.tagName()!="pt") continue;
+                        QString xStr = ptEl.attribute("x");
+                        QString yStr = ptEl.attribute("y");
+                        cout << "pt" << xStr.toFloat() << "," << yStr.toFloat() << endl;
+                    }
+                    ptNode = ptNode.nextSiblingElement();
                 }
+
             }
-            n = n.nextSibling();
+            n = n.nextSiblingElement();
         }
 
         return;
