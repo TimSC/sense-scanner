@@ -201,21 +201,28 @@ void AnnotThread::ImageToProcess(QSharedPointer<QImage> img,
     assert(img->format() == QImage::Format_RGB888);
 
     assert(this->eventLoop!=NULL);
+    int reqId = this->eventLoop->GetId();
+
+    //Ask alg process to make a prediction
     std::tr1::shared_ptr<class Event> requestEv(new Event("PREDICT_FRAME_REQUEST"));
     class ProcessingRequestOrResponse *req = new class ProcessingRequestOrResponse;
     req->img = img;
     req->pos.clear();
     req->pos.push_back(model);
     requestEv->raw = req;
+    requestEv->id = reqId;
     requestEv->data = algUid.toString().toLocal8Bit().constData();
 
     this->eventLoop->SendEvent(requestEv);
 
     //Wait for response
-    for(int i=0;i<10;i++)
+    try
     {
-        //this->Update();
-        LocalSleep::msleep(100);
+        std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(reqId);
+    }
+    catch(std::runtime_error e)
+    {
+
     }
 }
 

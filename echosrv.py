@@ -145,10 +145,12 @@ def WorkerProcess(childPipeConn):
 					if 'HEIGHT' not in argDict: continue
 					if 'IMGBYTES' not in argDict: continue
 					if 'XMLBYTES' not in argDict: continue
+					if 'ID' not in argDict: continue
 					width = int(argDict['WIDTH'])
 					height = int(argDict['HEIGHT'])
 					imgBytes = int(argDict['IMGBYTES'])
 					xmlBytes = int(argDict['XMLBYTES'])
+					reqId = int(argDict['ID'])
 					if width * height * 3 != imgBytes: 
 						print "#Image buffer of incorrect size",width,height,len(event[2])
 						continue
@@ -178,7 +180,7 @@ def WorkerProcess(childPipeConn):
 						outXmlEnc = outXml.encode('utf-8')
 
 						print "XML_BLOCK={0}".format(len(outXmlEnc))
-						sys.stdout.write("PREDICTION_RESPONSE\n")
+						sys.stdout.write("PREDICTION_RESPONSE ID="+str(reqId)+"\n")
 						sys.stdout.flush()
 						sys.stdout.write(outXmlEnc)
 						sys.stdout.flush()

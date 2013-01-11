@@ -244,11 +244,12 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         QByteArray xmlBytes(xml.toUtf8().constData());
 
         QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(img->byteCount()+xmlBytes.length());
-        QString imgPreamble2 = QString("RGB_IMAGE_AND_XML HEIGHT=%1 WIDTH=%2 IMGBYTES=%3 XMLBYTES=%4\n").
+        QString imgPreamble2 = QString("RGB_IMAGE_AND_XML HEIGHT=%1 WIDTH=%2 IMGBYTES=%3 XMLBYTES=%4 ID=%5\n").
                 arg(img->height()).
                 arg(img->width()).
                 arg(img->byteCount()).
-                arg(xmlBytes.length());
+                arg(xmlBytes.length()).
+                arg(ev->id);
         this->SendCommand(imgPreamble1);
         this->SendCommand(imgPreamble2);
         QByteArray imgRaw((const char *)img->bits(), img->byteCount());
@@ -341,6 +342,18 @@ void AlgorithmProcess::ProcessAlgOutput()
     {
         QByteArray blockArg = this->ReadLineFromBuffer(this->algOutBuffer,0,1);
         int blockLen = cmd.mid(10).toInt();
+        std::vector<std::string> splitArgs = split(blockArg.constData(),' ');
+        unsigned long long responseId = 0;
+        for(unsigned int i=0;i<splitArgs.size();i++)
+        {
+            std::vector<std::string> splitArgPairs = split(splitArgs[i],'=');
+            if(splitArgPairs[0]=="ID")
+            {
+                QByteArray pairArgBytes(splitArgPairs[1].c_str());
+                responseId = STR_TO_ULL(pairArgBytes.constBegin(),
+                                                           0,10);
+            }
+        }
 
         //Wait for process to write the entire data block to standard output
         if(this->algOutBuffer.length() < cmd.length() + blockArg.length() + blockLen + 2)
@@ -405,6 +418,7 @@ void AlgorithmProcess::ProcessAlgOutput()
         response->pos.clear();
         response->pos = entireResponse;
         resultEv->raw = response;
+        resultEv->id = responseId;
         this->eventLoop->SendEvent(resultEv);
 
         return;
