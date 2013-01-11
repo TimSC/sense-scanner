@@ -43,7 +43,6 @@ void AnnotThread::Update()
     assert(this->parentAnn != NULL);
     QUuid algUid = this->parentAnn->GetAlgUid();
     QString src = this->parentAnn->GetSource();
-    cout << "update " << src.toLocal8Bit().constData() << endl;
 
     if(algUid.isNull())
     {
