@@ -43,12 +43,16 @@ void AnnotThread::Update()
     assert(this->parentAnn != NULL);
     QUuid algUid = this->parentAnn->GetAlgUid();
     QString src = this->parentAnn->GetSource();
+    cout << "update " << src.toLocal8Bit().constData() << endl;
 
     if(algUid.isNull())
     {
         //cout << this->parentAnn->GetSource().toLocal8Bit().constData() << endl;
         //cout << algUid.toString().toLocal8Bit().constData() << endl;
-        this->parentAnn->SetActiveStateDesired(0);
+        if(this->parentAnn->GetActive())
+            this->parentAnn->SetActiveStateDesired(0);
+        else
+            this->msleep(100);
         return;
     }
 
