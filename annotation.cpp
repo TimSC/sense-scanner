@@ -113,7 +113,9 @@ void AnnotThread::Update()
             else
             {
                 //If not annotation here, make a prediction
-                this->ImageToProcess(img, this->currentModel);
+                this->ImageToProcess(TO_MILLISEC(this->currentStartTimestamp),
+                                     TO_MILLISEC(this->currentEndTimestamp),
+                                     img, this->currentModel);
             }
         }
         catch (std::runtime_error &err)
@@ -173,7 +175,9 @@ void AnnotThread::Update()
         else
         {
             //If not annotation here, make a prediction
-            this->ImageToProcess(img, this->currentModel);
+            this->ImageToProcess(TO_MILLISEC(this->currentStartTimestamp),
+                                 TO_MILLISEC(this->currentEndTimestamp),
+                                 img, this->currentModel);
         }
 
         //Estimate mid time of next frame
@@ -197,7 +201,9 @@ void AnnotThread::Finished()
 
 }
 
-void AnnotThread::ImageToProcess(QSharedPointer<QImage> img,
+void AnnotThread::ImageToProcess(unsigned long long startTi,
+                                 unsigned long long endTi,
+                                 QSharedPointer<QImage> img,
                                  std::vector<std::vector<float> > &model)
 {
     QUuid algUid = this->parentAnn->GetAlgUid();
@@ -222,6 +228,14 @@ void AnnotThread::ImageToProcess(QSharedPointer<QImage> img,
     try
     {
         std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(reqId);
+        class SimpleSceneController *track = this->parentAnn->GetTrack();
+        assert(track!=NULL);
+
+        if(ev->type!="PREDICTION_RESULT") return;
+        class ProcessingRequestOrResponse *response = (class ProcessingRequestOrResponse *)ev->raw;
+
+        track->SetAnnotationBetweenTimestamps(startTi, endTi, response->pos[0]);
+
     }
     catch(std::runtime_error e)
     {

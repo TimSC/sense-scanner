@@ -21,7 +21,9 @@ public:
 
 protected:
 
-    void ImageToProcess(QSharedPointer<QImage> img,
+    void ImageToProcess(unsigned long long startTi,
+                        unsigned long long endTi,
+                        QSharedPointer<QImage> img,
                         std::vector<std::vector<float> > &model);
 
     class Annotation *parentAnn;
