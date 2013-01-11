@@ -79,7 +79,7 @@ def WorkerProcess(childPipeConn):
 					print "DATA_BLOCK={0}".format(len(modelData))
 					sys.stdout.write("MODEL\n")
 					sys.stdout.flush()
-					print modelData
+					sys.stdout.write(modelData)
 					sys.stdout.flush()
 					print "Saved data size", len(modelData)
 					print "Uncompressed size", len(trackerStr)
@@ -180,9 +180,8 @@ def WorkerProcess(childPipeConn):
 						print "XML_BLOCK={0}".format(len(outXmlEnc))
 						sys.stdout.write("PREDICTION_RESPONSE\n")
 						sys.stdout.flush()
-						print outXmlEnc
+						sys.stdout.write(outXmlEnc)
 						sys.stdout.flush()
-						print "FLUSH"
 
 					else:
 						print "ALG_NOT_READY"
