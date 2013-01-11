@@ -37,17 +37,17 @@ public:
     void FastSwap(class DecodedFrame &other);
 };
 
-class ProcessingRequest : public Deletable
+class ProcessingRequestOrResponse : public Deletable
 {
 public:
     QSharedPointer<QImage> img;
 
     std::vector<std::vector<std::vector<float> > > pos;
 
-    ProcessingRequest();
-    ProcessingRequest(const ProcessingRequest &other);
-    ProcessingRequest& operator=(const ProcessingRequest& other);
-    virtual ~ProcessingRequest();
+    ProcessingRequestOrResponse();
+    ProcessingRequestOrResponse(const ProcessingRequestOrResponse &other);
+    ProcessingRequestOrResponse& operator=(const ProcessingRequestOrResponse& other);
+    virtual ~ProcessingRequestOrResponse();
 };
 
 typedef std::tr1::function<void (const class DecodedFrame&)> FrameCallback;

@@ -212,7 +212,7 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type == "PREDICT_FRAME_REQUEST")
     {
         //Encode request event into a serial data and send to process
-        class ProcessingRequest *req = (class ProcessingRequest *)ev->raw;
+        class ProcessingRequestOrResponse *req = (class ProcessingRequestOrResponse *)ev->raw;
         assert(req!=NULL);
         QSharedPointer<QImage> img = req->img;
         std::vector<std::vector<std::vector<float> > > &pos = req->pos;
@@ -352,9 +352,6 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
         QByteArray blockData = this->algOutBuffer.left(blockLen);
         this->algOutBuffer = this->algOutBuffer.mid(blockLen);
 
-        //std::tr1::shared_ptr<class Event> dataEv(new Event("ALG_DATA_BLOCK"));
-        //dataEv->data = blockData.constData();
-        //el.SendEvent(dataEv);
         QTextStream dec(blockData);
         dec.setCodec("UTF-8");
         QString xmlBlock = dec.readAll();
@@ -370,10 +367,13 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
         }
 
         //Iterate over result
+        std::vector<std::vector<std::vector<float> > > entireResponse;
         QDomElement rootElem = doc.documentElement();
         QDomNode n = rootElem.firstChild();
         while(!n.isNull())
         {
+            std::vector<std::vector<float> > model;
+
             QDomElement e = n.toElement(); // try to convert the node to an element.
             if(!e.isNull())
             {
@@ -385,16 +385,28 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
                     if(!ptEl.isNull())
                     {
                         if(ptEl.tagName()!="pt") continue;
+                        std::vector<float> pt;
                         QString xStr = ptEl.attribute("x");
                         QString yStr = ptEl.attribute("y");
                         cout << "pt" << xStr.toFloat() << "," << yStr.toFloat() << endl;
+                        pt.push_back(xStr.toFloat());
+                        pt.push_back(yStr.toFloat());
+                        model.push_back(pt);
                     }
                     ptNode = ptNode.nextSiblingElement();
                 }
-
             }
+
+            entireResponse.push_back(model);
             n = n.nextSiblingElement();
         }
+
+        std::tr1::shared_ptr<class Event> resultEv(new Event("PREDICTION_RESULT"));
+        class ProcessingRequestOrResponse *response = new class ProcessingRequestOrResponse;
+        response->pos.clear();
+        response->pos = entireResponse;
+        resultEv->raw = response;
+        this->eventLoop->SendEvent(resultEv);
 
         return;
 

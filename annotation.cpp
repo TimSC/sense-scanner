@@ -26,6 +26,18 @@ AnnotThread::~AnnotThread()
 
 }
 
+void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
+{
+    MessagableThread::SetEventLoop(eventLoopIn);
+    this->eventLoop->AddListener("PREDICTION_RESULT", *this->eventReceiver);
+}
+
+void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
+{
+    cout << "test" << ev->type.c_str() << endl;
+    MessagableThread::HandleEvent(ev);
+}
+
 void AnnotThread::Update()
 {
     //Check if this thread should be active and access the video
@@ -191,7 +203,7 @@ void AnnotThread::ImageToProcess(QSharedPointer<QImage> img,
 
     assert(this->eventLoop!=NULL);
     std::tr1::shared_ptr<class Event> requestEv(new Event("PREDICT_FRAME_REQUEST"));
-    class ProcessingRequest *req = new class ProcessingRequest;
+    class ProcessingRequestOrResponse *req = new class ProcessingRequestOrResponse;
     req->img = img;
     req->pos.clear();
     req->pos.push_back(model);

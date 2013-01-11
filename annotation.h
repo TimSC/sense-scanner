@@ -13,6 +13,9 @@ public:
     AnnotThread(class Annotation *annIn, class AvBinMedia* mediaInterface);
     virtual ~AnnotThread();
 
+    void SetEventLoop(class EventLoop *eventLoopIn);
+    virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);
+
     void Update();
     void Finished();
 

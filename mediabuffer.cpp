@@ -97,24 +97,24 @@ void DecodedFrame::FastSwap(class DecodedFrame &other)
 
 //**************************************
 
-ProcessingRequest::ProcessingRequest()
+ProcessingRequestOrResponse::ProcessingRequestOrResponse()
 {
 
 }
 
-ProcessingRequest::ProcessingRequest(const ProcessingRequest &other)
+ProcessingRequestOrResponse::ProcessingRequestOrResponse(const ProcessingRequestOrResponse &other)
 {
     operator=(other);
 }
 
-ProcessingRequest& ProcessingRequest::operator=(const ProcessingRequest& other)
+ProcessingRequestOrResponse& ProcessingRequestOrResponse::operator=(const ProcessingRequestOrResponse& other)
 {
     this->img = other.img; //Smart pointer
     this->pos = other.pos;
     return *this;
 }
 
-ProcessingRequest::~ProcessingRequest()
+ProcessingRequestOrResponse::~ProcessingRequestOrResponse()
 {
 
 }
