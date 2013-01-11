@@ -34,7 +34,6 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
-    cout << "test" << ev->type.c_str() << endl;
     MessagableThread::HandleEvent(ev);
 }
 

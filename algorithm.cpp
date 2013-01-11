@@ -131,32 +131,46 @@ AlgorithmProcess::ProcessState AlgorithmProcess::GetState()
     return AlgorithmProcess::RUNNING;
 }
 
-QString AlgorithmProcess::ReadLineFromBuffer(QByteArray &buff)
+QByteArray AlgorithmProcess::ReadLineFromBuffer(QByteArray &buff, int popLine, int skipLines)
 {
+    if(popLine==1) assert(skipLines==0);//Cannot skip lines if we are modifying buffer
+
+    //Count lines to skip
+    int skipCount = 0, skipPos = 0;
+    while(skipCount < skipLines)
+    {
+        if(buff[skipPos]=='\n')
+        {
+            skipCount++;
+        }
+        skipPos++;
+    }
+
     //Check if a new line has occured
     int newLinePos = -1;
-    for(unsigned i=0;i<buff.length();i++)
+    for(unsigned i=skipPos;i<buff.length();i++)
     {
         if(buff[i]=='\n' && newLinePos == -1)
         {
             newLinePos = i;
         }
+        if(newLinePos>=0) break;
     }
 
     //If no new line found, so return
     if(newLinePos==-1)
     {
-        QString empty;
+        QByteArray empty;
         return empty;
     }
 
     //Extract a string for recent command
-    QString cmd = buff.left(newLinePos);
-    buff = buff.mid(newLinePos+1);
+    QByteArray cmd = buff.mid(skipPos,newLinePos-skipPos);
+    if(popLine) buff = buff.mid(newLinePos+1);
 
     if(buff != NULL)
     {
-        this->algOutLog->write(cmd.toLocal8Bit().constData());
+        this->algOutLog->write(cmd.constData());
         this->algOutLog->write("\n");
         this->algOutLog->flush();
     }
@@ -183,13 +197,7 @@ void AlgorithmProcess::Update()
     //Get standard output from algorithm process
     QByteArray ret = this->readAllStandardOutput();
     this->algOutBuffer.append(ret);
-
-    while(true)
-    {
-        QString cmd = ReadLineFromBuffer(this->algOutBuffer);
-        if(cmd.length() == 0) break;
-        this->ProcessAlgOutput(cmd);
-    }
+    this->ProcessAlgOutput();
 
     //Get errors from console error out
     ret = this->readAllStandardError();
@@ -249,18 +257,23 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
 }
 
-void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
+void AlgorithmProcess::ProcessAlgOutput()
 {
+    if(this->algOutBuffer.length()==0) return;
     class EventLoop &el = *this->eventLoop;
+
+    //Get first line of console output without modifying the buffer
+    QByteArray cmd = ReadLineFromBuffer(this->algOutBuffer,0);
     if(cmd.length()==0) return;
 
     if(cmd.left(9)=="PROGRESS=")
     {
         std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_PROGRESS_UPDATE"));
         std::ostringstream tmp;
-        tmp << cmd.mid(9).toLocal8Bit().constData() << "," << this->threadId;
+        tmp << cmd.mid(9).constData() << "," << this->threadId;
         openEv->data = tmp.str();
         el.SendEvent(openEv);
+        ReadLineFromBuffer(this->algOutBuffer,1);//Pop this line
         return;
     }
 
@@ -273,6 +286,7 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
         tmp << this->threadId << ",paused";
         openEv->data = tmp.str();
         el.SendEvent(openEv);
+        ReadLineFromBuffer(this->algOutBuffer,1);//Pop this line
         return;
     }
 
@@ -285,6 +299,7 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
         tmp << this->threadId << ",running";
         openEv->data = tmp.str();
         el.SendEvent(openEv);
+        ReadLineFromBuffer(this->algOutBuffer,1);//Pop this line
         return;
     }
 
@@ -299,63 +314,47 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
         tmp << this->threadId << ",finished";
         openEv->data = tmp.str();
         el.SendEvent(openEv);
+        ReadLineFromBuffer(this->algOutBuffer,1);//Pop this line
         return;
     }
 
     if(cmd.left(11)=="DATA_BLOCK=")
     {
-        QString blockArg = this->ReadLineFromBuffer(this->algOutBuffer);
-        while(blockArg.length()==0)
-        {
-            blockArg = this->ReadLineFromBuffer(this->algOutBuffer);
-        }
+        QByteArray blockArg = this->ReadLineFromBuffer(this->algOutBuffer,0,1);
         int blockLen = cmd.mid(11).toInt();
 
         //Wait for process to write the entire data block to standard output
-        while(this->algOutBuffer.length() < blockLen)
-        {
-            //Get standard output from algorithm process
-            QByteArray ret = this->readAllStandardOutput();
-            this->algOutBuffer.append(ret);
-            //int currentLen = this->algOutBuffer.length();
-        }
+        if(this->algOutBuffer.length() < cmd.length() + blockArg.length() + blockLen)
+            return;
 
-        QByteArray blockData = this->algOutBuffer.left(blockLen);
-        this->algOutBuffer = this->algOutBuffer.mid(blockLen);
+        QByteArray blockData = this->algOutBuffer.mid(cmd.length() + blockArg.length() + 2, blockLen);
+        //Remove used data from buffer
+        this->algOutBuffer = this->algOutBuffer.mid(cmd.length() + blockArg.length() + blockLen + 2);
 
-        //std::tr1::shared_ptr<class Event> dataEv(new Event("ALG_DATA_BLOCK"));
-        //dataEv->data = blockData.constData();
-        //el.SendEvent(dataEv);
         this->dataBlock = blockData;
         this->dataBlockReceived = 1;
+
         return;
     }
 
     if(cmd.left(10)=="XML_BLOCK=")
     {
-        QString blockArg = this->ReadLineFromBuffer(this->algOutBuffer);
-        while(blockArg.length()==0)
-        {
-            blockArg = this->ReadLineFromBuffer(this->algOutBuffer);
-        }
+        QByteArray blockArg = this->ReadLineFromBuffer(this->algOutBuffer,0,1);
         int blockLen = cmd.mid(10).toInt();
 
         //Wait for process to write the entire data block to standard output
-        while(this->algOutBuffer.length() < blockLen)
-        {
-            //Get standard output from algorithm process
-            QByteArray ret = this->readAllStandardOutput();
-            this->algOutBuffer.append(ret);
-            //int currentLen = this->algOutBuffer.length();
-        }
+        if(this->algOutBuffer.length() < cmd.length() + blockArg.length() + blockLen + 2)
+            return;
 
-        QByteArray blockData = this->algOutBuffer.left(blockLen);
-        this->algOutBuffer = this->algOutBuffer.mid(blockLen);
+        QByteArray blockData = this->algOutBuffer.mid(cmd.length() + blockArg.length() + 2, blockLen);
 
         QTextStream dec(blockData);
         dec.setCodec("UTF-8");
         QString xmlBlock = dec.readAll();
         cout << xmlBlock.toLocal8Bit().constData() << endl;
+
+        //Remove used data from buffer
+        this->algOutBuffer = this->algOutBuffer.mid(cmd.length() + blockArg.length() + blockLen + 2);
 
         //Parse XML to DOM
         QDomDocument doc("algxml");
@@ -413,7 +412,11 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
     }
 
     if(cmd.length()>0)
-        cout << "Algorithm: " << cmd.toLocal8Bit().constData() << endl;
+    {
+        cout << "Algorithm: " << this->algOutBuffer.constData() << endl;
+        ReadLineFromBuffer(this->algOutBuffer,1);//Pop this line
+        return;
+    }
 
 }
 
