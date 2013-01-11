@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <QtCore/QTextStream>
 #include <QtCore/QSharedPointer>
+#include <QtXml/QtXml>
 using namespace std;
 
 //************************************************
@@ -18,7 +19,6 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->pausing = 0;
     this->initDone = 0;
     this->dataBlockReceived = 0;
-    this->xmlBlockReceived = 0;
 
     QString fina = "algout.txt";
     this->eventLoop = eventLoopIn;
@@ -55,7 +55,6 @@ void AlgorithmProcess::Init()
     this->pausing = 0;
     this->initDone = 1;
     this->dataBlockReceived = 0;
-    this->xmlBlockReceived = 0;
 }
 
 void AlgorithmProcess::Pause()
@@ -212,6 +211,7 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
     if(ev->type == "PREDICT_FRAME_REQUEST")
     {
+        //Encode request event into a serial data and send to process
         class ProcessingRequest *req = (class ProcessingRequest *)ev->raw;
         assert(req!=NULL);
         QSharedPointer<QImage> img = req->img;
@@ -357,10 +357,37 @@ void AlgorithmProcess::ProcessAlgOutput(QString &cmd)
         //el.SendEvent(dataEv);
         QTextStream dec(blockData);
         dec.setCodec("UTF-8");
-        this->xmlBlock = dec.readAll();
-        cout << this->xmlBlock.toLocal8Bit().constData() << endl;
-        this->xmlBlockReceived = 1;
+        QString xmlBlock = dec.readAll();
+        cout << xmlBlock.toLocal8Bit().constData() << endl;
+
+        //Parse XML to DOM
+        QDomDocument doc("algxml");
+        QString errorMsg;
+        if (!doc.setContent(xmlBlock, 0, &errorMsg))
+        {
+            cout << "Xml Error: "<< errorMsg.toLocal8Bit().constData() << endl;
+            return;
+        }
+
+        //Iterate over result
+        QDomElement rootElem = doc.documentElement();
+        QDomNode n = rootElem.firstChild();
+        while(!n.isNull())
+        {
+            QDomElement e = n.toElement(); // try to convert the node to an element.
+            if(!e.isNull())
+            {
+                if(e.tagName() == "model")
+                {
+                    cout << "tag" << e.tagName().toLocal8Bit().constData() << endl;
+
+                }
+            }
+            n = n.nextSibling();
+        }
+
         return;
+
     }
 
     if(cmd.length()>0)

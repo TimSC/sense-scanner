@@ -55,8 +55,6 @@ protected:
 
     QByteArray dataBlock;
     int dataBlockReceived;
-    QString xmlBlock;
-    int xmlBlockReceived;
 
     QByteArray algOutBuffer;
     QByteArray algErrBuffer;
