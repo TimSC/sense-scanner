@@ -276,7 +276,7 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long startTimesta
 
 }
 
-void VideoWidget::SetSceneControl(SimpleSceneController *sceneIn)
+void VideoWidget::SetSceneControl(TrackingAnnotation *sceneIn)
 {
     cout << ">>> count " << this->ui->annotationTools->count() << endl;
 

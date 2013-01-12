@@ -43,14 +43,14 @@ void MouseGraphicsScene::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent
         this->sceneControl->mouseReleaseEvent(mouseEvent);
 }
 
-void MouseGraphicsScene::SetSceneControl(SimpleSceneController *sceneControlIn)
+void MouseGraphicsScene::SetSceneControl(TrackingAnnotation *sceneControlIn)
 {
     this->sceneControl = sceneControlIn;
 }
 
 //********************************************************************
 
-SimpleSceneController::SimpleSceneController(QObject *parent)
+TrackingAnnotation::TrackingAnnotation(QObject *parent)
 {
     this->mode = "MOVE";
     this->mouseOver = false;
@@ -74,14 +74,14 @@ SimpleSceneController::SimpleSceneController(QObject *parent)
 
 }
 
-SimpleSceneController::SimpleSceneController(const SimpleSceneController &other)
+TrackingAnnotation::TrackingAnnotation(const TrackingAnnotation &other)
 {
     this->operator=(other);
 }
 
-SimpleSceneController::~SimpleSceneController()
+TrackingAnnotation::~TrackingAnnotation()
 {
-    cout << "SimpleSceneController::~SimpleSceneController()" << endl;
+    cout << "TrackingAnnotation::~TrackingAnnotation()" << endl;
     this->item = QSharedPointer<QGraphicsPixmapItem>(NULL);
     if(!this->scene.isNull())
     {
@@ -95,7 +95,7 @@ SimpleSceneController::~SimpleSceneController()
     annotationControls = NULL;
 }
 
-SimpleSceneController& SimpleSceneController::operator= (const SimpleSceneController &other)
+TrackingAnnotation& TrackingAnnotation::operator= (const TrackingAnnotation &other)
 {
     this->lock.lock();
 
@@ -126,7 +126,7 @@ SimpleSceneController& SimpleSceneController::operator= (const SimpleSceneContro
 
 }
 
-bool SimpleSceneController::operator!= (const SimpleSceneController &other)
+bool TrackingAnnotation::operator!= (const TrackingAnnotation &other)
 {
     bool ret = false;
     this->lock.lock();
@@ -139,7 +139,7 @@ bool SimpleSceneController::operator!= (const SimpleSceneController &other)
     return ret;
 }
 
-int SimpleSceneController::GetAnnotationBetweenTimestamps(unsigned long long startTime,
+int TrackingAnnotation::GetAnnotationBetweenTimestamps(unsigned long long startTime,
                                                           unsigned long long endTime,
                                                           unsigned long long requestedTime,
                                                           std::vector<std::vector<float> > &annot,
@@ -179,7 +179,7 @@ int SimpleSceneController::GetAnnotationBetweenTimestamps(unsigned long long sta
     return 0;
 }
 
-vector<unsigned long long> SimpleSceneController::GetAnnotationTimesBetweenTimestamps(unsigned long long startTime,
+vector<unsigned long long> TrackingAnnotation::GetAnnotationTimesBetweenTimestamps(unsigned long long startTime,
                                                                                       unsigned long long endTime)
 {
     this->lock.lock();
@@ -199,7 +199,7 @@ vector<unsigned long long> SimpleSceneController::GetAnnotationTimesBetweenTimes
     return out;
 }
 
-void SimpleSceneController::DeleteAnnotationAtTimestamp(unsigned long long annotationTimeIn)
+void TrackingAnnotation::DeleteAnnotationAtTimestamp(unsigned long long annotationTimeIn)
 {
     this->lock.lock();
     std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
@@ -211,7 +211,7 @@ void SimpleSceneController::DeleteAnnotationAtTimestamp(unsigned long long annot
     this->lock.unlock();
 }
 
-void SimpleSceneController::SetAnnotationBetweenTimestamps(unsigned long long startTime,
+void TrackingAnnotation::SetAnnotationBetweenTimestamps(unsigned long long startTime,
                                                           unsigned long long endTime,
                                                           std::vector<std::vector<float> > annot)
 {
@@ -241,7 +241,7 @@ void SimpleSceneController::SetAnnotationBetweenTimestamps(unsigned long long st
     this->lock.unlock();
 }
 
-void SimpleSceneController::VideoImageChanged(QImage &fr, unsigned long long startTime,
+void TrackingAnnotation::VideoImageChanged(QImage &fr, unsigned long long startTime,
                                               unsigned long long endTime,
                                               unsigned long long requestedTime)
 {
@@ -262,7 +262,7 @@ void SimpleSceneController::VideoImageChanged(QImage &fr, unsigned long long sta
     this->Redraw();
 }
 
-void SimpleSceneController::Redraw()
+void TrackingAnnotation::Redraw()
 {
     //Get positions for current frame
     std::vector<std::vector<float> > currentFrame;
@@ -327,7 +327,7 @@ void SimpleSceneController::Redraw()
     }
 }
 
-void SimpleSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
+void TrackingAnnotation::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     //assert(mouseEvent);
     QPointF pos = mouseEvent->scenePos();
@@ -370,7 +370,7 @@ void SimpleSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
     this->mousey = pos.y();
 }
 
-void SimpleSceneController::RemovePoint(int index)
+void TrackingAnnotation::RemovePoint(int index)
 {
     this->lock.lock();
     assert(index >=0);
@@ -404,7 +404,7 @@ void SimpleSceneController::RemovePoint(int index)
     this->lock.unlock();
 }
 
-int SimpleSceneController::NearestLink(float x, float y, std::vector<std::vector<float> > &currentFrame)
+int TrackingAnnotation::NearestLink(float x, float y, std::vector<std::vector<float> > &currentFrame)
 {
     //cout << x << "," << y << endl;
     vector<float> pc;
@@ -443,7 +443,7 @@ int SimpleSceneController::NearestLink(float x, float y, std::vector<std::vector
     return bestInd;
 }
 
-void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
+void TrackingAnnotation::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     cout << "mousePressEvent" << endl;
     assert(mouseEvent);
@@ -548,7 +548,7 @@ void SimpleSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent
 
 }
 
-void SimpleSceneController::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent)
+void TrackingAnnotation::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent)
 {
     cout << "mouseReleaseEvent" << endl;
     assert(mouseEvent);
@@ -558,7 +558,7 @@ void SimpleSceneController::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEv
         this->leftDrag = 0;
 }
 
-int SimpleSceneController::NearestPoint(float x, float y, std::vector<std::vector<float> > &currentFrame)
+int TrackingAnnotation::NearestPoint(float x, float y, std::vector<std::vector<float> > &currentFrame)
 {
     int best = -1;
     float bestDist = -1;
@@ -582,7 +582,7 @@ unsigned long long AbsDiff(unsigned long long a, unsigned long long b)
     return b-a;
 }
 
-unsigned long long SimpleSceneController::GetSeekFowardTime()
+unsigned long long TrackingAnnotation::GetSeekFowardTime()
 {
     this->lock.lock();
     assert(this!=NULL);
@@ -614,7 +614,7 @@ unsigned long long SimpleSceneController::GetSeekFowardTime()
     throw std::runtime_error("No frame");
 }
 
-unsigned long long SimpleSceneController::GetSeekBackTime()
+unsigned long long TrackingAnnotation::GetSeekBackTime()
 {
     this->lock.lock();
     assert(this!=NULL);
@@ -649,7 +649,7 @@ unsigned long long SimpleSceneController::GetSeekBackTime()
 
 //********************************************************************
 
-QWidget *SimpleSceneController::ControlsFactory(QWidget *parent)
+QWidget *TrackingAnnotation::ControlsFactory(QWidget *parent)
 {
     assert(this->annotationControls==NULL);
 
@@ -704,7 +704,7 @@ QWidget *SimpleSceneController::ControlsFactory(QWidget *parent)
     return this->annotationControls;
 }
 
-void SimpleSceneController::DestroyControls()
+void TrackingAnnotation::DestroyControls()
 {
     assert(this->markFrameButton != NULL);
     //delete this->markFrameButton;
@@ -715,7 +715,7 @@ void SimpleSceneController::DestroyControls()
     this->annotationControls = NULL;
 }
 
-void SimpleSceneController::MarkFramePressed(bool val)
+void TrackingAnnotation::MarkFramePressed(bool val)
 {
 
 
@@ -749,50 +749,50 @@ void SimpleSceneController::MarkFramePressed(bool val)
     this->Redraw();
 }
 
-void SimpleSceneController::MovePressed()
+void TrackingAnnotation::MovePressed()
 {
     this->mode = "MOVE";
 }
 
-void SimpleSceneController::MoveAllPressed()
+void TrackingAnnotation::MoveAllPressed()
 {
     this->mode = "MOVE_ALL";
 }
 
-void SimpleSceneController::AddPointPressed()
+void TrackingAnnotation::AddPointPressed()
 {
     this->mode = "ADD_POINT";
 }
 
-void SimpleSceneController::RemovePointPressed()
+void TrackingAnnotation::RemovePointPressed()
 {
     this->mode = "REMOVE_POINT";
 }
 
-void SimpleSceneController::AddLinkPressed()
+void TrackingAnnotation::AddLinkPressed()
 {
     this->mode = "ADD_LINK";
     this->activePoint = -1; //Start with nothing selected
     this->Redraw();
 }
 
-void SimpleSceneController::RemoveLinkPressed()
+void TrackingAnnotation::RemoveLinkPressed()
 {
     this->mode = "REMOVE_LINK";
 }
 
-int SimpleSceneController::GetMouseOver()
+int TrackingAnnotation::GetMouseOver()
 {
     return this->mouseOver;
 }
 
-void SimpleSceneController::MouseEnterEvent()
+void TrackingAnnotation::MouseEnterEvent()
 {
     this->mouseOver = true;
     this->Redraw();
 }
 
-void SimpleSceneController::MouseLeaveEvent()
+void TrackingAnnotation::MouseLeaveEvent()
 {
     this->mouseOver = false;
     this->Redraw();
@@ -800,7 +800,7 @@ void SimpleSceneController::MouseLeaveEvent()
 
 //************************************************************
 
-QMenu *SimpleSceneController::MenuFactory(QMenuBar *menuBar)
+QMenu *TrackingAnnotation::MenuFactory(QMenuBar *menuBar)
 {
     assert(this!=NULL);
     assert(menuBar != NULL);
@@ -831,7 +831,7 @@ QMenu *SimpleSceneController::MenuFactory(QMenuBar *menuBar)
     return newMenu;
 }
 
-std::vector<std::vector<float> > SimpleSceneController::ProcessXmlDomFrame(QDomElement &rootElem)
+std::vector<std::vector<float> > TrackingAnnotation::ProcessXmlDomFrame(QDomElement &rootElem)
 {
     std::vector<std::vector<float> > out;
     QDomNode n = rootElem.firstChild();
@@ -867,7 +867,7 @@ std::vector<std::vector<float> > SimpleSceneController::ProcessXmlDomFrame(QDomE
     return out;
 }
 
-void SimpleSceneController::LoadShape()
+void TrackingAnnotation::LoadShape()
 {
     this->lock.lock();
 
@@ -953,7 +953,7 @@ void SimpleSceneController::LoadShape()
     this->lock.unlock();
 }
 
-void SimpleSceneController::WriteShapeToStream(QTextStream &out)
+void TrackingAnnotation::WriteShapeToStream(QTextStream &out)
 {
     out << "\t<shape>" << endl;
 
@@ -969,7 +969,7 @@ void SimpleSceneController::WriteShapeToStream(QTextStream &out)
     out << "\t</shape>" << endl;
 }
 
-void SimpleSceneController::SaveShape()
+void TrackingAnnotation::SaveShape()
 {
     //Get output filename from user
     QString fileName = QFileDialog::getSaveFileName(0,
@@ -986,7 +986,7 @@ void SimpleSceneController::SaveShape()
     f.close();
 }
 
-void SimpleSceneController::SetShapeFromCurentFrame()
+void TrackingAnnotation::SetShapeFromCurentFrame()
 {
     //Get annotated times(s) in current visible frame
     std::vector<std::vector<float> > annotShape;
@@ -1002,7 +1002,7 @@ void SimpleSceneController::SetShapeFromCurentFrame()
     this->shape = annotShape;
 }
 
-void SimpleSceneController::ResetCurentFrameShape()
+void TrackingAnnotation::ResetCurentFrameShape()
 {
     //Get current frame
     std::vector<std::vector<float> > currentFrame;
@@ -1019,7 +1019,7 @@ void SimpleSceneController::ResetCurentFrameShape()
     this->Redraw();
 }
 
-void SimpleSceneController::LoadAnnotation()
+void TrackingAnnotation::LoadAnnotation()
 {
     //Get input filename from user
     QString fileName = QFileDialog::getOpenFileName(0,
@@ -1044,7 +1044,7 @@ void SimpleSceneController::LoadAnnotation()
     this->ReadAnnotationXml(rootElem);
 }
 
-void SimpleSceneController::SaveAnnotation()
+void TrackingAnnotation::SaveAnnotation()
 {
     //Get output filename from user
     QString fileName = QFileDialog::getSaveFileName(0,
@@ -1063,7 +1063,7 @@ void SimpleSceneController::SaveAnnotation()
 
 //*********************************************************
 
-void SimpleSceneController::ReadAnnotationXml(QDomElement &elem)
+void TrackingAnnotation::ReadAnnotationXml(QDomElement &elem)
 {
     this->lock.lock();
     this->shape.clear();
@@ -1093,7 +1093,7 @@ void SimpleSceneController::ReadAnnotationXml(QDomElement &elem)
     this->lock.unlock();
 }
 
-void SimpleSceneController::WriteAnnotationXml(QTextStream &out)
+void TrackingAnnotation::WriteAnnotationXml(QTextStream &out)
 {
     out << "\t<tracking>" << endl;
     this->WriteShapeToStream(out);
@@ -1113,14 +1113,14 @@ void SimpleSceneController::WriteAnnotationXml(QTextStream &out)
     out << "\t</tracking>" << endl;
 }
 
-QSharedPointer<MouseGraphicsScene> SimpleSceneController::GetScene()
+QSharedPointer<MouseGraphicsScene> TrackingAnnotation::GetScene()
 {
     return this->scene;
 }
 
 //***************************************************
 
-unsigned int SimpleSceneController::NumMarkedFrames()
+unsigned int TrackingAnnotation::NumMarkedFrames()
 {
 
     this->lock.lock();
@@ -1129,7 +1129,7 @@ unsigned int SimpleSceneController::NumMarkedFrames()
     return out;
 }
 
-void SimpleSceneController::GetIndexAnnotationXml(unsigned int index, QTextStream *out)
+void TrackingAnnotation::GetIndexAnnotationXml(unsigned int index, QTextStream *out)
 {
     std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it = this->pos.begin();
     for(unsigned int i=0;i<index;i++)
@@ -1143,7 +1143,7 @@ void SimpleSceneController::GetIndexAnnotationXml(unsigned int index, QTextStrea
     *out << "\t</frame>" << endl;
 }
 
-unsigned long long SimpleSceneController::GetIndexTimestamp(unsigned int index)
+unsigned long long TrackingAnnotation::GetIndexTimestamp(unsigned int index)
 {
     this->lock.lock();
     std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it = this->pos.begin();

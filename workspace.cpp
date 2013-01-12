@@ -53,7 +53,7 @@ unsigned int Workspace::AddSource(QString &fina, QString UidStr, class AvBinMedi
 {
     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
     ann->SetSource(fina);
-    SimpleSceneController *scenePtr = new SimpleSceneController(0);
+    TrackingAnnotation *scenePtr = new TrackingAnnotation(0);
     ann->SetTrack(scenePtr);
     std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann, mediaInterface));
     annotThread->SetEventLoop(this->eventLoop);
@@ -91,7 +91,7 @@ unsigned int Workspace::AddAutoAnnot(QString annotUid, QString algUid, class AvB
     return this->annotations.size();
 }
 
-SimpleSceneController *Workspace::GetTrack(unsigned int trackNum)
+TrackingAnnotation *Workspace::GetTrack(unsigned int trackNum)
 {
     return this->annotations[trackNum]->GetTrack();
 }
@@ -301,8 +301,8 @@ void Workspace::Load(QString fina, class AvBinMedia* mediaInterface)
                     annotThread->Start();
                     ann->annotThread = annotThread;
 
-                    SimpleSceneController *track =
-                            new SimpleSceneController(NULL);
+                    TrackingAnnotation *track =
+                            new TrackingAnnotation(NULL);
 
                     QDomNode trackData = sourceNode.firstChild();
                     while(!trackData.isNull())

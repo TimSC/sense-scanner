@@ -27,8 +27,8 @@ public:
     unsigned int AddAutoAnnot(QString annotUid, QString algUid, class AvBinMedia* mediaInterface);
     int FindAnnotWithUid(QUuid uidIn);
 
-    //void SetTrack(unsigned int trackNum, SimpleSceneController *track);
-    SimpleSceneController *GetTrack(unsigned int trackNum);
+    //void SetTrack(unsigned int trackNum, TrackingAnnotation *track);
+    TrackingAnnotation *GetTrack(unsigned int trackNum);
 
     unsigned int GetNumSources();
     QString GetSourceName(unsigned int index);

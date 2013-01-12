@@ -576,7 +576,7 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
     //this->mediaInterfaceFront->ChangeVidSource(&this->mediaThreadFront, fina);
 
     //Update scene controller
-    SimpleSceneController *scene = this->workspace.GetTrack(selectedRow);
+    TrackingAnnotation *scene = this->workspace.GetTrack(selectedRow);
     this->ui->widget->SetSceneControl(scene);
 
     assert(scene!=NULL);
@@ -599,7 +599,7 @@ void MainWindow::TrainModelPressed()
     {
         QModelIndex &ind = selectList[i];
         //For each annotated frame
-        SimpleSceneController *annot = this->workspace.GetTrack(ind.row());
+        TrackingAnnotation *annot = this->workspace.GetTrack(ind.row());
         assert(annot!=0);
         for(unsigned int fr=0;fr<annot->NumMarkedFrames();fr++)
         {
@@ -637,7 +637,7 @@ void MainWindow::TrainModelPressed()
         QString fina = this->workspace.GetSourceName(ind.row());
 
         //For each annotated frame
-        SimpleSceneController *annot = this->workspace.GetTrack(ind.row());
+        TrackingAnnotation *annot = this->workspace.GetTrack(ind.row());
         assert(annot!=0);
         for(unsigned int fr=0;fr<annot->NumMarkedFrames();fr++)
         {

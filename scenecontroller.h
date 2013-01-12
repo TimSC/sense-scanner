@@ -23,22 +23,22 @@ public:
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent);
 
-    void SetSceneControl(class SimpleSceneController *sceneControlIn);
+    void SetSceneControl(class TrackingAnnotation *sceneControlIn);
 
 protected:
-    class SimpleSceneController *sceneControl;
+    class TrackingAnnotation *sceneControl;
 };
 
-class SimpleSceneController : public QObject
+class TrackingAnnotation : public QObject
 {
     Q_OBJECT
 
 public:
-    SimpleSceneController(QObject *parent);
-    SimpleSceneController(const SimpleSceneController &other);
-    virtual ~SimpleSceneController();
-    SimpleSceneController& operator= (const SimpleSceneController &other);
-    bool operator!= (const SimpleSceneController &other);
+    TrackingAnnotation(QObject *parent);
+    TrackingAnnotation(const TrackingAnnotation &other);
+    virtual ~TrackingAnnotation();
+    TrackingAnnotation& operator= (const TrackingAnnotation &other);
+    bool operator!= (const TrackingAnnotation &other);
 
     void VideoImageChanged(QImage &fr, unsigned long long startTime,
                            unsigned long long endTime,
