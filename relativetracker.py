@@ -71,13 +71,15 @@ class PredictAxis:
 		self.reg = None
 		self.ClearTrainingData()
 
-	def SetTrainData(self, intensitiesIn, offsetsIn, supportPixIntIn):
+	def SetTrainData(self, intensitiesIn, cloudOffsetsIn, trainingOffsetsIn, supportPixIntIn):
 		assert len(intensitiesIn.shape) == 2
 		assert intensitiesIn.shape[0] > 0
+		assert cloudOffsetsIn.shape[0] == intensitiesIn.shape[0]
 		self.labels = []
-		for offset in offsetsIn:
+		for offset in trainingOffsetsIn:
 			label = offset[0] * self.axisX + offset[1] * self.axisY
 			self.labels.append(label)
+		self.cloudOffsets = cloudOffsetsIn
 		self.intensities = intensitiesIn
 		self.supportPixInt = supportPixIntIn
 
@@ -88,9 +90,11 @@ class PredictAxis:
 	def Train(self, regIn, regArgs):
 		assert self.labels is not None
 		self.reg = regIn(**regArgs)
-		self.reg.fit(self.intensities - self.supportPixInt, self.labels)
+		centredIntensities = self.intensities - self.supportPixInt
+		trainingData = np.hstack((centredIntensities, self.cloudOffsets))
+		self.reg.fit(trainingData, self.labels)
 
-	def Predict(self, intensities):
+	def Predict(self, intensities, cloudOffsetsIn):
 		assert self.reg is not None
 		label = self.reg.predict(intensities - self.supportPixInt)[0]
 		return (label * self.axisX, label * self.axisY)
@@ -221,19 +225,24 @@ class RelativeTracker:
 		positionDiffsOnFrameY = GetOffsetsForAxis(positionDiffsOnFrames, (0.,1.))
 
 		#Generate matrix for cloud offset training, based on the frames used for intensities
-		trainOffsetsX = []
+		trainOffsetsX, trainOffsetsY = [], []
 		for frameNum in trainingOnFrameNum:
 			trainOffsetsX.append(positionDiffsOnFrameX[frameNum])
 			trainOffsetsY.append(positionDiffsOnFrameY[frameNum])
 
-		print np.array(trainOffsetsX)
+		trainOffsetsXAr = np.array(trainOffsetsX)
+		trainOffsetsYAr = np.array(trainOffsetsY)
 
+		#Add noise to position of cloud offsets
+		trainOffsetsXNoised = trainOffsetsXAr + np.random.randn(*trainOffsetsXAr.shape) * 12.
+		trainOffsetsYNoised = trainOffsetsYAr + np.random.randn(*trainOffsetsYAr.shape) * 12.
+	
 		#Create a pair of axis trackers for this data and copy training data
 		axisX = PredictAxis(1.,0.)
-		axisX.SetTrainData(trainingIntensitiesArr, trainingOffsetsArr, supportPixIntAv)
+		axisX.SetTrainData(trainingIntensitiesArr, trainOffsetsXNoised, trainingOffsetsArr, supportPixIntAv)
 
 		axisY = PredictAxis(0.,1.)
-		axisY.SetTrainData(trainingIntensitiesArr, trainingOffsetsArr, supportPixIntAv)
+		axisY.SetTrainData(trainingIntensitiesArr, trainOffsetsYNoised, trainingOffsetsArr, supportPixIntAv)
 
 		return (axisX, axisY)
 
@@ -389,6 +398,7 @@ if __name__=="__main__":
 	tracker.AddTrainingData(im, [(140,130),(20,60),(70,30)])
 	tracker.Init()
 	while tracker.GetProgress() < 1.:
+		print "Progress", tracker.GetProgress()
 		tracker.Update()
 	tracker.ClearTrainingImages()
 	pickle.dump(tracker, open("tracker.dat","wb"))
