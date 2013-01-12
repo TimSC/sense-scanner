@@ -229,7 +229,7 @@ class RelativeTracker:
 		trainCloudOffsets = []
 		for frameNum in trainingOnFrameNum:
 			trainCloudOffsets.append(positionDiffsOnFramesArr[frameNum])
-	
+		
 		#Create a pair of axis trackers for this data and copy training data
 		axisX = PredictAxis(1.,0.)
 		axisX.SetTrainData(trainingIntensitiesArr, trainCloudOffsets, trainingOffsetsArr, supportPixIntAv)
@@ -274,6 +274,8 @@ class RelativeTracker:
 			self.imls = [im.load() for im in self.ims]
 
 		#For each annotated frame, generate test offsets
+		print len(self.ims)
+		print len(self.pointsPosLi)
 		for iml, framePositions in zip(self.imls, self.pointsPosLi):
 			loc = framePositions[trNum]
 			if loc is None: continue
@@ -355,7 +357,6 @@ class RelativeTracker:
 
 		if len(self.models) == self.numTrackers and \
 			countPending == 0.:
-				self.ClearTrainingImages()
 				self.progress = 1.
 				#pickle.dump(self, open("tracker.dat","wb"))
 
@@ -380,19 +381,24 @@ class RelativeTracker:
 		self.imsStr = None
 
 if __name__=="__main__":
-	#tracker = pickle.load(open("tracker.dat","rb"))
-	#print len(tracker.models)
 
 	im = Image.open("test0.png")
 	iml = im.load()
-	tracker = RelativeTracker()
-	
-	tracker.AddTrainingData(im, [(120,120),(50,50),(40,60)])
-	tracker.AddTrainingData(im, [(140,130),(20,60),(70,30)])
-	tracker.Init()
-	while tracker.GetProgress() < 1.:
-		print "Progress", tracker.GetProgress()
-		tracker.Update()
-	tracker.ClearTrainingImages()
+	if 1:
+		tracker = RelativeTracker()
+		tracker.AddTrainingData(im, [(120,120),(50,50),(40,60)])
+		tracker.AddTrainingData(im, [(140,130),(20,60),(70,30)])
+		tracker.Init()
+
+		while tracker.GetProgress() < 1.:
+			print "Progress", tracker.GetProgress()
+			tracker.Update()
+	else:
+		tracker = pickle.load(open("tracker.dat","rb"))
+		tracker.PostUnPickle()
+		print tracker
+
+	#tracker.EvaluateModel(0)
+	tracker.PrepareForPickle()
 	pickle.dump(tracker, open("tracker.dat","wb"))
-	tracker.EvaluateModel(0)
+
