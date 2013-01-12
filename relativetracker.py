@@ -220,7 +220,13 @@ class RelativeTracker:
 		positionDiffsOnFrameX = GetOffsetsForAxis(positionDiffsOnFrames, (1.,0.))
 		positionDiffsOnFrameY = GetOffsetsForAxis(positionDiffsOnFrames, (0.,1.))
 
-		
+		#Generate matrix for cloud offset training, based on the frames used for intensities
+		trainOffsetsX = []
+		for frameNum in trainingOnFrameNum:
+			trainOffsetsX.append(positionDiffsOnFrameX[frameNum])
+			trainOffsetsY.append(positionDiffsOnFrameY[frameNum])
+
+		print np.array(trainOffsetsX)
 
 		#Create a pair of axis trackers for this data and copy training data
 		axisX = PredictAxis(1.,0.)
