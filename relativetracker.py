@@ -65,6 +65,7 @@ class PredictAxis:
 		assert mag > 0.
 		self.axisX = xIn / mag
 		self.axisY = yIn / mag
+		self.shapeNoise = 12.
 
 		self.crossX = -self.axisY
 		self.crossY = self.axisX
@@ -74,7 +75,7 @@ class PredictAxis:
 	def SetTrainData(self, intensitiesIn, cloudOffsetsIn, trainingOffsetsIn, supportPixIntIn):
 		assert len(intensitiesIn.shape) == 2
 		assert intensitiesIn.shape[0] > 0
-		assert cloudOffsetsIn.shape[0] == intensitiesIn.shape[0]
+		assert len(cloudOffsetsIn) == intensitiesIn.shape[0]
 		self.labels = []
 		for offset in trainingOffsetsIn:
 			label = offset[0] * self.axisX + offset[1] * self.axisY
@@ -91,7 +92,9 @@ class PredictAxis:
 		assert self.labels is not None
 		self.reg = regIn(**regArgs)
 		centredIntensities = self.intensities - self.supportPixInt
-		trainingData = np.hstack((centredIntensities, self.cloudOffsets))
+		axisOffsets = np.array(GetOffsetsForAxis(self.cloudOffsets, (self.axisX, self.axisY)))
+		axisOffsetsNoised = axisOffsets + np.random.randn(*axisOffsets.shape) * self.shapeNoise
+		trainingData = np.hstack((centredIntensities, axisOffsets))
 		self.reg.fit(trainingData, self.labels)
 
 	def Predict(self, intensities, cloudOffsetsIn):
@@ -220,29 +223,19 @@ class RelativeTracker:
 
 			positionDiffsOnFrames.append(distToOtherPts)
 
-		#Project differences onto axis
-		positionDiffsOnFrameX = GetOffsetsForAxis(positionDiffsOnFrames, (1.,0.))
-		positionDiffsOnFrameY = GetOffsetsForAxis(positionDiffsOnFrames, (0.,1.))
+		positionDiffsOnFramesArr = np.array(positionDiffsOnFrames)
 
 		#Generate matrix for cloud offset training, based on the frames used for intensities
-		trainOffsetsX, trainOffsetsY = [], []
+		trainCloudOffsets = []
 		for frameNum in trainingOnFrameNum:
-			trainOffsetsX.append(positionDiffsOnFrameX[frameNum])
-			trainOffsetsY.append(positionDiffsOnFrameY[frameNum])
-
-		trainOffsetsXAr = np.array(trainOffsetsX)
-		trainOffsetsYAr = np.array(trainOffsetsY)
-
-		#Add noise to position of cloud offsets
-		trainOffsetsXNoised = trainOffsetsXAr + np.random.randn(*trainOffsetsXAr.shape) * 12.
-		trainOffsetsYNoised = trainOffsetsYAr + np.random.randn(*trainOffsetsYAr.shape) * 12.
+			trainCloudOffsets.append(positionDiffsOnFramesArr[frameNum])
 	
 		#Create a pair of axis trackers for this data and copy training data
 		axisX = PredictAxis(1.,0.)
-		axisX.SetTrainData(trainingIntensitiesArr, trainOffsetsXNoised, trainingOffsetsArr, supportPixIntAv)
+		axisX.SetTrainData(trainingIntensitiesArr, trainCloudOffsets, trainingOffsetsArr, supportPixIntAv)
 
 		axisY = PredictAxis(0.,1.)
-		axisY.SetTrainData(trainingIntensitiesArr, trainOffsetsYNoised, trainingOffsetsArr, supportPixIntAv)
+		axisY.SetTrainData(trainingIntensitiesArr, trainCloudOffsets, trainingOffsetsArr, supportPixIntAv)
 
 		return (axisX, axisY)
 
