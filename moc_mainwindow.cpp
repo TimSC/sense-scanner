@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'mainwindow.h'
 **
-** Created: Thu Dec 6 14:36:12 2012
+** Created: Sat Jan 12 16:36:30 2013
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -96,6 +96,83 @@ int CheckDiscardDataDialog::qt_metacall(QMetaObject::Call _c, int _id, void **_a
     }
     return _id;
 }
+static const uint qt_meta_data_StopProcessingDialog[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       2,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      22,   21,   21,   21, 0x0a,
+      35,   21,   21,   21, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_StopProcessingDialog[] = {
+    "StopProcessingDialog\0\0AnswerStop()\0"
+    "AnswerCancel()\0"
+};
+
+void StopProcessingDialog::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        StopProcessingDialog *_t = static_cast<StopProcessingDialog *>(_o);
+        switch (_id) {
+        case 0: _t->AnswerStop(); break;
+        case 1: _t->AnswerCancel(); break;
+        default: ;
+        }
+    }
+    Q_UNUSED(_a);
+}
+
+const QMetaObjectExtraData StopProcessingDialog::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject StopProcessingDialog::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_StopProcessingDialog,
+      qt_meta_data_StopProcessingDialog, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &StopProcessingDialog::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *StopProcessingDialog::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *StopProcessingDialog::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_StopProcessingDialog))
+        return static_cast<void*>(const_cast< StopProcessingDialog*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int StopProcessingDialog::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 2)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 2;
+    }
+    return _id;
+}
 static const uint qt_meta_data_SourcesList[] = {
 
  // content:
@@ -182,7 +259,7 @@ static const uint qt_meta_data_MainWindow[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-      11,   14, // methods
+      19,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -193,27 +270,41 @@ static const uint qt_meta_data_MainWindow[] = {
       12,   11,   11,   11, 0x0a,
       26,   11,   11,   11, 0x0a,
       40,   11,   11,   11, 0x0a,
-      55,   49,   11,   11, 0x0a,
+      60,   11,   11,   11, 0x0a,
       80,   11,   11,   11, 0x0a,
-     104,   11,   11,   11, 0x0a,
-     119,   11,   11,   11, 0x0a,
-     135,   11,   11,   11, 0x0a,
-     151,   11,   11,   11, 0x0a,
-     177,  169,   11,   11, 0x0a,
-     231,  220,  212,   11, 0x0a,
+     102,   11,   11,   11, 0x0a,
+     122,   11,   11,   11, 0x0a,
+     145,   11,   11,   11, 0x0a,
+     160,  154,   11,   11, 0x0a,
+     185,   11,   11,   11, 0x0a,
+     209,   11,   11,   11, 0x0a,
+     236,   11,   11,   11, 0x0a,
+     251,   11,   11,   11, 0x0a,
+     267,   11,   11,   11, 0x0a,
+     283,   11,   11,   11, 0x0a,
+     309,  301,   11,   11, 0x0a,
+     356,  344,   11,   11, 0x0a,
+     402,  391,  383,   11, 0x0a,
+     440,   11,   11,   11, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_MainWindow[] = {
     "MainWindow\0\0ImportVideo()\0RemoveVideo()\0"
-    "Update()\0event\0closeEvent(QCloseEvent*)\0"
-    "RegenerateSourcesList()\0NewWorkspace()\0"
+    "TrainModelPressed()\0ApplyModelPressed()\0"
+    "PauseProcessPressed()\0RunProcessPressed()\0"
+    "RemoveProcessPressed()\0Update()\0event\0"
+    "closeEvent(QCloseEvent*)\0"
+    "RegenerateSourcesList()\0"
+    "RegenerateProcessingList()\0NewWorkspace()\0"
     "LoadWorkspace()\0SaveWorkspace()\0"
     "SaveAsWorkspace()\0current\0"
     "SelectedSourceChanged(QModelIndex)\0"
+    "selectedRow\0SelectedSourceChanged(int)\0"
     "QString\0discardMsg\0"
     "CheckIfDataShouldBeDiscarded(QString)\0"
+    "AboutPressed()\0"
 };
 
 void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -224,16 +315,24 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         switch (_id) {
         case 0: _t->ImportVideo(); break;
         case 1: _t->RemoveVideo(); break;
-        case 2: _t->Update(); break;
-        case 3: _t->closeEvent((*reinterpret_cast< QCloseEvent*(*)>(_a[1]))); break;
-        case 4: _t->RegenerateSourcesList(); break;
-        case 5: _t->NewWorkspace(); break;
-        case 6: _t->LoadWorkspace(); break;
-        case 7: _t->SaveWorkspace(); break;
-        case 8: _t->SaveAsWorkspace(); break;
-        case 9: _t->SelectedSourceChanged((*reinterpret_cast< const QModelIndex(*)>(_a[1]))); break;
-        case 10: { QString _r = _t->CheckIfDataShouldBeDiscarded((*reinterpret_cast< QString(*)>(_a[1])));
+        case 2: _t->TrainModelPressed(); break;
+        case 3: _t->ApplyModelPressed(); break;
+        case 4: _t->PauseProcessPressed(); break;
+        case 5: _t->RunProcessPressed(); break;
+        case 6: _t->RemoveProcessPressed(); break;
+        case 7: _t->Update(); break;
+        case 8: _t->closeEvent((*reinterpret_cast< QCloseEvent*(*)>(_a[1]))); break;
+        case 9: _t->RegenerateSourcesList(); break;
+        case 10: _t->RegenerateProcessingList(); break;
+        case 11: _t->NewWorkspace(); break;
+        case 12: _t->LoadWorkspace(); break;
+        case 13: _t->SaveWorkspace(); break;
+        case 14: _t->SaveAsWorkspace(); break;
+        case 15: _t->SelectedSourceChanged((*reinterpret_cast< const QModelIndex(*)>(_a[1]))); break;
+        case 16: _t->SelectedSourceChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 17: { QString _r = _t->CheckIfDataShouldBeDiscarded((*reinterpret_cast< QString(*)>(_a[1])));
             if (_a[0]) *reinterpret_cast< QString*>(_a[0]) = _r; }  break;
+        case 18: _t->AboutPressed(); break;
         default: ;
         }
     }
@@ -271,9 +370,9 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 11)
+        if (_id < 19)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 11;
+        _id -= 19;
     }
     return _id;
 }

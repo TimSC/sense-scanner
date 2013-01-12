@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'scenecontroller.h'
 **
-** Created: Thu Dec 6 14:04:07 2012
+** Created: Sat Jan 12 16:36:36 2013
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-static const uint qt_meta_data_SimpleSceneController[] = {
+static const uint qt_meta_data_TrackingAnnotation[] = {
 
  // content:
        6,       // revision
@@ -31,43 +31,43 @@ static const uint qt_meta_data_SimpleSceneController[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-      27,   23,   22,   22, 0x0a,
-      50,   22,   22,   22, 0x0a,
-      64,   22,   22,   22, 0x0a,
-      81,   22,   22,   22, 0x0a,
-      99,   22,   22,   22, 0x0a,
-     120,   22,   22,   22, 0x0a,
-     137,   22,   22,   22, 0x0a,
-     157,   22,   22,   22, 0x0a,
-     169,   22,   22,   22, 0x0a,
-     181,   22,   22,   22, 0x0a,
-     207,   22,   22,   22, 0x0a,
-     231,   22,   22,   22, 0x0a,
-     248,   22,   22,   22, 0x0a,
-     270,  265,   22,   22, 0x0a,
-     306,  302,   22,   22, 0x0a,
+      24,   20,   19,   19, 0x0a,
+      47,   19,   19,   19, 0x0a,
+      61,   19,   19,   19, 0x0a,
+      78,   19,   19,   19, 0x0a,
+      96,   19,   19,   19, 0x0a,
+     117,   19,   19,   19, 0x0a,
+     134,   19,   19,   19, 0x0a,
+     154,   19,   19,   19, 0x0a,
+     166,   19,   19,   19, 0x0a,
+     178,   19,   19,   19, 0x0a,
+     204,   19,   19,   19, 0x0a,
+     228,   19,   19,   19, 0x0a,
+     245,   19,   19,   19, 0x0a,
+     267,  262,   19,   19, 0x0a,
+     303,  299,   19,   19, 0x0a,
 
        0        // eod
 };
 
-static const char qt_meta_stringdata_SimpleSceneController[] = {
-    "SimpleSceneController\0\0val\0"
-    "MarkFramePressed(bool)\0MovePressed()\0"
-    "MoveAllPressed()\0AddPointPressed()\0"
-    "RemovePointPressed()\0AddLinkPressed()\0"
-    "RemoveLinkPressed()\0LoadShape()\0"
-    "SaveShape()\0SetShapeFromCurentFrame()\0"
+static const char qt_meta_stringdata_TrackingAnnotation[] = {
+    "TrackingAnnotation\0\0val\0MarkFramePressed(bool)\0"
+    "MovePressed()\0MoveAllPressed()\0"
+    "AddPointPressed()\0RemovePointPressed()\0"
+    "AddLinkPressed()\0RemoveLinkPressed()\0"
+    "LoadShape()\0SaveShape()\0"
+    "SetShapeFromCurentFrame()\0"
     "ResetCurentFrameShape()\0LoadAnnotation()\0"
     "SaveAnnotation()\0elem\0"
     "ReadAnnotationXml(QDomElement&)\0out\0"
     "WriteAnnotationXml(QTextStream&)\0"
 };
 
-void SimpleSceneController::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void TrackingAnnotation::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
         Q_ASSERT(staticMetaObject.cast(_o));
-        SimpleSceneController *_t = static_cast<SimpleSceneController *>(_o);
+        TrackingAnnotation *_t = static_cast<TrackingAnnotation *>(_o);
         switch (_id) {
         case 0: _t->MarkFramePressed((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 1: _t->MovePressed(); break;
@@ -89,33 +89,33 @@ void SimpleSceneController::qt_static_metacall(QObject *_o, QMetaObject::Call _c
     }
 }
 
-const QMetaObjectExtraData SimpleSceneController::staticMetaObjectExtraData = {
+const QMetaObjectExtraData TrackingAnnotation::staticMetaObjectExtraData = {
     0,  qt_static_metacall 
 };
 
-const QMetaObject SimpleSceneController::staticMetaObject = {
-    { &QObject::staticMetaObject, qt_meta_stringdata_SimpleSceneController,
-      qt_meta_data_SimpleSceneController, &staticMetaObjectExtraData }
+const QMetaObject TrackingAnnotation::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_TrackingAnnotation,
+      qt_meta_data_TrackingAnnotation, &staticMetaObjectExtraData }
 };
 
 #ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &SimpleSceneController::getStaticMetaObject() { return staticMetaObject; }
+const QMetaObject &TrackingAnnotation::getStaticMetaObject() { return staticMetaObject; }
 #endif //Q_NO_DATA_RELOCATION
 
-const QMetaObject *SimpleSceneController::metaObject() const
+const QMetaObject *TrackingAnnotation::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
 }
 
-void *SimpleSceneController::qt_metacast(const char *_clname)
+void *TrackingAnnotation::qt_metacast(const char *_clname)
 {
     if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_SimpleSceneController))
-        return static_cast<void*>(const_cast< SimpleSceneController*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_TrackingAnnotation))
+        return static_cast<void*>(const_cast< TrackingAnnotation*>(this));
     return QObject::qt_metacast(_clname);
 }
 
-int SimpleSceneController::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int TrackingAnnotation::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QObject::qt_metacall(_c, _id, _a);
     if (_id < 0)

@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'videowidget.h'
 **
-** Created: Thu Dec 6 14:04:04 2012
+** Created: Sat Jan 12 16:36:33 2013
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -105,28 +105,31 @@ static const uint qt_meta_data_VideoWidget[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-      17,   13,   12,   12, 0x0a,
-      52,   43,   12,   12, 0x0a,
-      69,   12,   12,   12, 0x0a,
-      77,   12,   12,   12, 0x0a,
+      24,   13,   12,   12, 0x0a,
+      67,   58,   12,   12, 0x0a,
       84,   12,   12,   12, 0x0a,
-      95,   12,   12,   12, 0x0a,
-     109,   12,   12,   12, 0x0a,
-     154,  123,   12,   12, 0x0a,
-     228,  220,   12,   12, 0x0a,
-     268,   12,   12,   12, 0x0a,
-     287,  282,   12,   12, 0x0a,
+      92,   12,   12,   12, 0x0a,
+      99,   12,   12,   12, 0x0a,
+     110,   12,   12,   12, 0x0a,
+     124,   12,   12,   12, 0x0a,
+     186,  138,   12,   12, 0x0a,
+     279,  271,   12,   12, 0x0a,
+     316,   12,   12,   12, 0x0a,
+     335,  330,   12,   12, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_VideoWidget[] = {
-    "VideoWidget\0\0src\0SetSource(AbstractMedia*)\0"
+    "VideoWidget\0\0src,finaIn\0"
+    "SetSource(AbstractMedia*,QString)\0"
     "newValue\0SliderMoved(int)\0Pause()\0"
     "Play()\0SeekBack()\0SeekForward()\0"
-    "TimerUpdate()\0fr,startTimestamp,endTimestamp\0"
-    "AsyncFrameReceived(QImage&,unsigned long long,unsigned long long)\0"
-    "sceneIn\0SetSceneControl(SimpleSceneController*)\0"
+    "TimerUpdate()\0"
+    "fr,startTimestamp,endTimestamp,requestTimestamp\0"
+    "AsyncFrameReceived(QImage&,unsigned long long,unsigned long long,unsig"
+    "ned long long)\0"
+    "sceneIn\0SetSceneControl(TrackingAnnotation*)\0"
     "FitToWindow()\0time\0TimeChanged(QTime)\0"
 };
 
@@ -136,15 +139,15 @@ void VideoWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         Q_ASSERT(staticMetaObject.cast(_o));
         VideoWidget *_t = static_cast<VideoWidget *>(_o);
         switch (_id) {
-        case 0: _t->SetSource((*reinterpret_cast< AbstractMedia*(*)>(_a[1]))); break;
+        case 0: _t->SetSource((*reinterpret_cast< AbstractMedia*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
         case 1: _t->SliderMoved((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 2: _t->Pause(); break;
         case 3: _t->Play(); break;
         case 4: _t->SeekBack(); break;
         case 5: _t->SeekForward(); break;
         case 6: _t->TimerUpdate(); break;
-        case 7: _t->AsyncFrameReceived((*reinterpret_cast< QImage(*)>(_a[1])),(*reinterpret_cast< unsigned long long(*)>(_a[2])),(*reinterpret_cast< unsigned long long(*)>(_a[3]))); break;
-        case 8: _t->SetSceneControl((*reinterpret_cast< SimpleSceneController*(*)>(_a[1]))); break;
+        case 7: _t->AsyncFrameReceived((*reinterpret_cast< QImage(*)>(_a[1])),(*reinterpret_cast< unsigned long long(*)>(_a[2])),(*reinterpret_cast< unsigned long long(*)>(_a[3])),(*reinterpret_cast< unsigned long long(*)>(_a[4]))); break;
+        case 8: _t->SetSceneControl((*reinterpret_cast< TrackingAnnotation*(*)>(_a[1]))); break;
         case 9: _t->FitToWindow(); break;
         case 10: _t->TimeChanged((*reinterpret_cast< QTime(*)>(_a[1]))); break;
         default: ;
