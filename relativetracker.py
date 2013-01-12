@@ -384,7 +384,7 @@ if __name__=="__main__":
 
 	im = Image.open("test0.png")
 	iml = im.load()
-	if 1:
+	if 0:
 		tracker = RelativeTracker()
 		tracker.AddTrainingData(im, [(120,120),(50,50),(40,60)])
 		tracker.AddTrainingData(im, [(140,130),(20,60),(70,30)])
@@ -398,7 +398,7 @@ if __name__=="__main__":
 		tracker.PostUnPickle()
 		print tracker
 
-	#tracker.EvaluateModel(0)
-	tracker.PrepareForPickle()
-	pickle.dump(tracker, open("tracker.dat","wb"))
+	tracker.EvaluateModel(0)
+	#tracker.PrepareForPickle()
+	#pickle.dump(tracker, open("tracker.dat","wb"))
 
