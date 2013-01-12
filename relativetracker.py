@@ -56,6 +56,27 @@ def GetOffsetsForAxis(positionDiffsOnFrames, axisVec):
 
 	return magsOnFrames
 
+def CalculateCloudDistances(pointsPosLi, trNum):
+	positionDiffsOnFrames = []
+	for framePositions in pointsPosLi:
+		loc = framePositions[trNum]
+		if loc is None: continue
+
+		#Separate positions of other trackers into a separate variable
+		otherOnFrame = []
+		for ptNum, pt in enumerate(framePositions):
+			if ptNum != trNum:
+				otherOnFrame.append(pt)
+
+		#Calculate difference from current tracker to other trackers in 2D
+		distToOtherPts = []
+		for otherPt in otherOnFrame:
+			diff = ((loc[0] - otherPt[0]), (loc[1] - otherPt[1]))
+			distToOtherPts.append(diff)
+
+		positionDiffsOnFrames.append(distToOtherPts)
+	return np.array(positionDiffsOnFrames)
+
 
 #*************************************************************
 
@@ -91,15 +112,24 @@ class PredictAxis:
 	def Train(self, regIn, regArgs):
 		assert self.labels is not None
 		self.reg = regIn(**regArgs)
+
 		centredIntensities = self.intensities - self.supportPixInt
+
 		axisOffsets = np.array(GetOffsetsForAxis(self.cloudOffsets, (self.axisX, self.axisY)))
 		axisOffsetsNoised = axisOffsets + np.random.randn(*axisOffsets.shape) * self.shapeNoise
-		trainingData = np.hstack((centredIntensities, axisOffsets))
+		trainingData = np.hstack((centredIntensities, axisOffsetsNoised))
+
 		self.reg.fit(trainingData, self.labels)
 
 	def Predict(self, intensities, cloudOffsetsIn):
 		assert self.reg is not None
-		label = self.reg.predict(intensities - self.supportPixInt)[0]
+
+		centredIntensities = intensities - self.supportPixInt
+
+		axisOffsets = np.array(GetOffsetsForAxis(cloudOffsetsIn, (self.axisX, self.axisY)))
+		testData = np.concatenate((centredIntensities, axisOffsets[0,:]))
+
+		label = self.reg.predict(testData)[0]
 		return (label * self.axisX, label * self.axisY)
 
 #******************************************************
@@ -204,26 +234,7 @@ class RelativeTracker:
 		assert len(trainingOffsetsArr.shape) == 2
 
 		#For each training frame, generate training offset data
-		positionDiffsOnFrames = []
-		for iml, framePositions in zip(self.imls, self.pointsPosLi):
-			loc = framePositions[trNum]
-			if loc is None: continue
-
-			#Separate positions of other trackers into a separate variable
-			otherOnFrame = []
-			for ptNum, pt in enumerate(framePositions):
-				if ptNum != trNum:
-					otherOnFrame.append(pt)
-
-			#Calculate difference from current tracker to other trackers in 2D
-			distToOtherPts = []
-			for otherPt in otherOnFrame:
-				diff = ((loc[0] - otherPt[0]), (loc[1] - otherPt[1]))
-				distToOtherPts.append(diff)
-
-			positionDiffsOnFrames.append(distToOtherPts)
-
-		positionDiffsOnFramesArr = np.array(positionDiffsOnFrames)
+		positionDiffsOnFramesArr = CalculateCloudDistances(self.pointsPosLi, trNum)
 
 		#Generate matrix for cloud offset training, based on the frames used for intensities
 		trainCloudOffsets = []
@@ -253,6 +264,9 @@ class RelativeTracker:
 				for col in supportColours:
 					supportInt.append(ITUR6012(col))
 				#print trainOffset
+
+				#Calculate distance to nearby points
+				positionDiffsOnFramesArr = CalculateCloudDistances(ptsPos, trNum)
 
 				predX = model[0].Predict(supportInt)
 				predY = model[1].Predict(supportInt)
@@ -296,8 +310,11 @@ class RelativeTracker:
 					supportInt.append(ITUR6012(col))
 				#print trainOffset
 
-				predX = model[0].Predict(supportInt)
-				predY = model[1].Predict(supportInt)
+				#Get relative distances of other trackers
+				positionDiffsOnFramesArr = CalculateCloudDistances([framePositions], trNum)
+
+				predX = model[0].Predict(supportInt, positionDiffsOnFramesArr)
+				predY = model[1].Predict(supportInt, positionDiffsOnFramesArr)
 				print testOffset, predX, predY
 
 	def AddTrainingData(self, im, pointsPos):
