@@ -16,6 +16,10 @@ class MainWindow;
 
 class CheckDiscardDataDialog : public QObject
 {
+    /*!
+    * QT Dialog pop up to ask user if unsaved changes should be discarded.
+    */
+
     Q_OBJECT
 public:
     CheckDiscardDataDialog(QWidget *parent, QString discardMsg);
@@ -35,6 +39,11 @@ protected:
 
 class StopProcessingDialog : public QObject
 {
+    /*!
+    * QT Dialog pop up to ask user if currently running processing tasks
+    * should be stopped (paused).
+    */
+
     Q_OBJECT
 public:
     StopProcessingDialog(QWidget *parent);
@@ -53,6 +62,11 @@ protected:
 
 class SourcesList : public QListView
 {
+    /*!
+    * A QListView with currentChanged overridden to detect when
+    * this selection changes.
+    */
+
     Q_OBJECT
 public:
     SourcesList(QWidget * parent = 0);
@@ -69,6 +83,10 @@ signals:
 
 class MainWindow : public QMainWindow
 {
+    /*!
+    * The main GUI window.
+    */
+
     Q_OBJECT
     
 public:

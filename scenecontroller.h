@@ -10,6 +10,11 @@
 
 class MouseGraphicsScene : public QGraphicsScene
 {
+    /*!
+    * This is a QGraphicsScene with various methods overridden
+    * to monitor for special mouse events.
+    */
+
 public:
     MouseGraphicsScene(QObject *parent);
     virtual ~MouseGraphicsScene();

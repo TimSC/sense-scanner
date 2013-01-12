@@ -17,6 +17,11 @@
 
 class DecodedFrame : public Deletable
 {
+    /*!
+    * DecodedFrame contains a video frame and associated meta data.
+    * This is used to return requested frames in a high level manner.
+    */
+
 public:
     uint8_t *buff;
     unsigned int buffSize;
@@ -39,6 +44,12 @@ public:
 
 class ProcessingRequestOrResponse : public Deletable
 {
+    /*!
+    * DecodedFrame contains a video frame and a tracking point model.
+    * This is used for requesting a tracking position and returning the
+    * result to the GUI.
+    */
+
 public:
     QSharedPointer<QImage> img;
 
@@ -54,6 +65,11 @@ typedef std::tr1::function<void (const class DecodedFrame&)> FrameCallback;
 
 class AbstractMedia
 {
+    /*!
+    * AbstractMedia is a pure virtual interface for any sequential source of
+    * image frames.
+    */
+
 public:
     explicit AbstractMedia() {}
     virtual ~AbstractMedia() {}
