@@ -192,6 +192,10 @@ class RelativeTracker:
 				if ptNum != trNum:
 					otherOnFrame.append(pt)
 
+			#Calculate difference from current tracker to other trackers in 2D
+			for otherPt in otherOnFrame:
+				diff = loc - otherPt
+				print diff
 
 
 		#Create a pair of axis trackers for this data and copy training data
