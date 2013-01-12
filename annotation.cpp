@@ -62,7 +62,7 @@ void AnnotThread::Update()
         return;
     }
 
-    class SimpleSceneController *track = this->parentAnn->GetTrack();
+    class TrackingAnnotation *track = this->parentAnn->GetTrack();
     assert(track!=NULL);
 
     if(!this->srcDurationSet)
@@ -228,7 +228,7 @@ void AnnotThread::ImageToProcess(unsigned long long startTi,
     try
     {
         std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(reqId);
-        class SimpleSceneController *track = this->parentAnn->GetTrack();
+        class TrackingAnnotation *track = this->parentAnn->GetTrack();
         assert(track!=NULL);
 
         if(ev->type!="PREDICTION_RESULT") return;
@@ -268,7 +268,7 @@ Annotation& Annotation::operator= (const Annotation &other)
     this->track = NULL;
 
     QObject *par = other.track->parent();
-    this->SetTrack(new SimpleSceneController(par));
+    this->SetTrack(new TrackingAnnotation(par));
     *this->track = *other.track;
     return *this;
 }
@@ -295,23 +295,23 @@ void Annotation::Clear()
     this->annotThread = thd;
 }
 
-void Annotation::SetTrack(class SimpleSceneController *trackIn)
+void Annotation::SetTrack(class TrackingAnnotation *trackIn)
 {
     if(this->track != NULL) delete this->track;
     this->track = trackIn;
 }
 
-void Annotation::CloneTrack(class SimpleSceneController *trackIn)
+void Annotation::CloneTrack(class TrackingAnnotation *trackIn)
 {
     this->SetTrack(NULL);
-    this->track = new class SimpleSceneController(trackIn->parent());
+    this->track = new class TrackingAnnotation(trackIn->parent());
     *this->track = *trackIn;
 }
 
-class SimpleSceneController *Annotation::GetTrack()
+class TrackingAnnotation *Annotation::GetTrack()
 {
     this->lock.lock();
-    class SimpleSceneController *out = this->track;
+    class TrackingAnnotation *out = this->track;
     this->lock.unlock();
     return out;
 }

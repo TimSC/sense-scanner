@@ -58,9 +58,9 @@ public:
     Annotation& operator= (const Annotation &other);
     bool operator!= (const Annotation &other);
     void Clear();
-    void SetTrack(class SimpleSceneController *trackIn);
-    void CloneTrack(class SimpleSceneController *trackIn);
-    class SimpleSceneController *GetTrack();
+    void SetTrack(class TrackingAnnotation *trackIn);
+    void CloneTrack(class TrackingAnnotation *trackIn);
+    class TrackingAnnotation *GetTrack();
 
     void SetAlgUid(QUuid uidIn); //Thread safe
     QUuid GetAlgUid(); //Thread safe
@@ -82,7 +82,7 @@ public:
 
 protected:
     QMutex lock;
-    class SimpleSceneController * track;
+    class TrackingAnnotation * track;
     QUuid algUid;
     QString source;
     int active;
