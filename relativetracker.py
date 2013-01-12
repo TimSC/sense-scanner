@@ -149,7 +149,7 @@ class RelativeTracker:
 			supportPixIntCollect.append(supportInt)
 		supportPixIntAv = np.array(supportPixIntCollect).mean(axis=0)
 
-		#For each annotated frame, generate training data
+		#For each annotated frame, generate intensity training data
 		trainingIntensities = []
 		trainingOffsets = []
 		for iml, framePositions in zip(self.imls, self.pointsPosLi):
@@ -178,9 +178,21 @@ class RelativeTracker:
 
 		trainingIntensitiesArr = np.array(trainingIntensities)
 		trainingOffsetsArr = np.array(trainingOffsets)
-
 		assert len(trainingIntensitiesArr.shape) == 2
 		assert len(trainingOffsetsArr.shape) == 2
+
+		#For each training frame, generate training offset data
+		for iml, framePositions in zip(self.imls, self.pointsPosLi):
+			loc = framePositions[trNum]
+			if loc is None: continue
+
+			#Separate positions of other trackers into a separate variable
+			otherOnFrame = []
+			for ptNum, pt in enumerate(framePositions):
+				if ptNum != trNum:
+					otherOnFrame.append(pt)
+
+
 
 		#Create a pair of axis trackers for this data and copy training data
 		axisX = PredictAxis(1.,0.)
@@ -337,11 +349,11 @@ class RelativeTracker:
 		self.imsStr = None
 
 if __name__=="__main__":
-	tracker = pickle.load(open("tracker.dat","rb"))
-	print len(tracker.models)
+	#tracker = pickle.load(open("tracker.dat","rb"))
+	#print len(tracker.models)
 
 
-if 0:
+
 	im = Image.open("test0.png")
 	iml = im.load()
 	tracker = RelativeTracker()
@@ -349,7 +361,8 @@ if 0:
 	tracker.AddTrainingData(im, [(120,120),(50,50)])
 	tracker.AddTrainingData(im, [(140,130),(20,60)])
 	tracker.Init()
-	tracker.Train()
+	while tracker.GetProgress() < 1.:
+		tracker.Update()
 	tracker.ClearTrainingImages()
 	pickle.dump(tracker, open("tracker.dat","wb"))
 
