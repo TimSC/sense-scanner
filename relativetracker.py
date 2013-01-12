@@ -127,7 +127,7 @@ class PredictAxis:
 		centredIntensities = intensities - self.supportPixInt
 
 		axisOffsets = np.array(GetOffsetsForAxis(cloudOffsetsIn, (self.axisX, self.axisY)))
-		testData = np.concatenate((centredIntensities, axisOffsets[0,:]))
+		testData = np.concatenate((centredIntensities, axisOffsets))
 
 		label = self.reg.predict(testData)[0]
 		return (label * self.axisX, label * self.axisY)
@@ -254,7 +254,7 @@ class RelativeTracker:
 		ptsPos = np.copy(ptsPos)
 
 		for it in range(3):
-			for model, loc, spOffsets in zip(self.models, ptsPos, self.supportPixOffsets):
+			for trNum, (model, loc, spOffsets) in enumerate(zip(self.models, ptsPos, self.supportPixOffsets)):
 				print "pred from", ptsPos
 
 				#Get intensity at training offset
@@ -266,10 +266,12 @@ class RelativeTracker:
 				#print trainOffset
 
 				#Calculate distance to nearby points
-				positionDiffsOnFramesArr = CalculateCloudDistances(ptsPos, trNum)
+				positionDiffsOnFramesArr = CalculateCloudDistances([ptsPos], trNum)
+				#print "xx",ptsPos
+				#print "yy",positionDiffsOnFramesArr
 
-				predX = model[0].Predict(supportInt)
-				predY = model[1].Predict(supportInt)
+				predX = model[0].Predict(supportInt, positionDiffsOnFramesArr[0])
+				predY = model[1].Predict(supportInt, positionDiffsOnFramesArr[0])
 			
 				pred = (predX[0], predY[1])
 				loc[0] -= pred[0]
@@ -288,8 +290,6 @@ class RelativeTracker:
 			self.imls = [im.load() for im in self.ims]
 
 		#For each annotated frame, generate test offsets
-		print len(self.ims)
-		print len(self.pointsPosLi)
 		for iml, framePositions in zip(self.imls, self.pointsPosLi):
 			loc = framePositions[trNum]
 			if loc is None: continue
@@ -313,8 +313,8 @@ class RelativeTracker:
 				#Get relative distances of other trackers
 				positionDiffsOnFramesArr = CalculateCloudDistances([framePositions], trNum)
 
-				predX = model[0].Predict(supportInt, positionDiffsOnFramesArr)
-				predY = model[1].Predict(supportInt, positionDiffsOnFramesArr)
+				predX = model[0].Predict(supportInt, positionDiffsOnFramesArr[0])
+				predY = model[1].Predict(supportInt, positionDiffsOnFramesArr[0])
 				print testOffset, predX, predY
 
 	def AddTrainingData(self, im, pointsPos):
@@ -401,7 +401,7 @@ if __name__=="__main__":
 
 	im = Image.open("test0.png")
 	iml = im.load()
-	if 1:
+	if 0:
 		tracker = RelativeTracker()
 		tracker.AddTrainingData(im, [(120,120),(50,50),(40,60)])
 		tracker.AddTrainingData(im, [(140,130),(20,60),(70,30)])
@@ -415,7 +415,7 @@ if __name__=="__main__":
 		tracker.PostUnPickle()
 		print tracker
 
-	#tracker.EvaluateModel(0)
-	tracker.PrepareForPickle()
-	pickle.dump(tracker, open("tracker.dat","wb"))
+	tracker.EvaluateModel(0)
+	#tracker.PrepareForPickle()
+	#pickle.dump(tracker, open("tracker.dat","wb"))
 
