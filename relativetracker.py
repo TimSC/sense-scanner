@@ -395,4 +395,4 @@ if __name__=="__main__":
 		tracker.Update()
 	tracker.ClearTrainingImages()
 	pickle.dump(tracker, open("tracker.dat","wb"))
-
+	tracker.EvaluateModel(0)
