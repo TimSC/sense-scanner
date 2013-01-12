@@ -19,6 +19,10 @@
 
 class AvBinMedia : public AbstractMedia
 {
+    /*!
+    * A high level interface to retrieve video frames. The decoding is
+    * performed by AvBinThread and AvBinBackend.
+    */
 public:
     explicit AvBinMedia(int idIn, class EventLoop *eventLoopIn);
     virtual ~AvBinMedia();

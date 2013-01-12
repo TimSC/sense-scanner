@@ -76,6 +76,12 @@ protected:
 
 class AvBinThread : public MessagableThread
 {
+    /*!
+    * AvBinThread decodes video while not iterrupting GUI behaviour.
+    * This repeatedly calls into AvBinBackend to do the actual work.
+    * AvBinMedia provides a higher level interface to retrieve frames.
+    */
+
 public:
     AvBinThread();
     virtual ~AvBinThread();

@@ -1,6 +1,11 @@
 #ifndef __LOCALINTS_H_
 #define __LOCALINTS_H_
 
+/*!
+* This file provides platform specific aliases for various
+* integer conversions and types
+*/
+
 #ifdef _MSC_VER
 	typedef unsigned char uint8_t;
 	typedef unsigned __int64 uint64_t;

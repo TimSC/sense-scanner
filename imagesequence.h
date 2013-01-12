@@ -8,6 +8,11 @@
 
 class ImageSequence : public AbstractMedia
 {
+    /*!
+    * ImageSequences uses a folder of images to emulate frames from
+    * a video sequence.
+    */
+
 public:
     ImageSequence(QString targetDir, float frameRate = 25.);
     virtual ~ImageSequence();

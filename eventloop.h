@@ -15,6 +15,12 @@
 
 class Deletable
 {
+    /*!
+    * This base class is used to derive classes that are later to
+    * be deallocated by the event system. The most important point
+    * is that the destructor is virtual.
+    */
+
 public:
     Deletable() {};
     virtual ~Deletable() {};
@@ -22,6 +28,12 @@ public:
 
 class Event
 {
+    /*!
+    * Event contains a message that is send to one or more EventReceivers.
+    * This facilitates communication between modules without more
+    * complex interdependency.
+    */
+
 public:
     Event();
     Event(std::string typeIn, unsigned long long idIn = 0);
@@ -34,13 +46,19 @@ public:
     //String data
     std::string data;
 
-    //Raw binary data
+    //Pointer to a custom class that contains additional data
     class Deletable *raw;
 
 };
 
 class EventReceiver
 {
+    /*!
+    * EventReciever is a FIFO buffer that holds messages received from
+    * the event system until some thread requests the information. They
+    * must be registered with the EventLoop object to receive messages.
+    */
+
 public:
     EventReceiver(class EventLoop *elIn);
     virtual ~EventReceiver();
@@ -60,12 +78,20 @@ protected:
 class EventLoop
 {
 public:
+    /*!
+    * The event loop is an object to dispatch Event messages to pre-registered
+    * EventReceivers, based on the Event type.
+    */
+
     EventLoop();
     virtual ~EventLoop();
 
     void SendEvent(std::tr1::shared_ptr<class Event> event);
     void AddListener(std::string type, class EventReceiver &rx);
     void RemoveListener(class EventReceiver &rx);
+
+    //! This generates a unique message ID number that can be used to wait
+    //! for message responses. A request and a response can share an ID.
     unsigned long long GetId();
 
 protected:
@@ -76,6 +102,12 @@ protected:
 
 class MessagableThread : public QThread
 {
+    /*!
+    * MessagableThread is a worker thread with an event receiver and
+    * convenience functions to start and stop the thread. Other worker
+    * threads are derived from this base thread.
+    */
+
 public:
     MessagableThread();
     virtual ~MessagableThread();
@@ -102,8 +134,11 @@ protected:
     int id;
 };
 
+/*!
+* Convenience functions for splitting a string based on a specified delimiter
+*/
+
 std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems);
 std::vector<std::string> split(const std::string &s, char delim);
-
 
 #endif // EVENTLOOP_H

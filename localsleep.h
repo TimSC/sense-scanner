@@ -2,6 +2,11 @@
 #ifndef _LOCAL_SLEEP_H_
 #define _LOCAL_SLEEP_H_
 
+/*!
+* This file exposes the normally private QT sleep functions.
+* Use sparingly.
+*/
+
 #include <QtCore/QThread>
 
 class LocalSleep : public QThread
