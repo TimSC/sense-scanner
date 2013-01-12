@@ -15,20 +15,6 @@
 #include "eventloop.h"
 #include "avbinbackend.h"
 
-class AvBinThread : public MessagableThread
-{
-public:
-    AvBinThread();
-    virtual ~AvBinThread();
-    void SetEventLoop(class EventLoop *eventLoopIn);
-    void SetId(int idIn);
-
-    void Update();
-    void Finished();
-protected:
-    class AvBinBackend avBinBackend;
-};
-
 //*************************************************
 
 class AvBinMedia : public AbstractMedia

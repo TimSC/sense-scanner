@@ -21,7 +21,7 @@ class AvBinBackend
     /*!
     * AvBinBackend uses the avbin interface to decode video files. The
     * stream of images and audio blocks are decoded and are returned in
-    * RGB format.
+    * RGB format. Seeking in files is also supported.
     */
 
 public:
@@ -71,5 +71,22 @@ protected:
     unsigned audioBufferSize;
     int id;
 };
+
+//************************************************
+
+class AvBinThread : public MessagableThread
+{
+public:
+    AvBinThread();
+    virtual ~AvBinThread();
+    void SetEventLoop(class EventLoop *eventLoopIn);
+    void SetId(int idIn);
+
+    void Update();
+    void Finished();
+protected:
+    class AvBinBackend avBinBackend;
+};
+
 
 #endif // AVBINBACKEND_H

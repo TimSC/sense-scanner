@@ -319,50 +319,6 @@ void AvBinMedia::ChangeVidSource(QString fina)
     this->currentFina = fina;
 }
 
-//*************************************************
-
-AvBinThread::AvBinThread() : MessagableThread()
-{
-
-}
-
-AvBinThread::~AvBinThread()
-{
-
-}
-
-void AvBinThread::Update()
-{
-
-    //cout << "AvBinThread::Update()" << this->id <<"\t"<< (unsigned long)this << endl;
-
-    int foundEvent = 0;
-
-    //Update the backend to actually do something useful
-    foundEvent = this->avBinBackend.PlayUpdate();
-
-    if(!foundEvent)
-        msleep(10);
-    else
-        msleep(0);
-}
-
-void AvBinThread::SetEventLoop(class EventLoop *eventLoopIn)
-{
-    this->avBinBackend.SetEventLoop(eventLoopIn);
-    MessagableThread::SetEventLoop(eventLoopIn);
-}
-
-void AvBinThread::SetId(int idIn)
-{
-    this->avBinBackend.SetId(idIn);
-    MessagableThread::SetId(idIn);
-}
-
-void AvBinThread::Finished()
-{
-    cout << "AvBinThread::Finished" << endl;
-}
 
 //************************************************
 
