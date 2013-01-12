@@ -44,6 +44,19 @@ def RandomDirectionVector(mag):
 	ang = np.random.uniform(0, math.pi)
 	return (math.cos(ang) * mag, math.sin(ang) * mag)
 
+def GetOffsetsForAxis(positionDiffsOnFrames, axisVec):
+
+	magsOnFrames = []
+	for posDiffOnFrame in positionDiffsOnFrames:
+		mags = []
+		for pt in posDiffOnFrame:
+			mag = pt[0] * axisVec[0] + pt[1] * axisVec[1]
+			mags.append(mag)
+		magsOnFrames.append(mags)
+
+	return magsOnFrames
+
+
 #*************************************************************
 
 class PredictAxis:
@@ -184,7 +197,7 @@ class RelativeTracker:
 		assert len(trainingOffsetsArr.shape) == 2
 
 		#For each training frame, generate training offset data
-		positionDiffsOnFrame = []
+		positionDiffsOnFrames = []
 		for iml, framePositions in zip(self.imls, self.pointsPosLi):
 			loc = framePositions[trNum]
 			if loc is None: continue
@@ -201,9 +214,13 @@ class RelativeTracker:
 				diff = ((loc[0] - otherPt[0]), (loc[1] - otherPt[1]))
 				distToOtherPts.append(diff)
 
-			positionDiffsOnFrame.append(distToOtherPts)
+			positionDiffsOnFrames.append(distToOtherPts)
 
-		print positionDiffsOnFrame
+		#Project differences onto axis
+		positionDiffsOnFrameX = GetOffsetsForAxis(positionDiffsOnFrames, (1.,0.))
+		positionDiffsOnFrameY = GetOffsetsForAxis(positionDiffsOnFrames, (0.,1.))
+
+		
 
 		#Create a pair of axis trackers for this data and copy training data
 		axisX = PredictAxis(1.,0.)
@@ -328,8 +345,6 @@ class RelativeTracker:
 
 		self.progress += 0.67 * countTrained / self.numTrackers
 
-		#time.sleep(0.1)
-
 		if len(self.models) == self.numTrackers and \
 			countPending == 0.:
 				self.ClearTrainingImages()
@@ -338,9 +353,6 @@ class RelativeTracker:
 
 	def GetProgress(self):
 		return self.progress
-
-	#def ToString(self):
-	#	return pickle.dumps(self, protocol=pickle.HIGHEST_PROTOCOL)
 
 	def PrepareForPickle(self):
 		assert self.imsStr is None
@@ -362,8 +374,6 @@ class RelativeTracker:
 if __name__=="__main__":
 	#tracker = pickle.load(open("tracker.dat","rb"))
 	#print len(tracker.models)
-
-
 
 	im = Image.open("test0.png")
 	iml = im.load()
