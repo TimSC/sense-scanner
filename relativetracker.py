@@ -152,7 +152,8 @@ class RelativeTracker:
 		#For each annotated frame, generate intensity training data
 		trainingIntensities = []
 		trainingOffsets = []
-		for iml, framePositions in zip(self.imls, self.pointsPosLi):
+		trainingOnFrameNum = []
+		for frameNum, (iml, framePositions) in enumerate(zip(self.imls, self.pointsPosLi)):
 			loc = framePositions[trNum]
 			if loc is None: continue
 
@@ -175,6 +176,7 @@ class RelativeTracker:
 
 				trainingIntensities.append(supportInt)
 				trainingOffsets.append(trainOffset)
+				trainingOnFrameNum.append(frameNum)
 
 		trainingIntensitiesArr = np.array(trainingIntensities)
 		trainingOffsetsArr = np.array(trainingOffsets)
@@ -182,6 +184,7 @@ class RelativeTracker:
 		assert len(trainingOffsetsArr.shape) == 2
 
 		#For each training frame, generate training offset data
+		positionDiffsOnFrame = []
 		for iml, framePositions in zip(self.imls, self.pointsPosLi):
 			loc = framePositions[trNum]
 			if loc is None: continue
@@ -193,10 +196,14 @@ class RelativeTracker:
 					otherOnFrame.append(pt)
 
 			#Calculate difference from current tracker to other trackers in 2D
+			distToOtherPts = []
 			for otherPt in otherOnFrame:
-				diff = loc - otherPt
-				print diff
+				diff = ((loc[0] - otherPt[0]), (loc[1] - otherPt[1]))
+				distToOtherPts.append(diff)
 
+			positionDiffsOnFrame.append(distToOtherPts)
+
+		print positionDiffsOnFrame
 
 		#Create a pair of axis trackers for this data and copy training data
 		axisX = PredictAxis(1.,0.)
@@ -362,8 +369,8 @@ if __name__=="__main__":
 	iml = im.load()
 	tracker = RelativeTracker()
 	
-	tracker.AddTrainingData(im, [(120,120),(50,50)])
-	tracker.AddTrainingData(im, [(140,130),(20,60)])
+	tracker.AddTrainingData(im, [(120,120),(50,50),(40,60)])
+	tracker.AddTrainingData(im, [(140,130),(20,60),(70,30)])
 	tracker.Init()
 	while tracker.GetProgress() < 1.:
 		tracker.Update()
