@@ -16,15 +16,14 @@
 #include "avbinapi.h"
 #include "localmutex.h"
 
-class FrameGroup
-{
-public:
-    std::vector<std::tr1::shared_ptr<class DecodedFrame> > frames;
-    int64_t start, end;
-};
-
 class AvBinBackend
 {
+    /*!
+    * AvBinBackend uses the avbin interface to decode video files. The
+    * stream of images and audio blocks are decoded and are returned in
+    * RGB format.
+    */
+
 public:
     AvBinBackend();
     AvBinBackend(const AvBinBackend &other);

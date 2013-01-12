@@ -9,6 +9,13 @@
 
 class AnnotThread : public MessagableThread
 {
+    /*!
+    * AnnotThread is a worker thread that allows annotations to create events
+    * and continue processing without interupting the GUI thread. It also
+    * manages the current tracker positions and frame iteration during tracking
+    * of new videos.
+    */
+
 public:
     AnnotThread(class Annotation *annIn, class AvBinMedia* mediaInterface);
     virtual ~AnnotThread();
@@ -39,6 +46,12 @@ protected:
 
 class Annotation
 {
+    /*!
+    * Annotation contains various shared state information between
+    * the AnnotThread and the GUI. Some of the methods are thread safe
+    * to enable iteraction between the two.
+    */
+
 public:
     Annotation();
     virtual ~Annotation();

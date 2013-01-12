@@ -7,6 +7,11 @@ extern "C"
 #include <avbin.h>
 }
 
+/*!
+* These functions wrap the underlying avbin interface but add
+* resource locking and windows specific fuctionality to load DLLs.
+*/
+
 AVbinResult mod_avbin_init();
 AVbinFile* mod_avbin_open_filename(const char *filename);
 AVbinResult mod_avbin_file_info(AVbinFile *file, AVbinFileInfo *info);

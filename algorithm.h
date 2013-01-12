@@ -9,6 +9,14 @@
 
 class AlgorithmProcess : public QProcess
 {
+    /*!
+    * AlgorithmProcess is a facade for a separate process. It enables easy
+    * stopping and starting, as well as handling serialisation of events and
+    * handling of the process standard out (console) response.
+    *
+    * The GUI thread should periodically call update to process event messages.
+    */
+
 public:
     AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent);
     virtual ~AlgorithmProcess();
