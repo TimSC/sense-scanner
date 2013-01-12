@@ -15,6 +15,11 @@ class VideoWidget;
 
 class ZoomGraphicsView : public QGraphicsView
 {
+    /*!
+    * A QGraphicsView with overridden methods to detect mouse
+    * wheel events.
+    */
+
     Q_OBJECT
 public:
     explicit ZoomGraphicsView(QWidget *parent = 0);
@@ -30,8 +35,13 @@ protected:
 
 class VideoWidget : public QWidget
 {
-    Q_OBJECT
-    
+    /*
+    * VideoWidget handles the video controls and display based on
+    * an AbstractMedia data source. The TrackingAnnotation provides
+    * the GUI code for inside the video area.
+    */
+
+    Q_OBJECT   
 public:
     explicit VideoWidget(QWidget *parent = 0);
     virtual ~VideoWidget();

@@ -12,6 +12,12 @@
 
 class Workspace : public QObject
 {
+    /*!
+    * Workshape contains all annotation track objects and algorithm process objects.
+    * Functionality for loading and saving is provided. Various thread starting and
+    * stopping is also available to control multiple algorithms at once.
+    */
+
     Q_OBJECT
 public:
     explicit Workspace();

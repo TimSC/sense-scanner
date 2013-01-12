@@ -31,8 +31,12 @@ protected:
 
 class TrackingAnnotation : public QObject
 {
-    Q_OBJECT
+    /*!
+    * TrackingAnnotation contains the annotation data for a single video and
+    * handles the GUI, loading and saving functionality of tracking.
+    */
 
+    Q_OBJECT
 public:
     TrackingAnnotation(QObject *parent);
     TrackingAnnotation(const TrackingAnnotation &other);

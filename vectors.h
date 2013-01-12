@@ -3,6 +3,10 @@
 #include <vector>
 #include <iostream>
 
+/*!
+* Simple vector operations based on STL containers.
+*/
+
 std::vector<float> SubVec(std::vector<float> &a, std::vector<float> &b)
 {
     assert(a.size() == b.size());
