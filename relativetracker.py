@@ -255,6 +255,7 @@ class RelativeTracker:
 		return (axisX, axisY)
 
 	def Predict(self, iml, ptsPos):
+		return ptsPos
 		#Immediately return if points are not set
 		if len(ptsPos) == 0:
 			return []

@@ -234,6 +234,9 @@ void AnnotThread::ImageToProcess(unsigned long long startTi,
         if(ev->type!="PREDICTION_RESULT") return;
         class ProcessingRequestOrResponse *response = (class ProcessingRequestOrResponse *)ev->raw;
 
+        cout << "Rx prediction for " << response->pos[0].size() << endl;
+        cout << "Expected " << track->GetShapeNumPoints() << endl;
+
         if(response->pos[0].size() == track->GetShapeNumPoints())
             track->SetAnnotationBetweenTimestamps(startTi, endTi, response->pos[0]);
 

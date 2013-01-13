@@ -216,6 +216,14 @@ void TrackingAnnotation::SetAnnotationBetweenTimestamps(unsigned long long start
                                                           std::vector<std::vector<float> > annot)
 {
     this->lock.lock();
+
+    if(annot.size() != this->shape.size())
+    {
+        cout << "Error: Cannot set annotation to mismatched size" << endl;
+        this->lock.unlock();
+        return;
+    }
+
     //Set annotation for preset frames
     int found = 0;
     std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
