@@ -46,9 +46,13 @@ def RandomDirectionVector(mag):
 
 def GetOffsetsForAxis(positionDiffsOnFrames, axisVec):
 
+	assert len(axisVec) == 2
+	#assert positionDiffsOnFrames.ndim == 3
+
 	magsOnFrames = []
 	for posDiffOnFrame in positionDiffsOnFrames:
 		mags = []
+		#assert posDiffOnFrame.ndim == 2
 		for pt in posDiffOnFrame:
 			mag = pt[0] * axisVec[0] + pt[1] * axisVec[1]
 			mags.append(mag)
@@ -126,7 +130,9 @@ class PredictAxis:
 
 		centredIntensities = intensities - self.supportPixInt
 
-		axisOffsets = np.array(GetOffsetsForAxis(cloudOffsetsIn, (self.axisX, self.axisY)))
+		axisOffsets = np.array(GetOffsetsForAxis([cloudOffsetsIn], (self.axisX, self.axisY))[0])
+
+		print centredIntensities.shape, axisOffsets.shape
 		testData = np.concatenate((centredIntensities, axisOffsets))
 
 		label = self.reg.predict(testData)[0]
@@ -251,11 +257,15 @@ class RelativeTracker:
 		return (axisX, axisY)
 
 	def Predict(self, iml, ptsPos):
+		#Immediately return if points are not set
+		if len(ptsPos) == 0:
+			return []
+
 		ptsPos = np.copy(ptsPos)
 
 		for it in range(3):
 			for trNum, (model, loc, spOffsets) in enumerate(zip(self.models, ptsPos, self.supportPixOffsets)):
-				print "pred from", ptsPos
+				#print "pred from", ptsPos
 
 				#Get intensity at training offset
 				supportColours = GetPixIntensityAtLoc(iml, spOffsets, loc)
@@ -269,6 +279,8 @@ class RelativeTracker:
 				positionDiffsOnFramesArr = CalculateCloudDistances([ptsPos], trNum)
 				#print "xx",ptsPos
 				#print "yy",positionDiffsOnFramesArr
+
+				print "cloud shape", positionDiffsOnFramesArr[0].shape
 
 				predX = model[0].Predict(supportInt, positionDiffsOnFramesArr[0])
 				predY = model[1].Predict(supportInt, positionDiffsOnFramesArr[0])
@@ -315,7 +327,7 @@ class RelativeTracker:
 
 				predX = model[0].Predict(supportInt, positionDiffsOnFramesArr[0])
 				predY = model[1].Predict(supportInt, positionDiffsOnFramesArr[0])
-				print testOffset, predX, predY
+				#print testOffset, predX, predY
 
 	def AddTrainingData(self, im, pointsPos):
 		assert self.ims is not None

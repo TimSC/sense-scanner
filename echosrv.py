@@ -117,12 +117,12 @@ def WorkerProcess(childPipeConn):
 
 					tree = ET.fromstring(event[2])
 					xmlTrees.append(tree)
-					timestamp = float(tree.attrib['time'])
-					for child in tree:
-						pid = int(child.attrib['id'])
-						x = float(child.attrib['x'])
-						y = float(child.attrib['y'])
-						print pid, x, y
+					#timestamp = float(tree.attrib['time'])
+					#for child in tree:
+					#	pid = int(child.attrib['id'])
+					#	x = float(child.attrib['x'])
+					#	y = float(child.attrib['y'])
+					#	print pid, x, y
 
 				if args[0]=="MODEL":
 					print "Loading model from string", len(event[2])
