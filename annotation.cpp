@@ -234,7 +234,8 @@ void AnnotThread::ImageToProcess(unsigned long long startTi,
         if(ev->type!="PREDICTION_RESULT") return;
         class ProcessingRequestOrResponse *response = (class ProcessingRequestOrResponse *)ev->raw;
 
-        track->SetAnnotationBetweenTimestamps(startTi, endTi, response->pos[0]);
+        if(response->pos[0].size() == track->GetShapeNumPoints())
+            track->SetAnnotationBetweenTimestamps(startTi, endTi, response->pos[0]);
 
     }
     catch(std::runtime_error e)

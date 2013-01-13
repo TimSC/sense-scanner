@@ -101,6 +101,7 @@ public slots:
     void SaveShape();
     void SetShapeFromCurentFrame();
     void ResetCurentFrameShape();
+    int GetShapeNumPoints();
     void LoadAnnotation();
     void SaveAnnotation();
 

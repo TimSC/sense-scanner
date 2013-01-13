@@ -1019,6 +1019,14 @@ void TrackingAnnotation::ResetCurentFrameShape()
     this->Redraw();
 }
 
+int TrackingAnnotation::GetShapeNumPoints()
+{
+    this->lock.lock();
+    int out = this->shape.size();
+    this->lock.unlock();
+    return out;
+}
+
 void TrackingAnnotation::LoadAnnotation()
 {
     //Get input filename from user
