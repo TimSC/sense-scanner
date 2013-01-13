@@ -251,7 +251,8 @@ MessagableThread::MessagableThread()
 
 MessagableThread::~MessagableThread()
 {
-    cout << "MessagableThread::~MessagableThread()" << endl;
+    cout << "MessagableThread::~MessagableThread() "
+         << (unsigned long) this << endl;
     this->Stop();
     if(this->eventReceiver)
         delete this->eventReceiver;

@@ -427,6 +427,9 @@ void MainWindow::RemoveVideo()
     QItemSelectionModel *sourceSelected = this->ui->dataSources->selectionModel();
     assert(sourceSelected!=NULL);
 
+    //Disable this source UI controls
+    this->DeselectCurrentSource();
+
     QModelIndexList rowList = sourceSelected->selectedRows();
     for(unsigned int i=0;i<rowList.size();i++)
     {
@@ -565,15 +568,7 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
 
     QString fina = this->workspace.GetSourceName(selectedRow);
 
-    if(this->annotationMenu)
-    {
-        this->menuBar()->removeAction(this->annotationMenu->menuAction());
-    }
-
-    //Pause video
-    this->ui->widget->Pause();
-
-    //this->mediaInterfaceFront->ChangeVidSource(&this->mediaThreadFront, fina);
+    this->DeselectCurrentSource();
 
     //Update scene controller
     TrackingAnnotation *scene = this->workspace.GetTrack(selectedRow);
@@ -584,6 +579,19 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
 
     //Set widget to use this source
     this->ui->widget->SetSource(this->mediaInterfaceFront, fina);
+
+}
+
+void MainWindow::DeselectCurrentSource()
+{
+    if(this->annotationMenu)
+    {
+        this->menuBar()->removeAction(this->annotationMenu->menuAction());
+    }
+
+    //Pause video
+    this->ui->widget->Pause();
+    this->ui->widget->SetSceneControl(NULL);
 
 }
 

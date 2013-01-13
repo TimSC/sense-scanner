@@ -129,6 +129,7 @@ public slots:
 
     void SelectedSourceChanged(const QModelIndex current);
     void SelectedSourceChanged(int selectedRow);
+    void DeselectCurrentSource();
     QString CheckIfDataShouldBeDiscarded(QString discardMsg);
 
     void AboutPressed();

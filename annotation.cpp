@@ -255,6 +255,10 @@ Annotation::Annotation()
 
 Annotation::~Annotation()
 {
+    if(this->annotThread)
+    {
+        annotThread->Stop();
+    }
     this->SetTrack(NULL);
 }
 
@@ -379,7 +383,7 @@ int Annotation::GetActiveStateDesired()
 
 void Annotation::Terminate()
 {
-    if(this->annotThread->isRunning())
+    if(this->annotThread && this->annotThread->isRunning())
     {
         cout << "Warning: terminating annot thread " << this->source.toLocal8Bit().constData() << endl;
         this->annotThread->terminate();
