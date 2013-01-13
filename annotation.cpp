@@ -112,7 +112,9 @@ void AnnotThread::Update()
             }
             else
             {
+
                 //If not annotation here, make a prediction
+                if(this->currentModelSet == true)
                 this->ImageToProcess(TO_MILLISEC(this->currentStartTimestamp),
                                      TO_MILLISEC(this->currentEndTimestamp),
                                      img, this->currentModel);
@@ -174,7 +176,9 @@ void AnnotThread::Update()
         }
         else
         {
+
             //If not annotation here, make a prediction
+            if(this->currentModelSet != 0)
             this->ImageToProcess(TO_MILLISEC(this->currentStartTimestamp),
                                  TO_MILLISEC(this->currentEndTimestamp),
                                  img, this->currentModel);
@@ -227,7 +231,7 @@ void AnnotThread::ImageToProcess(unsigned long long startTi,
     //Wait for response
     try
     {
-        std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(reqId);
+        std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(reqId,80000000);
         class TrackingAnnotation *track = this->parentAnn->GetTrack();
         assert(track!=NULL);
 
@@ -243,7 +247,7 @@ void AnnotThread::ImageToProcess(unsigned long long startTi,
     }
     catch(std::runtime_error e)
     {
-
+        cout << "Warning: Prediction timed out" << endl;
     }
 }
 

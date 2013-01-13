@@ -255,16 +255,17 @@ class RelativeTracker:
 		return (axisX, axisY)
 
 	def Predict(self, iml, ptsPos):
-		return ptsPos
+
 		#Immediately return if points are not set
 		if len(ptsPos) == 0:
 			return []
+		numPts = len(ptsPos)
 
 		ptsPos = np.copy(ptsPos)
 
 		for it in range(3):
 			for trNum, (model, loc, spOffsets) in enumerate(zip(self.models, ptsPos, self.supportPixOffsets)):
-				#print "pred from", ptsPos
+				print "pred ",trNum,"from", len(ptsPos),"pts (iteration",it,")"
 
 				#Get intensity at training offset
 				supportColours = GetPixIntensityAtLoc(iml, spOffsets, loc)
@@ -283,7 +284,8 @@ class RelativeTracker:
 				pred = (predX[0], predY[1])
 				loc[0] -= pred[0]
 				loc[1] -= pred[1]
-
+ 
+		assert len(ptsPos) == numPts
 		return ptsPos
 
 	def EvaluateModel(self, trNum):
