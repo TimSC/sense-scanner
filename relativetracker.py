@@ -129,10 +129,8 @@ class PredictAxis:
 		assert self.reg is not None
 
 		centredIntensities = intensities - self.supportPixInt
-
 		axisOffsets = np.array(GetOffsetsForAxis([cloudOffsetsIn], (self.axisX, self.axisY))[0])
 
-		print centredIntensities.shape, axisOffsets.shape
 		testData = np.concatenate((centredIntensities, axisOffsets))
 
 		label = self.reg.predict(testData)[0]
@@ -277,10 +275,6 @@ class RelativeTracker:
 
 				#Calculate distance to nearby points
 				positionDiffsOnFramesArr = CalculateCloudDistances([ptsPos], trNum)
-				#print "xx",ptsPos
-				#print "yy",positionDiffsOnFramesArr
-
-				print "cloud shape", positionDiffsOnFramesArr[0].shape
 
 				predX = model[0].Predict(supportInt, positionDiffsOnFramesArr[0])
 				predY = model[1].Predict(supportInt, positionDiffsOnFramesArr[0])
