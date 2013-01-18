@@ -2,7 +2,7 @@
 import multiprocessing, sys, time, pickle, bz2
 from PIL import Image
 import xml.etree.ElementTree as ET
-import relativetracker
+from reltracker import reltracker
 
 def WorkerProcess(childPipeConn):
 	progress = 0.
@@ -51,7 +51,7 @@ def WorkerProcess(childPipeConn):
 				modelReady = 1
 				training = 1
 				if tracker is None:
-					tracker = relativetracker.RelativeTracker()
+					tracker = reltracker.RelTracker()
 					for tree in xmlTrees:
 						timestamp = float(tree.attrib['time'])
 						xs, ys = [], []
@@ -68,7 +68,7 @@ def WorkerProcess(childPipeConn):
 							print "Image for timestamp",int(round(timestamp*1000.)),"not found"
 							continue
 						im = trainImgs[int(round(timestamp*1000.))]
-						tracker.AddTrainingData(im, zip(xs,ys))
+						tracker.Add(im, zip(xs,ys))
 
 			if event[0]=="SAVE_MODEL":
 				if paused and tracker is not None:
