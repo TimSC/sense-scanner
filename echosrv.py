@@ -191,7 +191,8 @@ def WorkerProcess(childPipeConn):
 				print "DATA_BLOCK_PROCESSED"
 
 		if (not paused and training and progress < 1.) or getProgress:
-			tracker.Update()
+			if not paused and training and progress < 1.: 
+				tracker.Update()
 			progress = tracker.GetProgress()
 			print "PROGRESS="+str(progress)
 			getProgress = False
