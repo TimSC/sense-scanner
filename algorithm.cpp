@@ -427,7 +427,7 @@ void AlgorithmProcess::ProcessAlgOutput()
 
     if(cmd.length()>0)
     {
-        cout << "Algorithm: " << this->algOutBuffer.constData() << endl;
+        cout << "Algorithm: " << cmd.constData() << endl;
         ReadLineFromBuffer(this->algOutBuffer,1);//Pop this line
         return;
     }
