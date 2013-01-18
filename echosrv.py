@@ -170,7 +170,7 @@ def WorkerProcess(childPipeConn):
 							for pt in model:
 								modelList.append((float(pt.attrib['x']), float(pt.attrib['y'])))
 
-							pred = tracker.Predict(im.load(), modelList)
+							pred = tracker.Predict(im, modelList)
 							
 							for pt in pred:
 								outXml += "  <pt x=\""+str(pt[0])+"\" y=\""+str(pt[1])+"\"/>\n"
