@@ -458,26 +458,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>processingView</sender>
-   <signal>UpdateSources(QModelIndex)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>AboutPressed()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>137</x>
-     <y>216</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>199</x>
-     <y>161</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>dataSources</sender>
    <signal>UpdateSources(QModelIndex)</signal>
    <receiver>MainWindow</receiver>
-   <slot>AboutPressed()</slot>
+   <slot>SelectedSourceChanged(QModelIndex)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>137</x>
