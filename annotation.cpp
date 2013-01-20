@@ -187,7 +187,7 @@ void AnnotThread::Update()
         //Estimate progress and generate an event
         double progress = double(milsec) / this->srcDuration;
         std::tr1::shared_ptr<class Event> requestEv(new Event("ANNOTATION_THREAD_PROGRESS"));
-        QString progressStr = QString("%0 %1").arg(this->parentAnn->GetAlgUid()).arg(progress);
+        QString progressStr = QString("%0 %1").arg(this->parentAnn->GetAnnotUid()).arg(progress);
         requestEv->data = progressStr.toLocal8Bit().constData();
         this->eventLoop->SendEvent(requestEv);
 
@@ -307,7 +307,7 @@ void Annotation::Clear()
     this->SetTrack(NULL);
     this->visible = true;
     QUuid uidBlank;
-    this->uid = uidBlank;
+    this->SetAnnotUid(uidBlank);
     this->algUid = algUid;
     this->source = "";
     std::tr1::shared_ptr<class AnnotThread> thd;
@@ -346,6 +346,21 @@ QUuid Annotation::GetAlgUid()
 {
     this->lock.lock();
     QUuid out = this->algUid;
+    this->lock.unlock();
+    return out;
+}
+
+void Annotation::SetAnnotUid(QUuid uidIn)
+{
+    this->lock.lock();
+    this->uid = uidIn;
+    this->lock.unlock();
+}
+
+QUuid Annotation::GetAnnotUid()
+{
+    this->lock.lock();
+    QUuid out = this->uid;
     this->lock.unlock();
     return out;
 }

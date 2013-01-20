@@ -65,6 +65,9 @@ public:
     void SetAlgUid(QUuid uidIn); //Thread safe
     QUuid GetAlgUid(); //Thread safe
 
+    void SetAnnotUid(QUuid uidIn); //Thread safe
+    QUuid GetAnnotUid(); //Thread safe
+
     void SetSource(QString uidIn); //Thread safe
     QString GetSource(); //Thread safe
 
@@ -77,13 +80,13 @@ public:
     void Terminate();
 
     bool visible;
-    QUuid uid;
+
     std::tr1::shared_ptr<class AnnotThread> annotThread;
 
 protected:
     QMutex lock;
     class TrackingAnnotation * track;
-    QUuid algUid;
+    QUuid algUid, uid;
     QString source;
     int active;
     int activeStateDesired;

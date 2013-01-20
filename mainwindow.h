@@ -107,6 +107,7 @@ private:
     QStandardItemModel processingModel;
     QMenu *annotationMenu;
     QMessageBox *errMsg;
+    std::map<QUuid, float> annotProgress;
 
 public slots:
     void ImportVideo();

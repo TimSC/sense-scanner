@@ -79,7 +79,7 @@ unsigned int Workspace::AddAutoAnnot(QString annotUid, QString algUid, class AvB
 
     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
     ann->SetSource(parent.GetSource());
-    ann->uid = QUuid::createUuid();
+    ann->SetAnnotUid(QUuid::createUuid());
     ann->CloneTrack(parent.GetTrack());
     std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann, mediaInterface));
     annotThread->SetEventLoop(this->eventLoop);
@@ -110,7 +110,7 @@ QString Workspace::GetSourceName(unsigned int index)
 QUuid Workspace::GetAnnotUid(unsigned int index)
 {
     assert(index < this->annotations.size());
-    return this->annotations[index]->uid;
+    return this->annotations[index]->GetAnnotUid();
 }
 
 //***********************************************************************
@@ -165,7 +165,7 @@ int Workspace::FindAnnotWithUid(QUuid uidIn)
 {
     for(unsigned int i=0;i<this->annotations.size();i++)
     {
-        if(this->annotations[i]->uid == uidIn)
+        if(this->annotations[i]->GetAnnotUid() == uidIn)
             return i;
     }
     return -1;
@@ -288,7 +288,7 @@ void Workspace::Load(QString fina, class AvBinMedia* mediaInterface)
                     QString uidStr = sourceEle.attribute("uid");
                     QUuid uid(uidStr);
                     if(uid.isNull()) uid = uid.createUuid();
-                    ann->uid = uid;
+                    ann->SetAnnotUid(uid);
 
                     //Set alg Uid
                     QString algStr = sourceEle.attribute("alg");
@@ -384,7 +384,7 @@ int Workspace::Save()
     {
         try
         {
-            out << "\t<source id=\""<<i<<"\" uid=\""<<Qt::escape(this->annotations[i]->uid)<<"\" file=\""<<
+            out << "\t<source id=\""<<i<<"\" uid=\""<<Qt::escape(this->annotations[i]->GetAnnotUid())<<"\" file=\""<<
                    Qt::escape(dir.relativeFilePath(this->annotations[i]->GetSource()))<<"\"";
             QUuid uid = this->annotations[i]->GetAlgUid();
             if(!uid.isNull())

@@ -348,16 +348,28 @@ void MainWindow::RegenerateSourcesList()
         {
             std::ostringstream displayLine;
             //float progress = this->workspace.GetProgress(row);
+            QUuid annotId = this->workspace.GetAnnotUid(row);
+            //cout << annotId.toString().toLocal8Bit().constData() << endl;
+
+            std::map<QUuid, float>::iterator it = this->annotProgress.find(annotId);
+            if(it != this->annotProgress.end())
+            {
+                displayLine << it->second;
+            }
+            else
+            {
+                displayLine << "Unknown";
+            }
 
             QStandardItem *item = this->sourcesModel.item(row, column);
             if(item!=NULL)
             {
-                item->setText("0.5");
+                item->setText(displayLine.str().c_str());
                 continue;
             }
             else
             {
-                item = new QStandardItem("0.5");
+                item = new QStandardItem(displayLine.str().c_str());
                 this->sourcesModel.setItem(row, column, item);
             }
         }
@@ -518,8 +530,11 @@ void MainWindow::Update()
         }
         if(ev->type=="ANNOTATION_THREAD_PROGRESS")
         {
-            cout << ev->type.c_str() << endl;
-            cout << ev->data.c_str() << endl;
+            assert(ev->data.length()>40);
+            QUuid annId(ev->data.substr(0, 38).c_str());
+            QString progStr(ev->data.substr(39).c_str());
+            this->annotProgress[annId] = progStr.toFloat();
+            this->RegenerateSourcesList();
         }
 
     }
