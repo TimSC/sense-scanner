@@ -184,6 +184,13 @@ void AnnotThread::Update()
                                  img, this->currentModel);
         }
 
+        //Estimate progress and generate an event
+        double progress = double(milsec) / this->srcDuration;
+        std::tr1::shared_ptr<class Event> requestEv(new Event("ANNOTATION_THREAD_PROGRESS"));
+        QString progressStr = QString("%0 %1").arg(this->parentAnn->GetAlgUid()).arg(progress);
+        requestEv->data = progressStr.toLocal8Bit().constData();
+        this->eventLoop->SendEvent(requestEv);
+
         //Estimate mid time of next frame
         frameDuration = this->currentEndTimestamp - this->currentStartTimestamp;
         avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5);

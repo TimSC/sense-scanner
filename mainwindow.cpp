@@ -168,6 +168,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("THREAD_PROGRESS_UPDATE",*eventReceiver);
     this->eventLoop->AddListener("THREAD_STATUS_CHANGED",*eventReceiver);
     this->eventLoop->AddListener("ALG_DATA_BLOCK",*eventReceiver);
+    this->eventLoop->AddListener("ANNOTATION_THREAD_PROGRESS",*eventReceiver);
 
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(0, this->eventLoop);
@@ -486,6 +487,12 @@ void MainWindow::Update()
         {
 
         }
+        if(ev->type=="ANNOTATION_THREAD_PROGRESS")
+        {
+            cout << ev->type.c_str() << endl;
+            cout << ev->data.c_str() << endl;
+        }
+
     }
     catch(std::runtime_error e) {flushing = 0;}
 

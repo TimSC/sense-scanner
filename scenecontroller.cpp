@@ -249,6 +249,12 @@ void TrackingAnnotation::SetAnnotationBetweenTimestamps(unsigned long long start
     this->lock.unlock();
 }
 
+/*float TrackingAnnotation::GetProportionAnnotated()
+{
+    unsigned int numAnnot = this->pos.size();
+    //Unfortunately, there is no easy way to determine the number of frames
+}*/
+
 void TrackingAnnotation::VideoImageChanged(QImage &fr, unsigned long long startTime,
                                               unsigned long long endTime,
                                               unsigned long long requestedTime)
