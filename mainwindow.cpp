@@ -127,17 +127,17 @@ void StopProcessingDialog::AnswerCancel()
 
 //********************************
 
-SourcesList::SourcesList(QWidget * parent) : QListView(parent)
+ClickableQListView::ClickableQListView(QWidget * parent) : QListView(parent)
 {
 
 }
 
-SourcesList::~SourcesList()
+ClickableQListView::~ClickableQListView()
 {
 
 }
 
-void SourcesList::currentChanged(const QModelIndex & current, const QModelIndex & previous)
+void ClickableQListView::currentChanged(const QModelIndex & current, const QModelIndex & previous)
 {
     this->UpdateSources(current);
 }
@@ -183,11 +183,15 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowTitle("Video Cognition System");
     this->ui->widget->SetSource(this->mediaInterfaceFront,"");
 
+    QStringList horLabelsAnn;
+    horLabelsAnn.push_back("Sources");
+    horLabelsAnn.push_back("Status");
+    this->sourcesModel.setHorizontalHeaderLabels(horLabelsAnn);
     this->ui->dataSources->setModel(&this->sourcesModel);
     this->RegenerateSourcesList();
 
     QStringList horLabels;
-    horLabels.push_back("Processing");
+    horLabels.push_back("Models");
     horLabels.push_back("Status");
     this->processingModel.setHorizontalHeaderLabels(horLabels);
     this->ui->processingView->setModel(&this->processingModel);
@@ -321,7 +325,8 @@ void MainWindow::RegenerateSourcesList()
 {
     //Update GUI list
     QIcon icon("icons/media-eject.png");
-    this->sourcesModel.setColumnCount(1);
+    if(this->sourcesModel.columnCount()!= 2)
+        this->sourcesModel.setColumnCount(2);
     this->sourcesModel.setRowCount(this->workspace.GetNumSources());
     for (int row = 0; row < this->workspace.GetNumSources(); ++row) {
         for (int column = 0; column < 1; ++column) {

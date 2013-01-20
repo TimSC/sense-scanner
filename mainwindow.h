@@ -58,27 +58,6 @@ protected:
     QString userSelection;
 };
 
-//*****************************************
-
-class SourcesList : public QListView
-{
-    /*!
-    * A QListView with currentChanged overridden to detect when
-    * this selection changes.
-    */
-
-    Q_OBJECT
-public:
-    SourcesList(QWidget * parent = 0);
-    virtual ~SourcesList();
-
-    void currentChanged(const QModelIndex & current, const QModelIndex & previous);
-
-signals:
-    void UpdateSources(const QModelIndex current);
-
-};
-
 //***************************************
 
 class MainWindow : public QMainWindow
