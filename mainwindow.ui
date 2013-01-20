@@ -62,7 +62,7 @@
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
-        <widget class="QTreeView" name="dataSources">
+        <widget class="ClickableQTreeView" name="dataSources">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -70,7 +70,7 @@
           </sizepolicy>
          </property>
         </widget>
-        <widget class="QTreeView" name="processingView"/>
+        <widget class="ClickableQTreeView" name="processingView"/>
        </widget>
       </item>
       <item>
@@ -220,6 +220,14 @@
    <container>1</container>
    <slots>
     <slot>FitToWindow()</slot>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>ClickableQTreeView</class>
+   <extends>QTreeView</extends>
+   <header>mainwindow.h</header>
+   <slots>
+    <signal>UpdateSources(QModelIndex)</signal>
    </slots>
   </customwidget>
  </customwidgets>
@@ -446,6 +454,38 @@
     <hint type="destinationlabel">
      <x>199</x>
      <y>154</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>processingView</sender>
+   <signal>UpdateSources(QModelIndex)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>AboutPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>137</x>
+     <y>216</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>161</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dataSources</sender>
+   <signal>UpdateSources(QModelIndex)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>AboutPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>137</x>
+     <y>125</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>161</y>
     </hint>
    </hints>
   </connection>

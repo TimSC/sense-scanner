@@ -58,6 +58,27 @@ protected:
     QString userSelection;
 };
 
+//*****************************************
+
+class ClickableQTreeView : public QTreeView
+{
+    /*!
+    * A QListView with currentChanged overridden to detect when
+    * this selection changes.
+    */
+
+    Q_OBJECT
+public:
+    ClickableQTreeView(QWidget * parent = 0);
+    virtual ~ClickableQTreeView();
+
+    void currentChanged(const QModelIndex & current, const QModelIndex & previous);
+
+signals:
+    void UpdateSources(const QModelIndex current);
+
+};
+
 //***************************************
 
 class MainWindow : public QMainWindow

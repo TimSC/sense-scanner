@@ -127,17 +127,17 @@ void StopProcessingDialog::AnswerCancel()
 
 //********************************
 
-ClickableQListView::ClickableQListView(QWidget * parent) : QListView(parent)
+ClickableQTreeView::ClickableQTreeView(QWidget * parent) : QTreeView(parent)
 {
 
 }
 
-ClickableQListView::~ClickableQListView()
+ClickableQTreeView::~ClickableQTreeView()
 {
 
 }
 
-void ClickableQListView::currentChanged(const QModelIndex & current, const QModelIndex & previous)
+void ClickableQTreeView::currentChanged(const QModelIndex & current, const QModelIndex & previous)
 {
     this->UpdateSources(current);
 }
