@@ -327,17 +327,41 @@ void MainWindow::RegenerateSourcesList()
     QIcon icon("icons/media-eject.png");
     if(this->sourcesModel.columnCount()!= 2)
         this->sourcesModel.setColumnCount(2);
-    this->sourcesModel.setRowCount(this->workspace.GetNumSources());
-    for (int row = 0; row < this->workspace.GetNumSources(); ++row) {
-        for (int column = 0; column < 1; ++column) {
+    if(this->sourcesModel.rowCount() != this->workspace.GetNumSources())
+        this->sourcesModel.setRowCount(this->workspace.GetNumSources());
+    for (int row = 0; row < this->workspace.GetNumSources(); ++row)
+    {
+        for (int column = 0; column < 1; ++column)
+        {
             QString fina = this->workspace.GetSourceName(row);
             QFileInfo finaInfo(fina);
 
-            QStandardItem *item = new QStandardItem(icon, finaInfo.fileName());
+            QStandardItem *item = this->sourcesModel.item(row, column);
+            if(item!=NULL)
+                continue;
+
+            item = new QStandardItem(icon, finaInfo.fileName());
             this->sourcesModel.setItem(row, column, item);
         }
-    }
 
+        for (int column = 1; column < 2; ++column)
+        {
+            std::ostringstream displayLine;
+            //float progress = this->workspace.GetProgress(row);
+
+            QStandardItem *item = this->sourcesModel.item(row, column);
+            if(item!=NULL)
+            {
+                item->setText("0.5");
+                continue;
+            }
+            else
+            {
+                item = new QStandardItem("0.5");
+                this->sourcesModel.setItem(row, column, item);
+            }
+        }
+    }
 }
 
 void MainWindow::RegenerateProcessingList()
