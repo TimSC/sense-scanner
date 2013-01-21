@@ -364,7 +364,7 @@ void AlgorithmProcess::ProcessAlgOutput()
         QTextStream dec(blockData);
         dec.setCodec("UTF-8");
         QString xmlBlock = dec.readAll();
-        cout << xmlBlock.toLocal8Bit().constData() << endl;
+        //cout << xmlBlock.toLocal8Bit().constData() << endl;
 
         //Remove used data from buffer
         this->algOutBuffer = this->algOutBuffer.mid(cmd.length() + blockArg.length() + blockLen + 2);
@@ -400,7 +400,7 @@ void AlgorithmProcess::ProcessAlgOutput()
                         std::vector<float> pt;
                         QString xStr = ptEl.attribute("x");
                         QString yStr = ptEl.attribute("y");
-                        cout << "pt" << xStr.toFloat() << "," << yStr.toFloat() << endl;
+                        //cout << "pt" << xStr.toFloat() << "," << yStr.toFloat() << endl;
                         pt.push_back(xStr.toFloat());
                         pt.push_back(yStr.toFloat());
                         model.push_back(pt);

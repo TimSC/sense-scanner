@@ -719,6 +719,15 @@ void MainWindow::TrainModelPressed()
                 cout << "Timeout getting frame " << annotTimestamp << endl;
                 continue;
             }
+
+            if(annotTimestamp * 1000 < startTimestamp || annotTimestamp * 1000 > endTimestamp)
+            {
+                cout << "Warning: found a frame but it does not cover requested time" << endl;
+                cout << "Requested: " << annotTimestamp << endl;
+                cout << "Found: " << startTimestamp << " to " << endTimestamp << endl;
+                continue;
+            }
+
             int len = img->byteCount();
             //cout << "Image bytes "<< len << endl;
             //int len = 10;
