@@ -524,10 +524,7 @@ void MainWindow::Update()
         {
             this->RegenerateProcessingList();
         }
-        if(ev->type=="ALG_DATA_BLOCK")
-        {
 
-        }
         if(ev->type=="ANNOTATION_THREAD_PROGRESS")
         {
             assert(ev->data.length()>40);

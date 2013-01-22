@@ -95,6 +95,9 @@ void AnnotThread::Update()
             cout << "startTimestamp " << this->currentStartTimestamp << endl;
             cout << "endTimestamp " << this->currentEndTimestamp << endl;
 
+            //Update annotation with frame that has been found
+            track->FoundFrame(this->currentStartTimestamp, this->currentEndTimestamp);
+
             //Check if annotation is in this frame
             std::vector<std::vector<float> > foundAnnot;
             unsigned long long foundAnnotationTime;
@@ -146,6 +149,9 @@ void AnnotThread::Update()
                     milsec,
                     this->currentStartTimestamp,
                     this->currentEndTimestamp);
+
+            //Update annotation with frame that has been found
+            track->FoundFrame(this->currentStartTimestamp, this->currentEndTimestamp);
         }
         catch (std::runtime_error &err)
         {
@@ -417,5 +423,13 @@ void Annotation::Terminate()
     {
         cout << "Warning: terminating annot thread " << this->source.toLocal8Bit().constData() << endl;
         this->annotThread->terminate();
+    }
+}
+
+void Annotation::FoundFrame(unsigned long startTi, unsigned long endTi)
+{
+    if(this->track != NULL)
+    {
+        this->track->FoundFrame(startTi, endTi);
     }
 }

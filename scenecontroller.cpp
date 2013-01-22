@@ -71,6 +71,7 @@ TrackingAnnotation::TrackingAnnotation(QObject *parent)
     this->markFrameButton = NULL;
 
     this->annotationControls = NULL;
+    this->frameTimesEnd = 0;
 
 }
 
@@ -120,6 +121,8 @@ TrackingAnnotation& TrackingAnnotation::operator= (const TrackingAnnotation &oth
     this->pos = other.pos; //contains annotation positions
     this->shape = other.shape; //contains the default shape
     this->links = other.links;
+    this->frameTimes = other.frameTimes;
+    this->frameTimesEnd = other.frameTimesEnd;
 
     this->lock.unlock();
     return *this;
@@ -1121,6 +1124,8 @@ void TrackingAnnotation::WriteAnnotationXml(QTextStream &out)
     this->WriteShapeToStream(out);
 
     std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+
+    //Save annotated frames
     for(it=this->pos.begin(); it != this->pos.end();it++)
     {
         std::vector<std::vector<float> > &frame = it->second;
@@ -1132,6 +1137,18 @@ void TrackingAnnotation::WriteAnnotationXml(QTextStream &out)
         }
         out << "\t</frame>" << endl;
     }
+
+    //Save frame start and end times
+    out << "\t<available>" << endl;
+    for(std::map<unsigned long, unsigned long>::iterator it = this->frameTimes.begin();
+        it != this->frameTimes.end();
+        it++)
+    {
+        unsigned long st = it->first;
+        out << "\t<f s=\""<<st<<"\" e=\""<<this->frameTimes[st]<<"\"/>" << endl;
+    }
+
+    out << "\t</available>" << endl;
     out << "\t</tracking>" << endl;
 }
 
@@ -1174,4 +1191,14 @@ unsigned long long TrackingAnnotation::GetIndexTimestamp(unsigned int index)
     unsigned long long out = it->first;
     this->lock.unlock();
     return out;
+}
+
+void TrackingAnnotation::FoundFrame(unsigned long startTi, unsigned long endTi)
+{
+    this->lock.lock();
+    //Update store
+    this->frameTimes[startTi] = endTi;
+    if(endTi > this->frameTimesEnd)
+        this->frameTimesEnd = endTi;
+    this->lock.unlock();
 }

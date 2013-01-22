@@ -108,6 +108,8 @@ public slots:
     void ReadAnnotationXml(QDomElement &elem);
     void WriteAnnotationXml(QTextStream &out);
 
+    void FoundFrame(unsigned long startTi, unsigned long endTi);
+
 protected:
     QSharedPointer<MouseGraphicsScene> scene;
     int activePoint; //which point is selected
@@ -128,6 +130,10 @@ protected:
     std::vector<std::vector<float> > shape; //contains the default shape
     QWidget *annotationControls;
     QMutex lock;
+
+    //Keep track of frame times that are available
+    std::map<unsigned long, unsigned long> frameTimes;
+    unsigned long frameTimesEnd;
 };
 
 #endif // SCENECONTROLLER_H

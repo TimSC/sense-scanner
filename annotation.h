@@ -92,6 +92,7 @@ protected:
     QString source;
     int active;
     int activeStateDesired;
+
 };
 
 
