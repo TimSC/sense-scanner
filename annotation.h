@@ -77,6 +77,8 @@ public:
     void SetActiveStateDesired(int desiredIn);
     int GetActiveStateDesired();
 
+    void FoundFrame(unsigned long startTi, unsigned long endTi);
+
     void Terminate();
 
     bool visible;

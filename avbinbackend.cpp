@@ -6,7 +6,7 @@
 using namespace std;
 #define DEFAULT_AUDIO_BUFF_SIZE 1024*1024
 #define SEEK_BEFORE_MARGIN 100000 //Seek this time before desired frame, microsec
-#define DECODE_INITIAL_DURATION 5000000 //Duration to decode when file is loaded
+#define DECODE_INITIAL_DURATION 0 //Duration to decode when file is loaded
 #define SEEK_TOLERANCE 1000000 //Don't seek but use playback for frames less than this time
 
 //**********************************************************
