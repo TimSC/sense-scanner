@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <QtCore/QThread>
+#include <QtCore/QUuid>
 #include <map>
 #include "localmutex.h"
 #include "localints.h"
@@ -68,10 +69,13 @@ public:
     std::tr1::shared_ptr<class Event> PopEvent();
     std::tr1::shared_ptr<class Event> WaitForEventId(unsigned long long id,
                                unsigned timeOutMs = 50000);
+    int SetThreadId(QUuid idIn);
+
 protected:
     std::vector<std::tr1::shared_ptr<class Event> > eventBuffer;
     Mutex mutex;
     class EventLoop *el;
+    QUuid threadId;
 };
 
 
@@ -123,6 +127,7 @@ public:
     void SetId(int idIn);
     int GetId();
     virtual void Finished()=0;
+    int SetThreadId(QUuid idIn);
 
 protected:
     void start (Priority priority = InheritPriority);
@@ -131,6 +136,7 @@ protected:
     int stopThreads;
     class EventLoop *eventLoop;
     Mutex mutex;
+    QUuid threadId;
     int id;
 };
 

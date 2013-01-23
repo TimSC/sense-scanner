@@ -66,6 +66,11 @@ unsigned int Workspace::AddSource(QString &fina, QString UidStr, class AvBinMedi
 void Workspace::RemoveSource(unsigned int num)
 {
     assert(num < this->annotations.size());
+
+    //Prepare annotation for delete
+    std::tr1::shared_ptr<class Annotation> ann = this->annotations[num];
+    if(ann!=NULL) ann->PreDelete();
+
     this->annotations.erase(this->annotations.begin()+num);
 }
 
@@ -84,8 +89,8 @@ unsigned int Workspace::AddAutoAnnot(QString annotUid, QString algUid, class AvB
     std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann, mediaInterface));
     annotThread->SetEventLoop(this->eventLoop);
     annotThread->Start();
-    ann->SetAlgUid(algUid);
     ann->annotThread = annotThread;
+    ann->SetAlgUid(algUid);
 
     this->annotations.push_back(ann);
     return this->annotations.size();

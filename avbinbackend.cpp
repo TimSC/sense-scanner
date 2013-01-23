@@ -190,8 +190,8 @@ void AvBinBackend::DoOpenFile(int requestId)
                     this->currentFrame.width = sinfo->video.width;
                     this->currentFrame.sample_aspect_num = sinfo->video.sample_aspect_num;
                     this->currentFrame.sample_aspect_den = sinfo->video.sample_aspect_den;
-                    this->currentFrame.frame_rate_num = sinfo->video.frame_rate_num;
-                    this->currentFrame.frame_rate_den = sinfo->video.frame_rate_den;
+                    //this->currentFrame.frame_rate_num = sinfo->video.frame_rate_num;
+                    //this->currentFrame.frame_rate_den = sinfo->video.frame_rate_den;
                     this->currentFrame.timestamp = timestamp - this->info.start_time;
                     *this->firstFrames[packet.stream_index] = this->currentFrame;
                 }
@@ -394,8 +394,8 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
                 this->currentFrame.width = sinfo->video.width;
                 this->currentFrame.sample_aspect_num = sinfo->video.sample_aspect_num;
                 this->currentFrame.sample_aspect_den = sinfo->video.sample_aspect_den;
-                this->currentFrame.frame_rate_num = sinfo->video.frame_rate_num;
-                this->currentFrame.frame_rate_den = sinfo->video.frame_rate_den;
+                //this->currentFrame.frame_rate_num = sinfo->video.frame_rate_num;
+                //this->currentFrame.frame_rate_den = sinfo->video.frame_rate_den;
                 this->currentFrame.timestamp = timestamp - this->info.start_time;
                 this->currentFrame.endTimestamp = 0;
                 this->currentFrame.requestedTimestamp = time;
@@ -629,7 +629,7 @@ void AvBinBackend::PrintAVbinStreamInfo(AVbinStreamInfo &sinfo)
         cout << "Video" << endl;
         cout << "Vid size " << sinfo.video.height <<","<<sinfo.video.height<< endl;
         cout << "Vid aspect " << sinfo.video.sample_aspect_num << "/" << sinfo.video.sample_aspect_den << endl;
-        cout << "Frame rate " << sinfo.video.frame_rate_num << "," << sinfo.video.frame_rate_den << endl;
+        //cout << "Frame rate " << sinfo.video.frame_rate_num << "," << sinfo.video.frame_rate_den << endl;
     }
     if(sinfo.type == AVBIN_STREAM_TYPE_AUDIO)
     {

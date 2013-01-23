@@ -80,6 +80,7 @@ public:
     void FoundFrame(unsigned long startTi, unsigned long endTi);
 
     void Terminate();
+    void PreDelete();
 
     bool visible;
 

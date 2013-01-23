@@ -30,10 +30,21 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
 {
     MessagableThread::SetEventLoop(eventLoopIn);
     this->eventLoop->AddListener("PREDICTION_RESULT", *this->eventReceiver);
+    this->eventLoop->AddListener("STOP_SPECIFIC_THREAD", *this->eventReceiver);
 }
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
+    if(ev->type=="STOP_SPECIFIC_THREAD")
+    {
+        QUuid algUid = this->parentAnn->GetAlgUid();
+        QUuid reqUid(ev->data.c_str());
+        if(algUid == reqUid)
+        {
+            this->stopThreads = true;
+        }
+    }
+
     MessagableThread::HandleEvent(ev);
 }
 
@@ -345,6 +356,8 @@ void Annotation::SetAlgUid(QUuid uidIn)
 {
     this->lock.lock();
     this->algUid = uidIn;
+    if(this->annotThread!=NULL)
+        this->annotThread->SetThreadId(uidIn);
     this->lock.unlock();
 }
 
@@ -360,6 +373,8 @@ void Annotation::SetAnnotUid(QUuid uidIn)
 {
     this->lock.lock();
     this->uid = uidIn;
+    if(this->annotThread != NULL)
+        this->annotThread->SetThreadId(uidIn);
     this->lock.unlock();
 }
 
@@ -432,4 +447,9 @@ void Annotation::FoundFrame(unsigned long startTi, unsigned long endTi)
     {
         this->track->FoundFrame(startTi, endTi);
     }
+}
+
+void Annotation::PreDelete()
+{
+
 }
