@@ -20,6 +20,7 @@ def WorkerProcess(childPipeConn):
 	getProgress = False
 	aliveClock = time.time()
 	aliveMsgEnabled = False
+	savedTracker = False
 
 	while running:
 		timeNow = time.time()
@@ -69,6 +70,9 @@ def WorkerProcess(childPipeConn):
 							continue
 						im = trainImgs[int(round(timestamp*1000.))]
 						tracker.Add(im, zip(xs,ys))
+
+				tracker.TrainingDataComplete()
+				#tracker = pickle.load(open("tracker.dat","rb"))
 
 			if event[0]=="SAVE_MODEL":
 				if paused and tracker is not None:
@@ -158,8 +162,8 @@ def WorkerProcess(childPipeConn):
 					im = Image.frombuffer("RGB", (width, height), event[2][:imgBytes], 'raw', "RGB", 0, 1)
 					if training:
 						#Post-training phase
-						print "Store image"
-						im.save("alg.jpg")
+						#print "Store image"
+						#im.save("alg.jpg")
 
 						outXml = "<prediction>\n"
 						xmlData = event[2][imgBytes:imgBytes+xmlBytes].decode('utf8')
@@ -196,6 +200,16 @@ def WorkerProcess(childPipeConn):
 			progress = tracker.GetProgress()
 			print "PROGRESS="+str(progress)
 			getProgress = False
+
+			#Save training when training is complete
+			if not savedTracker and tracker.trainingRegressorsCompleteFlag:
+				#tracker.PrepareForPickle()
+				#pickle.dump(tracker,open("tracker.dat","wb"),protocol=-1)
+				#tracker = pickle.load(open("tracker.dat","rb"))
+				#tracker.PostUnPickle()
+				savedTracker = True
+
+
 		else:
 			time.sleep(0.1)
 

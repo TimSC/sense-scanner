@@ -267,7 +267,8 @@ void AnnotThread::ImageToProcess(unsigned long long startTi,
 
         if(response->pos[0].size() == track->GetShapeNumPoints())
             track->SetAnnotationBetweenTimestamps(startTi, endTi, response->pos[0]);
-
+        this->currentModel = response->pos[0];
+        this->currentModelSet = true;
     }
     catch(std::runtime_error e)
     {
