@@ -1217,3 +1217,12 @@ void TrackingAnnotation::FoundFrame(unsigned long startTi, unsigned long endTi)
         this->frameTimesEnd = endTi;
     this->lock.unlock();
 }
+
+void TrackingAnnotation::GetFramesAvailable(std::map<unsigned long, unsigned long> &frameTimesOut,
+                        unsigned long &frameTimesEndOut)
+{
+    this->lock.lock();
+    frameTimesOut = this->frameTimes;
+    frameTimesEndOut = this->frameTimesEnd;
+    this->lock.unlock();
+}

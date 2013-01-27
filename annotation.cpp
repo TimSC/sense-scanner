@@ -19,6 +19,9 @@ AnnotThread::AnnotThread(class Annotation *annIn, class AvBinMedia* mediaInterfa
     this->currentEndTimestamp = 0;
     this->currentTimeSet = 0;
     this->currentModelSet = 0;
+
+    this->frameTimesEnd = 0;
+    this->frameTimesSet = false;
 }
 
 AnnotThread::~AnnotThread()
@@ -92,10 +95,48 @@ void AnnotThread::Update()
         return;
     }
 
+    //Get list of avilable frames
+    if(!this->frameTimesSet)
+    {
+        track->GetFramesAvailable(this->frameTimes, this->frameTimesEnd);
+        this->frameTimesSet = true;
+        return;
+    }
+
+    unsigned long long frameDuration = 0; //microsec
+    unsigned long long avTi = 0; //microsec
+    unsigned long long nextTi = 0; //microsec
+
     //Check algorithm is ready to work
     //TODO
 
-    if(!currentTimeSet)
+    if(this->frameTimesSet && this->currentTimeSet==false && this->frameTimes.size() > 0)
+    {
+        std::map<unsigned long, unsigned long>::iterator it = this->frameTimes.begin();
+        assert(it!=this->frameTimes.end());
+        unsigned long start = it->first;
+        unsigned long end = it->second;
+        avTi = (unsigned long long)(0.5 * (start + end) + 0.5); //microsec
+
+        std::vector<std::vector<float> > foundAnnot;
+        unsigned long long foundAnnotationTime=0;
+        int found = track->GetAnnotationBetweenTimestamps(TO_MILLISEC(start),
+                                              TO_MILLISEC(end),
+                                              TO_MILLISEC(avTi),
+                                              foundAnnot,
+                                              foundAnnotationTime);
+
+        //Check if first frame has already been annotated
+        if(found)
+        {
+            this->currentTimeSet = true;
+            this->currentStartTimestamp = start;
+            this->currentEndTimestamp = end;
+        }
+    }
+
+    //If needed, get the first frame from the video
+    if(this->currentTimeSet==false)
     {
         //Get first frame
         QSharedPointer<QImage> img;
@@ -111,7 +152,7 @@ void AnnotThread::Update()
 
             //Check if annotation is in this frame
             std::vector<std::vector<float> > foundAnnot;
-            unsigned long long foundAnnotationTime;
+            unsigned long long foundAnnotationTime=0;
             int found = track->GetAnnotationBetweenTimestamps(TO_MILLISEC(this->currentStartTimestamp),
                                                   TO_MILLISEC(this->currentEndTimestamp),
                                                   0,
@@ -139,20 +180,59 @@ void AnnotThread::Update()
             cout << "Timeout getting frame 0" << endl;
             return;
         }
-        currentTimeSet = 1;
+        this->currentTimeSet = true;
         return;
     }
 
+    //If the list of frames has not been set, assume it is blank
+    this->frameTimesSet = true;
+
     //Estimate mid time of next frame
-    unsigned long long frameDuration = this->currentEndTimestamp - this->currentStartTimestamp; //microsec
-    unsigned long long avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5); //microsec
-    unsigned long long nextTi = avTi + frameDuration; //microsec
+    assert(this->currentTimeSet==true);
+    frameDuration = this->currentEndTimestamp - this->currentStartTimestamp; //microsec
+    avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5); //microsec
+    nextTi = avTi + frameDuration; //microsec
 
     //Get subsequent frames
     if(nextTi < srcDuration * 1000)
     {
-        QSharedPointer<QImage> img;
         unsigned long long milsec = TO_MILLISEC(nextTi);
+
+        //Check if the next frame start and end is already known
+        std::map<unsigned long, unsigned long>::iterator fit = this->frameTimes.find(this->currentEndTimestamp);
+        if(fit != this->frameTimes.end())
+        {
+            //Frame duration is already known
+            //Now check if annotation already exists
+            std::vector<std::vector<float> > foundAnnot;
+            unsigned long long foundAnnotationTime;
+            int found = track->GetAnnotationBetweenTimestamps(TO_MILLISEC(this->currentStartTimestamp),
+                                                  TO_MILLISEC(this->currentEndTimestamp),
+                                                  milsec,
+                                                  foundAnnot,
+                                                  foundAnnotationTime);
+
+            if(found)
+            {
+                //Update current model from annotation
+                this->currentModel = foundAnnot;
+                this->currentModelSet = 1;
+
+                //This frame is done, go to next frame
+                this->currentStartTimestamp = fit->first;
+                this->currentEndTimestamp = fit->second;
+                frameDuration = this->currentEndTimestamp - this->currentStartTimestamp;
+                avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5);
+                nextTi = avTi + frameDuration;
+
+                return;
+            }
+        }
+
+        QSharedPointer<QImage> img;
+
+        //If needed, get the next frame from video
+
         try
         {
             cout << "Current time " << milsec << "," << src.toLocal8Bit().constData() << endl;

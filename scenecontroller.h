@@ -109,6 +109,8 @@ public slots:
     void WriteAnnotationXml(QTextStream &out);
 
     void FoundFrame(unsigned long startTi, unsigned long endTi);
+    void GetFramesAvailable(std::map<unsigned long, unsigned long> &frameTimesOut,
+                            unsigned long &frameTimesEndOut);
 
 protected:
     QSharedPointer<MouseGraphicsScene> scene;

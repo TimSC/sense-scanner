@@ -527,7 +527,7 @@ void MainWindow::Update()
 
         if(ev->type=="ANNOTATION_THREAD_PROGRESS")
         {
-            assert(ev->data.length()>40);
+            assert(ev->data.length()>=40);
             QUuid annId(ev->data.substr(0, 38).c_str());
             QString progStr(ev->data.substr(39).c_str());
             this->annotProgress[annId] = progStr.toFloat();

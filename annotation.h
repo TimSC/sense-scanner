@@ -42,6 +42,10 @@ protected:
     int currentTimeSet;
     std::vector<std::vector<float> > currentModel;
     int currentModelSet;
+
+    std::map<unsigned long, unsigned long> frameTimes;
+    unsigned long frameTimesEnd;
+    bool frameTimesSet;
 };
 
 class Annotation
