@@ -1139,7 +1139,7 @@ void TrackingAnnotation::WriteAnnotationXml(QTextStream &out)
     }
 
     //Save frame start and end times
-    out << "\t<available>" << endl;
+    out << "\t<available to=\""<< this->frameTimesEnd << "\">" << endl;
     for(std::map<unsigned long, unsigned long>::iterator it = this->frameTimes.begin();
         it != this->frameTimes.end();
         it++)
