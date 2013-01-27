@@ -1112,6 +1112,21 @@ void TrackingAnnotation::ReadAnnotationXml(QDomElement &elem)
                 assert(frame.size() == this->shape.size());
                 this->pos[(unsigned long long)(timeSec * 1000.f + 0.5)] = frame;
             }
+            if(e.tagName() == "available")
+            {
+                this->frameTimes.clear();
+                this->frameTimesEnd = e.attribute("to").toULong();
+
+                QDomElement frEl = e.firstChildElement();
+                while(!frEl.isNull())
+                {
+                    if(frEl.tagName() != "f");
+                    unsigned long s = frEl.attribute("s").toULong();
+                    unsigned long e = frEl.attribute("e").toULong();
+                    this->frameTimes[s] = e;
+                    frEl = frEl.nextSiblingElement();
+                }
+            }
         }
         n = n.nextSibling();
     }
