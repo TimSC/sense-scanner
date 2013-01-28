@@ -57,6 +57,8 @@ void AnnotThread::Update()
     assert(this->parentAnn != NULL);
     QUuid algUid = this->parentAnn->GetAlgUid();
     QString src = this->parentAnn->GetSource();
+    int activeStateDesired = this->parentAnn->GetActiveStateDesired();
+    if(!activeStateDesired) return;
 
     if(algUid.isNull())
     {
@@ -268,12 +270,14 @@ void AnnotThread::Update()
         catch (std::runtime_error &err)
         {
             this->parentAnn->SetActiveStateDesired(0);
+            this->currentTimeSet = false;
             return;
         }
 
         if(this->currentEndTimestamp < milsec)
         {
             this->parentAnn->SetActiveStateDesired(0);
+            this->currentTimeSet = false;
             throw runtime_error("Earlier frame found than was requested");
         }
 
