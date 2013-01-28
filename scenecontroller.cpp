@@ -673,6 +673,7 @@ QWidget *TrackingAnnotation::ControlsFactory(QWidget *parent)
     this->annotationControls = new QWidget();
     assert(this->annotationControls->layout() == NULL);
     QHBoxLayout *layout = new QHBoxLayout();
+    layout->setContentsMargins(0,0,0,0);
 
     assert(this->markFrameButton == NULL);
     this->markFrameButton = new QPushButton("Mark Frame", this->annotationControls);
