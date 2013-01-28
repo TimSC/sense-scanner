@@ -58,7 +58,11 @@ void AnnotThread::Update()
     QUuid algUid = this->parentAnn->GetAlgUid();
     QString src = this->parentAnn->GetSource();
     int activeStateDesired = this->parentAnn->GetActiveStateDesired();
-    if(!activeStateDesired) return;
+    if(!activeStateDesired)
+    {
+        this->msleep(100);
+        return;
+    }
 
     if(algUid.isNull())
     {
