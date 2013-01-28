@@ -201,6 +201,7 @@ void AnnotThread::Update()
 
     //Check if known frames can satisfy iterations
     int knownFrame = 1;
+    int countKnown = 0;
     if(nextTi < srcDuration * 1000) while(knownFrame)
     {
         unsigned long long milsec = TO_MILLISEC(nextTi);
@@ -224,6 +225,7 @@ void AnnotThread::Update()
                 //Update current model from annotation
                 this->currentModel = foundAnnot;
                 this->currentModelSet = 1;
+                countKnown ++;
 
                 //This frame is done, go to next frame
                 this->currentStartTimestamp = fit->first;
@@ -231,16 +233,22 @@ void AnnotThread::Update()
                 frameDuration = this->currentEndTimestamp - this->currentStartTimestamp;
                 avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5);
                 nextTi = avTi + frameDuration;
+            }
+            else
+                knownFrame = 0;
 
+            //After 100 frames, return to allow thread messages to be processed
+            if(countKnown>1000)
+            {
                 //Estimate progress and generate an event
                 double progress = double(milsec) / this->srcDuration;
                 std::tr1::shared_ptr<class Event> requestEv(new Event("ANNOTATION_THREAD_PROGRESS"));
                 QString progressStr = QString("%0 %1").arg(this->parentAnn->GetAnnotUid()).arg(progress);
                 requestEv->data = progressStr.toLocal8Bit().constData();
                 this->eventLoop->SendEvent(requestEv);
+
+                return;
             }
-            else
-                knownFrame = 0;
 
         }
         else
