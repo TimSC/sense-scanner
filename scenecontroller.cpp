@@ -185,6 +185,7 @@ int TrackingAnnotation::GetAnnotationBetweenTimestamps(unsigned long long startT
             return 1;
         }
     }
+    this->lock.unlock();
 
     //If the above did not find a frame, check if there is annotation
     //at the requested time
@@ -192,12 +193,10 @@ int TrackingAnnotation::GetAnnotationBetweenTimestamps(unsigned long long startT
     if(found)
     {
         outAnnotationTime = requestedTime;
-        this->lock.unlock();
         return 1;
     }
 
     //Failed to find annotation
-    this->lock.unlock();
     return 0;
 }
 
