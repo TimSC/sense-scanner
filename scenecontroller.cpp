@@ -150,6 +150,7 @@ int TrackingAnnotation::GetAnnotationAtTime(unsigned long long time,
     annot.clear();
     //Check if there is annotation
     //at the requested time
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
     it = this->pos.find(time);
     if(it != this->pos.end())
     {
