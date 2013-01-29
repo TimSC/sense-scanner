@@ -109,6 +109,8 @@ public slots:
 
     void ReadAnnotationXml(QDomElement &elem);
     void WriteAnnotationXml(QTextStream &out);
+    void ReadFramesXml(QDomElement &elem);
+    void ReadDemoFramesXml(QDomElement &elem);
 
     void FoundFrame(unsigned long startTi, unsigned long endTi);
     void GetFramesAvailable(std::map<unsigned long, unsigned long> &frameTimesOut,

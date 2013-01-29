@@ -13,6 +13,9 @@
 using namespace::std;
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
 
+#define DEMO_MODE
+#define SECRET_KEY "This is a secret..."
+
 //Custom graphics scene to catch mouse move and press
 
 MouseGraphicsScene::MouseGraphicsScene(QObject *parent) : QGraphicsScene(parent)
@@ -1122,14 +1125,27 @@ void TrackingAnnotation::ReadAnnotationXml(QDomElement &elem)
                 std::vector<std::vector<float> > shapeData = ProcessXmlDomFrame(e);
                 this->shape = shapeData;
             }
+
+            //Obsolete format loading code here
             if(e.tagName() == "frame")
             {
                 std::vector<std::vector<float> > frame = ProcessXmlDomFrame(e);
-                cout << e.attribute("time").toFloat() << endl;
+                //cout << e.attribute("time").toFloat() << endl;
                 float timeSec = e.attribute("time").toFloat();
                 assert(timeSec > 0.f);
                 assert(frame.size() == this->shape.size());
                 this->pos[(unsigned long long)(timeSec * 1000.f + 0.5)] = frame;
+            }
+
+            //Newer frame XML format
+            if(e.tagName() == "frameset")
+            {
+                ReadFramesXml(e);
+            }
+
+            if(e.tagName() == "demoframe")
+            {
+                ReadDemoFramesXml(e);
             }
             if(e.tagName() == "available")
             {
@@ -1152,6 +1168,52 @@ void TrackingAnnotation::ReadAnnotationXml(QDomElement &elem)
     this->lock.unlock();
 }
 
+void TrackingAnnotation::ReadFramesXml(QDomElement &elem)
+{
+    QDomElement e = elem.firstChildElement();
+    while(!e.isNull())
+    {
+        if(e.tagName() != "frame") continue;
+
+        std::vector<std::vector<float> > frame = ProcessXmlDomFrame(e);
+        //cout << e.attribute("time").toFloat() << endl;
+        float timeSec = e.attribute("time").toFloat();
+        assert(timeSec > 0.f);
+        assert(frame.size() == this->shape.size());
+        this->pos[(unsigned long long)(timeSec * 1000.f + 0.5)] = frame;
+
+        e = e.nextSiblingElement();
+    }
+}
+
+void TrackingAnnotation::ReadDemoFramesXml(QDomElement &elem)
+{
+    QString content = elem.text();
+    int test = content.length();
+    QString test2 = elem.tagName();
+
+    QByteArray encData = QByteArray::fromBase64(content.toLocal8Bit().constData());
+    int test3 = encData.length();
+
+    QByteArray secretKey(SECRET_KEY);
+    QBlowfish bf(secretKey);
+    bf.setPaddingEnabled(true);
+
+    QByteArray encryptedBa = bf.decrypted(encData);
+    QString framesXml = QString::fromUtf8(encryptedBa);
+
+    QDomDocument doc("mydocument");
+    QString errorMsg;
+    if (!doc.setContent(framesXml, &errorMsg))
+    {
+        throw runtime_error(errorMsg.toLocal8Bit().constData());
+    }
+
+    //Load points and links into memory
+    QDomElement rootElem = doc.documentElement();
+    this->ReadFramesXml(rootElem);
+}
+
 void TrackingAnnotation::WriteAnnotationXml(QTextStream &out)
 {
     out << "\t<tracking>" << endl;
@@ -1162,6 +1224,7 @@ void TrackingAnnotation::WriteAnnotationXml(QTextStream &out)
     //Save annotated frames
     QString frameXmlStr;
     QTextStream frameXml(&frameXmlStr);
+    frameXml << "\t<frameset>" << endl;
     for(it=this->pos.begin(); it != this->pos.end();it++)
     {
         std::vector<std::vector<float> > &frame = it->second;
@@ -1173,20 +1236,21 @@ void TrackingAnnotation::WriteAnnotationXml(QTextStream &out)
         }
         frameXml << "\t</frame>" << endl;
     }
+    frameXml << "\t</frameset>" << endl;
 
-#define DEMO_MODE
 #ifndef DEMO_MODE
     out << frameXml.string();
 #else
     out << "<demoframe>" << endl;
-    QByteArray secretKey("This is a secret...");
+    QByteArray secretKey(SECRET_KEY);
 
     QBlowfish bf(secretKey);
     bf.setPaddingEnabled(true);
     QByteArray encryptedBa = bf.encrypted(frameXmlStr.toUtf8());
     QByteArray encBase64 = encryptedBa.toBase64();
-    for(int pos=0;pos<encryptedBa.length();pos+=512)
-        out << encBase64.mid(pos,512) << endl;
+    //for(int pos=0;pos<encBase64.length();pos+=512)
+    //    out << encBase64.mid(pos,512) << endl;
+    out << encBase64 << endl;
 
     out << "</demoframe>" << endl;
 
