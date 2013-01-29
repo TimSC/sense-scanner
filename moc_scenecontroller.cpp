@@ -1,8 +1,8 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'scenecontroller.h'
 **
-** Created: Sat Jan 12 16:36:36 2013
-**      by: The Qt Meta Object Compiler version 63 (Qt 4.8.1)
+** Created: Tue Jan 29 02:12:25 2013
+**      by: The Qt Meta Object Compiler version 63 (Qt 4.8.3)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
@@ -11,7 +11,7 @@
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'scenecontroller.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 63
-#error "This file was generated using the moc from 4.8.1. It"
+#error "This file was generated using the moc from 4.8.3. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -23,7 +23,7 @@ static const uint qt_meta_data_TrackingAnnotation[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-      15,   14, // methods
+      20,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -42,10 +42,15 @@ static const uint qt_meta_data_TrackingAnnotation[] = {
      166,   19,   19,   19, 0x0a,
      178,   19,   19,   19, 0x0a,
      204,   19,   19,   19, 0x0a,
-     228,   19,   19,   19, 0x0a,
-     245,   19,   19,   19, 0x0a,
-     267,  262,   19,   19, 0x0a,
-     303,  299,   19,   19, 0x0a,
+     232,   19,  228,   19, 0x0a,
+     252,   19,   19,   19, 0x0a,
+     269,   19,   19,   19, 0x0a,
+     291,  286,   19,   19, 0x0a,
+     327,  323,   19,   19, 0x0a,
+     360,  286,   19,   19, 0x0a,
+     388,  286,   19,   19, 0x0a,
+     434,  420,   19,   19, 0x0a,
+     489,  458,   19,   19, 0x0a,
 
        0        // eod
 };
@@ -57,10 +62,16 @@ static const char qt_meta_stringdata_TrackingAnnotation[] = {
     "AddLinkPressed()\0RemoveLinkPressed()\0"
     "LoadShape()\0SaveShape()\0"
     "SetShapeFromCurentFrame()\0"
-    "ResetCurentFrameShape()\0LoadAnnotation()\0"
+    "ResetCurentFrameShape()\0int\0"
+    "GetShapeNumPoints()\0LoadAnnotation()\0"
     "SaveAnnotation()\0elem\0"
     "ReadAnnotationXml(QDomElement&)\0out\0"
     "WriteAnnotationXml(QTextStream&)\0"
+    "ReadFramesXml(QDomElement&)\0"
+    "ReadDemoFramesXml(QDomElement&)\0"
+    "startTi,endTi\0FoundFrame(ulong,ulong)\0"
+    "frameTimesOut,frameTimesEndOut\0"
+    "GetFramesAvailable(std::map<ulong,ulong>&,ulong&)\0"
 };
 
 void TrackingAnnotation::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -80,10 +91,16 @@ void TrackingAnnotation::qt_static_metacall(QObject *_o, QMetaObject::Call _c, i
         case 8: _t->SaveShape(); break;
         case 9: _t->SetShapeFromCurentFrame(); break;
         case 10: _t->ResetCurentFrameShape(); break;
-        case 11: _t->LoadAnnotation(); break;
-        case 12: _t->SaveAnnotation(); break;
-        case 13: _t->ReadAnnotationXml((*reinterpret_cast< QDomElement(*)>(_a[1]))); break;
-        case 14: _t->WriteAnnotationXml((*reinterpret_cast< QTextStream(*)>(_a[1]))); break;
+        case 11: { int _r = _t->GetShapeNumPoints();
+            if (_a[0]) *reinterpret_cast< int*>(_a[0]) = _r; }  break;
+        case 12: _t->LoadAnnotation(); break;
+        case 13: _t->SaveAnnotation(); break;
+        case 14: _t->ReadAnnotationXml((*reinterpret_cast< QDomElement(*)>(_a[1]))); break;
+        case 15: _t->WriteAnnotationXml((*reinterpret_cast< QTextStream(*)>(_a[1]))); break;
+        case 16: _t->ReadFramesXml((*reinterpret_cast< QDomElement(*)>(_a[1]))); break;
+        case 17: _t->ReadDemoFramesXml((*reinterpret_cast< QDomElement(*)>(_a[1]))); break;
+        case 18: _t->FoundFrame((*reinterpret_cast< ulong(*)>(_a[1])),(*reinterpret_cast< ulong(*)>(_a[2]))); break;
+        case 19: _t->GetFramesAvailable((*reinterpret_cast< std::map<ulong,ulong>(*)>(_a[1])),(*reinterpret_cast< ulong(*)>(_a[2]))); break;
         default: ;
         }
     }
@@ -121,9 +138,9 @@ int TrackingAnnotation::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 15)
+        if (_id < 20)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 15;
+        _id -= 20;
     }
     return _id;
 }
