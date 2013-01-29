@@ -679,7 +679,19 @@ void MainWindow::TrainModelPressed()
     std::tr1::shared_ptr<class AlgorithmProcess> alg(new class AlgorithmProcess(this->eventLoop, this));
     alg->SetUid(QUuid::createUuid());
 
-    alg->Init();
+	try
+	{
+		alg->Init();
+	}
+	catch(std::runtime_error &err)
+	{
+		//If python/executable is not found, an error is thrown to be caught here
+		QErrorMessage *errPopUp = new QErrorMessage(this);
+		errPopUp->showMessage(err.what());
+		errPopUp->exec();
+		delete errPopUp;
+		return;
+	}
 
     //Start worker process
     alg->Start();
