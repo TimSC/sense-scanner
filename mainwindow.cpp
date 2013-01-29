@@ -730,15 +730,16 @@ void MainWindow::TrainModelPressed()
             //int len = 10;
 
             assert(img->format() == QImage::Format_RGB888);
-            QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(len);
+            QByteArray imgRaw((const char *)img->bits(), len);
+            QByteArray imgRawB64 = imgRaw.toBase64();
+            QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(imgRawB64.length());
             QString imgPreamble2 = QString("RGB_IMAGE_DATA TIMESTAMP=%1 HEIGHT=%2 WIDTH=%3\n").
                     arg(annotTimestamp).
                     arg(img->height()).
                     arg(img->width());
             alg->SendCommand(imgPreamble1);
             alg->SendCommand(imgPreamble2);
-            QByteArray imgRaw((const char *)img->bits(), len);
-            alg->SendRawData(imgRaw);
+            alg->SendRawData(imgRawB64);
             //for (int xx=0;xx<len;xx++) alg->SendCommand("x");
 
             //Get annotation data and sent it to the process

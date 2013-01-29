@@ -101,11 +101,12 @@ def WorkerProcess(childPipeConn):
 					width = int(argDict['WIDTH'])
 					height = int(argDict['HEIGHT'])
 					timestamp = int(argDict['TIMESTAMP'])
-					if width * height * 3 != len(event[2]): 
-						print "#Image buffer of incorrect size",width,height,len(event[2])
+					imgRaw = base64.b64decode(event[2])
+					if width * height * 3 != len(imgRaw): 
+						print "#Image buffer of incorrect size",width,height,len(imgRaw)
 						continue
 
-					im = Image.frombuffer("RGB", (width, height), event[2], 'raw', "RGB", 0, 1)
+					im = Image.frombuffer("RGB", (width, height), imgRaw, 'raw', "RGB", 0, 1)
 					if not training:
 						#Pre-training image collection
 						print "Store image"
