@@ -218,11 +218,24 @@ void AnnotThread::Update()
             //Now check if annotation already exists
             std::vector<std::vector<float> > foundAnnot;
             unsigned long long foundAnnotationTime;
-            int found = track->GetAnnotationBetweenTimestamps(TO_MILLISEC(this->currentStartTimestamp),
-                                                  TO_MILLISEC(this->currentEndTimestamp),
-                                                  milsec,
-                                                  foundAnnot,
-                                                  foundAnnotationTime);
+
+            //Get frame at expected time (fast)
+            int found = track->GetAnnotationAtTime(milsec,
+                                                  foundAnnot);
+            if(found)
+            {
+                foundAnnotationTime = milsec;
+            }
+            else
+            {
+                //Get frames anywhere in frame iterval (slow)
+                found = track->GetAnnotationBetweenTimestamps(
+                    TO_MILLISEC(this->currentStartTimestamp),
+                    TO_MILLISEC(this->currentEndTimestamp),
+                    milsec,
+                    foundAnnot,
+                    foundAnnotationTime);
+            }
 
             if(found)
             {
