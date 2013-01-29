@@ -1155,7 +1155,7 @@ void TrackingAnnotation::ReadAnnotationXml(QDomElement &elem)
                 QDomElement frEl = e.firstChildElement();
                 while(!frEl.isNull())
                 {
-                    if(frEl.tagName() != "f");
+                    if(frEl.tagName() != "f") continue;
                     unsigned long s = frEl.attribute("s").toULong();
                     unsigned long e = frEl.attribute("e").toULong();
                     this->frameTimes[s] = e;
