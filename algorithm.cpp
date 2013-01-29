@@ -251,8 +251,11 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
         xml+="</predict>\n";
         QByteArray xmlBytes(xml.toUtf8().constData());
+		QByteArray imgRaw((const char *)img->bits(), img->byteCount());
+		QByteArray combinedRawB64 = imgRaw.toBase64();
+		combinedRawB64.append(xmlBytes.toBase64());
 
-        QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(img->byteCount()+xmlBytes.length());
+        QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(combinedRawB64.length());
         QString imgPreamble2 = QString("RGB_IMAGE_AND_XML HEIGHT=%1 WIDTH=%2 IMGBYTES=%3 XMLBYTES=%4 ID=%5\n").
                 arg(img->height()).
                 arg(img->width()).
@@ -261,9 +264,8 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
                 arg(ev->id);
         this->SendCommand(imgPreamble1);
         this->SendCommand(imgPreamble2);
-        QByteArray imgRaw((const char *)img->bits(), img->byteCount());
-        this->SendRawData(imgRaw);
-        this->SendRawData(xmlBytes);
+        
+        this->SendRawData(combinedRawB64);
     }
 }
 

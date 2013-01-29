@@ -156,18 +156,19 @@ def WorkerProcess(childPipeConn):
 					imgBytes = int(argDict['IMGBYTES'])
 					xmlBytes = int(argDict['XMLBYTES'])
 					reqId = int(argDict['ID'])
-					if width * height * 3 != imgBytes: 
-						print "#Image buffer of incorrect size",width,height,len(event[2])
-						continue
+					combinedRaw = base64.b64decode(event[2]);
+					#if width * height * 3 != imgBytes: 
+					#	print "#Image buffer of incorrect size",width,height,len(event[2])
+					#	continue
 
-					im = Image.frombuffer("RGB", (width, height), event[2][:imgBytes], 'raw', "RGB", 0, 1)
+					im = Image.frombuffer("RGB", (width, height), combinedRaw[:imgBytes], 'raw', "RGB", 0, 1)
 					if training:
 						#Post-training phase
 						#print "Store image"
 						#im.save("alg.jpg")
 
 						outXml = "<prediction>\n"
-						xmlData = event[2][imgBytes:imgBytes+xmlBytes].decode('utf8')
+						xmlData = combinedRaw[imgBytes:imgBytes+xmlBytes].decode('utf8')
 						tree = ET.fromstring(xmlData)
 						for model in tree:
 							outXml += " <model>\n"
