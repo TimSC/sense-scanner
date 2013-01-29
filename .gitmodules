@@ -1,3 +1,6 @@
 [submodule "reltracker"]
 	path = reltracker
 	url = https://github.com/TimSC/reltracker.git
+[submodule "qblowfish"]
+	path = qblowfish
+	url = https://github.com/roop/qblowfish.git

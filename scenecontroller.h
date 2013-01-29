@@ -71,6 +71,8 @@ public:
     std::vector<std::vector<float> > ProcessXmlDomFrame(QDomElement &e);
     QSharedPointer<MouseGraphicsScene> GetScene();
 
+    int GetAnnotationAtTime(unsigned long long time,
+        std::vector<std::vector<float> > &annot);
     int GetAnnotationBetweenTimestamps(unsigned long long startTime,
         unsigned long long endTime,
         unsigned long long requestedTime,

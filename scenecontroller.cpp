@@ -9,6 +9,7 @@
 #include <QtXml/QtXml>
 #include "assert.h"
 #include "vectors.h"
+#include "qblowfish/src/qblowfish.h"
 using namespace::std;
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
 
@@ -142,6 +143,24 @@ bool TrackingAnnotation::operator!= (const TrackingAnnotation &other)
     return ret;
 }
 
+int TrackingAnnotation::GetAnnotationAtTime(unsigned long long time,
+    std::vector<std::vector<float> > &annot)
+{
+    this->lock.lock();
+    annot.clear();
+    //Check if there is annotation
+    //at the requested time
+    it = this->pos.find(time);
+    if(it != this->pos.end())
+    {
+        annot = it->second;
+        this->lock.unlock();
+        return 1;
+    }
+    this->lock.unlock();
+    return 0;
+}
+
 int TrackingAnnotation::GetAnnotationBetweenTimestamps(unsigned long long startTime,
                                                           unsigned long long endTime,
                                                           unsigned long long requestedTime,
@@ -168,11 +187,10 @@ int TrackingAnnotation::GetAnnotationBetweenTimestamps(unsigned long long startT
 
     //If the above did not find a frame, check if there is annotation
     //at the requested time
-    it = this->pos.find(requestedTime);
-    if(it != this->pos.end())
+    int found = GetAnnotationAtTime(requestedTime, annot);
+    if(found)
     {
         outAnnotationTime = requestedTime;
-        annot = it->second;
         this->lock.unlock();
         return 1;
     }
@@ -1142,17 +1160,37 @@ void TrackingAnnotation::WriteAnnotationXml(QTextStream &out)
     std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
 
     //Save annotated frames
+    QString frameXmlStr;
+    QTextStream frameXml(&frameXmlStr);
     for(it=this->pos.begin(); it != this->pos.end();it++)
     {
         std::vector<std::vector<float> > &frame = it->second;
         assert(frame.size() == this->shape.size());
-        out << "\t<frame time='"<<(it->first/1000.f)<<"'>" << endl;
+        frameXml << "\t<frame time='"<<(it->first/1000.f)<<"'>\n";
         for(unsigned int i=0; i < frame.size(); i++)
         {
-            out << "\t\t<point id='"<<i<<"' x='"<<frame[i][0]<<"' y='"<<frame[i][1]<<"'/>" << endl;
+            frameXml << "\t\t<point id='"<<i<<"' x='"<<frame[i][0]<<"' y='"<<frame[i][1]<<"'/>\n";
         }
-        out << "\t</frame>" << endl;
+        frameXml << "\t</frame>" << endl;
     }
+
+#define DEMO_MODE
+#ifndef DEMO_MODE
+    out << frameXml.string();
+#else
+    out << "<demoframe>" << endl;
+    QByteArray secretKey("This is a secret...");
+
+    QBlowfish bf(secretKey);
+    bf.setPaddingEnabled(true);
+    QByteArray encryptedBa = bf.encrypted(frameXmlStr.toUtf8());
+    QByteArray encBase64 = encryptedBa.toBase64();
+    for(int pos=0;pos<encryptedBa.length();pos+=512)
+        out << encBase64.mid(pos,512) << endl;
+
+    out << "</demoframe>" << endl;
+
+#endif //DEMO_MODE
 
     //Save frame start and end times
     out << "\t<available to=\""<< this->frameTimesEnd << "\">" << endl;

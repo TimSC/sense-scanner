@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     scenecontroller.cpp \
     workspace.cpp \
     algorithm.cpp \
-    annotation.cpp
+    annotation.cpp \
+    qblowfish/src/qblowfish.cpp
 
 HEADERS  += mainwindow.h \
     videowidget.h \
