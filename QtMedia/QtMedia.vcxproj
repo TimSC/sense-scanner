@@ -46,7 +46,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Dev\Lib\Qt\4.8.3\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>QtGui4.lib;QtCore4.lib;QtWebKit4.lib;QtXml4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>QtGuid4.lib;QtCored4.lib;QtWebKitd4.lib;QtXmld4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -80,6 +80,7 @@
     <ClCompile Include="..\moc_mainwindow.cpp" />
     <ClCompile Include="..\moc_scenecontroller.cpp" />
     <ClCompile Include="..\moc_videowidget.cpp" />
+    <ClCompile Include="..\moc_workspace.cpp" />
     <ClCompile Include="..\qblowfish\src\qblowfish.cpp" />
     <ClCompile Include="..\scenecontroller.cpp" />
     <ClCompile Include="..\videoarea.cpp" />

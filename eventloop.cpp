@@ -144,7 +144,7 @@ void EventReceiver::MessageLoopDeleted()
     this->mutex.unlock();
 }
 
-int EventReceiver::SetThreadId(QUuid idIn)
+void EventReceiver::SetThreadId(QUuid idIn)
 {
     this->mutex.lock();
     this->threadId = idIn;
@@ -407,7 +407,7 @@ int MessagableThread::GetId()
     return this->id;
 }
 
-int MessagableThread::SetThreadId(QUuid idIn)
+void MessagableThread::SetThreadId(QUuid idIn)
 {
     this->mutex.lock();
     this->threadId = idIn;

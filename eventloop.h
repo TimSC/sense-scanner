@@ -69,7 +69,7 @@ public:
     std::tr1::shared_ptr<class Event> PopEvent();
     std::tr1::shared_ptr<class Event> WaitForEventId(unsigned long long id,
                                unsigned timeOutMs = 50000);
-    int SetThreadId(QUuid idIn);
+    void SetThreadId(QUuid idIn);
 
 protected:
     std::vector<std::tr1::shared_ptr<class Event> > eventBuffer;
@@ -127,7 +127,7 @@ public:
     void SetId(int idIn);
     int GetId();
     virtual void Finished()=0;
-    int SetThreadId(QUuid idIn);
+    void SetThreadId(QUuid idIn);
 
 protected:
     void start (Priority priority = InheritPriority);

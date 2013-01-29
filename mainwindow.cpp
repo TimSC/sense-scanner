@@ -210,9 +210,6 @@ MainWindow::~MainWindow()
     delete this->timer;
     this->timer = NULL;
 
-    delete this->eventLoop;
-    this->eventLoop = NULL;
-
     delete this->eventReceiver;
     this->eventReceiver = NULL;
 
@@ -224,6 +221,9 @@ MainWindow::~MainWindow()
 
     delete this->mediaInterfaceBack;
     this->mediaInterfaceBack = NULL;
+
+	delete this->eventLoop;
+    this->eventLoop = NULL;
 
     delete ui;
 }
