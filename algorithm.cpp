@@ -41,14 +41,23 @@ void AlgorithmProcess::Init()
     if(this->initDone) return;
     assert(this->state() != QProcess::Running);
 
+#ifndef _MSC_VER
     QString program = "/usr/bin/python";
+#else
+	QString program = "c:\\dev\\Python27\\python.exe";
+#endif
+
     QFile programFile(program);
     if(!programFile.exists())
     {
         throw std::runtime_error("Process executable not found");
     }
     QStringList arguments;
+#ifndef _MSC_VER
     arguments.append("../QtMedia/echosrv.py");
+#else
+	arguments.append("..\echosrv.py");
+#endif
     this->start(program, arguments);
     this->stopping = 0;
     this->paused = 1;
