@@ -1,5 +1,5 @@
 
-import multiprocessing, sys, time, pickle, bz2
+import multiprocessing, sys, time, pickle, bz2, base64
 from PIL import Image
 import xml.etree.ElementTree as ET
 from reltracker import reltracker
@@ -131,7 +131,7 @@ def WorkerProcess(childPipeConn):
 				if args[0]=="MODEL":
 					print "Loading model from string", len(event[2])
 					try:
-						modelData = bz2.decompress(event[2])
+						modelData = bz2.decompress(base64.b64decode(event[2]))
 						print "Uncompressed size", len(modelData)
 						tracker = pickle.loads(modelData)
 						tracker.PostUnPickle()
