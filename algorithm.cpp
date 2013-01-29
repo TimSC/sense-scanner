@@ -168,7 +168,7 @@ QByteArray AlgorithmProcess::ReadLineFromBuffer(QByteArray &buff, int popLine, i
     QByteArray cmd = buff.mid(skipPos,newLinePos-skipPos);
     if(popLine) buff = buff.mid(newLinePos+1);
 
-    if(buff != NULL)
+	if(cmd.length()>0)
     {
         this->algOutLog->write(cmd.constData());
         this->algOutLog->write("\n");

@@ -67,6 +67,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\algorithm.cpp" />
+    <ClCompile Include="..\annotation.cpp" />
     <ClCompile Include="..\avbinapi.cpp" />
     <ClCompile Include="..\avbinbackend.cpp" />
     <ClCompile Include="..\avbinmedia.cpp" />
@@ -78,6 +80,7 @@
     <ClCompile Include="..\moc_mainwindow.cpp" />
     <ClCompile Include="..\moc_scenecontroller.cpp" />
     <ClCompile Include="..\moc_videowidget.cpp" />
+    <ClCompile Include="..\qblowfish\src\qblowfish.cpp" />
     <ClCompile Include="..\scenecontroller.cpp" />
     <ClCompile Include="..\videoarea.cpp" />
     <ClCompile Include="..\videowidget.cpp" />
