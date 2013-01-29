@@ -1248,9 +1248,9 @@ void TrackingAnnotation::WriteAnnotationXml(QTextStream &out)
     bf.setPaddingEnabled(true);
     QByteArray encryptedBa = bf.encrypted(frameXmlStr.toUtf8());
     QByteArray encBase64 = encryptedBa.toBase64();
-    //for(int pos=0;pos<encBase64.length();pos+=512)
-    //    out << encBase64.mid(pos,512) << endl;
-    out << encBase64 << endl;
+    for(int pos=0;pos<encBase64.length();pos+=512)
+        out << encBase64.mid(pos,512) << endl;
+    //out << encBase64 << endl;
 
     out << "</demoframe>" << endl;
 
