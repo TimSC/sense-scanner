@@ -1,8 +1,8 @@
 /********************************************************************************
 ** Form generated from reading UI file 'videowidget.ui'
 **
-** Created: Thu Dec 6 14:03:54 2012
-**      by: Qt User Interface Compiler version 4.8.1
+** Created: Tue Jan 29 02:11:31 2013
+**      by: Qt User Interface Compiler version 4.8.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -45,6 +45,7 @@ public:
             VideoWidget->setObjectName(QString::fromUtf8("VideoWidget"));
         VideoWidget->resize(400, 300);
         verticalLayout_2 = new QVBoxLayout(VideoWidget);
+        verticalLayout_2->setContentsMargins(0, 0, 0, 0);
         verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
         annotationTools = new QHBoxLayout();
         annotationTools->setObjectName(QString::fromUtf8("annotationTools"));
@@ -99,6 +100,11 @@ public:
 
         timeEdit = new QTimeEdit(VideoWidget);
         timeEdit->setObjectName(QString::fromUtf8("timeEdit"));
+        QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(timeEdit->sizePolicy().hasHeightForWidth());
+        timeEdit->setSizePolicy(sizePolicy);
 
         horizontalLayout->addWidget(timeEdit);
 
