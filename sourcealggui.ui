@@ -233,6 +233,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>dataSources</sender>
+   <signal>UpdateSources(QModelIndex)</signal>
+   <receiver>SourceAlgGui</receiver>
+   <slot>SelectedSourceChanged(QModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>199</x>
+     <y>96</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>ImportVideo()</slot>
