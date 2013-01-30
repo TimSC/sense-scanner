@@ -20,7 +20,7 @@
       <property name="minimumSize">
        <size>
         <width>200</width>
-        <height>10</height>
+        <height>200</height>
        </size>
       </property>
      </widget>
@@ -77,12 +77,31 @@
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="videoDock">
+   <property name="cursor">
+    <cursorShape>ArrowCursor</cursorShape>
+   </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="VideoWidget" name="widget"/>
+   <widget class="VideoWidget" name="widget">
+    <property name="cursor">
+     <cursorShape>CrossCursor</cursorShape>
+    </property>
+   </widget>
   </widget>
   <widget class="QDockWidget" name="aboutDock">
+   <property name="minimumSize">
+    <size>
+     <width>76</width>
+     <height>100</height>
+    </size>
+   </property>
+   <property name="baseSize">
+    <size>
+     <width>0</width>
+     <height>0</height>
+    </size>
+   </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>

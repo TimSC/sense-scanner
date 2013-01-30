@@ -1,5 +1,5 @@
 
-All original software in this package is (C) 2012 Tim sheerman-Chase. All rights reserved.
+All original software in this package is (C) 2013 Tim sheerman-Chase. All rights reserved.
 
 This software uses and/or distributes code from the following projects:
 
