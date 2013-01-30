@@ -329,7 +329,8 @@ void AlgorithmProcess::ProcessAlgOutput()
     if(cmd.left(11)=="DATA_BLOCK=")
     {
         QByteArray blockArg = this->ReadLineFromBuffer(this->algOutBuffer,0,1);
-        int blockLen = cmd.mid(11).toInt();
+		QString blockLenStr = cmd.mid(11);
+        int blockLen = blockLenStr.toInt();
 
         //Wait for process to write the entire data block to standard output
         if(this->algOutBuffer.length() < cmd.length() + blockArg.length() + blockLen)
@@ -367,7 +368,8 @@ void AlgorithmProcess::ProcessAlgOutput()
         if(this->algOutBuffer.length() < cmd.length() + blockArg.length() + blockLen + 2)
             return;
 
-        QByteArray blockData = this->algOutBuffer.mid(cmd.length() + blockArg.length() + 2, blockLen);
+		QByteArray blockDataB64 = this->algOutBuffer.mid(cmd.length() + blockArg.length() + 2, blockLen);
+		QByteArray blockData = QByteArray::fromBase64(blockDataB64);
 
         QTextStream dec(blockData);
         dec.setCodec("UTF-8");

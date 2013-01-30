@@ -186,8 +186,8 @@ def WorkerProcess(childPipeConn):
 							outXml += " </model>\n"
 
 						outXml += "</prediction>\n"
-						outXmlEnc = outXml.encode('utf-8')
-
+						outXmlEnc = base64.b64encode(outXml.encode('utf-8'))
+						
 						print "XML_BLOCK={0}".format(len(outXmlEnc))
 						sys.stdout.write("PREDICTION_RESPONSE ID="+str(reqId)+"\n")
 						sys.stdout.flush()
