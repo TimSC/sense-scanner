@@ -201,6 +201,10 @@ MainWindow::MainWindow(QWidget *parent) :
     this->workspaceAsStored = this->workspace;
     this->ui->dataSources->setSelectionMode(QListView::SelectionMode::ExtendedSelection);
     this->RegenerateSourcesList();
+
+    //Set visibility to show about box
+    this->ui->workspaceLayout->hide();
+    this->ui->webViewLayout->hide();
 }
 
 MainWindow::~MainWindow()

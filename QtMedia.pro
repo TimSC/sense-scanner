@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
-QT       += xml
+QT       += xml webkit
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = QtMedia
