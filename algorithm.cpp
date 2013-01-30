@@ -41,23 +41,49 @@ void AlgorithmProcess::Init()
     if(this->initDone) return;
     assert(this->state() != QProcess::Running);
 
-#ifndef _MSC_VER
-    QString program = "/usr/bin/python";
-#else
-	QString program = "python.exe";
-#endif
+	//Determine which python executable to run
+	QList<QString> programCandidates;
+	programCandidates.append("python.exe");
+	programCandidates.append("/usr/bin/python");
+	programCandidates.append("c:\\dev\\Python27\\python.exe");
 
-    QFile programFile(program);
-    if(!programFile.exists())
+	QString program = "";
+	for(unsigned i=0;i<programCandidates.size();i++)
+	{
+		QFile programFile(programCandidates[i]);
+		if(programFile.exists())
+		{
+			program = programCandidates[i];
+			break;
+		}
+	}
+	if(program.length()==0)
     {
-        throw std::runtime_error("Process executable not found");
+        throw std::runtime_error("Python runtime executable not found");
+    }
+
+	//Find the main python script
+	QList<QString> scriptCandidates;
+	scriptCandidates.append("../QtMedia/echosrv.py");
+	scriptCandidates.append("echosrv.py");
+	scriptCandidates.append("../echosrv.py");
+	QString mainScript = "";
+	for(unsigned i=0;i<scriptCandidates.size();i++)
+	{
+		QFile scriptFile(scriptCandidates[i]);
+		if(scriptFile.exists())
+		{
+			mainScript = scriptCandidates[i];
+			break;
+		}
+	}
+	if(mainScript.length()==0)
+    {
+        throw std::runtime_error("Algorithm python script not found");
     }
     QStringList arguments;
-#ifndef _MSC_VER
-    arguments.append("../QtMedia/echosrv.py");
-#else
-	arguments.append("echosrv.py");
-#endif
+    arguments.append(mainScript);
+
     this->start(program, arguments);
     this->stopping = 0;
     this->paused = 1;
