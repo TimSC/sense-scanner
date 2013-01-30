@@ -348,7 +348,8 @@ void AlgorithmProcess::ProcessAlgOutput()
     if(cmd.left(10)=="XML_BLOCK=")
     {
         QByteArray blockArg = this->ReadLineFromBuffer(this->algOutBuffer,0,1);
-        int blockLen = cmd.mid(10).toInt();
+		QString blockLenStr = cmd.mid(10);
+        int blockLen = blockLenStr.toInt();
         std::vector<std::string> splitArgs = split(blockArg.constData(),' ');
         unsigned long long responseId = 0;
         for(unsigned int i=0;i<splitArgs.size();i++)
