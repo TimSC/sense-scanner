@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SourceAlgGui</class>
+ <widget class="QWidget" name="SourceAlgGui">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="sourceButtons">
+     <item>
+      <widget class="QToolButton" name="addSourceButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>icons/archive-insert.png</normaloff>icons/archive-insert.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="removeSourceButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>icons/archive-remove.png</normaloff>icons/archive-remove.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="trainModelButton">
+       <property name="text">
+        <string>Train</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="applyModelButton">
+       <property name="text">
+        <string>Apply</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <widget class="ClickableQTreeView" name="dataSources">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+     <widget class="ClickableQTreeView" name="processingView"/>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="processingButtons">
+     <item>
+      <widget class="QToolButton" name="pauseProcessButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>icons/media-playback-pause.png</normaloff>icons/media-playback-pause.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="runProcessButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>icons/media-playback-start.png</normaloff>icons/media-playback-start.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="removeProcessButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>icons/archive-remove.png</normaloff>icons/archive-remove.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ClickableQTreeView</class>
+   <extends>QTreeView</extends>
+   <header>mainwindow.h</header>
+   <slots>
+    <signal>UpdateSources(QModelIndex)</signal>
+   </slots>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>addSourceButton</sender>
+   <signal>pressed()</signal>
+   <receiver>SourceAlgGui</receiver>
+   <slot>ImportVideo()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>25</x>
+     <y>24</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>removeSourceButton</sender>
+   <signal>pressed()</signal>
+   <receiver>SourceAlgGui</receiver>
+   <slot>RemoveVideo()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>62</x>
+     <y>24</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>trainModelButton</sender>
+   <signal>pressed()</signal>
+   <receiver>SourceAlgGui</receiver>
+   <slot>TrainModelPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>158</x>
+     <y>24</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>applyModelButton</sender>
+   <signal>pressed()</signal>
+   <receiver>SourceAlgGui</receiver>
+   <slot>ApplyModelPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>314</x>
+     <y>24</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pauseProcessButton</sender>
+   <signal>pressed()</signal>
+   <receiver>SourceAlgGui</receiver>
+   <slot>PauseProcessPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>93</x>
+     <y>274</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>runProcessButton</sender>
+   <signal>pressed()</signal>
+   <receiver>SourceAlgGui</receiver>
+   <slot>RunProcessPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>198</x>
+     <y>274</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>removeProcessButton</sender>
+   <signal>pressed()</signal>
+   <receiver>SourceAlgGui</receiver>
+   <slot>RemoveProcessPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>303</x>
+     <y>274</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>ImportVideo()</slot>
+  <slot>RemoveVideo()</slot>
+  <slot>TrainModelPressed()</slot>
+  <slot>ApplyModelPressed()</slot>
+  <slot>PauseProcessPressed()</slot>
+  <slot>RunProcessPressed()</slot>
+  <slot>RemoveProcessPressed()</slot>
+  <slot>SelectedSourceChanged(QModelIndex)</slot>
+  <slot>DeselectCurrentSource()</slot>
+ </slots>
+</ui>

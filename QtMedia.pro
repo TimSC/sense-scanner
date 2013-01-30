@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     workspace.cpp \
     algorithm.cpp \
     annotation.cpp \
-    qblowfish/src/qblowfish.cpp
+    qblowfish/src/qblowfish.cpp \
+    sourcealggui.cpp
 
 HEADERS  += mainwindow.h \
     videowidget.h \
@@ -42,10 +43,12 @@ HEADERS  += mainwindow.h \
     localints.h \
     localmutex.h \
     localsleep.h \
-    annotation.h
+    annotation.h \
+    sourcealggui.h
 
 FORMS    += mainwindow.ui \
-    videowidget.ui
+    videowidget.ui \
+    sourcealggui.ui
 
 OTHER_FILES +=
 

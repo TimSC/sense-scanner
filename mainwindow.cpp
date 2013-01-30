@@ -1,5 +1,7 @@
 #include <assert.h>
 #include "mainwindow.h"
+#include "sourcealggui.h"
+#include "ui_sourcealggui.h"
 #include "ui_mainwindow.h"
 #include "videowidget.h"
 #include "mediabuffer.h"
@@ -187,24 +189,25 @@ MainWindow::MainWindow(QWidget *parent) :
     horLabelsAnn.push_back("Sources");
     horLabelsAnn.push_back("Status");
     this->sourcesModel.setHorizontalHeaderLabels(horLabelsAnn);
-    this->ui->dataSources->setModel(&this->sourcesModel);
+    this->ui->sourcesAlgGui->ui->dataSources->setModel(&this->sourcesModel);
     this->RegenerateSourcesList();
 
     QStringList horLabels;
     horLabels.push_back("Models");
     horLabels.push_back("Status");
     this->processingModel.setHorizontalHeaderLabels(horLabels);
-    this->ui->processingView->setModel(&this->processingModel);
+    this->ui->sourcesAlgGui->ui->processingView->setModel(&this->processingModel);
     this->RegenerateProcessingList();
 
     this->workspace.Load(tr("/home/tim/test.work"), this->mediaInterfaceBack);
     this->workspaceAsStored = this->workspace;
-    this->ui->dataSources->setSelectionMode(QListView::SelectionMode::ExtendedSelection);
+    this->ui->sourcesAlgGui->ui->dataSources->setSelectionMode(QListView::SelectionMode::ExtendedSelection);
     this->RegenerateSourcesList();
 
     //Set visibility to show about box
-    this->ui->workspaceLayout->hide();
-    this->ui->webViewLayout->hide();
+    //this->ui->workspaceLayout->hide();
+    //this->ui->webViewLayout->hide();
+    this->ui->sourcesAlgGui->mainWindow = this;
 }
 
 MainWindow::~MainWindow()
@@ -382,7 +385,7 @@ void MainWindow::RegenerateSourcesList()
 
 void MainWindow::RegenerateProcessingList()
 {
-    QItemSelectionModel *sourceSelected = this->ui->dataSources->selectionModel();
+    QItemSelectionModel *sourceSelected = this->ui->sourcesAlgGui->ui->dataSources->selectionModel();
 
     QIcon icon("icons/media-eject.png");
     if(this->processingModel.columnCount()!= 2)
@@ -470,7 +473,7 @@ void MainWindow::ImportVideo()
 void MainWindow::RemoveVideo()
 {
     cout << "remove" << endl;
-    QItemSelectionModel *sourceSelected = this->ui->dataSources->selectionModel();
+    QItemSelectionModel *sourceSelected = this->ui->sourcesAlgGui->ui->dataSources->selectionModel();
     assert(sourceSelected!=NULL);
 
     //Disable this source UI controls
@@ -650,7 +653,7 @@ void MainWindow::DeselectCurrentSource()
 void MainWindow::TrainModelPressed()
 {
     cout << "TrainModelPressed" << endl;
-    QItemSelectionModel *selection = this->ui->dataSources->selectionModel();
+    QItemSelectionModel *selection = this->ui->sourcesAlgGui->ui->dataSources->selectionModel();
 
     //Count frames, because at least one is needed to train
     int countMarkedFrames = 0;
@@ -776,8 +779,8 @@ void MainWindow::TrainModelPressed()
 void MainWindow::ApplyModelPressed()
 {
     cout << "ApplyModelPressed" << endl;
-    QItemSelectionModel *modelSelection = this->ui->processingView->selectionModel();
-    QItemSelectionModel *srcSelection = this->ui->dataSources->selectionModel();
+    QItemSelectionModel *modelSelection = this->ui->sourcesAlgGui->ui->processingView->selectionModel();
+    QItemSelectionModel *srcSelection = this->ui->sourcesAlgGui->ui->dataSources->selectionModel();
     assert(modelSelection!=NULL);
     assert(srcSelection!=NULL);
     QModelIndexList modelSelList = modelSelection->selectedRows(0);
@@ -811,7 +814,7 @@ void MainWindow::PauseProcessPressed()
 {
     cout << "MainWindow::PauseProcessPressed()" << endl;
 
-    QItemSelectionModel *selection = this->ui->processingView->selectionModel();
+    QItemSelectionModel *selection = this->ui->sourcesAlgGui->ui->processingView->selectionModel();
     QModelIndexList selectList = selection->selectedRows(0);
     for(unsigned int i=0;i<selectList.size();i++)
     {
@@ -825,7 +828,7 @@ void MainWindow::RunProcessPressed()
 {
     cout << "MainWindow::RunProcessPressed()" << endl;
 
-    QItemSelectionModel *selection = this->ui->processingView->selectionModel();
+    QItemSelectionModel *selection = this->ui->sourcesAlgGui->ui->processingView->selectionModel();
     QModelIndexList selectList = selection->selectedRows(0);
     for(unsigned int i=0;i<selectList.size();i++)
     {
@@ -840,7 +843,7 @@ void MainWindow::RemoveProcessPressed()
 {
     cout << "MainWindow::RemoveProcessPressed()" << endl;
 
-    QItemSelectionModel *selection = this->ui->processingView->selectionModel();
+    QItemSelectionModel *selection = this->ui->sourcesAlgGui->ui->processingView->selectionModel();
     QModelIndexList selectList = selection->selectedRows(0);
     for(unsigned int i=0;i<selectList.size();i++)
     {
