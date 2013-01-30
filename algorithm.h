@@ -44,7 +44,7 @@ public:
     void Pause();
     void Unpause();
     void SendCommand(QString cmd);
-    void SendRawData(QByteArray cmd);
+    void SendRawDataBlock(QString args, QByteArray data);
     unsigned int EncodedLength(QString cmd);
     QByteArray GetModel();
     QUuid GetUid();

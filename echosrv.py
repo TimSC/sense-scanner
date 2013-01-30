@@ -104,7 +104,7 @@ def WorkerProcess(childPipeConn):
 					width = int(argDict['WIDTH'])
 					height = int(argDict['HEIGHT'])
 					timestamp = int(argDict['TIMESTAMP'])
-					imgRaw = base64.b64decode(event[2])
+					imgRaw = event[2]
 					if width * height * 3 != len(imgRaw): 
 						print "#Image buffer of incorrect size",width,height,len(imgRaw)
 						continue
@@ -159,7 +159,7 @@ def WorkerProcess(childPipeConn):
 					imgBytes = int(argDict['IMGBYTES'])
 					xmlBytes = int(argDict['XMLBYTES'])
 					reqId = int(argDict['ID'])
-					combinedRaw = base64.b64decode(event[2]);
+					combinedRaw = event[2];
 					#if width * height * 3 != imgBytes: 
 					#	print "#Image buffer of incorrect size",width,height,len(event[2])
 					#	continue

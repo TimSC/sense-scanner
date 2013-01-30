@@ -252,20 +252,16 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         xml+="</predict>\n";
         QByteArray xmlBytes(xml.toUtf8().constData());
 		QByteArray imgRaw((const char *)img->bits(), img->byteCount());
-		QByteArray combinedRawB64 = imgRaw.toBase64();
-		combinedRawB64.append(xmlBytes.toBase64());
+		QByteArray combinedRaw = imgRaw;
+		combinedRaw.append(xmlBytes);
 
-        QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(combinedRawB64.length());
         QString imgPreamble2 = QString("RGB_IMAGE_AND_XML HEIGHT=%1 WIDTH=%2 IMGBYTES=%3 XMLBYTES=%4 ID=%5\n").
                 arg(img->height()).
                 arg(img->width()).
                 arg(img->byteCount()).
                 arg(xmlBytes.length()).
-                arg(ev->id);
-        this->SendCommand(imgPreamble1);
-        this->SendCommand(imgPreamble2);
-        
-        this->SendRawData(combinedRawB64);
+                arg(ev->id);   
+        this->SendRawDataBlock(imgPreamble2, combinedRaw);
     }
 }
 
@@ -463,12 +459,16 @@ void AlgorithmProcess::SendCommand(QString cmd)
     enc.flush();
 }
 
-void AlgorithmProcess::SendRawData(QByteArray cmd)
+void AlgorithmProcess::SendRawDataBlock(QString args, QByteArray data)
 {
     int running = (this->state() == QProcess::Running);
     if(!running) return;
     assert(this->initDone);
-    this->write(cmd);
+
+	QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(data.length());
+    this->SendCommand(imgPreamble1);
+    this->SendCommand(args);
+    this->write(data);
 	//this->waitForBytesWritten();
 }
 
