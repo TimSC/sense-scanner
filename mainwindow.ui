@@ -6,58 +6,24 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>526</width>
-    <height>426</height>
+    <width>525</width>
+    <height>330</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_3">
+   <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <layout class="QHBoxLayout" name="workspaceLayout">
-      <item>
-       <widget class="SourceAlgGui" name="sourcesAlgGui" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>10</width>
-          <height>10</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="VideoWidget" name="widget" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>10</width>
-          <height>10</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="webViewLayout">
-      <item>
-       <widget class="QWebView" name="webView">
-        <property name="url">
-         <url>
-          <string>http://www.sheerman-chase.org.uk/web/?version=alpha1</string>
-         </url>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="closeWebViewButton">
-        <property name="text">
-         <string>Close</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <widget class="SourceAlgGui" name="sourcesAlgGui" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>10</width>
+        <height>10</height>
+       </size>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -66,7 +32,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>526</width>
+     <width>525</width>
      <height>23</height>
     </rect>
    </property>
@@ -109,6 +75,12 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QDockWidget" name="dockWidget">
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="VideoWidget" name="widget"/>
+  </widget>
   <action name="actionNew_Workspace">
    <property name="text">
     <string>New Workspace</string>
@@ -157,11 +129,6 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
-  <customwidget>
-   <class>QWebView</class>
-   <extends>QWidget</extends>
-   <header>QtWebKit/QWebView</header>
-  </customwidget>
   <customwidget>
    <class>VideoWidget</class>
    <extends>QWidget</extends>
@@ -257,22 +224,6 @@
     <hint type="destinationlabel">
      <x>199</x>
      <y>149</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionFit_to_Window</sender>
-   <signal>activated()</signal>
-   <receiver>widget</receiver>
-   <slot>FitToWindow()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>331</x>
-     <y>155</y>
     </hint>
    </hints>
   </connection>
