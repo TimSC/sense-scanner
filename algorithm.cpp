@@ -469,6 +469,7 @@ void AlgorithmProcess::SendRawData(QByteArray cmd)
     if(!running) return;
     assert(this->initDone);
     this->write(cmd);
+	this->waitForBytesWritten();
 }
 
 unsigned int AlgorithmProcess::EncodedLength(QString cmd)
