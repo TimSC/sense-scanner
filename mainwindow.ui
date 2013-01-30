@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>525</width>
-    <height>330</height>
+    <height>375</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -85,7 +85,7 @@
    </attribute>
    <widget class="VideoWidget" name="widget">
     <property name="cursor">
-     <cursorShape>CrossCursor</cursorShape>
+     <cursorShape>ArrowCursor</cursorShape>
     </property>
    </widget>
   </widget>
