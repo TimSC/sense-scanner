@@ -134,7 +134,7 @@ public slots:
     QString CheckIfDataShouldBeDiscarded(QString discardMsg);
 
     void AboutPressed();
-
+    void ShowVideoPressed();
 };
 
 #endif // MAINWINDOW_H

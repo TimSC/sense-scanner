@@ -19,7 +19,7 @@
      <widget class="SourceAlgGui" name="sourcesAlgGui" native="true">
       <property name="minimumSize">
        <size>
-        <width>10</width>
+        <width>200</width>
         <height>10</height>
        </size>
       </property>
@@ -52,6 +52,7 @@
      <string>Video</string>
     </property>
     <addaction name="actionFit_to_Window"/>
+    <addaction name="actionShow"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -130,6 +131,16 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionVideo">
+   <property name="text">
+    <string>Video</string>
+   </property>
+  </action>
+  <action name="actionShow">
+   <property name="text">
+    <string>Show</string>
    </property>
   </action>
  </widget>
@@ -255,6 +266,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionShow</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ShowVideoPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>262</x>
+     <y>164</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>ImportVideo()</slot>
@@ -270,5 +297,6 @@
   <slot>RunProcessPressed()</slot>
   <slot>RemoveProcessPressed()</slot>
   <slot>AboutPressed()</slot>
+  <slot>ShowVideoPressed()</slot>
  </slots>
 </ui>
