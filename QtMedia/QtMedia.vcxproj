@@ -89,6 +89,8 @@
     <ClCompile Include="..\workspace.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\algorithm.h" />
+    <ClInclude Include="..\annotation.h" />
     <ClInclude Include="..\avbinapi.h" />
     <ClInclude Include="..\avbinbackend.h" />
     <ClInclude Include="..\avbinmedia.h" />

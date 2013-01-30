@@ -1,8 +1,10 @@
-
-import multiprocessing, sys, time, pickle, bz2, base64
+import sys
+#sys.path = ["python-lib", "site-packages", "."]
+import multiprocessing, time, pickle, bz2, base64, os
 from PIL import Image
 import xml.etree.ElementTree as ET
 from reltracker import reltracker
+import msvcrt
 
 def WorkerProcess(childPipeConn):
 	progress = 0.
@@ -103,7 +105,7 @@ def WorkerProcess(childPipeConn):
 					width = int(argDict['WIDTH'])
 					height = int(argDict['HEIGHT'])
 					timestamp = int(argDict['TIMESTAMP'])
-					imgRaw = base64.b64decode(event[2])
+					imgRaw = event[2]
 					if width * height * 3 != len(imgRaw): 
 						print "#Image buffer of incorrect size",width,height,len(imgRaw)
 						continue
@@ -134,7 +136,7 @@ def WorkerProcess(childPipeConn):
 				if args[0]=="MODEL":
 					print "Loading model from string", len(event[2])
 					try:
-						modelData = bz2.decompress(base64.b64decode(event[2]))
+						modelData = bz2.decompress(event[2])
 						print "Uncompressed size", len(modelData)
 						tracker = pickle.loads(modelData)
 						tracker.PostUnPickle()
@@ -158,7 +160,7 @@ def WorkerProcess(childPipeConn):
 					imgBytes = int(argDict['IMGBYTES'])
 					xmlBytes = int(argDict['XMLBYTES'])
 					reqId = int(argDict['ID'])
-					combinedRaw = base64.b64decode(event[2]);
+					combinedRaw = event[2];
 					#if width * height * 3 != imgBytes: 
 					#	print "#Image buffer of incorrect size",width,height,len(event[2])
 					#	continue
@@ -185,8 +187,8 @@ def WorkerProcess(childPipeConn):
 							outXml += " </model>\n"
 
 						outXml += "</prediction>\n"
-						outXmlEnc = outXml.encode('utf-8')
-
+						outXmlEnc = base64.b64encode(outXml.encode('utf-8'))
+						
 						print "XML_BLOCK={0}".format(len(outXmlEnc))
 						sys.stdout.write("PREDICTION_RESPONSE ID="+str(reqId)+"\n")
 						sys.stdout.flush()
@@ -232,8 +234,13 @@ def WorkerProcess(childPipeConn):
 
 
 if __name__=="__main__":
+        
 	running = 1
 	parentPipeConn, childPipeConn = multiprocessing.Pipe()
+
+        #Set console to open in binary mode (on windows)
+        msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
+        msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
 	fi = open("log.txt","wt")
 	inputlog = None

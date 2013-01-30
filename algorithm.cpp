@@ -41,23 +41,49 @@ void AlgorithmProcess::Init()
     if(this->initDone) return;
     assert(this->state() != QProcess::Running);
 
-#ifndef _MSC_VER
-    QString program = "/usr/bin/python";
-#else
-	QString program = "c:\\dev\\Python27\\python.exe";
-#endif
+	//Determine which python executable to run
+	QList<QString> programCandidates;
+	programCandidates.append("python.exe");
+	programCandidates.append("/usr/bin/python");
+	programCandidates.append("c:\\dev\\Python27\\python.exe");
 
-    QFile programFile(program);
-    if(!programFile.exists())
+	QString program = "";
+	for(unsigned i=0;i<programCandidates.size();i++)
+	{
+		QFile programFile(programCandidates[i]);
+		if(programFile.exists())
+		{
+			program = programCandidates[i];
+			break;
+		}
+	}
+	if(program.length()==0)
     {
-        throw std::runtime_error("Process executable not found");
+        throw std::runtime_error("Python runtime executable not found");
+    }
+
+	//Find the main python script
+	QList<QString> scriptCandidates;
+	scriptCandidates.append("../QtMedia/echosrv.py");
+	scriptCandidates.append("echosrv.py");
+	scriptCandidates.append("../echosrv.py");
+	QString mainScript = "";
+	for(unsigned i=0;i<scriptCandidates.size();i++)
+	{
+		QFile scriptFile(scriptCandidates[i]);
+		if(scriptFile.exists())
+		{
+			mainScript = scriptCandidates[i];
+			break;
+		}
+	}
+	if(mainScript.length()==0)
+    {
+        throw std::runtime_error("Algorithm python script not found");
     }
     QStringList arguments;
-#ifndef _MSC_VER
-    arguments.append("../QtMedia/echosrv.py");
-#else
-	arguments.append("..\\echosrv.py");
-#endif
+    arguments.append(mainScript);
+
     this->start(program, arguments);
     this->stopping = 0;
     this->paused = 1;
@@ -107,8 +133,8 @@ int AlgorithmProcess::Start()
     if(!this->paused) return 0;
     this->pausing = 0;
     this->stopping = 0;
-    this->SendCommand("RUN\n");
-    //this->waitForFinished();
+    this->Unpause(); //Start process in running state
+    
     return 1;
 }
 
@@ -252,20 +278,16 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         xml+="</predict>\n";
         QByteArray xmlBytes(xml.toUtf8().constData());
 		QByteArray imgRaw((const char *)img->bits(), img->byteCount());
-		QByteArray combinedRawB64 = imgRaw.toBase64();
-		combinedRawB64.append(xmlBytes.toBase64());
+		QByteArray combinedRaw = imgRaw;
+		combinedRaw.append(xmlBytes);
 
-        QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(combinedRawB64.length());
         QString imgPreamble2 = QString("RGB_IMAGE_AND_XML HEIGHT=%1 WIDTH=%2 IMGBYTES=%3 XMLBYTES=%4 ID=%5\n").
                 arg(img->height()).
                 arg(img->width()).
                 arg(img->byteCount()).
                 arg(xmlBytes.length()).
-                arg(ev->id);
-        this->SendCommand(imgPreamble1);
-        this->SendCommand(imgPreamble2);
-        
-        this->SendRawData(combinedRawB64);
+                arg(ev->id);   
+        this->SendRawDataBlock(imgPreamble2, combinedRaw);
     }
 }
 
@@ -277,6 +299,7 @@ void AlgorithmProcess::ProcessAlgOutput()
     //Get first line of console output without modifying the buffer
     QByteArray cmd = ReadLineFromBuffer(this->algOutBuffer,0);
     if(cmd.length()==0) return;
+	cmd = cmd.trimmed(); //Remove whitespace from command
 
     if(cmd.left(9)=="PROGRESS=")
     {
@@ -333,7 +356,8 @@ void AlgorithmProcess::ProcessAlgOutput()
     if(cmd.left(11)=="DATA_BLOCK=")
     {
         QByteArray blockArg = this->ReadLineFromBuffer(this->algOutBuffer,0,1);
-        int blockLen = cmd.mid(11).toInt();
+		QString blockLenStr = cmd.mid(11);
+        int blockLen = blockLenStr.toInt();
 
         //Wait for process to write the entire data block to standard output
         if(this->algOutBuffer.length() < cmd.length() + blockArg.length() + blockLen)
@@ -343,7 +367,7 @@ void AlgorithmProcess::ProcessAlgOutput()
         //Remove used data from buffer
         this->algOutBuffer = this->algOutBuffer.mid(cmd.length() + blockArg.length() + blockLen + 2);
 
-        this->dataBlock = blockData;
+		this->dataBlock = QByteArray::fromBase64(blockData);
         this->dataBlockReceived = 1;
 
         return;
@@ -352,7 +376,8 @@ void AlgorithmProcess::ProcessAlgOutput()
     if(cmd.left(10)=="XML_BLOCK=")
     {
         QByteArray blockArg = this->ReadLineFromBuffer(this->algOutBuffer,0,1);
-        int blockLen = cmd.mid(10).toInt();
+		QString blockLenStr = cmd.mid(10);
+        int blockLen = blockLenStr.toInt();
         std::vector<std::string> splitArgs = split(blockArg.constData(),' ');
         unsigned long long responseId = 0;
         for(unsigned int i=0;i<splitArgs.size();i++)
@@ -370,7 +395,8 @@ void AlgorithmProcess::ProcessAlgOutput()
         if(this->algOutBuffer.length() < cmd.length() + blockArg.length() + blockLen + 2)
             return;
 
-        QByteArray blockData = this->algOutBuffer.mid(cmd.length() + blockArg.length() + 2, blockLen);
+		QByteArray blockDataB64 = this->algOutBuffer.mid(cmd.length() + blockArg.length() + 2, blockLen);
+		QByteArray blockData = QByteArray::fromBase64(blockDataB64);
 
         QTextStream dec(blockData);
         dec.setCodec("UTF-8");
@@ -463,12 +489,17 @@ void AlgorithmProcess::SendCommand(QString cmd)
     enc.flush();
 }
 
-void AlgorithmProcess::SendRawData(QByteArray cmd)
+void AlgorithmProcess::SendRawDataBlock(QString args, QByteArray data)
 {
     int running = (this->state() == QProcess::Running);
     if(!running) return;
     assert(this->initDone);
-    this->write(cmd);
+
+	QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(data.length());
+    this->SendCommand(imgPreamble1);
+    this->SendCommand(args);
+    this->write(data);
+	//this->waitForBytesWritten();
 }
 
 unsigned int AlgorithmProcess::EncodedLength(QString cmd)
@@ -502,7 +533,8 @@ QByteArray AlgorithmProcess::GetModel()
     }
 
     QByteArray out;
-	out.append(QByteArray::fromBase64(this->dataBlock));
+	//out.append(QByteArray::fromBase64(this->dataBlock));
+	out.append(this->dataBlock);
     int currentLen = out.length();
     return out;
 }

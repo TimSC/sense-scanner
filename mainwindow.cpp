@@ -747,16 +747,11 @@ void MainWindow::TrainModelPressed()
 
             assert(img->format() == QImage::Format_RGB888);
             QByteArray imgRaw((const char *)img->bits(), len);
-            QByteArray imgRawB64 = imgRaw.toBase64();
-            QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(imgRawB64.length());
             QString imgPreamble2 = QString("RGB_IMAGE_DATA TIMESTAMP=%1 HEIGHT=%2 WIDTH=%3\n").
                     arg(annotTimestamp).
                     arg(img->height()).
                     arg(img->width());
-            alg->SendCommand(imgPreamble1);
-            alg->SendCommand(imgPreamble2);
-            alg->SendRawData(imgRawB64);
-            //for (int xx=0;xx<len;xx++) alg->SendCommand("x");
+            alg->SendRawDataBlock(imgPreamble2, imgRaw);
 
             //Get annotation data and sent it to the process
             QString annotXml;
@@ -764,12 +759,8 @@ void MainWindow::TrainModelPressed()
             annot->GetIndexAnnotationXml(fr, &test);
             assert(annotXml.mid(annotXml.length()-1).toLocal8Bit().constData()[0]=='\n');
 
-            int xmlLen = alg->EncodedLength(annotXml);
-            QString preamble1 = QString("DATA_BLOCK=%1\n").arg(xmlLen);
             QString preamble2 = QString("XML_DATA\n");
-            alg->SendCommand(preamble1);
-            alg->SendCommand(preamble2);
-            alg->SendCommand(annotXml);
+			alg->SendRawDataBlock(preamble2, annotXml.toUtf8());
         }
     }
 

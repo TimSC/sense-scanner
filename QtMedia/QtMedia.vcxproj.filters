@@ -116,5 +116,11 @@
     <ClInclude Include="..\scenecontroller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\algorithm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\annotation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
