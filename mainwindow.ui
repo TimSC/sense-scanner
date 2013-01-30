@@ -75,11 +75,17 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QDockWidget" name="dockWidget">
+  <widget class="QDockWidget" name="videoDock">
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
    <widget class="VideoWidget" name="widget"/>
+  </widget>
+  <widget class="QDockWidget" name="aboutDock">
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="AboutGui" name="aboutWidget"/>
   </widget>
   <action name="actionNew_Workspace">
    <property name="text">
@@ -142,6 +148,12 @@
    <class>SourceAlgGui</class>
    <extends>QWidget</extends>
    <header>sourcealggui.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>AboutGui</class>
+   <extends>QWidget</extends>
+   <header>aboutgui.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
