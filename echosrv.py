@@ -1,5 +1,6 @@
-
-import multiprocessing, sys, time, pickle, bz2, base64, os
+import sys
+sys.path = ["python-lib", "site-packages", "."]
+import multiprocessing, time, pickle, bz2, base64, os
 from PIL import Image
 import xml.etree.ElementTree as ET
 from reltracker import reltracker
@@ -233,6 +234,7 @@ def WorkerProcess(childPipeConn):
 
 
 if __name__=="__main__":
+        
 	running = 1
 	parentPipeConn, childPipeConn = multiprocessing.Pipe()
 

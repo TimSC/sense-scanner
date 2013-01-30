@@ -44,7 +44,7 @@ void AlgorithmProcess::Init()
 #ifndef _MSC_VER
     QString program = "/usr/bin/python";
 #else
-	QString program = "c:\\dev\\Python27\\python.exe";
+	QString program = "python.exe";
 #endif
 
     QFile programFile(program);
@@ -56,7 +56,7 @@ void AlgorithmProcess::Init()
 #ifndef _MSC_VER
     arguments.append("../QtMedia/echosrv.py");
 #else
-	arguments.append("..\\echosrv.py");
+	arguments.append("echosrv.py");
 #endif
     this->start(program, arguments);
     this->stopping = 0;
