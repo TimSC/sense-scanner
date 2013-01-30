@@ -340,7 +340,7 @@ void AlgorithmProcess::ProcessAlgOutput()
         //Remove used data from buffer
         this->algOutBuffer = this->algOutBuffer.mid(cmd.length() + blockArg.length() + blockLen + 2);
 
-        this->dataBlock = blockData;
+		this->dataBlock = QByteArray::fromBase64(blockData);
         this->dataBlockReceived = 1;
 
         return;
