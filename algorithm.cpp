@@ -133,8 +133,8 @@ int AlgorithmProcess::Start()
     if(!this->paused) return 0;
     this->pausing = 0;
     this->stopping = 0;
-    this->SendCommand("RUN\n");
-    //this->waitForFinished();
+    this->Unpause(); //Start process in running state
+    
     return 1;
 }
 
@@ -299,6 +299,7 @@ void AlgorithmProcess::ProcessAlgOutput()
     //Get first line of console output without modifying the buffer
     QByteArray cmd = ReadLineFromBuffer(this->algOutBuffer,0);
     if(cmd.length()==0) return;
+	cmd = cmd.trimmed(); //Remove whitespace from command
 
     if(cmd.left(9)=="PROGRESS=")
     {
