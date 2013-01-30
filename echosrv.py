@@ -1,8 +1,9 @@
 
-import multiprocessing, sys, time, pickle, bz2, base64
+import multiprocessing, sys, time, pickle, bz2, base64, os
 from PIL import Image
 import xml.etree.ElementTree as ET
 from reltracker import reltracker
+import msvcrt
 
 def WorkerProcess(childPipeConn):
 	progress = 0.
@@ -234,6 +235,12 @@ def WorkerProcess(childPipeConn):
 if __name__=="__main__":
 	running = 1
 	parentPipeConn, childPipeConn = multiprocessing.Pipe()
+
+        #Set console to open in binary mode (on windows)
+        #stdinFd = msvcrt.get_osfhandle()
+        msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
+        #stdoutFd = msvcrt.get_osfhandle()
+        msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
 	fi = open("log.txt","wt")
 	inputlog = None
