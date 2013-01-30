@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'videowidget.ui'
 **
-** Created: Tue Jan 29 02:11:31 2013
+** Created: Wed Jan 30 22:18:13 2013
 **      by: Qt User Interface Compiler version 4.8.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -54,6 +54,7 @@ public:
 
         graphicsView = new ZoomGraphicsView(VideoWidget);
         graphicsView->setObjectName(QString::fromUtf8("graphicsView"));
+        graphicsView->viewport()->setProperty("cursor", QVariant(QCursor(Qt::CrossCursor)));
 
         verticalLayout_2->addWidget(graphicsView);
 
