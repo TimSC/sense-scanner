@@ -345,12 +345,12 @@ void Workspace::Load(QString fina, class AvBinMedia* mediaInterface)
                     alg->Pause(); //Start paused
 
                     //Send data to algorithm process
-                    QByteArray modelDataB64 = modelData.toBase64();
-                    QString modelPreamble1 = QString("DATA_BLOCK=%1\n").arg(modelDataB64.length());
+					//QByteArray modelDataB64 = modelData.toBase64();
+                    QString modelPreamble1 = QString("DATA_BLOCK=%1\n").arg(modelData.length());
                     QString modelPreamble2 = QString("MODEL\n");
                     alg->SendCommand(modelPreamble1);
                     alg->SendCommand(modelPreamble2);
-                    alg->SendRawData(modelDataB64);
+                    alg->SendRawData(modelData);
 
                     alg->SendCommand("TRAIN\n"); //Continue to train if needed
 

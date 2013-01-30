@@ -81,11 +81,11 @@ def WorkerProcess(childPipeConn):
 					trackerStr = pickle.dumps(tracker, protocol=pickle.HIGHEST_PROTOCOL)
 					tracker.PostUnPickle()
 					modelData = bz2.compress(trackerStr)
-					modelDataB64 = base64.b64encode(modelData)
-					print "DATA_BLOCK={0}".format(len(modelDataB64))
+					#modelDataB64 = base64.b64encode(modelData)
+					print "DATA_BLOCK={0}".format(len(modelData))
 					sys.stdout.write("MODEL\n")
 					sys.stdout.flush()
-					sys.stdout.write(modelDataB64)
+					sys.stdout.write(modelData)
 					sys.stdout.flush()
 					print "Saved data size", len(modelData)
 					print "B64 encoded", len(modelDataB64)
@@ -135,7 +135,7 @@ def WorkerProcess(childPipeConn):
 				if args[0]=="MODEL":
 					print "Loading model from string", len(event[2])
 					try:
-						modelData = bz2.decompress(base64.b64decode(event[2]))
+						modelData = bz2.decompress(event[2])
 						print "Uncompressed size", len(modelData)
 						tracker = pickle.loads(modelData)
 						tracker.PostUnPickle()
@@ -237,9 +237,7 @@ if __name__=="__main__":
 	parentPipeConn, childPipeConn = multiprocessing.Pipe()
 
         #Set console to open in binary mode (on windows)
-        #stdinFd = msvcrt.get_osfhandle()
         msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
-        #stdoutFd = msvcrt.get_osfhandle()
         msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
 	fi = open("log.txt","wt")
