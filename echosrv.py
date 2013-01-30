@@ -80,12 +80,14 @@ def WorkerProcess(childPipeConn):
 					trackerStr = pickle.dumps(tracker, protocol=pickle.HIGHEST_PROTOCOL)
 					tracker.PostUnPickle()
 					modelData = bz2.compress(trackerStr)
-					print "DATA_BLOCK={0}".format(len(modelData))
+					modelDataB64 = base64.b64decode(modelData)
+					print "DATA_BLOCK={0}".format(len(modelDataB64))
 					sys.stdout.write("MODEL\n")
 					sys.stdout.flush()
-					sys.stdout.write(modelData)
+					sys.stdout.write(modelDataB64)
 					sys.stdout.flush()
 					print "Saved data size", len(modelData)
+					print "B64 encoded", len(modelDataB64)
 					print "Uncompressed size", len(trackerStr)
 
 			if event[0]=="DATA_BLOCK":

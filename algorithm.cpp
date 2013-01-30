@@ -502,7 +502,7 @@ QByteArray AlgorithmProcess::GetModel()
     }
 
     QByteArray out;
-    out.append(this->dataBlock);
+	out.append(QByteArray::fromBase64(this->dataBlock));
     int currentLen = out.length();
     return out;
 }
