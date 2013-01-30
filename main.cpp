@@ -14,6 +14,8 @@ int WINAPI WinMain ( HINSTANCE instance, HINSTANCE prev_instance, PSTR cmd_line,
 #else
 int main(int argc, char *argv[])
 {
+
+//http://stackoverflow.com/questions/9554252/c-c-is-it-possible-to-pass-binary-data-through-the-console
 #endif
 #endif
 
