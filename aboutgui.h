@@ -1,7 +1,7 @@
 #ifndef ABOUTGUI_H
 #define ABOUTGUI_H
 
-#include <QWidget>
+#include <QtGui/QWidget>
 
 namespace Ui {
 class AboutGui;
