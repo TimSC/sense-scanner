@@ -242,12 +242,14 @@ if __name__=="__main__":
         msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
         msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
-	fi = open("log.txt","wt")
+        fi = None
+	#fi = open("log.txt","wt")
 	inputlog = None
-	inputlog = open("inputlog.dat","wb")
+	#inputlog = open("inputlog.dat","wb")
 	
-	fi.write("READY\n")
-	fi.flush()
+	if fi is not None:
+                fi.write("READY\n")
+        	fi.flush()
 	print "READY"
 	sys.stdout.flush()
 
@@ -262,7 +264,7 @@ if __name__=="__main__":
 		li = li.rstrip()
 
 		#print li, len(li)
-		if len(li) > 0: 
+		if len(li) > 0 and fi is not None: 
 			fi.write(li+"\n")
 			fi.flush()
 
@@ -280,9 +282,10 @@ if __name__=="__main__":
 				inputlog.flush()
 			args = args.rstrip()
 			si = int(li[11:])
-			fi.write(args+"\n")
-			fi.write("Attempt to read " +str(si)+"\n")
-			fi.flush()
+			if fi is not None:
+        			fi.write(args+"\n")
+                		fi.write("Attempt to read " +str(si)+"\n")
+                        	fi.flush()
 			dataBlock = sys.stdin.read(si)
 
 			parentPipeConn.send(["DATA_BLOCK", args, dataBlock])

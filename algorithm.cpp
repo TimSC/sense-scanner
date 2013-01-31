@@ -20,10 +20,10 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->initDone = 0;
     this->dataBlockReceived = 0;
 
-    QString fina = "algout.txt";
+	//QString fina = "algout.txt";
     this->eventLoop = eventLoopIn;
-    this->algOutLog = new QFile(fina);
-    this->algOutLog->open(QIODevice::WriteOnly);
+    //this->algOutLog = new QFile(fina);
+    //this->algOutLog->open(QIODevice::WriteOnly);
     this->eventReceiver = new class EventReceiver(this->eventLoop);
     this->eventLoop->AddListener("PREDICT_FRAME_REQUEST", *this->eventReceiver);
 }
@@ -203,12 +203,12 @@ QByteArray AlgorithmProcess::ReadLineFromBuffer(QByteArray &buff, int popLine, i
     QByteArray cmd = buff.mid(skipPos,newLinePos-skipPos);
     if(popLine) buff = buff.mid(newLinePos+1);
 
-	if(cmd.length()>0)
+	/*if(cmd.length()>0)
     {
         this->algOutLog->write(cmd.constData());
         this->algOutLog->write("\n");
         this->algOutLog->flush();
-    }
+    }*/
 
     return cmd;
 }
