@@ -156,7 +156,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->avbinVerChecked = 0;
 
     //Set the window icon
-    QIcon windowIcon("icons/Charm.png");
+    QIcon windowIcon("icons/Kinatomic-Icon50.png");
+    if(windowIcon.isNull()) cout << "Warning: Window icon not found" << endl;
     this->setWindowIcon(windowIcon);
 
     //Create inter thread message system
