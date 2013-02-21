@@ -13,6 +13,7 @@ extern "C"
 */
 
 AVbinResult mod_avbin_init();
+int32_t mod_avbin_get_version();
 AVbinFile* mod_avbin_open_filename(const char *filename);
 AVbinResult mod_avbin_file_info(AVbinFile *file, AVbinFileInfo *info);
 AVbinResult mod_avbin_stream_info(AVbinFile *file, int stream_index, AVbinStreamInfo *info);

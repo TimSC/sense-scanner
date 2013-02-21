@@ -51,6 +51,11 @@ AvBinBackend::~AvBinBackend()
     this->firstFrames.clear();
 }
 
+int AvBinBackend::GetBackendVersion()
+{
+    return mod_avbin_get_version();
+}
+
 int AvBinBackend::OpenFile(const char *filenameIn, int requestId)
 {
     assert(this->fi == NULL);
@@ -673,6 +678,14 @@ void AvBinThread::SetEventLoop(class EventLoop *eventLoopIn)
 {
     this->avBinBackend.SetEventLoop(eventLoopIn);
     MessagableThread::SetEventLoop(eventLoopIn);
+
+    int backendVer = avBinBackend.GetBackendVersion();
+    QString eventName = QString("AVBIN_VERSION");
+    std::tr1::shared_ptr<class Event> verEv(new Event(eventName.toLocal8Bit().constData()));
+    QString verStr;
+    verStr.setNum(backendVer);
+    verEv->data.append(verStr.toLocal8Bit().constData(), verStr.length());
+    eventLoopIn->SendEvent(verEv);
 }
 
 void AvBinThread::SetId(int idIn)

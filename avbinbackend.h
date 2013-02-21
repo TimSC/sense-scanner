@@ -29,6 +29,7 @@ public:
     AvBinBackend(const AvBinBackend &other);
     ~AvBinBackend();
 
+    int GetBackendVersion();
     int OpenFile(const char *filename, int requestId = 0);
     void CloseFile();
     int64_t Length();

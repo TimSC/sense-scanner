@@ -153,6 +153,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->threadCount = 0;
     this->annotationMenu = NULL;
     this->errMsg = NULL;
+    this->avbinVerChecked = 0;
 
     //Set the window icon
     QIcon windowIcon("icons/Charm.png");
@@ -171,6 +172,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("THREAD_STATUS_CHANGED",*eventReceiver);
     this->eventLoop->AddListener("ALG_DATA_BLOCK",*eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_THREAD_PROGRESS",*eventReceiver);
+    this->eventLoop->AddListener("AVBIN_VERSION",*eventReceiver);
 
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(0, this->eventLoop);
@@ -540,7 +542,23 @@ void MainWindow::Update()
             this->annotProgress[annId] = progStr.toFloat();
             this->RegenerateSourcesList();
         }
-
+        if(ev->type=="AVBIN_VERSION")
+        {
+            cout << ev->type <<" "<< ev->data<< endl;
+            //The software does not function properly for versions before 11
+            //so display a warning if an old avbin is detected
+            if(atoi(ev->data.c_str())<11 && !this->avbinVerChecked)
+            {
+                if(this->errMsg == NULL)
+                    this->errMsg = new QMessageBox(this);
+                this->errMsg->setWindowTitle("Warning: Old Avbin version detected");
+                QString errTxt = QString("You have Avbin version %1 but at least version %2 is recommended")
+                    .arg(ev->data.c_str()).arg(11);
+                this->errMsg->setText(errTxt);
+                this->errMsg->exec();
+            }
+            this->avbinVerChecked = 1;
+        }
     }
     catch(std::runtime_error e) {flushing = 0;}
 

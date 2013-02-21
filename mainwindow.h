@@ -108,6 +108,7 @@ private:
     QMenu *annotationMenu;
     QMessageBox *errMsg;
     std::map<QUuid, float> annotProgress;
+    int avbinVerChecked;
 
 public slots:
     void ImportVideo();

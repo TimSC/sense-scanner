@@ -18,11 +18,20 @@ AVbinResult mod_avbin_init()
         AVbinResult ret = avbin_init();
         if(ret == AVBIN_RESULT_OK)
             gavBinInitCompleted = 1;
+
         avbinOpenMutex.unlock();
         return ret;
     }
     avbinOpenMutex.unlock();
     return AVBIN_RESULT_OK;
+}
+
+int32_t mod_avbin_get_version()
+{
+    avbinOpenMutex.lock();
+    int32_t ver = avbin_get_version();
+    avbinOpenMutex.unlock();
+    return ver;
 }
 
 AVbinFile* mod_avbin_open_filename(const char *filename)
