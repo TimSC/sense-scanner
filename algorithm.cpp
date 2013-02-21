@@ -44,6 +44,7 @@ void AlgorithmProcess::Init()
 	//Determine which python executable to run
 	QList<QString> programCandidates;
 	programCandidates.append("python.exe");
+    programCandidates.append("python.exe");
 	programCandidates.append("/usr/bin/python");
 	programCandidates.append("c:\\dev\\Python27\\python.exe");
 
@@ -82,6 +83,14 @@ void AlgorithmProcess::Init()
         throw std::runtime_error("Algorithm python script not found");
     }
     QStringList arguments;
+    if(1)
+    {
+        //Enable python profiling
+        arguments.append("-m");
+        arguments.append("cProfile");
+        arguments.append("-o");
+        arguments.append("prof");
+    }
     arguments.append(mainScript);
 
     this->start(program, arguments);

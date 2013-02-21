@@ -231,6 +231,21 @@ def WorkerProcess(childPipeConn):
 	print "FINISHED"
 	sys.stdout.flush()
 
+def ReadDataBlock(parentPipeConn, inputlog, fi):
+	args = sys.stdin.readline()
+	if inputlog is not None: 
+		inputlog.write(args)
+		inputlog.flush()
+	args = args.rstrip()
+	si = int(li[11:])
+	if fi is not None:
+		fi.write(args+"\n")
+		fi.write("Attempt to read " +str(si)+"\n")
+		fi.flush()
+	dataBlock = sys.stdin.read(si)
+
+	parentPipeConn.send(["DATA_BLOCK", args, dataBlock])
+
 
 if __name__=="__main__":
         
@@ -244,8 +259,8 @@ if __name__=="__main__":
 		msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
 		msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
-	fi = None
-	#fi = open("log.txt","wt")
+	#fi = None
+	fi = open("log.txt","wt")
 	inputlog = None
 	#inputlog = open("inputlog.dat","wb")
 	
@@ -259,7 +274,11 @@ if __name__=="__main__":
 	p.start()
 	
 	while running:
+		#startItTi = time.time()
+		#if fi is not None: fi.write("Waiting for stdin data:"+str(startItTi)+"\n")
 		li = sys.stdin.readline()
+		#endItTi = time.time()
+		#if fi is not None: fi.write("Rx stdin data:"+str(endItTi)+","+str(endItTi-startItTi)+"\n")
 		if inputlog is not None: 
 			inputlog.write(li)
 			inputlog.flush()
@@ -278,19 +297,7 @@ if __name__=="__main__":
 			handled = 1
 
 		if li[0:11] == "DATA_BLOCK=":
-			args = sys.stdin.readline()
-			if inputlog is not None: 
-				inputlog.write(args)
-				inputlog.flush()
-			args = args.rstrip()
-			si = int(li[11:])
-			if fi is not None:
-        			fi.write(args+"\n")
-                		fi.write("Attempt to read " +str(si)+"\n")
-                        	fi.flush()
-			dataBlock = sys.stdin.read(si)
-
-			parentPipeConn.send(["DATA_BLOCK", args, dataBlock])
+			ReadDataBlock(parentPipeConn, inputlog, fi)
 			handled = 1
 
 		#Send all misc commands to worker thread
@@ -304,5 +311,6 @@ if __name__=="__main__":
 
 		time.sleep(0.01)
 
+	if fi is not None: fi.flush()
 	p.join()
 
