@@ -1,8 +1,8 @@
 #ifndef SOURCEALGGUI_H
 #define SOURCEALGGUI_H
 
-#include <QWidget>
-#include <QModelIndex>
+#include <QtGui/QWidget>
+#include <QtCore/QModelIndex>
 
 namespace Ui {
 class SourceAlgGui;
