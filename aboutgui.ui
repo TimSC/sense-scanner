@@ -18,7 +18,7 @@
     <widget class="QWebView" name="webView">
      <property name="url">
       <url>
-       <string>http://www.sheerman-chase.org.uk/vcs/about.html?version=alpha1</string>
+       <string>http://www.kinatomic.com/progurl/about.php?version=alpha1</string>
       </url>
      </property>
     </widget>

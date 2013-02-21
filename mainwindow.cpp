@@ -182,7 +182,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->timer->start(10); //in millisec
 
     ui->setupUi(this);
-    this->setWindowTitle("Video Cognition System");
+    this->setWindowTitle("Kinatomic Sense Scanner");
     this->ui->widget->SetSource(this->mediaInterfaceFront,"");
 
     QStringList horLabelsAnn;
