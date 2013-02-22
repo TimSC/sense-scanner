@@ -6,6 +6,13 @@ import xml.etree.ElementTree as ET
 from reltracker import reltracker
 
 def WorkerProcess(childPipeConn):
+	if 1:
+		import cProfile
+		cProfile.run('WorkerProcessProf(childPipeConn)', 'workerProf')
+	else:
+		WorkerProcessProf(childPipeConn)
+
+def WorkerProcessProf(childPipeConn):
 	progress = 0.
 	running = 1
 	paused = 1
@@ -80,9 +87,9 @@ def WorkerProcess(childPipeConn):
 					tracker.PrepareForPickle()
 					trackerStr = pickle.dumps(tracker, protocol=pickle.HIGHEST_PROTOCOL)
 					tracker.PostUnPickle()
-					modelData = bz2.compress(trackerStr)
+					modelData = "bz2".encode("ascii")+bz2.compress(trackerStr)
 					modelDataB64 = base64.b64encode(modelData)
-					print "DATA_BLOCK={0}".format(len(modelDataB64))
+					print "DATA_BLOCK={0}".format(len(modelDataB64)+3)
 					sys.stdout.write("MODEL\n")
 					sys.stdout.flush()
 					sys.stdout.write(modelDataB64)
@@ -135,7 +142,9 @@ def WorkerProcess(childPipeConn):
 				if args[0]=="MODEL":
 					print "Loading model from string", len(event[2])
 					try:
-						modelData = bz2.decompress(event[2])
+						modelFormat = event[2][:3]
+						print "modelformat",modelFormat
+						modelData = bz2.decompress(event[2][3:])
 						print "Uncompressed size", len(modelData)
 						tracker = pickle.loads(modelData)
 						tracker.PostUnPickle()
@@ -200,6 +209,8 @@ def WorkerProcess(childPipeConn):
 				print "DATA_BLOCK_PROCESSED"
 
 		if (not paused and training and progress < 1.) or getProgress:
+			assert tracker is not None
+
 			if not paused and training and progress < 1.: 
 				tracker.Update()
 			progress = tracker.GetProgress()

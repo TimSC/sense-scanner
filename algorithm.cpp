@@ -83,7 +83,7 @@ void AlgorithmProcess::Init()
         throw std::runtime_error("Algorithm python script not found");
     }
     QStringList arguments;
-    if(1)
+    if(0)
     {
         //Enable python profiling
         arguments.append("-m");
