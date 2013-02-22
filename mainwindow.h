@@ -9,6 +9,7 @@
 #include <QtCore/QTimer>
 #include "avbinmedia.h"
 #include "workspace.h"
+#include "localmutex.h"
 
 namespace Ui {
 class MainWindow;
@@ -29,8 +30,15 @@ public:
 
     void Update();
     void Finished();
+
+    void Save(class WaitPopUpDialog *dialog);
+    void SaveAs(class WaitPopUpDialog *dialog, QString filename);
 protected:
     class MainWindow *mainWindow;
+    QList<QString> cmds;
+    QList<QString> args;
+    QList<class WaitPopUpDialog *> dialogs;
+    Mutex lock;
 };
 
 //**************************************************
@@ -46,11 +54,16 @@ public:
     WaitPopUpDialog(QWidget *parent);
     virtual ~WaitPopUpDialog();
     void Exec();
+    void WorkerTaskDone(int resultCode);
+    int GetResultCode();
 public slots:
-
+    void Update();
 protected:
     QDialog *dialog;
-
+    QTimer *timer;
+    int workerTaskDone;
+    Mutex lock;
+    int resultCode;
 };
 
 //*************************************************
@@ -129,6 +142,7 @@ class MainWindow : public QMainWindow
     */
 
     Q_OBJECT
+    friend class BackgroundActionThread;
     
 public:
     explicit MainWindow(QWidget *parent = 0);

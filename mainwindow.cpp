@@ -35,7 +35,37 @@ BackgroundActionThread::~BackgroundActionThread()
 
 void BackgroundActionThread::Update()
 {
-    cout << "BackgroundActionThread::Update()" << endl;
+    this->lock.lock();
+    assert(this->cmds.size() == this->dialogs.size());
+    assert(this->cmds.size() == this->args.size());
+    assert(this->mainWindow!=NULL);
+    int actionWaiting = (this->cmds.size() > 0);
+    this->lock.unlock();
+
+    if(actionWaiting)
+    {
+        this->lock.lock();
+        QString action = this->cmds[0];
+        this->cmds.pop_front();
+        class WaitPopUpDialog *dialog = this->dialogs[0];
+        this->dialogs.pop_front();
+        QString arg = this->args[0];
+        this->args.pop_front();
+        this->lock.unlock();
+
+        if(action=="SAVE")
+        {
+            int ret = this->mainWindow->workspace.Save();
+            dialog->WorkerTaskDone(ret);
+        }
+
+        if(action=="SAVEAS")
+        {
+            this->mainWindow->workspace.SaveAs(arg);
+            dialog->WorkerTaskDone(1);
+        }
+    }
+
     this->msleep(100);
 }
 
@@ -45,16 +75,44 @@ void BackgroundActionThread::Finished()
 
 }
 
+void BackgroundActionThread::Save(class WaitPopUpDialog *dialog)
+{
+    assert(dialog!=NULL);
+    this->lock.lock();
+    this->cmds.push_back("SAVE");
+    this->dialogs.push_back(dialog);
+    this->args.push_back("");
+    this->lock.unlock();
+}
+
+void BackgroundActionThread::SaveAs(class WaitPopUpDialog *dialog, QString filename)
+{
+    assert(dialog!=NULL);
+    this->lock.lock();
+    this->cmds.push_back("SAVEAS");
+    this->dialogs.push_back(dialog);
+    this->args.push_back(filename);
+    this->lock.unlock();
+}
+
 
 //*********************************************
 
 WaitPopUpDialog::WaitPopUpDialog(QWidget *parent)
 {
+    this->workerTaskDone = 0;
+    this->resultCode = 0;
+
     this->dialog = new QDialog(parent);
     QVBoxLayout topLayout(this->dialog);
     QLabel txt("Waiting for complete");
     this->dialog->setLayout(&topLayout);
     topLayout.addWidget(&txt);
+
+    //Start event buffer timer
+    this->timer = new QTimer();
+    QObject::connect(this->timer, SIGNAL(timeout()), this, SLOT(Update()));
+    this->timer->start(10); //in millisec
 }
 
 WaitPopUpDialog::~WaitPopUpDialog()
@@ -66,6 +124,32 @@ void WaitPopUpDialog::Exec()
 {
     //Run the dialog
     this->dialog->exec();
+}
+
+void WaitPopUpDialog::WorkerTaskDone(int resultCode)
+{
+    cout << "WaitPopUpDialog::WorkerTaskDone()" << endl;
+    this->lock.lock();
+    this->workerTaskDone = 1;
+    this->resultCode = resultCode;
+    this->lock.unlock();
+}
+
+void WaitPopUpDialog::Update()
+{
+    this->lock.lock();
+    int done = this->workerTaskDone;
+    this->lock.unlock();
+
+    if(done) this->dialog->close();
+}
+
+int WaitPopUpDialog::GetResultCode()
+{
+    this->lock.lock();
+    int out = this->resultCode;
+    this->lock.unlock();
+    return out;
 }
 
 //*********************************************
@@ -251,7 +335,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->sourcesAlgGui->ui->processingView->setModel(&this->processingModel);
     this->RegenerateProcessingList();
 
-    this->workspace.Load(tr("/home/tim/test.work"), this->mediaInterfaceBack);
+    //this->workspace.Load(tr("/home/tim/test.work"), this->mediaInterfaceBack);
     this->workspaceAsStored = this->workspace;
     this->ui->sourcesAlgGui->ui->dataSources->setSelectionMode(QListView::SelectionMode::ExtendedSelection);
     this->RegenerateSourcesList();
@@ -670,11 +754,17 @@ void MainWindow::LoadWorkspace()
 void MainWindow::SaveWorkspace()
 {
     WaitPopUpDialog *waitDlg = new WaitPopUpDialog(this);
-    waitDlg->Exec();
 
-    int ret = this->workspace.Save();
+    this->backgroundActionThread->Save(waitDlg);
+
+    waitDlg->Exec();
+    int ret = waitDlg->GetResultCode();
+    delete waitDlg;
+    waitDlg = NULL;
+
     if(ret == 0) this->SaveAsWorkspace();
     else this->workspaceAsStored = this->workspace;
+
 }
 
 void MainWindow::SaveAsWorkspace()
@@ -685,13 +775,14 @@ void MainWindow::SaveAsWorkspace()
     if(fileName.length() == 0) return;
 
     WaitPopUpDialog *waitDlg = new WaitPopUpDialog(this);
+
+    this->backgroundActionThread->SaveAs(waitDlg, fileName);
+
     waitDlg->Exec();
-
-    this->workspace.SaveAs(fileName);
-    this->workspaceAsStored = this->workspace;
-
     delete waitDlg;
     waitDlg = NULL;
+
+    this->workspaceAsStored = this->workspace;
 }
 
 void MainWindow::SelectedSourceChanged(const QModelIndex ind)
