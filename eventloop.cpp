@@ -264,6 +264,7 @@ MessagableThread::MessagableThread()
 {
     this->eventReceiver = NULL;
     this->stopThreads = 0;
+    this->eventLoop = NULL;
     this->id = 0;
     this->threadId = QUuid::createUuid();
 }

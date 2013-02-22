@@ -33,11 +33,6 @@ BackgroundActionThread::~BackgroundActionThread()
 
 }
 
-void BackgroundActionThread::SetEventLoop(class EventLoop *eventLoopIn)
-{
-
-}
-
 void BackgroundActionThread::Update()
 {
     cout << "BackgroundActionThread::Update()" << endl;
@@ -267,7 +262,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->sourcesAlgGui->mainWindow = this;
 
     this->backgroundActionThread = new BackgroundActionThread(this);
-    //this->backgroundActionThread->SetEventLoop(this->eventLoop);
+    this->backgroundActionThread->SetEventLoop(this->eventLoop);
     this->backgroundActionThread->Start();
 }
 

@@ -26,7 +26,6 @@ class BackgroundActionThread : public MessagableThread
 public:
     BackgroundActionThread(class MainWindow *mainWindowIn);
     virtual ~BackgroundActionThread();
-    void SetEventLoop(class EventLoop *eventLoopIn);
 
     void Update();
     void Finished();
