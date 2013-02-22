@@ -53,15 +53,18 @@ void BackgroundActionThread::Update()
         this->args.pop_front();
         this->lock.unlock();
 
+        cout << "action " << action.toLocal8Bit().constData() << endl;
         if(action=="SAVE")
         {
             int ret = this->mainWindow->workspace.Save();
+            cout << "here1" << endl;
             dialog->WorkerTaskDone(ret);
         }
 
         if(action=="SAVEAS")
         {
             this->mainWindow->workspace.SaveAs(arg);
+            cout << "here2" << endl;
             dialog->WorkerTaskDone(1);
         }
     }
@@ -100,6 +103,7 @@ void BackgroundActionThread::SaveAs(class WaitPopUpDialog *dialog, QString filen
 
 WaitPopUpDialog::WaitPopUpDialog(QWidget *parent)
 {
+    cout << "WaitPopUpDialog::WaitPopUpDialog()" << (unsigned long)this << endl;
     this->workerTaskDone = 0;
     this->resultCode = 0;
 
@@ -117,7 +121,7 @@ WaitPopUpDialog::WaitPopUpDialog(QWidget *parent)
 
 WaitPopUpDialog::~WaitPopUpDialog()
 {
-
+    cout << "WaitPopUpDialog::~WaitPopUpDialog()" << (unsigned long)this << endl;
 }
 
 void WaitPopUpDialog::Exec()
@@ -128,7 +132,7 @@ void WaitPopUpDialog::Exec()
 
 void WaitPopUpDialog::WorkerTaskDone(int resultCode)
 {
-    cout << "WaitPopUpDialog::WorkerTaskDone()" << endl;
+    cout << "WaitPopUpDialog::WorkerTaskDone()" << (unsigned long)this << endl;
     this->lock.lock();
     this->workerTaskDone = 1;
     this->resultCode = resultCode;
@@ -141,7 +145,14 @@ void WaitPopUpDialog::Update()
     int done = this->workerTaskDone;
     this->lock.unlock();
 
-    if(done) this->dialog->close();
+    if(done==1)
+    {
+        this->lock.lock();
+        this->workerTaskDone = 2;
+        this->lock.unlock();
+        cout << "safe to close" << endl;
+    }
+    //if(done) this->dialog->close();
 }
 
 int WaitPopUpDialog::GetResultCode()

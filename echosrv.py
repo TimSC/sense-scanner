@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 from reltracker import reltracker
 
 def WorkerProcess(childPipeConn):
-	if 1:
+	if 0:
 		import cProfile
 		cProfile.run('WorkerProcessProf(childPipeConn)', 'workerProf')
 	else:
