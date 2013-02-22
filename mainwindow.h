@@ -14,6 +14,48 @@ namespace Ui {
 class MainWindow;
 }
 
+//***********************************************
+
+class BackgroundActionThread : public MessagableThread
+{
+    /*!
+    * Does processing that would otherwise freeze the GUI such
+    * as loading and saving.
+    */
+
+public:
+    BackgroundActionThread(class MainWindow *mainWindowIn);
+    virtual ~BackgroundActionThread();
+    void SetEventLoop(class EventLoop *eventLoopIn);
+
+    void Update();
+    void Finished();
+protected:
+    class MainWindow *mainWindow;
+};
+
+//**************************************************
+
+class WaitPopUpDialog : public QObject
+{
+    /*!
+    * QT Dialog pop up while GUI is busy doing something else
+    */
+
+    Q_OBJECT
+public:
+    WaitPopUpDialog(QWidget *parent);
+    virtual ~WaitPopUpDialog();
+    void Exec();
+public slots:
+
+protected:
+    QDialog *dialog;
+
+};
+
+//*************************************************
+
 class CheckDiscardDataDialog : public QObject
 {
     /*!
@@ -97,6 +139,7 @@ private:
     Ui::MainWindow *ui;
     AvBinMedia *mediaInterfaceFront;
     AvBinMedia *mediaInterfaceBack;
+    class BackgroundActionThread *backgroundActionThread;
     class EventLoop *eventLoop;
     class EventReceiver *eventReceiver;
     QTimer *timer;

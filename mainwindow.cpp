@@ -21,6 +21,60 @@ using namespace std;
 
 //*********************************************
 
+BackgroundActionThread::BackgroundActionThread(class MainWindow *mainWindowIn)
+{
+    this->mainWindow = mainWindowIn;
+
+}
+
+BackgroundActionThread::~BackgroundActionThread()
+{
+
+
+}
+
+void BackgroundActionThread::SetEventLoop(class EventLoop *eventLoopIn)
+{
+
+}
+
+void BackgroundActionThread::Update()
+{
+    cout << "BackgroundActionThread::Update()" << endl;
+    this->msleep(100);
+}
+
+void BackgroundActionThread::Finished()
+{
+
+
+}
+
+
+//*********************************************
+
+WaitPopUpDialog::WaitPopUpDialog(QWidget *parent)
+{
+    this->dialog = new QDialog(parent);
+    QVBoxLayout topLayout(this->dialog);
+    QLabel txt("Waiting for complete");
+    this->dialog->setLayout(&topLayout);
+    topLayout.addWidget(&txt);
+}
+
+WaitPopUpDialog::~WaitPopUpDialog()
+{
+
+}
+
+void WaitPopUpDialog::Exec()
+{
+    //Run the dialog
+    this->dialog->exec();
+}
+
+//*********************************************
+
 CheckDiscardDataDialog::CheckDiscardDataDialog(QWidget *parent, QString discardMsg) : QObject(parent)
 {
     this->shutdownDialog = new QDialog(parent);
@@ -211,11 +265,18 @@ MainWindow::MainWindow(QWidget *parent) :
     //this->ui->workspaceLayout->hide();
     //this->ui->webViewLayout->hide();
     this->ui->sourcesAlgGui->mainWindow = this;
+
+    this->backgroundActionThread = new BackgroundActionThread(this);
+    //this->backgroundActionThread->SetEventLoop(this->eventLoop);
+    this->backgroundActionThread->Start();
 }
 
 MainWindow::~MainWindow()
 {
     this->workspace.Clear();
+
+    delete this->backgroundActionThread;
+    this->backgroundActionThread = NULL;
 
     delete this->timer;
     this->timer = NULL;
@@ -613,6 +674,9 @@ void MainWindow::LoadWorkspace()
 
 void MainWindow::SaveWorkspace()
 {
+    WaitPopUpDialog *waitDlg = new WaitPopUpDialog(this);
+    waitDlg->Exec();
+
     int ret = this->workspace.Save();
     if(ret == 0) this->SaveAsWorkspace();
     else this->workspaceAsStored = this->workspace;
@@ -625,8 +689,14 @@ void MainWindow::SaveAsWorkspace()
       tr("Save Workspace"), "", tr("Workspaces (*.work)"));
     if(fileName.length() == 0) return;
 
+    WaitPopUpDialog *waitDlg = new WaitPopUpDialog(this);
+    waitDlg->Exec();
+
     this->workspace.SaveAs(fileName);
     this->workspaceAsStored = this->workspace;
+
+    delete waitDlg;
+    waitDlg = NULL;
 }
 
 void MainWindow::SelectedSourceChanged(const QModelIndex ind)
