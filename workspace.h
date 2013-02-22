@@ -9,6 +9,7 @@
 #include "scenecontroller.h"
 #include "algorithm.h"
 #include "annotation.h"
+#include "localmutex.h"
 
 class Workspace : public QObject
 {
@@ -77,7 +78,7 @@ protected:
     std::vector<std::tr1::shared_ptr<class AlgorithmProcess> > processingList;
     std::vector<float> threadProgress;
     std::vector<unsigned int> threadId;
-
+    Mutex lock;
 };
 
 #endif // WORKSPACE_H

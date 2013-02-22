@@ -370,13 +370,21 @@ void Workspace::Load(QString fina, class AvBinMedia* mediaInterface)
 
 int Workspace::Save()
 {
-    if(this->defaultFilename.length()==0)
+    this->lock.lock();
+    int finaLen = this->defaultFilename.length();
+    if(finaLen==0)
+    {
+        this->lock.unlock();
         return 0;
+    }
+
+    QString tmpFina = this->defaultFilename;
+    tmpFina.append(".tmp");
     QFileInfo pathInfo(this->defaultFilename);
     QDir dir(pathInfo.absoluteDir());
 
     //Save data to file
-    QFile f(this->defaultFilename);
+    QFile f(tmpFina);
     f.open( QIODevice::WriteOnly );
     QTextStream out(&f);
     out.setCodec("UTF-8");
@@ -428,17 +436,28 @@ int Workspace::Save()
     out << "</models>" << endl;
     out << "</workspace>" << endl;
     f.close();
+
+    //Rename temporary file to final name
+    QFile targetFina(this->defaultFilename);
+    if(targetFina.exists())
+        QFile::remove(this->defaultFilename);
+    QFile::rename(tmpFina, this->defaultFilename);
+    this->lock.unlock();
+
     return 1;
 }
 
 void Workspace::SaveAs(QString &fina)
 {
+    this->lock.lock();
     this->defaultFilename = fina;
+    this->lock.unlock();
     this->Save();
 }
 
 void Workspace::Update()
 {
+    this->lock.lock();
     for(unsigned int i=0;i<this->processingList.size();i++)
     {
         this->processingList[i]->Update();
@@ -469,7 +488,7 @@ void Workspace::Update()
             count ++;
         }
     }
-
+    this->lock.unlock();
 }
 
 void Workspace::TerminateThreads()

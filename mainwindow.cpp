@@ -764,7 +764,7 @@ void MainWindow::LoadWorkspace()
 
 void MainWindow::SaveWorkspace()
 {
-    WaitPopUpDialog *waitDlg = new WaitPopUpDialog(this);
+    /*WaitPopUpDialog *waitDlg = new WaitPopUpDialog(this);
 
     this->backgroundActionThread->Save(waitDlg);
 
@@ -774,14 +774,17 @@ void MainWindow::SaveWorkspace()
     waitDlg = NULL;
 
     if(ret == 0) this->SaveAsWorkspace();
-    else this->workspaceAsStored = this->workspace;
+    else this->workspaceAsStored = this->workspace;*/
 
+    int ret = this->workspace.Save();
+    if(ret == 0) this->SaveAsWorkspace();
+    else this->workspaceAsStored = this->workspace;
 }
 
 void MainWindow::SaveAsWorkspace()
 {
     //Get output filename from user
-    QString fileName = QFileDialog::getSaveFileName(0,
+    /*QString fileName = QFileDialog::getSaveFileName(0,
       tr("Save Workspace"), "", tr("Workspaces (*.work)"));
     if(fileName.length() == 0) return;
 
@@ -793,6 +796,14 @@ void MainWindow::SaveAsWorkspace()
     delete waitDlg;
     waitDlg = NULL;
 
+    this->workspaceAsStored = this->workspace;*/
+
+    //Get output filename from user
+    QString fileName = QFileDialog::getSaveFileName(0,
+      tr("Save Workspace"), "", tr("Workspaces (*.work)"));
+    if(fileName.length() == 0) return;
+
+    this->workspace.SaveAs(fileName);
     this->workspaceAsStored = this->workspace;
 }
 
