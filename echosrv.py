@@ -1,12 +1,12 @@
 import sys
 #sys.path = ["python-lib", "site-packages", "."]
-import multiprocessing, time, pickle, bz2, base64, os
+import multiprocessing, time, pickle, bz2, base64, os, zlib
 from PIL import Image
 import xml.etree.ElementTree as ET
 from reltracker import reltracker
 
 def WorkerProcess(childPipeConn):
-	if 1:
+	if 0:
 		import cProfile
 		cProfile.run('WorkerProcessProf(childPipeConn)', 'workerProf')
 	else:
@@ -87,7 +87,8 @@ def WorkerProcessProf(childPipeConn):
 					tracker.PrepareForPickle()
 					trackerStr = pickle.dumps(tracker, protocol=pickle.HIGHEST_PROTOCOL)
 					tracker.PostUnPickle()
-					modelData = "bz2".encode("ascii")+bz2.compress(trackerStr)
+					#modelData = "bz2".encode("ascii")+bz2.compress(trackerStr)
+					modelData = "raw".encode("ascii")+trackerStr
 					modelDataB64 = base64.b64encode(modelData)
 					print "DATA_BLOCK={0}".format(len(modelDataB64)+3)
 					sys.stdout.write("MODEL\n")
@@ -143,8 +144,15 @@ def WorkerProcessProf(childPipeConn):
 					print "Loading model from string", len(event[2])
 					try:
 						modelFormat = event[2][:3]
-						print "modelformat",modelFormat
-						modelData = bz2.decompress(event[2][3:])
+						modelData = None
+						if modelFormat == "bz2":
+							modelData = bz2.decompress(event[2][3:])
+						if modelFormat == "raw":
+							modelData = event[2][3:]
+						if modelFormat == "zlb":
+							modelData = zlib.decompress(event[2][3:])
+						assert modelData is not None
+
 						print "Uncompressed size", len(modelData)
 						tracker = pickle.loads(modelData)
 						tracker.PostUnPickle()
