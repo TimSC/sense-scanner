@@ -21,87 +21,11 @@ using namespace std;
 
 //*********************************************
 
-BackgroundActionThread::BackgroundActionThread(class MainWindow *mainWindowIn)
-{
-    this->mainWindow = mainWindowIn;
-
-}
-
-BackgroundActionThread::~BackgroundActionThread()
-{
-
-
-}
-
-void BackgroundActionThread::Update()
-{
-    this->lock.lock();
-    assert(this->cmds.size() == this->dialogs.size());
-    assert(this->cmds.size() == this->args.size());
-    assert(this->mainWindow!=NULL);
-    int actionWaiting = (this->cmds.size() > 0);
-    this->lock.unlock();
-
-    if(actionWaiting)
-    {
-        this->lock.lock();
-        QString action = this->cmds[0];
-        this->cmds.pop_front();
-        class WaitPopUpDialog *dialog = this->dialogs[0];
-        this->dialogs.pop_front();
-        QString arg = this->args[0];
-        this->args.pop_front();
-        this->lock.unlock();
-
-        if(action=="SAVE")
-        {
-            int ret = this->mainWindow->workspace.Save();
-            dialog->WorkerTaskDone(ret);
-        }
-
-        if(action=="SAVEAS")
-        {
-            this->mainWindow->workspace.SaveAs(arg);
-            dialog->WorkerTaskDone(1);
-        }
-    }
-
-    this->msleep(100);
-}
-
-void BackgroundActionThread::Finished()
-{
-
-
-}
-
-void BackgroundActionThread::Save(class WaitPopUpDialog *dialog)
-{
-    assert(dialog!=NULL);
-    this->lock.lock();
-    this->cmds.push_back("SAVE");
-    this->dialogs.push_back(dialog);
-    this->args.push_back("");
-    this->lock.unlock();
-}
-
-void BackgroundActionThread::SaveAs(class WaitPopUpDialog *dialog, QString filename)
-{
-    assert(dialog!=NULL);
-    this->lock.lock();
-    this->cmds.push_back("SAVEAS");
-    this->dialogs.push_back(dialog);
-    this->args.push_back(filename);
-    this->lock.unlock();
-}
-
-
-//*********************************************
-
 WaitPopUpDialog::WaitPopUpDialog(QWidget *parent)
 {
     this->workerTaskDone = 0;
     this->resultCode = 0;
+    this->count = 0;
 
     this->dialog = new QDialog(parent);
     QVBoxLayout topLayout(this->dialog);
@@ -139,6 +63,9 @@ void WaitPopUpDialog::Update()
     this->lock.lock();
     int done = this->workerTaskDone;
     this->lock.unlock();
+
+    this->count += 1;
+    //cout << "test " << count << endl;
 
     if(done) this->dialog->close();
 }
@@ -344,17 +271,11 @@ MainWindow::MainWindow(QWidget *parent) :
     //this->ui->webViewLayout->hide();
     this->ui->sourcesAlgGui->mainWindow = this;
 
-    this->backgroundActionThread = new BackgroundActionThread(this);
-    this->backgroundActionThread->SetEventLoop(this->eventLoop);
-    this->backgroundActionThread->Start();
 }
 
 MainWindow::~MainWindow()
 {
     this->workspace.Clear();
-
-    delete this->backgroundActionThread;
-    this->backgroundActionThread = NULL;
 
     delete this->timer;
     this->timer = NULL;
@@ -753,7 +674,6 @@ void MainWindow::LoadWorkspace()
 void MainWindow::SaveWorkspace()
 {
     WaitPopUpDialog *waitDlg = new WaitPopUpDialog(this);
-
     this->backgroundActionThread->Save(waitDlg);
 
     waitDlg->Exec();
@@ -763,6 +683,7 @@ void MainWindow::SaveWorkspace()
 
     if(ret == 0) this->SaveAsWorkspace();
     else this->workspaceAsStored = this->workspace;
+
 }
 
 void MainWindow::SaveAsWorkspace()
@@ -857,27 +778,15 @@ void MainWindow::TrainModelPressed()
 
     //Create worker process
     std::tr1::shared_ptr<class AlgorithmProcess> alg(new class AlgorithmProcess(this->eventLoop, this));
-    alg->SetUid(QUuid::createUuid());
+    QUuid newUuid = QUuid::createUuid();
+    alg->SetUid(newUuid);
 
-	try
-	{
-		alg->Init();
-	}
-	catch(std::runtime_error &err)
-	{
-		//If python/executable is not found, an error is thrown to be caught here
-		QErrorMessage *errPopUp = new QErrorMessage(this);
-		errPopUp->showMessage(err.what());
-		errPopUp->exec();
-		delete errPopUp;
-		return;
-	}
-
-    //Start worker process
-    alg->Start();
+    //Add process to workspace
+    this->workspace.AddProcessing(alg);
 
     //Configure worker process
     selectList = selection->selectedRows(0);
+    QList<QSharedPointer<QImage> > imgs;
     for(unsigned int i=0;i<selectList.size();i++)
     {
 
@@ -892,8 +801,6 @@ void MainWindow::TrainModelPressed()
             countMarkedFrames ++;
 
             //Get image data and send to process
-            this->ui->widget->Pause();
-
             cout << annot->GetIndexTimestamp(fr) << endl;
             unsigned long long startTimestamp = 0, endTimestamp = 0;
             unsigned long long annotTimestamp = annot->GetIndexTimestamp(fr);
@@ -917,33 +824,40 @@ void MainWindow::TrainModelPressed()
                 continue;
             }
 
+            imgs.append(img);
+
             int len = img->byteCount();
-            //cout << "Image bytes "<< len << endl;
-            //int len = 10;
 
+            //Send image to algorithm module
             assert(img->format() == QImage::Format_RGB888);
-            QByteArray imgRaw((const char *)img->bits(), len);
+            std::tr1::shared_ptr<class Event> foundImgEv(new Event("TRAINING_IMG_FOUND"));
             QString imgPreamble2 = QString("RGB_IMAGE_DATA TIMESTAMP=%1 HEIGHT=%2 WIDTH=%3\n").
-                    arg(annotTimestamp).
-                    arg(img->height()).
-                    arg(img->width());
-            alg->SendRawDataBlock(imgPreamble2, imgRaw);
+                                arg(annotTimestamp).
+                                arg(img->height()).
+                                arg(img->width());
+            foundImgEv->data = imgPreamble2.toLocal8Bit().constData();
+            class BinaryData *imgRaw = new BinaryData();
+            imgRaw->Copy((const unsigned char *)img->bits(), len);
+            foundImgEv->raw = imgRaw;
+            foundImgEv->toUuid = newUuid;
+            this->eventLoop->SendEvent(foundImgEv);
 
-            //Get annotation data and sent it to the process
+            //Get annotation data and sent it to the algorithm
             QString annotXml;
             QTextStream test(&annotXml);
             annot->GetIndexAnnotationXml(fr, &test);
             assert(annotXml.mid(annotXml.length()-1).toLocal8Bit().constData()[0]=='\n');
 
-            QString preamble2 = QString("XML_DATA\n");
-			alg->SendRawDataBlock(preamble2, annotXml.toUtf8());
+            std::tr1::shared_ptr<class Event> foundPosEv(new Event("TRAINING_POS_FOUND"));
+            foundPosEv->data = annotXml.toUtf8().constData();
+            foundPosEv->toUuid = newUuid;
+            this->eventLoop->SendEvent(foundPosEv);
         }
     }
 
-    alg->SendCommand("TRAIN\n");
-
-    //Add process to workspace
-    this->workspace.AddProcessing(alg);
+    std::tr1::shared_ptr<class Event> trainingFinishEv(new Event("TRAINING_DATA_FINISH"));
+    trainingFinishEv->toUuid = newUuid;
+    this->eventLoop->SendEvent(trainingFinishEv);
 
     //Update GUI to reflect changed workspace
     this->RegenerateProcessingList();
@@ -1044,3 +958,4 @@ void MainWindow::ShowVideoPressed()
 {
     this->ui->videoDock->show();
 }
+

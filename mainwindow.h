@@ -64,6 +64,7 @@ protected:
     int workerTaskDone;
     Mutex lock;
     int resultCode;
+    int count;
 };
 
 //*************************************************
@@ -142,7 +143,6 @@ class MainWindow : public QMainWindow
     */
 
     Q_OBJECT
-    friend class BackgroundActionThread;
     
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -152,7 +152,6 @@ private:
     Ui::MainWindow *ui;
     AvBinMedia *mediaInterfaceFront;
     AvBinMedia *mediaInterfaceBack;
-    class BackgroundActionThread *backgroundActionThread;
     class EventLoop *eventLoop;
     class EventReceiver *eventReceiver;
     QTimer *timer;
@@ -165,6 +164,7 @@ private:
     QMessageBox *errMsg;
     std::map<QUuid, float> annotProgress;
     int avbinVerChecked;
+    int timeUpdatesEnabled;
 
 public slots:
     void ImportVideo();

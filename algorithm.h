@@ -5,7 +5,9 @@
 #include <QtCore/QProcess>
 #include <QtCore/QFile>
 #include <QtCore/QUuid>
+#include <QtCore/QTimer>
 #include <vector>
+#include "localmutex.h"
 
 class AlgorithmProcess : public QProcess
 {
@@ -16,6 +18,7 @@ class AlgorithmProcess : public QProcess
     *
     * The GUI thread should periodically call update to process event messages.
     */
+    Q_OBJECT
 
 public:
     AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent);
@@ -31,6 +34,13 @@ public:
         STOPPED = 6
     };
 
+    QUuid GetUid();
+    void SetUid(QUuid newUid);
+
+public slots:
+    void Update();
+
+protected:
     void Init();
     int Stop();
     void StopNonBlocking();
@@ -43,15 +53,13 @@ public:
     void ProcessAlgOutput();
     void Pause();
     void Unpause();
+
     void SendCommand(QString cmd);
     void SendRawDataBlock(QString args, QByteArray data);
     unsigned int EncodedLength(QString cmd);
     QByteArray GetModel();
-    QUuid GetUid();
-    void SetUid(QUuid newUid);
     void HandleEvent(std::tr1::shared_ptr<class Event> ev);
 
-protected:
     int stopping;
     int pausing;
     int paused;
@@ -67,6 +75,7 @@ protected:
     QByteArray algOutBuffer;
     QByteArray algErrBuffer;
     QUuid uid;
+    QTimer timer;
 };
 
 #endif // ALGORITHM_H

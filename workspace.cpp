@@ -122,6 +122,24 @@ QUuid Workspace::GetAnnotUid(unsigned int index)
 
 unsigned int Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg)
 {
+
+    try
+    {
+        alg->Init();
+    }
+    catch(std::runtime_error &err)
+    {
+        //If python/executable is not found, an error is thrown to be caught here
+        QErrorMessage *errPopUp = new QErrorMessage(this);
+        errPopUp->showMessage(err.what());
+        errPopUp->exec();
+        delete errPopUp;
+        return;
+    }
+
+    //Start worker process
+    alg->Start();
+
     alg->SetId(this->nextThreadId);
     this->processingList.push_back(alg);
     this->threadProgress.push_back(0.);
@@ -457,11 +475,15 @@ void Workspace::SaveAs(QString &fina)
 
 void Workspace::Update()
 {
-    this->lock.lock();
+
     for(unsigned int i=0;i<this->processingList.size();i++)
     {
         this->processingList[i]->Update();
     }
+
+    //This tries to update but if mutex is locked, it returns immediately
+    bool havelock = this->lock.try_lock();
+    if(!havelock) return;
 
     //Set annotations to inactive when they do not need active status
     for(unsigned int i=0;i<this->annotations.size();i++)

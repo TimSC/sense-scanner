@@ -27,6 +27,42 @@ public:
     virtual ~Deletable() {};
 };
 
+class BinaryData : public Deletable
+{
+    /*!
+    * A generic byte buffer than can be passed though the message system
+    */
+
+public:
+    BinaryData()
+    {
+        this->raw = NULL;
+        this->size = 0;
+    }
+
+    virtual ~BinaryData()
+    {
+        this->Clear();
+    }
+
+    void Copy(const unsigned char *buff, unsigned int buffSize)
+    {
+        if(this->raw!=NULL) delete [] this->raw;
+        this->size = buffSize;
+        this->raw = new unsigned char [this->size];
+        memcpy(this->raw, buff, this->size);
+    }
+
+    void Clear()
+    {
+        if(this->raw!=NULL) delete [] this->raw;
+        this->size = 0;
+    }
+
+    unsigned char *raw;
+    unsigned int size;
+};
+
 class Event
 {
     /*!
@@ -49,6 +85,8 @@ public:
 
     //Pointer to a custom class that contains additional data
     class Deletable *raw;
+
+    QUuid toUuid;
 
 };
 

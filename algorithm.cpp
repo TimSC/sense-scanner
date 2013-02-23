@@ -26,6 +26,9 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     //this->algOutLog->open(QIODevice::WriteOnly);
     this->eventReceiver = new class EventReceiver(this->eventLoop);
     this->eventLoop->AddListener("PREDICT_FRAME_REQUEST", *this->eventReceiver);
+
+    QObject::connect(&this->timer, SIGNAL(timeout()), this, SLOT(Update()));
+    this->timer.start(10); //in millisec
 }
 
 AlgorithmProcess::~AlgorithmProcess()
@@ -522,6 +525,7 @@ unsigned int AlgorithmProcess::EncodedLength(QString cmd)
 
 QByteArray AlgorithmProcess::GetModel()
 {
+
     //Send request to algorithm process
     assert(this->paused);
     this->dataBlock = "";
@@ -533,11 +537,12 @@ QByteArray AlgorithmProcess::GetModel()
     while(!this->dataBlockReceived)
     {
         this->waitForFinished(100);
-        this->Update();
+        //this->InternalUpdate();
         count ++;
     }
     if(!this->dataBlockReceived)
     {
+        this->lock.unlock();
         throw std::runtime_error("Algorithm process timed out during GetModel()");
     }
 
@@ -558,3 +563,8 @@ void AlgorithmProcess::SetUid(QUuid newUid)
     this->uid = newUid;
 }
 
+void AlgorithmProcess::Update()
+{
+
+
+}
