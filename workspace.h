@@ -30,6 +30,7 @@ public:
 
     //** Sources and annotations
     unsigned int AddSource(QString &fina, QString UidStr, class AvBinMedia* mediaInterface);
+    unsigned int AddSource(std::tr1::shared_ptr<class Annotation> ann);
     void RemoveSource(QUuid uuid);
     unsigned int AddAutoAnnot(QString annotUid, QString algUid, class AvBinMedia* mediaInterface);
 

@@ -1040,14 +1040,41 @@ int MainWindow::Save()
     {
         try
         {
+            //Get source filename for annotation
+            std::tr1::shared_ptr<class Event> getSourceNameEv(new Event("GET_SOURCE_FILENAME"));
+            getSourceNameEv->toUuid = annotationUuids[i];
+            getSourceNameEv->id = this->eventLoop->GetId();
+            this->eventLoop->SendEvent(getSourceNameEv);
+
+            std::tr1::shared_ptr<class Event> sourceName = this->eventReceiver->WaitForEventId(getSourceNameEv->id);
+            QString fina = sourceName->data.c_str();
+
+            //Get algorithm Uuid for this annotation track
+            std::tr1::shared_ptr<class Event> getAlgUuidEv(new Event("GET_ALG_UUID"));
+            getAlgUuidEv->toUuid = annotationUuids[i];
+            getAlgUuidEv->id = this->eventLoop->GetId();
+            this->eventLoop->SendEvent(getAlgUuidEv);
+
+            std::tr1::shared_ptr<class Event> algUuidEv = this->eventReceiver->WaitForEventId(getAlgUuidEv->id);
+            QUuid algUuid(algUuidEv->data.c_str());
+
+            //Get annotation data
+            std::tr1::shared_ptr<class Event> getAnnotEv(new Event("GET_ALL_ANNOTATION_XML"));
+            getAnnotEv->toUuid = annotationUuids[i];
+            getAnnotEv->id = this->eventLoop->GetId();
+            this->eventLoop->SendEvent(getAnnotEv);
+
+            std::tr1::shared_ptr<class Event> annotXmlRet = this->eventReceiver->WaitForEventId(getAnnotEv->id);
+
+            //Format as XML
             out << "\t<source id=\""<<i<<"\" uid=\""<<Qt::escape(annotationUuids[i].toString())<<"\" file=\""<<
-                   Qt::escape(dir.relativeFilePath(this->workspace.annotations[i]->GetSource()))<<"\"";
-            QUuid uid = this->workspace.annotations[i]->GetAlgUid();
-            if(!uid.isNull())
-                out << " alg=\"" << uid.toString().toLocal8Bit().constData() << "\"";;
+                   Qt::escape(dir.relativeFilePath(fina))<<"\"";
+
+            if(!algUuid.isNull())
+                out << " alg=\"" << algUuid.toString().toLocal8Bit().constData() << "\"";;
 
             out << ">" << endl;
-            this->workspace.annotations[i]->GetTrack()->WriteAnnotationXml(out);
+            out << annotXmlRet->data.c_str();
             out << "\t</source>" << endl;
         }
         catch(std::runtime_error err)
@@ -1186,7 +1213,7 @@ void MainWindow::Load(QString fina, class AvBinMedia* mediaInterface)
 
 
                     ann->SetTrack(track);
-                    this->workspace.annotations.push_back(ann);
+                    this->workspace.AddSource(ann);
                     sourceNode = sourceNode.nextSibling();
                 }
 

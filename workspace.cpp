@@ -60,6 +60,12 @@ unsigned int Workspace::AddSource(QString &fina, QString UidStr, class AvBinMedi
     std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann, mediaInterface));
     annotThread->SetEventLoop(this->eventLoop);
     annotThread->Start();
+
+    return this->AddSource(ann);
+}
+
+unsigned int Workspace::AddSource(std::tr1::shared_ptr<class Annotation> ann)
+{
     ann->annotThread = annotThread;
     this->annotations.push_back(ann);
     this->annotationUuids.push_back(QUuid(UidStr));
