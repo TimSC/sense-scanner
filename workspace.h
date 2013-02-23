@@ -30,16 +30,13 @@ public:
 
     //** Sources and annotations
     unsigned int AddSource(QString &fina, QString UidStr, class AvBinMedia* mediaInterface);
-    void RemoveSource(unsigned int num);
+    void RemoveSource(QUuid uuid);
     unsigned int AddAutoAnnot(QString annotUid, QString algUid, class AvBinMedia* mediaInterface);
-    int FindAnnotWithUid(QUuid uidIn);
 
     //void SetTrack(unsigned int trackNum, TrackingAnnotation *track);
-    TrackingAnnotation *GetTrack(unsigned int trackNum);
+    //TrackingAnnotation *GetTrack(unsigned int trackNum);
 
-    unsigned int GetNumSources();
-    QString GetSourceName(unsigned int index);
-    QUuid GetAnnotUid(unsigned int index);
+    QList<QUuid> GetAnnotationUuids();
 
     //** Processing
     void AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg);
@@ -55,9 +52,6 @@ public:
 
     void ClearProcessing();
     void ClearAnnotation();
-    void Load(QString fina, class AvBinMedia* mediaInterface);
-    int Save();
-    void SaveAs(QString &fina);
     int HasChanged();
 
     void TerminateThreads();
@@ -66,8 +60,8 @@ public:
 protected:
     //Sources and annotation data
     std::vector<std::tr1::shared_ptr<class Annotation> > annotations;
+    QList<QUuid> annotationUuids;
 
-    QString defaultFilename;
     class EventLoop *eventLoop;
 
     //Processing data

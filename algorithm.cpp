@@ -317,6 +317,16 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     {
         this->SendCommand("TRAIN\n");
     }
+
+    if(ev->type == "GET_PROGRESS")
+    {
+        this->SendCommand("GET_PROGRESS\n");
+    }
+
+    if(ev->type == "GET_MODEL")
+    {
+        QByteArray modelbin = this->GetModel();
+    }
 }
 
 void AlgorithmProcess::ProcessAlgOutput()

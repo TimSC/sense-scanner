@@ -276,7 +276,7 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long startTimesta
 
 }
 
-void VideoWidget::SetSceneControl(TrackingAnnotation *sceneIn)
+void VideoWidget::SetSceneControl(QUuid srcUuid)
 {
     cout << ">>> count " << this->ui->annotationTools->count() << endl;
 
@@ -307,8 +307,6 @@ void VideoWidget::SetSceneControl(TrackingAnnotation *sceneIn)
         this->ui->annotationTools->removeItem(item);
         delete custom;
     }
-    if(this->sceneControl!=NULL)
-        this->sceneControl->DestroyControls();
 
     //Remove previous menu controls
 

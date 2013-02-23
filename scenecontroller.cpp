@@ -689,69 +689,56 @@ unsigned long long TrackingAnnotation::GetSeekBackTime()
 
 QWidget *TrackingAnnotation::ControlsFactory(QWidget *parent)
 {
-    assert(this->annotationControls==NULL);
-
-    this->annotationControls = new QWidget();
-    assert(this->annotationControls->layout() == NULL);
+    QWidget *annotationControls = new QWidget();
+    assert(annotationControls->layout() == NULL);
     QHBoxLayout *layout = new QHBoxLayout();
     layout->setContentsMargins(0,0,0,0);
 
     assert(this->markFrameButton == NULL);
-    this->markFrameButton = new QPushButton("Mark Frame", this->annotationControls);
+    this->markFrameButton = new QPushButton("Mark Frame", annotationControls);
     QObject::connect(this->markFrameButton, SIGNAL(toggled(bool)), this, SLOT(MarkFramePressed(bool)));
     this->markFrameButton->setCheckable(true);
     //this->markFrameButton->setChecked(true);
     layout->addWidget(this->markFrameButton);
 
-    QPushButton *button = new QPushButton("Move", this->annotationControls);
+    QPushButton *button = new QPushButton("Move", annotationControls);
     QObject::connect(button, SIGNAL(clicked()), this, SLOT(MovePressed()));
     button->setAutoExclusive(true);
     button->setCheckable(true);
     button->setChecked(true);
     layout->addWidget(button);
 
-    button = new QPushButton("Move All", this->annotationControls);
+    button = new QPushButton("Move All", annotationControls);
     QObject::connect(button, SIGNAL(clicked()), this, SLOT(MoveAllPressed()));
     button->setAutoExclusive(true);
     button->setCheckable(true);
     layout->addWidget(button);
 
-    button = new QPushButton("Add", this->annotationControls);
+    button = new QPushButton("Add", annotationControls);
     QObject::connect(button, SIGNAL(clicked()), this, SLOT(AddPointPressed()));
     button->setAutoExclusive(true);
     button->setCheckable(true);
     layout->addWidget(button);
 
-    button = new QPushButton("Remove", this->annotationControls);
+    button = new QPushButton("Remove", annotationControls);
     QObject::connect(button, SIGNAL(clicked()), this, SLOT(RemovePointPressed()));
     button->setAutoExclusive(true);
     button->setCheckable(true);
     layout->addWidget(button);
 
-    button = new QPushButton("Add Link", this->annotationControls);
+    button = new QPushButton("Add Link", annotationControls);
     QObject::connect(button, SIGNAL(clicked()), this, SLOT(AddLinkPressed()));
     button->setAutoExclusive(true);
     button->setCheckable(true);
     layout->addWidget(button);
 
-    button = new QPushButton("Remove Link", this->annotationControls);
+    button = new QPushButton("Remove Link", annotationControls);
     QObject::connect(button, SIGNAL(clicked()), this, SLOT(RemoveLinkPressed()));
     button->setAutoExclusive(true);
     button->setCheckable(true);
     layout->addWidget(button);
-    this->annotationControls->setLayout(layout);
-    return this->annotationControls;
-}
-
-void TrackingAnnotation::DestroyControls()
-{
-    assert(this->markFrameButton != NULL);
-    //delete this->markFrameButton;
-    this->markFrameButton = NULL;
-
-    assert(this->annotationControls != NULL);
-    //delete this->annotationControls;
-    this->annotationControls = NULL;
+    annotationControls->setLayout(layout);
+    return annotationControls;
 }
 
 void TrackingAnnotation::MarkFramePressed(bool val)

@@ -57,7 +57,7 @@ public slots:
     void AsyncFrameReceived(QImage& fr, unsigned long long startTimestamp,
                             unsigned long long endTimestamp,
                             unsigned long long requestTimestamp);
-    void SetSceneControl(TrackingAnnotation *sceneIn);
+    void SetSceneControl(QUuid srcUuid);
     void FitToWindow();
     void TimeChanged(QTime time);
 

@@ -55,10 +55,8 @@ public:
     int NearestLink(float x, float y, std::vector<std::vector<float> > &currentFrame);
     void Redraw();
 
-    QWidget *ControlsFactory(QWidget *parent);
-    void DestroyControls();
-
-    QMenu *MenuFactory(QMenuBar *menuBar);
+    static QWidget *ControlsFactory(QWidget *parent);
+    static QMenu *MenuFactory(QMenuBar *menuBar);
 
     void RemovePoint(int index);
 
@@ -132,9 +130,9 @@ protected:
     unsigned long long annotationTime;
     int annotationTimeSet;
     int mouseOver;
-    QPushButton *markFrameButton;
+    //QPushButton *markFrameButton;
     std::vector<std::vector<float> > shape; //contains the default shape
-    QWidget *annotationControls;
+    //QWidget *annotationControls;
     QMutex lock;
 
     //Keep track of frame times that are available

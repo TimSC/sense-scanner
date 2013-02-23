@@ -165,6 +165,7 @@ private:
     std::map<QUuid, float> annotProgress;
     int avbinVerChecked;
     int timeUpdatesEnabled;
+    QString defaultFilename;
 
 public slots:
     void ImportVideo();
@@ -192,6 +193,10 @@ public slots:
 
     void AboutPressed();
     void ShowVideoPressed();
+
+    void Load(QString fina, class AvBinMedia* mediaInterface);
+    int Save();
+    void SaveAs(QString &fina);
 };
 
 #endif // MAINWINDOW_H

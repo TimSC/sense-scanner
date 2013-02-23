@@ -401,13 +401,21 @@ void MainWindow::RegenerateSourcesList()
     QIcon icon("icons/media-eject.png");
     if(this->sourcesModel.columnCount()!= 2)
         this->sourcesModel.setColumnCount(2);
-    if(this->sourcesModel.rowCount() != this->workspace.GetNumSources())
-        this->sourcesModel.setRowCount(this->workspace.GetNumSources());
-    for (int row = 0; row < this->workspace.GetNumSources(); ++row)
+    QList<QUuid> annotationUuids = this->workspace.GetAnnotationUuids();
+
+    if(this->sourcesModel.rowCount() != annotationUuids.size())
+        this->sourcesModel.setRowCount(annotationUuids.size());
+    for (int row = 0; row < annotationUuids.size(); ++row)
     {
         for (int column = 0; column < 1; ++column)
         {
-            QString fina = this->workspace.GetSourceName(row);
+            std::tr1::shared_ptr<class Event> getSourceNameEv(new Event("GET_SOURCE_FILENAME"));
+            getSourceNameEv->toUuid = annotationUuids[row];
+            getSourceNameEv->id = this->eventLoop->GetId();
+            this->eventLoop->SendEvent(getSourceNameEv);
+
+            std::tr1::shared_ptr<class Event> sourceName = this->eventReceiver->WaitForEventId(getSourceNameEv->id);
+            QString fina = sourceName->data.c_str();
             QFileInfo finaInfo(fina);
 
             QStandardItem *item = this->sourcesModel.item(row, column);
@@ -422,7 +430,7 @@ void MainWindow::RegenerateSourcesList()
         {
             std::ostringstream displayLine;
             //float progress = this->workspace.GetProgress(row);
-            QUuid annotId = this->workspace.GetAnnotUid(row);
+            QUuid annotId = annotationUuids[row];
             //cout << annotId.toString().toLocal8Bit().constData() << endl;
 
             std::map<QUuid, float>::iterator it = this->annotProgress.find(annotId);
@@ -541,6 +549,7 @@ void MainWindow::ImportVideo()
 void MainWindow::RemoveVideo()
 {
     cout << "remove" << endl;
+    QList<QUuid> algUuids = this->workspace.GetProcessingUuids();
     QItemSelectionModel *sourceSelected = this->ui->sourcesAlgGui->ui->dataSources->selectionModel();
     assert(sourceSelected!=NULL);
 
@@ -552,7 +561,7 @@ void MainWindow::RemoveVideo()
     {
         QModelIndex &ind = rowList[i];
         //cout << ind.row() << endl;
-        this->workspace.RemoveSource(ind.row());
+        this->workspace.RemoveSource(algUuids[ind.row()]);
     }
 
     this->RegenerateSourcesList();
@@ -668,7 +677,7 @@ void MainWindow::LoadWorkspace()
       tr("Load Workspace"), "", tr("Workspaces (*.work)"));
     if(fileName.length() == 0) return;
 
-    this->workspace.Load(fileName, this->mediaInterfaceBack);
+    this->Load(fileName, this->mediaInterfaceBack);
     this->workspaceAsStored = this->workspace;
     this->RegenerateSourcesList();
 }
@@ -676,7 +685,7 @@ void MainWindow::LoadWorkspace()
 void MainWindow::SaveWorkspace()
 {
     WaitPopUpDialog *waitDlg = new WaitPopUpDialog(this);
-    this->workspace.Save();
+    this->Save();
 
     waitDlg->Exec();
     int ret = waitDlg->GetResultCode();
@@ -697,7 +706,7 @@ void MainWindow::SaveAsWorkspace()
 
     WaitPopUpDialog *waitDlg = new WaitPopUpDialog(this);
 
-    this->workspace.SaveAs(fileName);
+    this->SaveAs(fileName);
 
     waitDlg->Exec();
     delete waitDlg;
@@ -714,19 +723,27 @@ void MainWindow::SelectedSourceChanged(const QModelIndex ind)
 
 void MainWindow::SelectedSourceChanged(int selectedRow)
 {
-    if(selectedRow < 0 && selectedRow >= this->workspace.GetNumSources())
+    QList<QUuid> annotationUuids = this->workspace.GetAnnotationUuids();
+    if(selectedRow < 0 && selectedRow >= annotationUuids.size())
         return;
 
-    QString fina = this->workspace.GetSourceName(selectedRow);
+    //Get video file name from source
+    std::tr1::shared_ptr<class Event> getSourceNameEv(new Event("GET_SOURCE_FILENAME"));
+    getSourceNameEv->toUuid = annotationUuids[selectedRow];
+    getSourceNameEv->id = this->eventLoop->GetId();
+    this->eventLoop->SendEvent(getSourceNameEv);
+
+    std::tr1::shared_ptr<class Event> sourceName = this->eventReceiver->WaitForEventId(getSourceNameEv->id);
+    QString fina = sourceName->data.c_str();
 
     this->DeselectCurrentSource();
 
     //Update scene controller
-    TrackingAnnotation *scene = this->workspace.GetTrack(selectedRow);
-    this->ui->widget->SetSceneControl(scene);
+    this->ui->widget->SetSceneControl(annotationUuids[selectedRow]);
 
-    assert(scene!=NULL);
-    this->annotationMenu = scene->MenuFactory(this->menuBar());
+    //Update window menus
+
+    this->annotationMenu = TrackingAnnotation::MenuFactory(this->menuBar());
 
     //Set widget to use this source
     this->ui->widget->SetSource(this->mediaInterfaceFront, fina);
@@ -750,20 +767,25 @@ void MainWindow::TrainModelPressed()
 {
     cout << "TrainModelPressed" << endl;
     QItemSelectionModel *selection = this->ui->sourcesAlgGui->ui->dataSources->selectionModel();
+    QList<QUuid> annotationUuids = this->workspace.GetAnnotationUuids();
 
     //Count frames, because at least one is needed to train
     int countMarkedFrames = 0;
     QModelIndexList selectList = selection->selectedRows(0);
+    QList<std::vector<std::string> > seqMarked;
     for(unsigned int i=0;i<selectList.size();i++)
     {
         QModelIndex &ind = selectList[i];
         //For each annotated frame
-        TrackingAnnotation *annot = this->workspace.GetTrack(ind.row());
-        assert(annot!=0);
-        for(unsigned int fr=0;fr<annot->NumMarkedFrames();fr++)
-        {
-            countMarkedFrames ++;
-        }
+        std::tr1::shared_ptr<class Event> getMarkedEv(new Event("GET_MARKED_LIST"));
+        getMarkedEv->toUuid = annotationUuids[ind.row()];
+        getMarkedEv->id = this->eventLoop->GetId();
+        this->eventLoop->SendEvent(getMarkedEv);
+
+        std::tr1::shared_ptr<class Event> markedEv = this->eventReceiver->WaitForEventId(getMarkedEv->id);
+        std::vector<std::string> splitMarked = split(markedEv->data.c_str(),',');
+        seqMarked.push_back(splitMarked);
+        countMarkedFrames += splitMarked.size();
     }
     if(countMarkedFrames==0)
     {
@@ -791,21 +813,26 @@ void MainWindow::TrainModelPressed()
     QList<QSharedPointer<QImage> > imgs;
     for(unsigned int i=0;i<selectList.size();i++)
     {
-
+        //Get filename from annotation source
         QModelIndex &ind = selectList[i];
-        QString fina = this->workspace.GetSourceName(ind.row());
+        std::tr1::shared_ptr<class Event> getSourceNameEv(new Event("GET_SOURCE_FILENAME"));
+        getSourceNameEv->toUuid = annotationUuids[ind.row()];
+        getSourceNameEv->id = this->eventLoop->GetId();
+        this->eventLoop->SendEvent(getSourceNameEv);
 
+        std::tr1::shared_ptr<class Event> sourceName = this->eventReceiver->WaitForEventId(getSourceNameEv->id);
+        QString fina = sourceName->data.c_str();
+        std::vector<std::string> marked = seqMarked[i];
         //For each annotated frame
-        TrackingAnnotation *annot = this->workspace.GetTrack(ind.row());
-        assert(annot!=0);
-        for(unsigned int fr=0;fr<annot->NumMarkedFrames();fr++)
+
+        for(unsigned int fr=0;fr<marked.size();fr++)
         {
             countMarkedFrames ++;
 
             //Get image data and send to process
-            cout << annot->GetIndexTimestamp(fr) << endl;
+            cout << marked[fr] << endl;
             unsigned long long startTimestamp = 0, endTimestamp = 0;
-            unsigned long long annotTimestamp = annot->GetIndexTimestamp(fr);
+            unsigned long long annotTimestamp = atoi(marked[fr].c_str()); //TODO make this use long long properly
             QSharedPointer<QImage> img;
             try
             {
@@ -845,9 +872,16 @@ void MainWindow::TrainModelPressed()
             this->eventLoop->SendEvent(foundImgEv);
 
             //Get annotation data and sent it to the algorithm
+            std::tr1::shared_ptr<class Event> getAnnotEv(new Event("GET_ANNOTATION_XML"));
+            getAnnotEv->toUuid = annotationUuids[ind.row()];
+            getAnnotEv->id = this->eventLoop->GetId();
+            this->eventLoop->SendEvent(getAnnotEv);
+
+            std::tr1::shared_ptr<class Event> annotXmlRet = this->eventReceiver->WaitForEventId(getAnnotEv->id);
+
             QString annotXml;
             QTextStream test(&annotXml);
-            annot->GetIndexAnnotationXml(fr, &test);
+            test << annotXmlRet->data.c_str();
             assert(annotXml.mid(annotXml.length()-1).toLocal8Bit().constData()[0]=='\n');
 
             std::tr1::shared_ptr<class Event> foundPosEv(new Event("TRAINING_POS_FOUND"));
@@ -875,6 +909,7 @@ void MainWindow::ApplyModelPressed()
     QModelIndexList modelSelList = modelSelection->selectedRows(0);
     QModelIndexList srcSelList = srcSelection->selectedRows(0);
     QList<QUuid> algUuids = this->workspace.GetProcessingUuids();
+    QList<QUuid> annotationUuids = this->workspace.GetAnnotationUuids();
 
     for(unsigned int i=0;i<srcSelList.size();i++)
     {
@@ -882,8 +917,8 @@ void MainWindow::ApplyModelPressed()
         cout << "src "<< ind.row() << "," << ind.column() << endl;
 
         //Load appropriate video
-        QString fina = this->workspace.GetSourceName(ind.row());
-        QUuid uid = this->workspace.GetAnnotUid(ind.row());
+        //QString fina = this->workspace.GetSourceName(ind.row());
+        QUuid uid = annotationUuids[ind.row()];
         //ChangeVidSource(&this->mediaThreadBack,this->mediaInterfaceBack,this->eventLoop,fina);
 
         //Apply models to selected video
@@ -976,3 +1011,231 @@ void MainWindow::ShowVideoPressed()
     this->ui->videoDock->show();
 }
 
+//**********************************
+
+
+int MainWindow::Save()
+{
+    int finaLen = this->defaultFilename.length();
+    if(finaLen==0)
+    {
+        return 0;
+    }
+
+    QString tmpFina = this->defaultFilename;
+    tmpFina.append(".tmp");
+    QFileInfo pathInfo(this->defaultFilename);
+    QDir dir(pathInfo.absoluteDir());
+
+    //Save data to file
+    QFile f(tmpFina);
+    f.open( QIODevice::WriteOnly );
+    QTextStream out(&f);
+    out.setCodec("UTF-8");
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;
+    out << "<workspace>" << endl;
+    out << "<sources>" << endl;
+    QList<QUuid> annotationUuids = this->workspace.GetAnnotationUuids();
+    for(unsigned int i=0;i<annotationUuids.size();i++)
+    {
+        try
+        {
+            out << "\t<source id=\""<<i<<"\" uid=\""<<Qt::escape(annotationUuids[i].toString())<<"\" file=\""<<
+                   Qt::escape(dir.relativeFilePath(this->workspace.annotations[i]->GetSource()))<<"\"";
+            QUuid uid = this->workspace.annotations[i]->GetAlgUid();
+            if(!uid.isNull())
+                out << " alg=\"" << uid.toString().toLocal8Bit().constData() << "\"";;
+
+            out << ">" << endl;
+            this->workspace.annotations[i]->GetTrack()->WriteAnnotationXml(out);
+            out << "\t</source>" << endl;
+        }
+        catch(std::runtime_error err)
+        {
+            cout << err.what() << endl;
+        }
+    }
+
+
+    out << "</sources>" << endl;
+    out << "<models>" << endl;
+    QList<QUuid> processingUuids = this->workspace.GetProcessingUuids();
+    for(unsigned int i=0;i<processingUuids.size();i++)
+    {
+        try
+        {
+            //Get model
+            std::tr1::shared_ptr<class Event> getModelEv(new Event("GET_MODEL"));
+            getModelEv->toUuid = processingUuids[i];
+            getModelEv->id = this->eventLoop->GetId();
+            this->eventLoop->SendEvent(getModelEv);
+
+            std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(getModelEv->id);
+            class BinaryData *modelBin = (class BinaryData *)ev->raw;
+            QByteArray modelArr((const char *)modelBin->raw, modelBin->size);
+
+            //Encode as XML binary blob
+            QByteArray modelBase64 = modelArr.toBase64();
+            out << "<model uid=\""<< processingUuids[i] <<"\">" << endl;
+            for(unsigned int pos=0;pos<modelBase64.length();pos+=512)
+            {
+                out << modelBase64.mid(pos, 512) << endl;
+            }
+            out << "</model>" << endl;
+        }
+        catch(std::runtime_error err)
+        {
+            cout << err.what() << endl;
+        }
+    }
+    out << "</models>" << endl;
+    out << "</workspace>" << endl;
+    f.close();
+
+    //Rename temporary file to final name
+    QFile targetFina(this->defaultFilename);
+    if(targetFina.exists())
+        QFile::remove(this->defaultFilename);
+    QFile::rename(tmpFina, this->defaultFilename);
+
+    return 1;
+}
+
+void MainWindow::SaveAs(QString &fina)
+{
+    this->defaultFilename = fina;
+    this->Save();
+}
+
+
+void MainWindow::Load(QString fina, class AvBinMedia* mediaInterface)
+{
+    this->workspace.ClearAnnotation();
+    this->workspace.ClearProcessing();
+    this->defaultFilename = fina;
+
+    //Parse XML to DOM
+    QFile f(fina);
+    QDomDocument doc("mydocument");
+    QString errorMsg;
+    if (!doc.setContent(&f, &errorMsg))
+    {
+        cout << "Xml Error: "<< errorMsg.toLocal8Bit().constData() << endl;
+        f.close();
+        return;
+    }
+    f.close();
+
+    //Get dir of data file
+    QFileInfo pathInfo(fina);
+    QDir dir(pathInfo.absoluteDir());
+
+    //Load points and links into memory
+    QDomElement rootElem = doc.documentElement();
+    QDomNode n = rootElem.firstChild();
+    while(!n.isNull()) {
+        QDomElement e = n.toElement(); // try to convert the node to an element.
+        if(!e.isNull()) {
+
+            if(e.tagName() == "sources")
+            {
+                QDomNode sourceNode = e.firstChild();
+                while(!sourceNode.isNull())
+                {
+                    QDomElement sourceEle = sourceNode.toElement(); // try to convert the node to an element.
+                    if(sourceEle.tagName() != "source") {sourceNode = sourceNode.nextSibling(); continue;}
+
+                    QString sourceFiNa = sourceEle.attribute("file");
+                    QString sourceFiNaAbs = dir.absoluteFilePath(sourceFiNa);
+                    QFileInfo fileInfo(sourceFiNaAbs);
+                    std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
+                    ann->SetSource(fileInfo.absoluteFilePath());
+
+                    //Set source UID
+                    QString uidStr = sourceEle.attribute("uid");
+                    QUuid uid(uidStr);
+                    if(uid.isNull()) uid = uid.createUuid();
+                    ann->SetAnnotUid(uid);
+
+                    //Set alg Uid
+                    QString algStr = sourceEle.attribute("alg");
+                    QUuid alg(algStr);
+                    ann->SetAlgUid(alg);
+
+                    //Start annot worker thread
+                    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann, mediaInterface));
+                    annotThread->SetEventLoop(this->eventLoop);
+                    annotThread->Start();
+                    ann->annotThread = annotThread;
+
+                    TrackingAnnotation *track =
+                            new TrackingAnnotation(NULL);
+
+                    QDomNode trackData = sourceNode.firstChild();
+                    while(!trackData.isNull())
+                    {
+                        QDomElement et = trackData.toElement(); // try to convert the node to an element.
+                        if(et.isNull()) continue;
+                        if(et.tagName() != "tracking") {trackData = trackData.nextSibling(); continue;}
+
+                        track->ReadAnnotationXml(et);
+
+                        trackData = trackData.nextSibling();
+
+                    }
+
+
+                    ann->SetTrack(track);
+                    this->workspace.annotations.push_back(ann);
+                    sourceNode = sourceNode.nextSibling();
+                }
+
+            }
+
+            if(e.tagName() == "models")
+            {
+                QDomNode modelNode = e.firstChild();
+                while(!modelNode.isNull())
+                {
+                    QDomElement modelEle = modelNode.toElement(); // try to convert the node to an element.
+                    if(modelEle.tagName() != "model") {modelNode = modelNode.nextSibling(); continue;}
+
+                    QByteArray modelData = QByteArray::fromBase64(modelEle.text().toLocal8Bit().constData());
+                    std::tr1::shared_ptr<class AlgorithmProcess> alg(
+                                new class AlgorithmProcess(this->eventLoop, this));
+                    alg->Init();
+
+                    QString uidStr = modelEle.attribute("uid");
+                    QUuid uid(uidStr);
+                    if(uid.isNull()) uid = uid.createUuid();
+                    alg->SetUid(uid);
+                    this->workspace.AddProcessing(alg);
+
+                    //Send data to algorithm process
+                    std::tr1::shared_ptr<class Event> foundModelEv(new Event("ALG_MODEL_FOUND"));
+                    QString imgPreamble2 = QString("MODEL\n");
+                    foundModelEv->data = imgPreamble2.toLocal8Bit().constData();
+                    class BinaryData *modelRaw = new BinaryData();
+                    modelRaw->Copy((const unsigned char *)modelData.constData(), modelData.size());
+                    foundModelEv->raw = modelRaw;
+                    foundModelEv->toUuid = uid;
+                    this->eventLoop->SendEvent(foundModelEv);
+
+                    //Continue to train if needed
+                    std::tr1::shared_ptr<class Event> trainingFinishEv(new Event("TRAINING_DATA_FINISH"));
+                    trainingFinishEv->toUuid = uid;
+                    this->eventLoop->SendEvent(trainingFinishEv);
+
+                    //Ask process to provide progress update
+                    std::tr1::shared_ptr<class Event> getProgressEv(new Event("GET_PROGRESS"));
+                    getProgressEv->toUuid = uid;
+                    this->eventLoop->SendEvent(getProgressEv);
+
+                    modelNode = modelNode.nextSibling();
+                }
+
+            }
+        }
+        n = n.nextSibling();
+    }
+}
