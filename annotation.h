@@ -12,6 +12,10 @@
 class TrackingAnnotationData
 {
 public:
+    /*!
+     * This class contains the tracking annotation for a single video.
+     */
+
     TrackingAnnotationData();
     TrackingAnnotationData(const TrackingAnnotationData &other);
     virtual ~TrackingAnnotationData();

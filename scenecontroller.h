@@ -32,8 +32,7 @@ protected:
 class TrackingSceneController : public QObject
 {
     /*!
-    * TrackingAnnotation contains the annotation data for a single video and
-    * handles the GUI, loading and saving functionality of tracking.
+    * TrackingAnnotation contains the handles the GUI for tracking data.
     */
 
     Q_OBJECT
