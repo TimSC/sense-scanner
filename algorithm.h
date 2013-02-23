@@ -36,20 +36,18 @@ public:
 
     QUuid GetUid();
     void SetUid(QUuid newUid);
+    void Init();
+    int Start();
+    int Stop();
+    void StopNonBlocking();
 
 public slots:
     void Update();
 
 protected:
-    void Init();
-    int Stop();
-    void StopNonBlocking();
-    int Start();
     int IsStopFlagged();
-    void SetId(unsigned int idIn);
     ProcessState GetState();
     QByteArray ReadLineFromBuffer(QByteArray &buff, int popLine = 1, int skipLines = 0);
-    void Update();
     void ProcessAlgOutput();
     void Pause();
     void Unpause();
@@ -63,7 +61,6 @@ protected:
     int stopping;
     int pausing;
     int paused;
-    unsigned int threadId;
     int initDone;
     QFile *algOutLog;
     class EventLoop *eventLoop;

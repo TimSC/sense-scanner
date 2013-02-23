@@ -42,20 +42,14 @@ public:
     QUuid GetAnnotUid(unsigned int index);
 
     //** Processing
-    unsigned int AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg);
-    std::tr1::shared_ptr<class AlgorithmProcess> GetProcessing(unsigned int num);
-    void PauseProcessing(unsigned int num);
-    int RemoveProcessing(unsigned int num);
-    int StartProcessing(unsigned int num);
+    void AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg);
+    //std::tr1::shared_ptr<class AlgorithmProcess> GetProcessing(unsigned int num);
     void ProcessingUpdate(unsigned int threadIdIn, float progress);
     float GetProgress(unsigned int num);
     AlgorithmProcess::ProcessState GetState(unsigned int num);
 
     int NumProcessesBlockingShutdown();
     void Update();
-
-    unsigned int GetNumProcessing();
-    QString GetProcessingName(unsigned int index);
 
     void Clear();
     void Load(QString fina, class AvBinMedia* mediaInterface);
@@ -71,13 +65,12 @@ protected:
     std::vector<std::tr1::shared_ptr<class Annotation> > annotations;
 
     QString defaultFilename;
-    unsigned int nextThreadId;
     class EventLoop *eventLoop;
 
     //Processing data
     std::vector<std::tr1::shared_ptr<class AlgorithmProcess> > processingList;
     std::vector<float> threadProgress;
-    std::vector<unsigned int> threadId;
+    std::vector<QUuid> threadId;
     Mutex lock;
 };
 

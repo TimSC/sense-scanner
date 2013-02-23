@@ -674,7 +674,7 @@ void MainWindow::LoadWorkspace()
 void MainWindow::SaveWorkspace()
 {
     WaitPopUpDialog *waitDlg = new WaitPopUpDialog(this);
-    this->backgroundActionThread->Save(waitDlg);
+    this->workspace.Save();
 
     waitDlg->Exec();
     int ret = waitDlg->GetResultCode();
@@ -695,7 +695,7 @@ void MainWindow::SaveAsWorkspace()
 
     WaitPopUpDialog *waitDlg = new WaitPopUpDialog(this);
 
-    this->backgroundActionThread->SaveAs(waitDlg, fileName);
+    this->workspace.SaveAs(fileName);
 
     waitDlg->Exec();
     delete waitDlg;

@@ -155,12 +155,6 @@ int AlgorithmProcess::IsStopFlagged()
     return this->stopping;
 }
 
-void AlgorithmProcess::SetId(unsigned int idIn)
-{
-
-    this->threadId = idIn;
-}
-
 AlgorithmProcess::ProcessState AlgorithmProcess::GetState()
 {
     if(this->state() == QProcess::Starting)
@@ -234,7 +228,10 @@ void AlgorithmProcess::Update()
     {
         assert(this->eventReceiver);
         std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
-        this->HandleEvent(ev);
+
+        //Only process events addressed to this algorithm
+        if(ev->toUuid.isNull() || ev->toUuid != this->GetUid())
+            this->HandleEvent(ev);
     }
     catch(std::runtime_error e)
     {
@@ -286,7 +283,6 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             xml+=" </model>\n";
         }
 
-
         xml+="</predict>\n";
         QByteArray xmlBytes(xml.toUtf8().constData());
 		QByteArray imgRaw((const char *)img->bits(), img->byteCount());
@@ -300,6 +296,26 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
                 arg(xmlBytes.length()).
                 arg(ev->id);   
         this->SendRawDataBlock(imgPreamble2, combinedRaw);
+    }
+
+    if(ev->type == "TRAINING_IMG_FOUND")
+    {
+        class BinaryData *data = (class BinaryData *)ev->raw;
+        assert(data!=NULL);
+        QByteArray imgRaw(data->raw, data->size);
+        this->SendRawDataBlock(ev->data.c_str(), imgRaw);
+    }
+
+    if(ev->type == "TRAINING_POS_FOUND")
+    {
+        QString preamble2 = QString("XML_DATA\n");
+        QByteArray posRaw(ev->data.c_str(), ev->data.size());
+        this->SendRawDataBlock(preamble2, posRaw);
+    }
+
+    if(ev->type == "TRAINING_DATA_FINISH")
+    {
+        this->SendCommand("TRAIN\n");
     }
 }
 
@@ -561,10 +577,4 @@ QUuid AlgorithmProcess::GetUid()
 void AlgorithmProcess::SetUid(QUuid newUid)
 {
     this->uid = newUid;
-}
-
-void AlgorithmProcess::Update()
-{
-
-
 }

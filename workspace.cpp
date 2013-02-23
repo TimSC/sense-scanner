@@ -10,7 +10,6 @@ using namespace std;
 Workspace::Workspace() : QObject()
 {
     this->Clear();
-    nextThreadId = 1;
     this->eventLoop = NULL;
 }
 
@@ -120,7 +119,7 @@ QUuid Workspace::GetAnnotUid(unsigned int index)
 
 //***********************************************************************
 
-unsigned int Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg)
+void Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg)
 {
 
     try
@@ -130,7 +129,7 @@ unsigned int Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProces
     catch(std::runtime_error &err)
     {
         //If python/executable is not found, an error is thrown to be caught here
-        QErrorMessage *errPopUp = new QErrorMessage(this);
+        QErrorMessage *errPopUp = new QErrorMessage();
         errPopUp->showMessage(err.what());
         errPopUp->exec();
         delete errPopUp;
@@ -140,27 +139,18 @@ unsigned int Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProces
     //Start worker process
     alg->Start();
 
-    alg->SetId(this->nextThreadId);
     this->processingList.push_back(alg);
     this->threadProgress.push_back(0.);
-    this->threadId.push_back(this->nextThreadId);
+    this->threadId.push_back(alg->GetUid());
 
-    this->nextThreadId ++;
-    return this->nextThreadId;
 }
 
-std::tr1::shared_ptr<class AlgorithmProcess> Workspace::GetProcessing(unsigned int num)
+/*std::tr1::shared_ptr<class AlgorithmProcess> Workspace::GetProcessing(unsigned int num)
 {
     return this->processingList[num];
-}
+}*/
 
-void Workspace::PauseProcessing(unsigned int num)
-{
-    assert(num < this->processingList.size());
-    this->processingList[num]->Pause();
-}
-
-int Workspace::RemoveProcessing(unsigned int num)
+/*int Workspace::RemoveProcessing(unsigned int num)
 {
     assert(num < this->processingList.size());
 
@@ -182,7 +172,7 @@ int Workspace::RemoveProcessing(unsigned int num)
     this->threadProgress.erase(this->threadProgress.begin()+num);
     this->threadId.erase(this->threadId.begin()+num);
     return 1;
-}
+}*/
 
 int Workspace::FindAnnotWithUid(QUuid uidIn)
 {
@@ -194,7 +184,7 @@ int Workspace::FindAnnotWithUid(QUuid uidIn)
     return -1;
 }
 
-int Workspace::StartProcessing(unsigned int num)
+/*int Workspace::StartProcessing(unsigned int num)
 {
     assert(num < this->processingList.size());
     if(this->processingList[num]->GetState() == AlgorithmProcess::PAUSED)
@@ -203,19 +193,7 @@ int Workspace::StartProcessing(unsigned int num)
         return 1;
     }
     return this->processingList[num]->Start();
-}
-
-unsigned int Workspace::GetNumProcessing()
-{
-    assert(this->processingList.size() == this->threadProgress.size());
-    return this->processingList.size();
-}
-
-QString Workspace::GetProcessingName(unsigned int index)
-{
-    QString out = "Alg";
-    return out;
-}
+}*/
 
 void Workspace::ProcessingUpdate(unsigned int threadIdIn, float progress)
 {
