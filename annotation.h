@@ -7,6 +7,49 @@
 #include <QtGui/QImage>
 #include "eventloop.h"
 
+//**********************************************************************
+
+class TrackingAnnotationData
+{
+public:
+    TrackingAnnotationData();
+    TrackingAnnotationData(const TrackingAnnotationData &other);
+    virtual ~TrackingAnnotationData();
+    TrackingAnnotationData& operator= (const TrackingAnnotationData &other);
+    bool operator!= (const TrackingAnnotationData &other);
+
+    int GetAnnotationAtTime(unsigned long long time,
+        std::vector<std::vector<float> > &annot);
+    int GetAnnotationBetweenTimestamps(unsigned long long startTime,
+        unsigned long long endTime,
+        unsigned long long requestedTime,
+        std::vector<std::vector<float> > &annot,
+        unsigned long long &annotationTime);
+    void DeleteAnnotationAtTimestamp(unsigned long long annotationTime);
+    std::vector<unsigned long long> GetAnnotationTimesBetweenTimestamps(unsigned long long startTime,
+        unsigned long long endTime);
+    void SetAnnotationBetweenTimestamps(unsigned long long startTime,
+        unsigned long long endTime,
+        std::vector<std::vector<float> > annot);
+
+    //Read individual frames
+    unsigned int NumMarkedFrames();
+    void GetIndexAnnotationXml(unsigned int index, QTextStream *out);
+    unsigned long long GetIndexTimestamp(unsigned int index);
+
+    void ReadAnnotationXml(QDomElement &elem);
+    void WriteAnnotationXml(QTextStream &out);
+    void ReadFramesXml(QDomElement &elem);
+    void ReadDemoFramesXml(QDomElement &elem);
+
+protected:
+    std::map<unsigned long long, std::vector<std::vector<float> > > pos; //contains annotation positions
+    std::vector<std::vector<int> > links;
+    std::vector<std::vector<float> > shape; //contains the default shape
+};
+
+//****************************************************
+
 class AnnotThread : public MessagableThread
 {
     /*!
@@ -62,8 +105,8 @@ public:
     Annotation& operator= (const Annotation &other);
     bool operator!= (const Annotation &other);
     void Clear();
-    void SetTrack(class TrackingAnnotation *trackIn);
-    void CloneTrack(class TrackingAnnotation *trackIn);
+    void SetTrack(class TrackingAnnotationData *trackIn);
+    void CloneTrack(class TrackingAnnotationData *trackIn);
     class TrackingAnnotation *GetTrack();
 
     void SetAlgUid(QUuid uidIn); //Thread safe
@@ -92,7 +135,7 @@ public:
 
 protected:
     QMutex lock;
-    class TrackingAnnotation * track;
+    class TrackingAnnotationData *track;
     QUuid algUid, uid;
     QString source;
     int active;

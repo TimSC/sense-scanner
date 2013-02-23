@@ -23,13 +23,13 @@ public:
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent);
 
-    void SetSceneControl(class TrackingAnnotation *sceneControlIn);
+    void SetSceneControl(class TrackingSceneController *sceneControlIn);
 
 protected:
-    class TrackingAnnotation *sceneControl;
+    class TrackingSceneController *sceneControl;
 };
 
-class TrackingAnnotation : public QObject
+class TrackingSceneController : public QObject
 {
     /*!
     * TrackingAnnotation contains the annotation data for a single video and
@@ -38,11 +38,8 @@ class TrackingAnnotation : public QObject
 
     Q_OBJECT
 public:
-    TrackingAnnotation(QObject *parent);
-    TrackingAnnotation(const TrackingAnnotation &other);
-    virtual ~TrackingAnnotation();
-    TrackingAnnotation& operator= (const TrackingAnnotation &other);
-    bool operator!= (const TrackingAnnotation &other);
+    TrackingSceneController(QObject *parent);
+    virtual ~TrackingSceneController();
 
     void VideoImageChanged(QImage &fr, unsigned long long startTime,
                            unsigned long long endTime,
@@ -55,8 +52,8 @@ public:
     int NearestLink(float x, float y, std::vector<std::vector<float> > &currentFrame);
     void Redraw();
 
-    static QWidget *ControlsFactory(QWidget *parent);
-    static QMenu *MenuFactory(QMenuBar *menuBar);
+    QWidget *ControlsFactory(QWidget *parent);
+    QMenu *MenuFactory(QMenuBar *menuBar);
 
     void RemovePoint(int index);
 
@@ -68,25 +65,6 @@ public:
     void WriteShapeToStream(QTextStream &textStream);
     std::vector<std::vector<float> > ProcessXmlDomFrame(QDomElement &e);
     QSharedPointer<MouseGraphicsScene> GetScene();
-
-    int GetAnnotationAtTime(unsigned long long time,
-        std::vector<std::vector<float> > &annot);
-    int GetAnnotationBetweenTimestamps(unsigned long long startTime,
-        unsigned long long endTime,
-        unsigned long long requestedTime,
-        std::vector<std::vector<float> > &annot,
-        unsigned long long &annotationTime);
-    void DeleteAnnotationAtTimestamp(unsigned long long annotationTime);
-    std::vector<unsigned long long> GetAnnotationTimesBetweenTimestamps(unsigned long long startTime,
-        unsigned long long endTime);
-    void SetAnnotationBetweenTimestamps(unsigned long long startTime,
-        unsigned long long endTime,
-        std::vector<std::vector<float> > annot);
-
-    //Read individual frames
-    unsigned int NumMarkedFrames();
-    void GetIndexAnnotationXml(unsigned int index, QTextStream *out);
-    unsigned long long GetIndexTimestamp(unsigned int index);
 
 public slots:
     void MarkFramePressed(bool val);
@@ -105,11 +83,6 @@ public slots:
     void LoadAnnotation();
     void SaveAnnotation();
 
-    void ReadAnnotationXml(QDomElement &elem);
-    void WriteAnnotationXml(QTextStream &out);
-    void ReadFramesXml(QDomElement &elem);
-    void ReadDemoFramesXml(QDomElement &elem);
-
     void FoundFrame(unsigned long startTi, unsigned long endTi);
     void GetFramesAvailable(std::map<unsigned long, unsigned long> &frameTimesOut,
                             unsigned long &frameTimesEndOut);
@@ -124,20 +97,23 @@ protected:
     QImage img;
     float mousex, mousey;
     QSharedPointer<QGraphicsPixmapItem> item;
-    std::map<unsigned long long, std::vector<std::vector<float> > > pos; //contains annotation positions
+
     std::vector<std::vector<int> > links;
     unsigned long long frameStartTime, frameEndTime, frameRequestTime;
     unsigned long long annotationTime;
     int annotationTimeSet;
     int mouseOver;
     //QPushButton *markFrameButton;
-    std::vector<std::vector<float> > shape; //contains the default shape
+    std::vector<std::vector<float> > currentShape; //contains the default shape
+    std::vector<std::vector<float> > defaultShape; //contains the default shape
     //QWidget *annotationControls;
-    QMutex lock;
+    QPushButton *markFrameButton;
+    QWidget *annotationControls;
 
     //Keep track of frame times that are available
     std::map<unsigned long, unsigned long> frameTimes;
     unsigned long frameTimesEnd;
 };
+
 
 #endif // SCENECONTROLLER_H

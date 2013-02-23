@@ -276,7 +276,7 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long startTimesta
 
 }
 
-void VideoWidget::SetSceneControl(QUuid srcUuid)
+void VideoWidget::SetSceneControl(TrackingSceneController *sceneControlIn)
 {
     cout << ">>> count " << this->ui->annotationTools->count() << endl;
 
@@ -315,7 +315,7 @@ void VideoWidget::SetSceneControl(QUuid srcUuid)
     if(oldScene!=NULL) oldScene->clear();
 
     //Activate new scene button controls
-    this->sceneControl = sceneIn;
+    this->sceneControl = sceneControlIn;
     if(this->sceneControl!=NULL)
     {
         QSharedPointer<MouseGraphicsScene> scene = this->sceneControl->GetScene();
@@ -330,6 +330,12 @@ void VideoWidget::SetSceneControl(QUuid srcUuid)
         this->ui->graphicsView->setScene(NULL);
     }
 
+}
+
+void VideoWidget::SetAnnotationTrack(QUuid srcUuid)
+{
+    //TODO
+    assert(0);
 }
 
 void VideoWidget::FitToWindow()

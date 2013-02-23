@@ -9,7 +9,6 @@
 #include <QtXml/QtXml>
 #include "assert.h"
 #include "vectors.h"
-#include "qblowfish/src/qblowfish.h"
 using namespace::std;
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
 
@@ -47,14 +46,14 @@ void MouseGraphicsScene::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent
         this->sceneControl->mouseReleaseEvent(mouseEvent);
 }
 
-void MouseGraphicsScene::SetSceneControl(TrackingAnnotation *sceneControlIn)
+void MouseGraphicsScene::SetSceneControl(TrackingSceneController *sceneControlIn)
 {
     this->sceneControl = sceneControlIn;
 }
 
 //********************************************************************
 
-TrackingAnnotation::TrackingAnnotation(QObject *parent)
+TrackingSceneController::TrackingSceneController(QObject *parent)
 {
     this->mode = "MOVE";
     this->mouseOver = false;
@@ -79,12 +78,7 @@ TrackingAnnotation::TrackingAnnotation(QObject *parent)
 
 }
 
-TrackingAnnotation::TrackingAnnotation(const TrackingAnnotation &other)
-{
-    this->operator=(other);
-}
-
-TrackingAnnotation::~TrackingAnnotation()
+TrackingSceneController::~TrackingSceneController()
 {
     cout << "TrackingAnnotation::~TrackingAnnotation()" << endl;
     this->item = QSharedPointer<QGraphicsPixmapItem>(NULL);
@@ -100,186 +94,7 @@ TrackingAnnotation::~TrackingAnnotation()
     annotationControls = NULL;
 }
 
-TrackingAnnotation& TrackingAnnotation::operator= (const TrackingAnnotation &other)
-{
-    this->lock.lock();
-
-    this->mode = other.mode;
-    this->mouseOver = other.mouseOver;
-    this->frameStartTime = other.frameStartTime;
-    this->frameEndTime = other.frameEndTime;
-    this->frameRequestTime = other.frameRequestTime;
-    this->annotationTime = other.annotationTime;
-    this->annotationTimeSet = other.annotationTimeSet;
-    this->scene = QSharedPointer<MouseGraphicsScene>(new MouseGraphicsScene(other.parent()));
-    this->scene->SetSceneControl(this);
-    this->activePoint = other.activePoint;
-    this->imgWidth = other.imgWidth;
-    this->imgHeight = other.imgHeight;
-    this->markerSize = other.markerSize;
-    this->leftDrag = other.leftDrag;
-    this->mousex = other.mousex;
-    this->mousey = other.mousey;
-    this->markFrameButton = NULL;
-    this->annotationControls = NULL;
-    this->pos = other.pos; //contains annotation positions
-    this->shape = other.shape; //contains the default shape
-    this->links = other.links;
-    this->frameTimes = other.frameTimes;
-    this->frameTimesEnd = other.frameTimesEnd;
-
-    this->lock.unlock();
-    return *this;
-
-}
-
-bool TrackingAnnotation::operator!= (const TrackingAnnotation &other)
-{
-    bool ret = false;
-    this->lock.lock();
-
-    if(this->pos != other.pos) ret = true;
-    if(this->shape != other.shape) ret = true;
-
-    this->lock.unlock();
-
-    return ret;
-}
-
-int TrackingAnnotation::GetAnnotationAtTime(unsigned long long time,
-    std::vector<std::vector<float> > &annot)
-{
-    this->lock.lock();
-    annot.clear();
-    //Check if there is annotation
-    //at the requested time
-    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
-    it = this->pos.find(time);
-    if(it != this->pos.end())
-    {
-        annot = it->second;
-        this->lock.unlock();
-        return 1;
-    }
-    this->lock.unlock();
-    return 0;
-}
-
-int TrackingAnnotation::GetAnnotationBetweenTimestamps(unsigned long long startTime,
-                                                          unsigned long long endTime,
-                                                          unsigned long long requestedTime,
-                                                          std::vector<std::vector<float> > &annot,
-                                                          unsigned long long &outAnnotationTime)
-{
-    this->lock.lock();
-
-    //Try to find annotation within the duration of the frame
-    outAnnotationTime = 0;
-    annot.clear();
-    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
-    for(it = this->pos.begin(); it != this->pos.end(); it++)
-    {
-        unsigned long long t = it->first;
-        if(t >= startTime && t < endTime)
-        {
-            outAnnotationTime = it->first;
-            annot = it->second;
-            this->lock.unlock();
-            return 1;
-        }
-    }
-    this->lock.unlock();
-
-    //If the above did not find a frame, check if there is annotation
-    //at the requested time
-    int found = GetAnnotationAtTime(requestedTime, annot);
-    if(found)
-    {
-        outAnnotationTime = requestedTime;
-        return 1;
-    }
-
-    //Failed to find annotation
-    return 0;
-}
-
-vector<unsigned long long> TrackingAnnotation::GetAnnotationTimesBetweenTimestamps(unsigned long long startTime,
-                                                                                      unsigned long long endTime)
-{
-    this->lock.lock();
-
-    vector<unsigned long long> out;
-    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
-    for(it = this->pos.begin(); it != this->pos.end(); it++)
-    {
-        unsigned long long t = it->first;
-        if(t >= startTime && t < endTime)
-        {
-            out.push_back(t);
-        }
-    }
-
-    this->lock.unlock();
-    return out;
-}
-
-void TrackingAnnotation::DeleteAnnotationAtTimestamp(unsigned long long annotationTimeIn)
-{
-    this->lock.lock();
-    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
-    it = this->pos.find(annotationTimeIn);
-    if(it != this->pos.end())
-    {
-        this->pos.erase(it);
-    }
-    this->lock.unlock();
-}
-
-void TrackingAnnotation::SetAnnotationBetweenTimestamps(unsigned long long startTime,
-                                                          unsigned long long endTime,
-                                                          std::vector<std::vector<float> > annot)
-{
-    this->lock.lock();
-
-    if(annot.size() != this->shape.size())
-    {
-        cout << "Error: Cannot set annotation to mismatched size" << endl;
-        this->lock.unlock();
-        return;
-    }
-
-    //Set annotation for preset frames
-    int found = 0;
-    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
-    for(it = this->pos.begin(); it != this->pos.end(); it++)
-    {
-        unsigned long long t = it->first;
-        if(t >= startTime && t < endTime)
-        {
-            it->second = annot;
-            found = 1;
-        }
-    }
-    if(found)
-    {
-        this->lock.unlock();
-        return;
-    }
-
-    //No annotation data set, so create a new annotation entry
-    assert(endTime >= startTime);
-    unsigned long long midTime = ROUND_TIMESTAMP(0.5*(startTime + endTime));
-    this->pos[midTime] = annot;
-    this->lock.unlock();
-}
-
-/*float TrackingAnnotation::GetProportionAnnotated()
-{
-    unsigned int numAnnot = this->pos.size();
-    //Unfortunately, there is no easy way to determine the number of frames
-}*/
-
-void TrackingAnnotation::VideoImageChanged(QImage &fr, unsigned long long startTime,
+void TrackingSceneController::VideoImageChanged(QImage &fr, unsigned long long startTime,
                                               unsigned long long endTime,
                                               unsigned long long requestedTime)
 {
@@ -300,7 +115,7 @@ void TrackingAnnotation::VideoImageChanged(QImage &fr, unsigned long long startT
     this->Redraw();
 }
 
-void TrackingAnnotation::Redraw()
+void TrackingSceneController::Redraw()
 {
     //Get positions for current frame
     std::vector<std::vector<float> > currentFrame;
@@ -365,7 +180,7 @@ void TrackingAnnotation::Redraw()
     }
 }
 
-void TrackingAnnotation::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
+void TrackingSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     //assert(mouseEvent);
     QPointF pos = mouseEvent->scenePos();
@@ -408,9 +223,8 @@ void TrackingAnnotation::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
     this->mousey = pos.y();
 }
 
-void TrackingAnnotation::RemovePoint(int index)
+void TrackingSceneController::RemovePoint(int index)
 {
-    this->lock.lock();
     assert(index >=0);
     assert(index < this->shape.size());
 
@@ -439,10 +253,9 @@ void TrackingAnnotation::RemovePoint(int index)
         if(!broken) filteredLinks.push_back(link);
     }
     this->links = filteredLinks;
-    this->lock.unlock();
 }
 
-int TrackingAnnotation::NearestLink(float x, float y, std::vector<std::vector<float> > &currentFrame)
+int TrackingSceneController::NearestLink(float x, float y, std::vector<std::vector<float> > &currentFrame)
 {
     //cout << x << "," << y << endl;
     vector<float> pc;
@@ -481,7 +294,7 @@ int TrackingAnnotation::NearestLink(float x, float y, std::vector<std::vector<fl
     return bestInd;
 }
 
-void TrackingAnnotation::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
+void TrackingSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     cout << "mousePressEvent" << endl;
     assert(mouseEvent);
@@ -514,7 +327,7 @@ void TrackingAnnotation::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
         p.push_back(pos.y());
 
         //Apply change to existing annotation frames
-        this->lock.lock();
+
         std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
         for(it=this->pos.begin(); it != this->pos.end();it++)
         {
@@ -522,7 +335,6 @@ void TrackingAnnotation::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             frame.push_back(p);
             assert(frame.size() == this->shape.size() + 1);
         }
-        this->lock.unlock();
 
         //Apply to currunt shape template
         this->shape.push_back(p);
@@ -586,7 +398,7 @@ void TrackingAnnotation::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 }
 
-void TrackingAnnotation::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent)
+void TrackingSceneController::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent)
 {
     cout << "mouseReleaseEvent" << endl;
     assert(mouseEvent);
@@ -596,7 +408,7 @@ void TrackingAnnotation::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent
         this->leftDrag = 0;
 }
 
-int TrackingAnnotation::NearestPoint(float x, float y, std::vector<std::vector<float> > &currentFrame)
+int TrackingSceneController::NearestPoint(float x, float y, std::vector<std::vector<float> > &currentFrame)
 {
     int best = -1;
     float bestDist = -1;
@@ -620,9 +432,8 @@ unsigned long long AbsDiff(unsigned long long a, unsigned long long b)
     return b-a;
 }
 
-unsigned long long TrackingAnnotation::GetSeekFowardTime()
+unsigned long long TrackingSceneController::GetSeekFowardTime()
 {
-    this->lock.lock();
     assert(this!=NULL);
     unsigned long long queryTime = this->annotationTime;
     if(!this->annotationTimeSet)
@@ -646,15 +457,13 @@ unsigned long long TrackingAnnotation::GetSeekFowardTime()
             cout << bestFrame << "," << bestDiff << endl;
         }
     }
-    this->lock.unlock();
     if(bestSet)
         return bestFrame;
     throw std::runtime_error("No frame");
 }
 
-unsigned long long TrackingAnnotation::GetSeekBackTime()
+unsigned long long TrackingSceneController::GetSeekBackTime()
 {
-    this->lock.lock();
     assert(this!=NULL);
     unsigned long long queryTime = this->annotationTime;
     if(!this->annotationTimeSet)
@@ -679,7 +488,6 @@ unsigned long long TrackingAnnotation::GetSeekBackTime()
         }
     }
 
-    this->lock.unlock();
     if(bestSet)
         return bestFrame;
     throw std::runtime_error("No frame");
@@ -687,7 +495,7 @@ unsigned long long TrackingAnnotation::GetSeekBackTime()
 
 //********************************************************************
 
-QWidget *TrackingAnnotation::ControlsFactory(QWidget *parent)
+QWidget *TrackingSceneController::ControlsFactory(QWidget *parent)
 {
     QWidget *annotationControls = new QWidget();
     assert(annotationControls->layout() == NULL);
@@ -741,7 +549,7 @@ QWidget *TrackingAnnotation::ControlsFactory(QWidget *parent)
     return annotationControls;
 }
 
-void TrackingAnnotation::MarkFramePressed(bool val)
+void TrackingSceneController::MarkFramePressed(bool val)
 {
 
 
@@ -767,58 +575,56 @@ void TrackingAnnotation::MarkFramePressed(bool val)
 
         assert(this->frameEndTime >= this->frameStartTime);
         unsigned long long frameMidpoint = ROUND_TIMESTAMP(0.5f*(this->frameStartTime + this->frameEndTime));
-        this->lock.lock();
         this->pos[frameMidpoint] = this->shape;
-        this->lock.unlock();
     }
 
     this->Redraw();
 }
 
-void TrackingAnnotation::MovePressed()
+void TrackingSceneController::MovePressed()
 {
     this->mode = "MOVE";
 }
 
-void TrackingAnnotation::MoveAllPressed()
+void TrackingSceneController::MoveAllPressed()
 {
     this->mode = "MOVE_ALL";
 }
 
-void TrackingAnnotation::AddPointPressed()
+void TrackingSceneController::AddPointPressed()
 {
     this->mode = "ADD_POINT";
 }
 
-void TrackingAnnotation::RemovePointPressed()
+void TrackingSceneController::RemovePointPressed()
 {
     this->mode = "REMOVE_POINT";
 }
 
-void TrackingAnnotation::AddLinkPressed()
+void TrackingSceneController::AddLinkPressed()
 {
     this->mode = "ADD_LINK";
     this->activePoint = -1; //Start with nothing selected
     this->Redraw();
 }
 
-void TrackingAnnotation::RemoveLinkPressed()
+void TrackingSceneController::RemoveLinkPressed()
 {
     this->mode = "REMOVE_LINK";
 }
 
-int TrackingAnnotation::GetMouseOver()
+int TrackingSceneController::GetMouseOver()
 {
     return this->mouseOver;
 }
 
-void TrackingAnnotation::MouseEnterEvent()
+void TrackingSceneController::MouseEnterEvent()
 {
     this->mouseOver = true;
     this->Redraw();
 }
 
-void TrackingAnnotation::MouseLeaveEvent()
+void TrackingSceneController::MouseLeaveEvent()
 {
     this->mouseOver = false;
     this->Redraw();
@@ -826,7 +632,7 @@ void TrackingAnnotation::MouseLeaveEvent()
 
 //************************************************************
 
-QMenu *TrackingAnnotation::MenuFactory(QMenuBar *menuBar)
+QMenu *TrackingSceneController::MenuFactory(QMenuBar *menuBar)
 {
     assert(this!=NULL);
     assert(menuBar != NULL);
@@ -857,7 +663,7 @@ QMenu *TrackingAnnotation::MenuFactory(QMenuBar *menuBar)
     return newMenu;
 }
 
-std::vector<std::vector<float> > TrackingAnnotation::ProcessXmlDomFrame(QDomElement &rootElem)
+std::vector<std::vector<float> > TrackingSceneController::ProcessXmlDomFrame(QDomElement &rootElem)
 {
     std::vector<std::vector<float> > out;
     QDomNode n = rootElem.firstChild();
@@ -893,16 +699,14 @@ std::vector<std::vector<float> > TrackingAnnotation::ProcessXmlDomFrame(QDomElem
     return out;
 }
 
-void TrackingAnnotation::LoadShape()
+void TrackingSceneController::LoadShape()
 {
-    this->lock.lock();
 
     //Get input filename from user
     QString fileName = QFileDialog::getOpenFileName(0,
         tr("Load Shape"), "", tr("Shapes (*.shape)"));
     if(fileName.length() == 0)
     {
-        this->lock.unlock();
         return;
     }
 
@@ -914,7 +718,6 @@ void TrackingAnnotation::LoadShape()
     {
         cout << "Xml Error: "<< errorMsg.toLocal8Bit().constData() << endl;
         f.close();
-        this->lock.unlock();
         return;
     }
     f.close();
@@ -958,7 +761,6 @@ void TrackingAnnotation::LoadShape()
     {
         this->shape.clear();
         this->links.clear();
-        this->lock.unlock();
         return;
     }
 
@@ -976,10 +778,9 @@ void TrackingAnnotation::LoadShape()
             frame.push_back(this->shape[frame.size()]);
         }
     }
-    this->lock.unlock();
 }
 
-void TrackingAnnotation::WriteShapeToStream(QTextStream &out)
+void TrackingSceneController::WriteShapeToStream(QTextStream &out)
 {
     out << "\t<shape>" << endl;
 
@@ -995,7 +796,7 @@ void TrackingAnnotation::WriteShapeToStream(QTextStream &out)
     out << "\t</shape>" << endl;
 }
 
-void TrackingAnnotation::SaveShape()
+void TrackingSceneController::SaveShape()
 {
     //Get output filename from user
     QString fileName = QFileDialog::getSaveFileName(0,
@@ -1012,7 +813,7 @@ void TrackingAnnotation::SaveShape()
     f.close();
 }
 
-void TrackingAnnotation::SetShapeFromCurentFrame()
+void TrackingSceneController::SetShapeFromCurentFrame()
 {
     //Get annotated times(s) in current visible frame
     std::vector<std::vector<float> > annotShape;
@@ -1028,7 +829,7 @@ void TrackingAnnotation::SetShapeFromCurentFrame()
     this->shape = annotShape;
 }
 
-void TrackingAnnotation::ResetCurentFrameShape()
+void TrackingSceneController::ResetCurentFrameShape()
 {
     //Get current frame
     std::vector<std::vector<float> > currentFrame;
@@ -1045,15 +846,13 @@ void TrackingAnnotation::ResetCurentFrameShape()
     this->Redraw();
 }
 
-int TrackingAnnotation::GetShapeNumPoints()
+int TrackingSceneController::GetShapeNumPoints()
 {
-    this->lock.lock();
     int out = this->shape.size();
-    this->lock.unlock();
     return out;
 }
 
-void TrackingAnnotation::LoadAnnotation()
+void TrackingSceneController::LoadAnnotation()
 {
     //Get input filename from user
     QString fileName = QFileDialog::getOpenFileName(0,
@@ -1078,7 +877,7 @@ void TrackingAnnotation::LoadAnnotation()
     this->ReadAnnotationXml(rootElem);
 }
 
-void TrackingAnnotation::SaveAnnotation()
+void TrackingSceneController::SaveAnnotation()
 {
     //Get output filename from user
     QString fileName = QFileDialog::getSaveFileName(0,
@@ -1095,185 +894,21 @@ void TrackingAnnotation::SaveAnnotation()
     f.close();
 }
 
-//*********************************************************
-
-void TrackingAnnotation::ReadAnnotationXml(QDomElement &elem)
-{
-    this->lock.lock();
-    this->shape.clear();
-    this->links.clear();
-    this->pos.clear();
-    QDomNode n = elem.firstChild();
-    while(!n.isNull()) {
-        QDomElement e = n.toElement(); // try to convert the node to an element.
-        if(!e.isNull()) {
-            if(e.tagName() == "shape")
-            {
-                std::vector<std::vector<float> > shapeData = ProcessXmlDomFrame(e);
-                this->shape = shapeData;
-            }
-
-            //Obsolete format loading code here
-            if(e.tagName() == "frame")
-            {
-                std::vector<std::vector<float> > frame = ProcessXmlDomFrame(e);
-                //cout << e.attribute("time").toFloat() << endl;
-                float timeSec = e.attribute("time").toFloat();
-                assert(timeSec > 0.f);
-                assert(frame.size() == this->shape.size());
-                this->pos[(unsigned long long)(timeSec * 1000.f + 0.5)] = frame;
-            }
-
-            //Newer frame XML format
-            if(e.tagName() == "frameset")
-            {
-                ReadFramesXml(e);
-            }
-
-            if(e.tagName() == "demoframe")
-            {
-                ReadDemoFramesXml(e);
-            }
-            if(e.tagName() == "available")
-            {
-                this->frameTimes.clear();
-                this->frameTimesEnd = e.attribute("to").toULong();
-
-                QDomElement frEl = e.firstChildElement();
-                while(!frEl.isNull())
-                {
-                    if(frEl.tagName() != "f") continue;
-                    unsigned long s = frEl.attribute("s").toULong();
-                    unsigned long e = frEl.attribute("e").toULong();
-                    this->frameTimes[s] = e;
-                    frEl = frEl.nextSiblingElement();
-                }
-            }
-        }
-        n = n.nextSibling();
-    }
-    this->lock.unlock();
-}
-
-void TrackingAnnotation::ReadFramesXml(QDomElement &elem)
-{
-    QDomElement e = elem.firstChildElement();
-    while(!e.isNull())
-    {
-        if(e.tagName() != "frame") continue;
-
-        std::vector<std::vector<float> > frame = ProcessXmlDomFrame(e);
-        //cout << e.attribute("time").toFloat() << endl;
-        float timeSec = e.attribute("time").toFloat();
-        assert(timeSec > 0.f);
-        assert(frame.size() == this->shape.size());
-        this->pos[(unsigned long long)(timeSec * 1000.f + 0.5)] = frame;
-
-        e = e.nextSiblingElement();
-    }
-}
-
-void TrackingAnnotation::ReadDemoFramesXml(QDomElement &elem)
-{
-    QString content = elem.text();
-    int test = content.length();
-    QString test2 = elem.tagName();
-
-    QByteArray encData = QByteArray::fromBase64(content.toLocal8Bit().constData());
-    int test3 = encData.length();
-
-    QByteArray secretKey(SECRET_KEY);
-    QBlowfish bf(secretKey);
-    bf.setPaddingEnabled(true);
-
-    QByteArray encryptedBa = bf.decrypted(encData);
-    QString framesXml = QString::fromUtf8(encryptedBa);
-
-    QDomDocument doc("mydocument");
-    QString errorMsg;
-    if (!doc.setContent(framesXml, &errorMsg))
-    {
-        throw runtime_error(errorMsg.toLocal8Bit().constData());
-    }
-
-    //Load points and links into memory
-    QDomElement rootElem = doc.documentElement();
-    this->ReadFramesXml(rootElem);
-}
-
-void TrackingAnnotation::WriteAnnotationXml(QTextStream &out)
-{
-    out << "\t<tracking>" << endl;
-    this->WriteShapeToStream(out);
-
-    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
-
-    //Save annotated frames
-    QString frameXmlStr;
-    QTextStream frameXml(&frameXmlStr);
-    frameXml << "\t<frameset>" << endl;
-    for(it=this->pos.begin(); it != this->pos.end();it++)
-    {
-        std::vector<std::vector<float> > &frame = it->second;
-        assert(frame.size() == this->shape.size());
-        frameXml << "\t<frame time='"<<(it->first/1000.f)<<"'>\n";
-        for(unsigned int i=0; i < frame.size(); i++)
-        {
-            frameXml << "\t\t<point id='"<<i<<"' x='"<<frame[i][0]<<"' y='"<<frame[i][1]<<"'/>\n";
-        }
-        frameXml << "\t</frame>" << endl;
-    }
-    frameXml << "\t</frameset>" << endl;
-
-#ifndef DEMO_MODE
-    out << frameXml.string();
-#else
-    out << "<demoframe>" << endl;
-    QByteArray secretKey(SECRET_KEY);
-
-    QBlowfish bf(secretKey);
-    bf.setPaddingEnabled(true);
-    QByteArray encryptedBa = bf.encrypted(frameXmlStr.toUtf8());
-    QByteArray encBase64 = encryptedBa.toBase64();
-    for(int pos=0;pos<encBase64.length();pos+=512)
-        out << encBase64.mid(pos,512) << endl;
-    //out << encBase64 << endl;
-
-    out << "</demoframe>" << endl;
-
-#endif //DEMO_MODE
-
-    //Save frame start and end times
-    out << "\t<available to=\""<< this->frameTimesEnd << "\">" << endl;
-    for(std::map<unsigned long, unsigned long>::iterator it = this->frameTimes.begin();
-        it != this->frameTimes.end();
-        it++)
-    {
-        unsigned long st = it->first;
-        out << "\t<f s=\""<<st<<"\" e=\""<<this->frameTimes[st]<<"\"/>" << endl;
-    }
-
-    out << "\t</available>" << endl;
-    out << "\t</tracking>" << endl;
-}
-
-QSharedPointer<MouseGraphicsScene> TrackingAnnotation::GetScene()
+QSharedPointer<MouseGraphicsScene> TrackingSceneController::GetScene()
 {
     return this->scene;
 }
 
 //***************************************************
 
-unsigned int TrackingAnnotation::NumMarkedFrames()
+unsigned int TrackingSceneController::NumMarkedFrames()
 {
 
-    this->lock.lock();
     unsigned int out = this->pos.size();
-    this->lock.unlock();
     return out;
 }
 
-void TrackingAnnotation::GetIndexAnnotationXml(unsigned int index, QTextStream *out)
+void TrackingSceneController::GetIndexAnnotationXml(unsigned int index, QTextStream *out)
 {
     std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it = this->pos.begin();
     for(unsigned int i=0;i<index;i++)
@@ -1287,32 +922,26 @@ void TrackingAnnotation::GetIndexAnnotationXml(unsigned int index, QTextStream *
     *out << "\t</frame>" << endl;
 }
 
-unsigned long long TrackingAnnotation::GetIndexTimestamp(unsigned int index)
+unsigned long long TrackingSceneController::GetIndexTimestamp(unsigned int index)
 {
-    this->lock.lock();
     std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it = this->pos.begin();
     for(unsigned int i=0;i<index;i++)
         it ++;
     unsigned long long out = it->first;
-    this->lock.unlock();
     return out;
 }
 
-void TrackingAnnotation::FoundFrame(unsigned long startTi, unsigned long endTi)
+void TrackingSceneController::FoundFrame(unsigned long startTi, unsigned long endTi)
 {
-    this->lock.lock();
     //Update store
     this->frameTimes[startTi] = endTi;
     if(endTi > this->frameTimesEnd)
         this->frameTimesEnd = endTi;
-    this->lock.unlock();
 }
 
-void TrackingAnnotation::GetFramesAvailable(std::map<unsigned long, unsigned long> &frameTimesOut,
+void TrackingSceneController::GetFramesAvailable(std::map<unsigned long, unsigned long> &frameTimesOut,
                         unsigned long &frameTimesEndOut)
 {
-    this->lock.lock();
     frameTimesOut = this->frameTimes;
     frameTimesEndOut = this->frameTimesEnd;
-    this->lock.unlock();
 }

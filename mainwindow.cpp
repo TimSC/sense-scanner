@@ -739,11 +739,12 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
     this->DeselectCurrentSource();
 
     //Update scene controller
-    this->ui->widget->SetSceneControl(annotationUuids[selectedRow]);
-
+    TrackingSceneController *sceneController = new TrackingSceneController(this);
+    this->ui->widget->SetSceneControl(sceneController);
+    this->ui->widget->SetAnnotationTrack(annotationUuids[selectedRow]);
     //Update window menus
-
-    this->annotationMenu = TrackingAnnotation::MenuFactory(this->menuBar());
+    assert(sceneController!=NULL);
+    this->annotationMenu = sceneController->MenuFactory(this->menuBar());
 
     //Set widget to use this source
     this->ui->widget->SetSource(this->mediaInterfaceFront, fina);
@@ -1195,8 +1196,8 @@ void MainWindow::Load(QString fina, class AvBinMedia* mediaInterface)
                     annotThread->Start();
                     ann->annotThread = annotThread;
 
-                    TrackingAnnotation *track =
-                            new TrackingAnnotation(NULL);
+                    TrackingAnnotationData *track =
+                            new TrackingAnnotationData();
 
                     QDomNode trackData = sourceNode.firstChild();
                     while(!trackData.isNull())

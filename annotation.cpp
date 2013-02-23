@@ -5,8 +5,323 @@
 #include <assert.h>
 #include <iostream>
 using namespace std;
+#include "qblowfish/src/qblowfish.h"
 
 #define TO_MILLISEC(x) (unsigned long long)(x / 1000. + 0.5)
+
+
+//****************************************************************************
+
+TrackingAnnotationData::TrackingAnnotationData()
+{
+
+}
+
+TrackingAnnotationData::TrackingAnnotationData(const TrackingAnnotationData &other)
+{
+    this->operator=(other);
+}
+
+TrackingAnnotationData::~TrackingAnnotationData()
+{
+
+}
+
+TrackingAnnotationData& TrackingAnnotationData::operator= (const TrackingAnnotationData &other)
+{
+    this->pos = other.pos;
+    this->links = other.links;
+    this->shape = other.shape;
+    return *this;
+}
+
+bool TrackingAnnotationData::operator!= (const TrackingAnnotationData &other)
+{
+    bool ret = false;
+    if(this->pos != other.pos) ret = true;
+    if(this->shape != other.shape) ret = true;
+    if(this->links != other.links) ret = true;
+    return ret;
+}
+
+int TrackingAnnotation::GetAnnotationAtTime(unsigned long long time,
+    std::vector<std::vector<float> > &annot)
+{
+
+    annot.clear();
+    //Check if there is annotation
+    //at the requested time
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    it = this->pos.find(time);
+    if(it != this->pos.end())
+    {
+        annot = it->second;
+        return 1;
+    }
+    return 0;
+}
+
+int TrackingAnnotationData::GetAnnotationBetweenTimestamps(unsigned long long startTime,
+                                                          unsigned long long endTime,
+                                                          unsigned long long requestedTime,
+                                                          std::vector<std::vector<float> > &annot,
+                                                          unsigned long long &outAnnotationTime)
+{
+    //Try to find annotation within the duration of the frame
+    outAnnotationTime = 0;
+    annot.clear();
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it = this->pos.begin(); it != this->pos.end(); it++)
+    {
+        unsigned long long t = it->first;
+        if(t >= startTime && t < endTime)
+        {
+            outAnnotationTime = it->first;
+            annot = it->second;
+            return 1;
+        }
+    }
+
+    //If the above did not find a frame, check if there is annotation
+    //at the requested time
+    int found = GetAnnotationAtTime(requestedTime, annot);
+    if(found)
+    {
+        outAnnotationTime = requestedTime;
+        return 1;
+    }
+
+    //Failed to find annotation
+    return 0;
+}
+
+vector<unsigned long long> TrackingAnnotationData::GetAnnotationTimesBetweenTimestamps(unsigned long long startTime,
+                                                                                      unsigned long long endTime)
+{
+
+    vector<unsigned long long> out;
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it = this->pos.begin(); it != this->pos.end(); it++)
+    {
+        unsigned long long t = it->first;
+        if(t >= startTime && t < endTime)
+        {
+            out.push_back(t);
+        }
+    }
+
+    return out;
+}
+
+void TrackingAnnotationData::DeleteAnnotationAtTimestamp(unsigned long long annotationTimeIn)
+{
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    it = this->pos.find(annotationTimeIn);
+    if(it != this->pos.end())
+    {
+        this->pos.erase(it);
+    }
+}
+
+void TrackingAnnotationData::SetAnnotationBetweenTimestamps(unsigned long long startTime,
+                                                          unsigned long long endTime,
+                                                          std::vector<std::vector<float> > annot)
+{
+
+    if(annot.size() != this->shape.size())
+    {
+        cout << "Error: Cannot set annotation to mismatched size" << endl;
+        this->lock.unlock();
+        return;
+    }
+
+    //Set annotation for preset frames
+    int found = 0;
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it = this->pos.begin(); it != this->pos.end(); it++)
+    {
+        unsigned long long t = it->first;
+        if(t >= startTime && t < endTime)
+        {
+            it->second = annot;
+            found = 1;
+        }
+    }
+    if(found)
+    {
+        return;
+    }
+
+    //No annotation data set, so create a new annotation entry
+    assert(endTime >= startTime);
+    unsigned long long midTime = ROUND_TIMESTAMP(0.5*(startTime + endTime));
+    this->pos[midTime] = annot;
+}
+
+
+//*********************************************************
+
+void TrackingAnnotationData::ReadAnnotationXml(QDomElement &elem)
+{
+    this->lock.lock();
+    this->shape.clear();
+    this->links.clear();
+    this->pos.clear();
+    QDomNode n = elem.firstChild();
+    while(!n.isNull()) {
+        QDomElement e = n.toElement(); // try to convert the node to an element.
+        if(!e.isNull()) {
+            if(e.tagName() == "shape")
+            {
+                std::vector<std::vector<float> > shapeData = ProcessXmlDomFrame(e);
+                this->shape = shapeData;
+            }
+
+            //Obsolete format loading code here
+            if(e.tagName() == "frame")
+            {
+                std::vector<std::vector<float> > frame = ProcessXmlDomFrame(e);
+                //cout << e.attribute("time").toFloat() << endl;
+                float timeSec = e.attribute("time").toFloat();
+                assert(timeSec > 0.f);
+                assert(frame.size() == this->shape.size());
+                this->pos[(unsigned long long)(timeSec * 1000.f + 0.5)] = frame;
+            }
+
+            //Newer frame XML format
+            if(e.tagName() == "frameset")
+            {
+                ReadFramesXml(e);
+            }
+
+            if(e.tagName() == "demoframe")
+            {
+                ReadDemoFramesXml(e);
+            }
+            if(e.tagName() == "available")
+            {
+                this->frameTimes.clear();
+                this->frameTimesEnd = e.attribute("to").toULong();
+
+                QDomElement frEl = e.firstChildElement();
+                while(!frEl.isNull())
+                {
+                    if(frEl.tagName() != "f") continue;
+                    unsigned long s = frEl.attribute("s").toULong();
+                    unsigned long e = frEl.attribute("e").toULong();
+                    this->frameTimes[s] = e;
+                    frEl = frEl.nextSiblingElement();
+                }
+            }
+        }
+        n = n.nextSibling();
+    }
+    this->lock.unlock();
+}
+
+void TrackingAnnotationData::ReadFramesXml(QDomElement &elem)
+{
+    QDomElement e = elem.firstChildElement();
+    while(!e.isNull())
+    {
+        if(e.tagName() != "frame") continue;
+
+        std::vector<std::vector<float> > frame = ProcessXmlDomFrame(e);
+        //cout << e.attribute("time").toFloat() << endl;
+        float timeSec = e.attribute("time").toFloat();
+        assert(timeSec > 0.f);
+        assert(frame.size() == this->shape.size());
+        this->pos[(unsigned long long)(timeSec * 1000.f + 0.5)] = frame;
+
+        e = e.nextSiblingElement();
+    }
+}
+
+void TrackingAnnotationData::ReadDemoFramesXml(QDomElement &elem)
+{
+    QString content = elem.text();
+    int test = content.length();
+    QString test2 = elem.tagName();
+
+    QByteArray encData = QByteArray::fromBase64(content.toLocal8Bit().constData());
+    int test3 = encData.length();
+
+    QByteArray secretKey(SECRET_KEY);
+    QBlowfish bf(secretKey);
+    bf.setPaddingEnabled(true);
+
+    QByteArray encryptedBa = bf.decrypted(encData);
+    QString framesXml = QString::fromUtf8(encryptedBa);
+
+    QDomDocument doc("mydocument");
+    QString errorMsg;
+    if (!doc.setContent(framesXml, &errorMsg))
+    {
+        throw runtime_error(errorMsg.toLocal8Bit().constData());
+    }
+
+    //Load points and links into memory
+    QDomElement rootElem = doc.documentElement();
+    this->ReadFramesXml(rootElem);
+}
+
+void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out)
+{
+    out << "\t<tracking>" << endl;
+    this->WriteShapeToStream(out);
+
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+
+    //Save annotated frames
+    QString frameXmlStr;
+    QTextStream frameXml(&frameXmlStr);
+    frameXml << "\t<frameset>" << endl;
+    for(it=this->pos.begin(); it != this->pos.end();it++)
+    {
+        std::vector<std::vector<float> > &frame = it->second;
+        assert(frame.size() == this->shape.size());
+        frameXml << "\t<frame time='"<<(it->first/1000.f)<<"'>\n";
+        for(unsigned int i=0; i < frame.size(); i++)
+        {
+            frameXml << "\t\t<point id='"<<i<<"' x='"<<frame[i][0]<<"' y='"<<frame[i][1]<<"'/>\n";
+        }
+        frameXml << "\t</frame>" << endl;
+    }
+    frameXml << "\t</frameset>" << endl;
+
+#ifndef DEMO_MODE
+    out << frameXml.string();
+#else
+    out << "<demoframe>" << endl;
+    QByteArray secretKey(SECRET_KEY);
+
+    QBlowfish bf(secretKey);
+    bf.setPaddingEnabled(true);
+    QByteArray encryptedBa = bf.encrypted(frameXmlStr.toUtf8());
+    QByteArray encBase64 = encryptedBa.toBase64();
+    for(int pos=0;pos<encBase64.length();pos+=512)
+        out << encBase64.mid(pos,512) << endl;
+    //out << encBase64 << endl;
+
+    out << "</demoframe>" << endl;
+
+#endif //DEMO_MODE
+
+    //Save frame start and end times
+    out << "\t<available to=\""<< this->frameTimesEnd << "\">" << endl;
+    for(std::map<unsigned long, unsigned long>::iterator it = this->frameTimes.begin();
+        it != this->frameTimes.end();
+        it++)
+    {
+        unsigned long st = it->first;
+        out << "\t<f s=\""<<st<<"\" e=\""<<this->frameTimes[st]<<"\"/>" << endl;
+    }
+
+    out << "\t</available>" << endl;
+    out << "\t</tracking>" << endl;
+}
+
+//****************************************************
 
 AnnotThread::AnnotThread(class Annotation *annIn, class AvBinMedia* mediaInterfaceIn)
 {
