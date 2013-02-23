@@ -43,15 +43,18 @@ public:
 
     //** Processing
     void AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg);
+    int RemoveProcessing(QUuid uuid);
     //std::tr1::shared_ptr<class AlgorithmProcess> GetProcessing(unsigned int num);
-    void ProcessingUpdate(unsigned int threadIdIn, float progress);
-    float GetProgress(unsigned int num);
-    AlgorithmProcess::ProcessState GetState(unsigned int num);
+    void ProcessingProgressChanged(QUuid uuid, float progress);
+    float GetProcessingProgress(QUuid uuid);
+    AlgorithmProcess::ProcessState GetProcessingState(QUuid uuid);
+    QList<QUuid> GetProcessingUuids();
 
     int NumProcessesBlockingShutdown();
     void Update();
 
-    void Clear();
+    void ClearProcessing();
+    void ClearAnnotation();
     void Load(QString fina, class AvBinMedia* mediaInterface);
     int Save();
     void SaveAs(QString &fina);
@@ -69,8 +72,9 @@ protected:
 
     //Processing data
     std::vector<std::tr1::shared_ptr<class AlgorithmProcess> > processingList;
-    std::vector<float> threadProgress;
-    std::vector<QUuid> threadId;
+    std::vector<float> processingProgress;
+    QList<QUuid> processingUuids;
+    QList<AlgorithmProcess::ProcessState> processingStates;
     Mutex lock;
 };
 

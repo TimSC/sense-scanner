@@ -275,7 +275,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    this->workspace.Clear();
+    this->workspace.ClearAnnotation();
+    this->workspace.ClearProcessing();
 
     delete this->timer;
     this->timer = NULL;
@@ -328,9 +329,12 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
         if(userSelection=="STOP")
         {
-            for(unsigned int i=0;i<this->workspace.GetNumProcessing();i++)
+            QList<QUuid> uuids = this->workspace.GetProcessingUuids();
+            for(unsigned int i=0;i<uuids.size();i++)
             {
-                this->workspace.PauseProcessing(i);
+                std::tr1::shared_ptr<class Event> pauseEvent(new Event("PAUSE_ALGORITHM"));
+                pauseEvent->toUuid = uuids[i];
+                this->eventLoop->SendEvent(pauseEvent);
             }
         }
         event->setAccepted(false);
@@ -453,9 +457,10 @@ void MainWindow::RegenerateProcessingList()
     QIcon icon("icons/media-eject.png");
     if(this->processingModel.columnCount()!= 2)
         this->processingModel.setColumnCount(2);
-    if(this->processingModel.rowCount() != this->workspace.GetNumProcessing())
-        this->processingModel.setRowCount(this->workspace.GetNumProcessing());
-    for (int row = 0; row < this->workspace.GetNumProcessing(); ++row)
+    QList<QUuid> algUuids = this->workspace.GetProcessingUuids();
+    if(this->processingModel.rowCount() != algUuids.size())
+        this->processingModel.setRowCount(algUuids.size());
+    for (int row = 0; row < algUuids.size(); ++row)
     {
         for (int column = 0; column < 1; ++column)
         {
@@ -465,7 +470,7 @@ void MainWindow::RegenerateProcessingList()
                 continue;
             }
 
-            QString fina = this->workspace.GetProcessingName(row);
+            QString fina = "Relative Tracker";
             QFileInfo finaInfo(fina);
             std::ostringstream displayLine;
             displayLine << finaInfo.fileName().toLocal8Bit().constData();
@@ -479,10 +484,10 @@ void MainWindow::RegenerateProcessingList()
         for (int column = 1; column < 2; ++column)
         {
             std::ostringstream displayLine;
-            float progress = this->workspace.GetProgress(row);
-            if(this->workspace.GetState(row)!=AlgorithmProcess::STOPPED)
+            float progress = this->workspace.GetProcessingProgress(algUuids[row]);
+            if(this->workspace.GetProcessingState(algUuids[row])!=AlgorithmProcess::STOPPED)
             {
-                AlgorithmProcess::ProcessState state = this->workspace.GetState(row);
+                AlgorithmProcess::ProcessState state = this->workspace.GetProcessingState(algUuids[row]);
                 if(state == AlgorithmProcess::STARTING) displayLine << "Starting " << progress;
                 if(state == AlgorithmProcess::RUNNING) displayLine << "Running " << progress;
                 if(state == AlgorithmProcess::RUNNING_PAUSING) displayLine << "Pausing... " << progress;
@@ -583,11 +588,7 @@ void MainWindow::Update()
         if(ev->type=="THREAD_PROGRESS_UPDATE")
         {
             std::vector<std::string> args = split(ev->data.c_str(),',');
-            this->workspace.ProcessingUpdate(atoi(args[1].c_str()), atof(args[0].c_str()));
-            for(unsigned int i=0;i<this->workspace.GetNumProcessing();i++)
-            {
-                //cout << this->workspace.GetProgress(i) << endl;
-            }
+            this->workspace.ProcessingProgressChanged(QUuid(args[1].c_str()), atof(args[0].c_str()));
             this->RegenerateProcessingList();
         }
         if(ev->type=="THREAD_STATUS_CHANGED")
@@ -641,7 +642,8 @@ void MainWindow::NewWorkspace()
         return;
     }
 
-    this->workspace.Clear();
+    this->workspace.ClearAnnotation();
+    this->workspace.ClearProcessing();
     this->workspaceAsStored = this->workspace;
     this->RegenerateSourcesList();
 }
@@ -872,6 +874,7 @@ void MainWindow::ApplyModelPressed()
     assert(srcSelection!=NULL);
     QModelIndexList modelSelList = modelSelection->selectedRows(0);
     QModelIndexList srcSelList = srcSelection->selectedRows(0);
+    QList<QUuid> algUuids = this->workspace.GetProcessingUuids();
 
     for(unsigned int i=0;i<srcSelList.size();i++)
     {
@@ -888,9 +891,7 @@ void MainWindow::ApplyModelPressed()
         {
             QModelIndex &mind = modelSelList[i];
             cout << "model "<< mind.row() << "," << mind.column() << endl;
-            std::tr1::shared_ptr<class AlgorithmProcess> alg = this->workspace.GetProcessing(mind.row());
-
-            this->workspace.AddAutoAnnot(uid.toString(), alg->GetUid(), this->mediaInterfaceBack);
+            this->workspace.AddAutoAnnot(uid.toString(), algUuids[i], this->mediaInterfaceBack);
         }
     }
     this->RegenerateSourcesList();
@@ -903,10 +904,14 @@ void MainWindow::PauseProcessPressed()
 
     QItemSelectionModel *selection = this->ui->sourcesAlgGui->ui->processingView->selectionModel();
     QModelIndexList selectList = selection->selectedRows(0);
+    QList<QUuid> algUuids = this->workspace.GetProcessingUuids();
     for(unsigned int i=0;i<selectList.size();i++)
     {
         QModelIndex &ind = selectList[i];
-        this->workspace.PauseProcessing(ind.row());
+
+        std::tr1::shared_ptr<class Event> pauseEvent(new Event("PAUSE_ALGORITHM"));
+        pauseEvent->toUuid = algUuids[ind.row()];
+        this->eventLoop->SendEvent(pauseEvent);
     }
     this->RegenerateProcessingList();
 }
@@ -917,11 +922,15 @@ void MainWindow::RunProcessPressed()
 
     QItemSelectionModel *selection = this->ui->sourcesAlgGui->ui->processingView->selectionModel();
     QModelIndexList selectList = selection->selectedRows(0);
+    QList<QUuid> algUuids = this->workspace.GetProcessingUuids();
     for(unsigned int i=0;i<selectList.size();i++)
     {
         QModelIndex &ind = selectList[i];
-        //cout << ind.row() << "," <<ind.column() << endl;
-        this->workspace.StartProcessing(ind.row());
+
+        std::tr1::shared_ptr<class Event> pauseEvent(new Event("RUN_ALGORITHM"));
+        pauseEvent->toUuid = algUuids[ind.row()];
+        this->eventLoop->SendEvent(pauseEvent);
+
     }
     this->RegenerateProcessingList();
 }
@@ -932,19 +941,27 @@ void MainWindow::RemoveProcessPressed()
 
     QItemSelectionModel *selection = this->ui->sourcesAlgGui->ui->processingView->selectionModel();
     QModelIndexList selectList = selection->selectedRows(0);
+    QList<QUuid> algUuids = this->workspace.GetProcessingUuids();
+
     for(unsigned int i=0;i<selectList.size();i++)
     {
         QModelIndex &ind = selectList[i];
+        AlgorithmProcess::ProcessState state = this->workspace.GetProcessingState(algUuids[ind.row()]);
 
-        int ret = this->workspace.RemoveProcessing(ind.row());
-        if(ret == 0)
+        //Check if alg state is ready for removal
+        if(state!= AlgorithmProcess::PAUSED && state!=AlgorithmProcess::STOPPED)
         {
             if(this->errMsg == NULL)
                 this->errMsg = new QMessageBox(this);
             this->errMsg->setWindowTitle("Error: Process is still running");
             this->errMsg->setText("Stop the process before trying to remove it.");
             this->errMsg->exec();
+
+            return;
         }
+
+        int ret = this->workspace.RemoveProcessing(algUuids[ind.row()]);
+
     }
     this->RegenerateProcessingList();
 }

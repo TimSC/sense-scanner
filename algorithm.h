@@ -40,6 +40,7 @@ public:
     int Start();
     int Stop();
     void StopNonBlocking();
+    int IsBlockingShutdown();
 
 public slots:
     void Update();

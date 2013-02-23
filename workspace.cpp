@@ -9,7 +9,8 @@ using namespace std;
 
 Workspace::Workspace() : QObject()
 {
-    this->Clear();
+    this->ClearAnnotation();
+    this->ClearProcessing();
     this->eventLoop = NULL;
 }
 
@@ -140,22 +141,26 @@ void Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg)
     alg->Start();
 
     this->processingList.push_back(alg);
-    this->threadProgress.push_back(0.);
-    this->threadId.push_back(alg->GetUid());
-
+    this->processingProgress.push_back(0.);
+    this->processingUuids.push_back(alg->GetUid());
+    this->processingStates.push_back(AlgorithmProcess::STARTING);
 }
 
-/*std::tr1::shared_ptr<class AlgorithmProcess> Workspace::GetProcessing(unsigned int num)
+int Workspace::RemoveProcessing(QUuid uuid)
 {
-    return this->processingList[num];
-}*/
-
-/*int Workspace::RemoveProcessing(unsigned int num)
-{
-    assert(num < this->processingList.size());
+    int ind = 0, found = 0;
+    for(unsigned int i=0;i<this->processingUuids.size();i++)
+    {
+        if(uuid == this->processingUuids[i])
+        {
+            ind = i;
+            found = 0;
+        }
+    }
+    if(!found) return -1;
 
     //Check process is ready to be removed
-    AlgorithmProcess::ProcessState state = this->processingList[num]->GetState();
+    AlgorithmProcess::ProcessState state = this->processingStates[ind];
     if(state!=AlgorithmProcess::STOPPED &&
             state!=AlgorithmProcess::PAUSED)
     {
@@ -164,15 +169,16 @@ void Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg)
     }
 
     //If paused, stop the process
-    if(this->processingList[num]->GetState()!=AlgorithmProcess::PAUSED)
-        this->processingList[num]->Stop();
+    if(this->processingStates[ind]!=AlgorithmProcess::PAUSED)
+        this->processingList[ind]->Stop();
 
-    assert(!this->processingList[num]->GetState()!=AlgorithmProcess::STOPPED);
-    this->processingList.erase(this->processingList.begin()+num);
-    this->threadProgress.erase(this->threadProgress.begin()+num);
-    this->threadId.erase(this->threadId.begin()+num);
+    assert(this->processingStates[ind]==AlgorithmProcess::STOPPED);
+    this->processingList.erase(this->processingList.begin()+ind);
+    this->processingProgress.erase(this->processingProgress.begin()+ind);
+    this->processingUuids.erase(this->processingUuids.begin()+ind);
+    this->processingStates.erase(this->processingStates.begin()+ind);
     return 1;
-}*/
+}
 
 int Workspace::FindAnnotWithUid(QUuid uidIn)
 {
@@ -195,27 +201,42 @@ int Workspace::FindAnnotWithUid(QUuid uidIn)
     return this->processingList[num]->Start();
 }*/
 
-void Workspace::ProcessingUpdate(unsigned int threadIdIn, float progress)
+void Workspace::ProcessingProgressChanged(QUuid uuid, float progress)
 {
-    for(unsigned int i=0;i<this->threadId.size();i++)
+    for(unsigned int i=0;i<this->processingUuids.size();i++)
     {
-        if(threadIdIn == this->threadId[i])
+        if(uuid == this->processingUuids[i])
         {
-            this->threadProgress[i] = progress;
+            this->processingProgress[i] = progress;
+            return;
         }
     }
+    throw std::runtime_error ("Uuid not found");
 }
 
-float Workspace::GetProgress(unsigned int num)
+float Workspace::GetProcessingProgress(QUuid uuid)
 {
-    assert(num >= 0 && num < this->threadProgress.size());
-    return this->threadProgress[num];
+    for(unsigned int i=0;i<this->processingUuids.size();i++)
+    {
+        if(uuid == this->processingUuids[i])
+        {
+            return this->processingProgress[i];
+        }
+    }
+    throw std::runtime_error ("Uuid not found");
 }
 
-AlgorithmProcess::ProcessState Workspace::GetState(unsigned int num)
+AlgorithmProcess::ProcessState Workspace::GetProcessingState(QUuid uuid)
 {
-    assert(num < this->processingList.size());
-    return this->processingList[num]->GetState();
+
+    for(unsigned int i=0;i<this->processingUuids.size();i++)
+    {
+        if(uuid == this->processingUuids[i])
+        {
+            return this->processingStates[i];
+        }
+    }
+    throw std::runtime_error ("Uuid not found");
 
 }
 
@@ -224,28 +245,34 @@ int Workspace::NumProcessesBlockingShutdown()
     int count = 0;
     for(unsigned int i=0;i<this->processingList.size();i++)
     {
-        AlgorithmProcess::ProcessState state = this->processingList[i]->GetState();
-        if(state == AlgorithmProcess::RUNNING) count += 1;
-        if(state == AlgorithmProcess::RUNNING_PAUSING) count += 1;
-        if(state == AlgorithmProcess::RUNNING_STOPPING) count += 1;
+        int bl = this->processingList[i]->IsBlockingShutdown();
+        count += bl;
     }
     return count;
 }
 
 //************************************************************************
 
-void Workspace::Clear()
+void Workspace::ClearProcessing()
 {
-    this->annotations.clear();
+
     this->defaultFilename = "";
     this->processingList.clear();
-    this->threadProgress.clear();
-    this->threadId.clear();
+    this->processingProgress.clear();
+    this->processingUuids.clear();
+    this->processingStates.clear();
+}
+
+void Workspace::ClearAnnotation()
+{
+    this->annotations.clear();
+
 }
 
 void Workspace::Load(QString fina, class AvBinMedia* mediaInterface)
 {
-    this->Clear();
+    this->ClearAnnotation();
+    this->ClearProcessing();
     this->defaultFilename = fina;
 
     //Parse XML to DOM
@@ -338,23 +365,33 @@ void Workspace::Load(QString fina, class AvBinMedia* mediaInterface)
                     std::tr1::shared_ptr<class AlgorithmProcess> alg(
                                 new class AlgorithmProcess(this->eventLoop, this));
                     alg->Init();
-                    alg->Pause(); //Start paused
-
-                    //Send data to algorithm process
-					//QByteArray modelDataB64 = modelData.toBase64();
-                    QString modelPreamble2 = QString("MODEL\n");
-                    alg->SendRawDataBlock(modelPreamble2, modelData);
-
-                    alg->SendCommand("TRAIN\n"); //Continue to train if needed
-
-                    //Ask process to provide progress update
-                    alg->SendCommand("GET_PROGRESS\n");
 
                     QString uidStr = modelEle.attribute("uid");
                     QUuid uid(uidStr);
                     if(uid.isNull()) uid = uid.createUuid();
                     alg->SetUid(uid);
                     this->AddProcessing(alg);
+
+                    //Send data to algorithm process
+                    std::tr1::shared_ptr<class Event> foundModelEv(new Event("ALG_MODEL_FOUND"));
+                    QString imgPreamble2 = QString("MODEL\n");
+                    foundModelEv->data = imgPreamble2.toLocal8Bit().constData();
+                    class BinaryData *modelRaw = new BinaryData();
+                    modelRaw->Copy((const unsigned char *)modelData.constData(), modelData.size());
+                    foundModelEv->raw = modelRaw;
+                    foundModelEv->toUuid = uid;
+                    this->eventLoop->SendEvent(foundModelEv);
+
+                    //Continue to train if needed
+                    std::tr1::shared_ptr<class Event> trainingFinishEv(new Event("TRAINING_DATA_FINISH"));
+                    trainingFinishEv->toUuid = uid;
+                    this->eventLoop->SendEvent(trainingFinishEv);
+
+                    //Ask process to provide progress update
+                    std::tr1::shared_ptr<class Event> getProgressEv(new Event("GET_PROGRESS"));
+                    getProgressEv->toUuid = uid;
+                    this->eventLoop->SendEvent(getProgressEv);
+
                     modelNode = modelNode.nextSibling();
                 }
 
@@ -507,4 +544,9 @@ void Workspace::SetAnnotThreadsInactive()
         std::tr1::shared_ptr<class Annotation> ann = this->annotations[i];
         ann->SetActive(0);
     }
+}
+
+QList<QUuid> Workspace::GetProcessingUuids()
+{
+    return this->processingUuids;
 }

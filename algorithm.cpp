@@ -578,3 +578,12 @@ void AlgorithmProcess::SetUid(QUuid newUid)
 {
     this->uid = newUid;
 }
+
+int AlgorithmProcess::IsBlockingShutdown()
+{
+    AlgorithmProcess::ProcessState state = AlgorithmProcess::GetState();
+    if(state == AlgorithmProcess::RUNNING) return 1;
+    if(state == AlgorithmProcess::RUNNING_PAUSING) return 1;
+    if(state == AlgorithmProcess::RUNNING_STOPPING) return 1;
+    return 0;
+}
