@@ -9,6 +9,7 @@
 #include <QtXml/QtXml>
 #include "assert.h"
 #include "vectors.h"
+#include "eventloop.h"
 using namespace::std;
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
 
@@ -75,7 +76,8 @@ TrackingSceneController::TrackingSceneController(QObject *parent)
 
     this->annotationControls = NULL;
     this->frameTimesEnd = 0;
-
+    this->eventLoop = NULL;
+    this->eventReceiver = NULL;
 }
 
 TrackingSceneController::~TrackingSceneController()
@@ -223,38 +225,6 @@ void TrackingSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEven
     this->mousey = pos.y();
 }
 
-void TrackingSceneController::RemovePoint(int index)
-{
-    assert(index >=0);
-    assert(index < this->shape.size());
-
-    //Remove from existing annotaiton frames
-    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
-    for(it=this->pos.begin(); it != this->pos.end();it++)
-    {
-        std::vector<std::vector<float> > &frame = it->second;
-        frame.erase(frame.begin()+index);
-        assert(frame.size() == this->shape.size() - 1);
-    }
-
-    //Remove from points list
-    this->shape.erase(this->shape.begin()+index);
-
-    //Update links with a higher index number
-    vector<vector<int> > filteredLinks;
-    for(unsigned int i=0;i<this->links.size();i++)
-    {
-        int broken = 0;
-        vector<int> &link = this->links[i];
-        if(link[0]==index) broken = 1;
-        if(link[1]==index) broken = 1;
-        if(link[0]>index) link[0] --;
-        if(link[1]>index) link[1] --;
-        if(!broken) filteredLinks.push_back(link);
-    }
-    this->links = filteredLinks;
-}
-
 int TrackingSceneController::NearestLink(float x, float y, std::vector<std::vector<float> > &currentFrame)
 {
     //cout << x << "," << y << endl;
@@ -322,22 +292,18 @@ void TrackingSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEve
 
     if(this->mode == "ADD_POINT" && button==Qt::LeftButton)
     {
-        std::vector<float> p;
-        p.push_back(pos.x());
-        p.push_back(pos.y());
-
         //Apply change to existing annotation frames
 
-        std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
-        for(it=this->pos.begin(); it != this->pos.end();it++)
-        {
-            std::vector<std::vector<float> > &frame = it->second;
-            frame.push_back(p);
-            assert(frame.size() == this->shape.size() + 1);
-        }
+        assert(this->eventLoop!=NULL);
 
-        //Apply to currunt shape template
-        this->shape.push_back(p);
+        std::tr1::shared_ptr<class Event> addEv(new Event("ADD_POINT"));
+        addEv->toUuid = this->annotationUuid;
+        QString args = QString("%1,%2").arg(pos.x()).arg(pos.y());
+        addEv->data = args.toLocal8Bit().constData();
+        this->eventLoop->SendEvent(addEv);
+
+        this->RefreshCurrentPos();
+        this->RefreshShape();
 
         this->Redraw();
     }
@@ -439,27 +405,7 @@ unsigned long long TrackingSceneController::GetSeekFowardTime()
     if(!this->annotationTimeSet)
         queryTime = this->frameRequestTime;
 
-    unsigned long long bestDiff = 0;
-    unsigned long long bestFrame = 0;
-    int bestSet = 0;
-    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
-    for(it = this->pos.begin(); it != this->pos.end(); it++)
-    {
-        const unsigned long long &ti = it->first;
-        std::vector<std::vector<float> >&framePos = it->second;
-        if(ti <= queryTime) continue; //Ignore frames in the past
-        unsigned long long diff = AbsDiff(ti, queryTime);
-        if(!bestSet || diff < bestDiff)
-        {
-            bestDiff = diff;
-            bestFrame = ti;
-            bestSet = 1;
-            cout << bestFrame << "," << bestDiff << endl;
-        }
-    }
-    if(bestSet)
-        return bestFrame;
-    throw std::runtime_error("No frame");
+    return this->GetSeekFowardTimeFromAnnot(queryTime);
 }
 
 unsigned long long TrackingSceneController::GetSeekBackTime()
@@ -469,28 +415,7 @@ unsigned long long TrackingSceneController::GetSeekBackTime()
     if(!this->annotationTimeSet)
         queryTime = this->frameRequestTime;
 
-    unsigned long long bestDiff = 0;
-    unsigned long long bestFrame = 0;
-    int bestSet = 0;
-    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
-    for(it = this->pos.begin(); it != this->pos.end(); it++)
-    {
-        const unsigned long long &ti = it->first;
-        std::vector<std::vector<float> >&framePos = it->second;
-        if(ti >= queryTime) continue; //Ignore frames in the future
-        unsigned long long diff = AbsDiff(ti, queryTime);
-        if(!bestSet || diff < bestDiff)
-        {
-            cout << bestFrame << "," << bestDiff << endl;
-            bestDiff = diff;
-            bestFrame = ti;
-            bestSet = 1;
-        }
-    }
-
-    if(bestSet)
-        return bestFrame;
-    throw std::runtime_error("No frame");
+    return this->GetSeekBackwardTimeFromAnnot(queryTime);
 }
 
 //********************************************************************
@@ -564,8 +489,10 @@ void TrackingSceneController::MarkFramePressed(bool val)
 
     if(val==0 && isUsed) //Deselect frame for marking
     {
-        this->DeleteAnnotationAtTimestamp(getAnnotationTime);
+        this->RemoveAnnotationAtTime(getAnnotationTime);
+        this->RefreshCurrentPos();
     }
+
     if(val==1 && !isUsed) //Enable frame annotation
     {
         if(this->shape.size() == 0)
@@ -575,7 +502,9 @@ void TrackingSceneController::MarkFramePressed(bool val)
 
         assert(this->frameEndTime >= this->frameStartTime);
         unsigned long long frameMidpoint = ROUND_TIMESTAMP(0.5f*(this->frameStartTime + this->frameEndTime));
-        this->pos[frameMidpoint] = this->shape;
+        this->AddAnnotationAtTime(frameMidpoint);
+
+        this->RefreshCurrentPos();
     }
 
     this->Redraw();
@@ -852,48 +781,6 @@ int TrackingSceneController::GetShapeNumPoints()
     return out;
 }
 
-void TrackingSceneController::LoadAnnotation()
-{
-    //Get input filename from user
-    QString fileName = QFileDialog::getOpenFileName(0,
-        tr("Load Annotation"), "", tr("Annotation (*.annot)"));
-    if(fileName.length() == 0) return;
-
-    //Parse XML to DOM
-    QFile f(fileName);
-    QDomDocument doc("mydocument");
-    QString errorMsg;
-    if (!doc.setContent(&f, &errorMsg))
-    {
-        cout << "Xml Error: "<< errorMsg.toLocal8Bit().constData() << endl;
-        f.close();
-        return;
-    }
-    f.close();
-
-    //Load points and links into memory
-    QDomElement rootElem = doc.documentElement();
-
-    this->ReadAnnotationXml(rootElem);
-}
-
-void TrackingSceneController::SaveAnnotation()
-{
-    //Get output filename from user
-    QString fileName = QFileDialog::getSaveFileName(0,
-      tr("Save Annotation Track"), "", tr("Annotation (*.annot)"));
-    if(fileName.length() == 0) return;
-
-    //Save data to file
-    QFile f(fileName);
-    f.open( QIODevice::WriteOnly );
-    QTextStream out(&f);
-    out.setCodec("UTF-8");
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;
-    this->WriteAnnotationXml(out);
-    f.close();
-}
-
 QSharedPointer<MouseGraphicsScene> TrackingSceneController::GetScene()
 {
     return this->scene;
@@ -922,14 +809,14 @@ void TrackingSceneController::GetIndexAnnotationXml(unsigned int index, QTextStr
     *out << "\t</frame>" << endl;
 }
 
-unsigned long long TrackingSceneController::GetIndexTimestamp(unsigned int index)
+/*unsigned long long TrackingSceneController::GetIndexTimestamp(unsigned int index)
 {
     std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it = this->pos.begin();
     for(unsigned int i=0;i<index;i++)
         it ++;
     unsigned long long out = it->first;
     return out;
-}
+}*/
 
 void TrackingSceneController::FoundFrame(unsigned long startTi, unsigned long endTi)
 {
@@ -944,4 +831,93 @@ void TrackingSceneController::GetFramesAvailable(std::map<unsigned long, unsigne
 {
     frameTimesOut = this->frameTimes;
     frameTimesEndOut = this->frameTimesEnd;
+}
+
+void TrackingSceneController::SetEventLoop(class EventLoop *eventLoopIn)
+{
+    if(this->eventReceiver) delete this->eventReceiver;
+    this->eventLoop = eventLoopIn;
+    this->eventReceiver = new EventReceiver(this->eventLoop);
+    this->eventLoop->AddListener("FOUND_ANNOTATION",*eventReceiver);
+}
+
+void TrackingSceneController::SetAnnotationTrack(QUuid srcUuid)
+{
+    this->annotationUuid = srcUuid;
+    this->RefreshCurrentPos();
+    this->RefreshShape();
+    this->RefreshLinks();
+}
+
+int TrackingSceneController::GetAnnotationBetweenTimestamps(unsigned long long startTime,
+    unsigned long long endTime,
+    unsigned long long requestedTime,
+    std::vector<std::vector<float> > &annot,
+    unsigned long long &annotationTime)
+{
+    assert(this->eventLoop!=NULL);
+    annot.clear();
+    annotationTime = 0;
+
+    std::tr1::shared_ptr<class Event> reqEv(new Event("GET_ANNOTATION_BETWEEN_TIMES"));
+    reqEv->id = this->eventLoop->GetId();
+    QString arg = QString("%1,%2,%3").arg(startTime).arg(endTime).arg(requestedTime);
+    reqEv->data = arg.toLocal8Bit().constData();
+    reqEv->toUuid = this->annotationUuid;
+    this->eventLoop->SendEvent(reqEv);
+
+    assert(this->eventReceiver!=NULL);
+    std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(reqEv->id);
+    assert(0);//TODO decode response
+}
+
+void TrackingSceneController::SetAnnotationBetweenTimestamps(unsigned long long startTime,
+    unsigned long long endTime,
+    std::vector<std::vector<float> > annot)
+{
+    assert(this->eventLoop!=NULL);
+
+    std::tr1::shared_ptr<class Event> reqEv(new Event("SET_ANNOTATION_BETWEEN_TIMES"));
+    reqEv->id = this->eventLoop->GetId();
+    reqEv->toUuid = this->annotationUuid;
+    this->eventLoop->SendEvent(reqEv);
+}
+
+void TrackingSceneController::RefreshCurrentPos()
+{
+    assert(0);
+
+}
+
+void TrackingSceneController::RefreshShape()
+{
+    assert(0);
+
+}
+
+void TrackingSceneController::RefreshLinks()
+{
+    assert(0);
+
+}
+
+unsigned long long TrackingSceneController::GetSeekFowardTimeFromAnnot(unsigned long long queryTime)
+{
+    assert(0);
+}
+
+unsigned long long TrackingSceneController::GetSeekBackwardTimeFromAnnot(unsigned long long queryTime)
+{
+    assert(0);
+}
+
+void TrackingSceneController::RemoveAnnotationAtTime(unsigned long long time)
+{
+    assert(0);
+
+}
+
+void TrackingSceneController::AddAnnotationAtTime(unsigned long long time)
+{
+    assert(0);
 }

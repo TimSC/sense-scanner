@@ -7,6 +7,11 @@
 #include <QtGui/QtGui>
 #include <QtXml/QXmlSimpleReader>
 #include <QtXml/QtXml>
+#ifdef _MSC_VER
+    #include <memory>
+#else
+    #include <tr1/memory>
+#endif
 
 class MouseGraphicsScene : public QGraphicsScene
 {
@@ -85,8 +90,35 @@ public slots:
     void FoundFrame(unsigned long startTi, unsigned long endTi);
     void GetFramesAvailable(std::map<unsigned long, unsigned long> &frameTimesOut,
                             unsigned long &frameTimesEndOut);
+    void SetAnnotationBetweenTimestamps(unsigned long long startTime,
+        unsigned long long endTime,
+        std::vector<std::vector<float> > annot);
 
+    void SetAnnotationTrack(QUuid srcUuid);
+
+    void SetEventLoop(class EventLoop *eventLoopIn);
+    //virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);
+
+    void RefreshCurrentPos();
+    void RefreshShape();
+    void RefreshLinks();
 protected:
+
+    int GetAnnotationBetweenTimestamps(unsigned long long startTime,
+        unsigned long long endTime,
+        unsigned long long requestedTime,
+        std::vector<std::vector<float> > &annot,
+        unsigned long long &annotationTime);
+
+    unsigned long long GetSeekFowardTimeFromAnnot(unsigned long long queryTime);
+    unsigned long long GetSeekBackwardTimeFromAnnot(unsigned long long queryTime);
+
+    void RemoveAnnotationAtTime(unsigned long long time);
+    void AddAnnotationAtTime(unsigned long long time);
+
+    class EventLoop *eventLoop;
+    class EventReceiver *eventReceiver;
+
     QSharedPointer<MouseGraphicsScene> scene;
     int activePoint; //which point is selected
     unsigned int imgHeight, imgWidth;
@@ -112,6 +144,7 @@ protected:
     //Keep track of frame times that are available
     std::map<unsigned long, unsigned long> frameTimes;
     unsigned long frameTimesEnd;
+    QUuid annotationUuid;
 };
 
 

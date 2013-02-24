@@ -334,8 +334,8 @@ void VideoWidget::SetSceneControl(TrackingSceneController *sceneControlIn)
 
 void VideoWidget::SetAnnotationTrack(QUuid srcUuid)
 {
-    //TODO
-    assert(0);
+    assert(this->sceneControl!=NULL);
+    this->sceneControl->SetAnnotationTrack(srcUuid);
 }
 
 void VideoWidget::FitToWindow()

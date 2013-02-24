@@ -321,6 +321,152 @@ void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out)
     out << "\t</tracking>" << endl;
 }
 
+
+void TrackingAnnotationData::LoadAnnotation()
+{
+    //Get input filename from user
+    QString fileName = QFileDialog::getOpenFileName(0,
+        tr("Load Annotation"), "", tr("Annotation (*.annot)"));
+    if(fileName.length() == 0) return;
+
+    //Parse XML to DOM
+    QFile f(fileName);
+    QDomDocument doc("mydocument");
+    QString errorMsg;
+    if (!doc.setContent(&f, &errorMsg))
+    {
+        cout << "Xml Error: "<< errorMsg.toLocal8Bit().constData() << endl;
+        f.close();
+        return;
+    }
+    f.close();
+
+    //Load points and links into memory
+    QDomElement rootElem = doc.documentElement();
+
+    this->ReadAnnotationXml(rootElem);
+}
+
+void TrackingAnnotationData::SaveAnnotation()
+{
+    //Get output filename from user
+    QString fileName = QFileDialog::getSaveFileName(0,
+      tr("Save Annotation Track"), "", tr("Annotation (*.annot)"));
+    if(fileName.length() == 0) return;
+
+    //Save data to file
+    QFile f(fileName);
+    f.open( QIODevice::WriteOnly );
+    QTextStream out(&f);
+    out.setCodec("UTF-8");
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;
+    this->WriteAnnotationXml(out);
+    f.close();
+}
+
+void TrackingAnnotationData::RemovePoint(int index)
+{
+    assert(index >=0);
+    assert(index < this->shape.size());
+
+    //Remove from existing annotaiton frames
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it=this->pos.begin(); it != this->pos.end();it++)
+    {
+        std::vector<std::vector<float> > &frame = it->second;
+        frame.erase(frame.begin()+index);
+        assert(frame.size() == this->shape.size() - 1);
+    }
+
+    //Remove from points list
+    this->shape.erase(this->shape.begin()+index);
+
+    //Update links with a higher index number
+    vector<vector<int> > filteredLinks;
+    for(unsigned int i=0;i<this->links.size();i++)
+    {
+        int broken = 0;
+        vector<int> &link = this->links[i];
+        if(link[0]==index) broken = 1;
+        if(link[1]==index) broken = 1;
+        if(link[0]>index) link[0] --;
+        if(link[1]>index) link[1] --;
+        if(!broken) filteredLinks.push_back(link);
+    }
+    this->links = filteredLinks;
+}
+
+void TrackingAnnotationData::AddPoint(std::vector<float> p)
+{
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it=this->pos.begin(); it != this->pos.end();it++)
+    {
+        std::vector<std::vector<float> > &frame = it->second;
+        frame.push_back(p);
+        assert(frame.size() == this->shape.size() + 1);
+    }
+
+    //Apply to currunt shape template
+    this->shape.push_back(p);
+
+}
+
+
+unsigned long long TrackingAnnotationData::GetSeekFowardTime(unsigned long long queryTime)
+{
+    assert(this!=NULL);
+
+    unsigned long long bestDiff = 0;
+    unsigned long long bestFrame = 0;
+    int bestSet = 0;
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it = this->pos.begin(); it != this->pos.end(); it++)
+    {
+        const unsigned long long &ti = it->first;
+        std::vector<std::vector<float> >&framePos = it->second;
+        if(ti <= queryTime) continue; //Ignore frames in the past
+        unsigned long long diff = AbsDiff(ti, queryTime);
+        if(!bestSet || diff < bestDiff)
+        {
+            bestDiff = diff;
+            bestFrame = ti;
+            bestSet = 1;
+            cout << bestFrame << "," << bestDiff << endl;
+        }
+    }
+    if(bestSet)
+        return bestFrame;
+    throw std::runtime_error("No frame");
+}
+
+unsigned long long TrackingAnnotationData::GetSeekBackTime(unsigned long long queryTime)
+{
+    assert(this!=NULL);
+
+    unsigned long long bestDiff = 0;
+    unsigned long long bestFrame = 0;
+    int bestSet = 0;
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it = this->pos.begin(); it != this->pos.end(); it++)
+    {
+        const unsigned long long &ti = it->first;
+        std::vector<std::vector<float> >&framePos = it->second;
+        if(ti >= queryTime) continue; //Ignore frames in the future
+        unsigned long long diff = AbsDiff(ti, queryTime);
+        if(!bestSet || diff < bestDiff)
+        {
+            cout << bestFrame << "," << bestDiff << endl;
+            bestDiff = diff;
+            bestFrame = ti;
+            bestSet = 1;
+        }
+    }
+
+    if(bestSet)
+        return bestFrame;
+    throw std::runtime_error("No frame");
+}
+
 //****************************************************
 
 AnnotThread::AnnotThread(class Annotation *annIn, class AvBinMedia* mediaInterfaceIn)

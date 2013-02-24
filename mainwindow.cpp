@@ -740,6 +740,7 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
 
     //Update scene controller
     TrackingSceneController *sceneController = new TrackingSceneController(this);
+    sceneController->SetEventLoop(this->eventLoop);
     this->ui->widget->SetSceneControl(sceneController);
     this->ui->widget->SetAnnotationTrack(annotationUuids[selectedRow]);
     //Update window menus

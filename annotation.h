@@ -45,8 +45,16 @@ public:
     void WriteAnnotationXml(QTextStream &out);
     void ReadFramesXml(QDomElement &elem);
     void ReadDemoFramesXml(QDomElement &elem);
+    void LoadAnnotation();
+    void SaveAnnotation();
 
 protected:
+
+    void AddPoint(std::vector<float> p);
+    void RemovePoint(int index);
+    unsigned long long GetSeekFowardTime(unsigned long long queryTime);
+    unsigned long long GetSeekBackTime(unsigned long long queryTime);
+
     std::map<unsigned long long, std::vector<std::vector<float> > > pos; //contains annotation positions
     std::vector<std::vector<int> > links;
     std::vector<std::vector<float> > shape; //contains the default shape
