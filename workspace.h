@@ -29,10 +29,11 @@ public:
     void SetEventLoop(class EventLoop &eventLoopIn);
 
     //** Sources and annotations
-    unsigned int AddSource(QString &fina, QString UidStr, class AvBinMedia* mediaInterface);
-    unsigned int AddSource(std::tr1::shared_ptr<class Annotation> ann);
+    unsigned int AddSource(QString &fina, QUuid uuid, class AvBinMedia* mediaInterface);
+    unsigned int AddSource(std::tr1::shared_ptr<class Annotation> ann,
+                           class AvBinMedia* mediaInterface, QUuid uuid);
     void RemoveSource(QUuid uuid);
-    unsigned int AddAutoAnnot(QString annotUid, QString algUid, class AvBinMedia* mediaInterface);
+    unsigned int AddAutoAnnot(QUuid annotUid, QUuid algUid, class AvBinMedia* mediaInterface);
 
     //void SetTrack(unsigned int trackNum, TrackingAnnotation *track);
     //TrackingAnnotation *GetTrack(unsigned int trackNum);

@@ -8,7 +8,7 @@ using namespace std;
 #include "qblowfish/src/qblowfish.h"
 
 #define TO_MILLISEC(x) (unsigned long long)(x / 1000. + 0.5)
-
+#define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
 
 //****************************************************************************
 
@@ -44,7 +44,7 @@ bool TrackingAnnotationData::operator!= (const TrackingAnnotationData &other)
     return ret;
 }
 
-int TrackingAnnotation::GetAnnotationAtTime(unsigned long long time,
+int TrackingAnnotationData::GetAnnotationAtTime(unsigned long long time,
     std::vector<std::vector<float> > &annot)
 {
 
@@ -131,7 +131,6 @@ void TrackingAnnotationData::SetAnnotationBetweenTimestamps(unsigned long long s
     if(annot.size() != this->shape.size())
     {
         cout << "Error: Cannot set annotation to mismatched size" << endl;
-        this->lock.unlock();
         return;
     }
 
@@ -163,7 +162,6 @@ void TrackingAnnotationData::SetAnnotationBetweenTimestamps(unsigned long long s
 
 void TrackingAnnotationData::ReadAnnotationXml(QDomElement &elem)
 {
-    this->lock.lock();
     this->shape.clear();
     this->links.clear();
     this->pos.clear();
@@ -465,6 +463,62 @@ unsigned long long TrackingAnnotationData::GetSeekBackTime(unsigned long long qu
     if(bestSet)
         return bestFrame;
     throw std::runtime_error("No frame");
+}
+
+void TrackingAnnotationData::SetShape(std::vector<std::vector<float> > shapeIn)
+{
+    this->shape = shapeIn;
+
+    //Check existing data to see if has the correct number of points
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it=this->pos.begin(); it != this->pos.end();it++)
+    {
+        std::vector<std::vector<float> > &frame = it->second;
+        while(frame.size() > shape.size())
+        {
+            frame.pop_back();
+        }
+        while(frame.size() < shape.size())
+        {
+            frame.push_back(shape[frame.size()]);
+        }
+    }
+}
+
+void TrackingAnnotationData::WriteShapeToStream(
+        std::vector<std::vector<int> > links,
+        std::vector<std::vector<float> > shape,
+        QTextStream &out)
+{
+    out << "\t<shape>" << endl;
+
+    for(unsigned int i=0; i < shape.size(); i++)
+    {
+        out << "\t\t<point id='"<<i<<"' x='"<<shape[i][0]<<"' y='"<<shape[i][1]<<"'/>" << endl;
+    }
+    for(unsigned int i=0;i < links.size();i++)
+    {
+        out << "\t\t<link from='"<<links[i][0]<<"' to='"<<links[i][1]<<"'/>" << endl;
+    }
+
+    out << "\t</shape>" << endl;
+}
+
+void TrackingAnnotationData::SaveShape()
+{
+    //Get output filename from user
+    QString fileName = QFileDialog::getSaveFileName(0,
+      tr("Save Shape"), "", tr("Shapes (*.shape)"));
+    if(fileName.length() == 0) return;
+
+    //Save data to file
+    QFile f(fileName);
+    f.open( QIODevice::WriteOnly );
+    QTextStream out(&f);
+    out.setCodec("UTF-8");
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;;
+    this->WriteShapeToStream(this->links,this->shape,out);
+    f.close();
 }
 
 //****************************************************
@@ -929,10 +983,12 @@ void Annotation::SetTrack(class TrackingAnnotation *trackIn)
     this->track = trackIn;
 }
 
-void Annotation::CloneTrack(class TrackingAnnotation *trackIn)
+void Annotation::Clone(class QUuid parentUuid)
 {
+    assert(0); //This is not thread safe
     this->SetTrack(NULL);
-    this->track = new class TrackingAnnotation(trackIn->parent());
+    this->track = new class TrackingAnnotationData(annIn->track);
+    this->SetSource(annIn->GetSource());
     *this->track = *trackIn;
 }
 

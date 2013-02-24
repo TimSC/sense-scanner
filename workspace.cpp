@@ -1,7 +1,6 @@
 #include "workspace.h"
 #include <assert.h>
 #include <QtCore/QFile>
-#include <QtCore/QTextStream>
 #include <QtGui/QtGui>
 #include <QtXml/QtXml>
 #include <iostream>
@@ -38,7 +37,6 @@ Workspace& Workspace::operator= (const Workspace &other)
 
 bool Workspace::operator!= (const Workspace &other)
 {
-    if(defaultFilename != other.defaultFilename) return true;
     if(this->annotations.size() != other.annotations.size()) return true;
     for(unsigned int i=0;i<this->annotations.size();i++)
         if(*annotations[i] != *other.annotations[i]) return true;
@@ -51,64 +49,56 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
     this->eventLoop = &eventLoopIn;
 }
 
-unsigned int Workspace::AddSource(QString &fina, QString UidStr, class AvBinMedia* mediaInterface)
+unsigned int Workspace::AddSource(QString &fina, QUuid uuid, class AvBinMedia* mediaInterface)
 {
     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
     ann->SetSource(fina);
-    TrackingAnnotation *scenePtr = new TrackingAnnotation(0);
+    TrackingAnnotationData *scenePtr = new TrackingAnnotationData();
     ann->SetTrack(scenePtr);
+    return this->AddSource(ann, mediaInterface, uuid);
+}
+
+unsigned int Workspace::AddSource(std::tr1::shared_ptr<class Annotation> ann,
+                                  class AvBinMedia* mediaInterface,
+                                  QUuid uuid)
+{
     std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann, mediaInterface));
     annotThread->SetEventLoop(this->eventLoop);
     annotThread->Start();
 
-    return this->AddSource(ann);
-}
-
-unsigned int Workspace::AddSource(std::tr1::shared_ptr<class Annotation> ann)
-{
-    ann->annotThread = annotThread;
     this->annotations.push_back(ann);
-    this->annotationUuids.push_back(QUuid(UidStr));
+    this->annotationUuids.push_back(uuid);
     return this->annotations.size();
 }
 
-void Workspace::RemoveSource(unsigned int num)
+void Workspace::RemoveSource(QUuid uuid)
 {
-    assert(num < this->annotations.size());
+    //Find index of uuid
+    int ind = -1;
+    for(unsigned int i=0;i<this->annotationUuids.size();i++)
+    {
+        if(this->annotationUuids[i] == uuid)
+        {
+            ind = i;
+            break;
+        }
+    }
+    if (ind == -1) throw std::runtime_error("No such uuid");
 
     //Prepare annotation for delete
-    std::tr1::shared_ptr<class Annotation> ann = this->annotations[num];
+    std::tr1::shared_ptr<class Annotation> ann = this->annotations[ind];
     if(ann!=NULL) ann->PreDelete();
 
-    this->annotations.erase(this->annotations.begin()+num);
+    this->annotations.erase(this->annotations.begin()+ind);
+    this->annotationUuids.erase(this->annotationUuids.begin()+ind);
 }
 
-unsigned int Workspace::AddAutoAnnot(QString annotUid, QString algUid, class AvBinMedia* mediaInterface)
+unsigned int Workspace::AddAutoAnnot(QUuid annotUid, QUuid algUid, class AvBinMedia* mediaInterface)
 {
-    QUuid annotUidObj(annotUid);
-    int basedOnAnnot = FindAnnotWithUid(annotUidObj);
-    assert(basedOnAnnot>=0 && basedOnAnnot < this->GetNumSources());
-
-    class Annotation &parent = *this->annotations[basedOnAnnot];
-
     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
-    ann->SetSource(parent.GetSource());
-    ann->SetAnnotUid(QUuid::createUuid());
-    ann->CloneTrack(parent.GetTrack());
-    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann, mediaInterface));
-    annotThread->SetEventLoop(this->eventLoop);
-    annotThread->Start();
-    ann->annotThread = annotThread;
-    ann->SetAlgUid(algUid);
+    ann->Clone(annotUid);
 
-    this->annotations.push_back(ann);
-    this->annotationUuids.push_back(QUuid(algUid));
-    return this->annotations.size();
-}
-
-unsigned int Workspace::GetNumSources()
-{
-    return this->annotations.size();
+    this->AddSource(ann, mediaInterface, QUuid::createUuid());
 }
 
 //***********************************************************************
@@ -171,16 +161,6 @@ int Workspace::RemoveProcessing(QUuid uuid)
     this->processingUuids.erase(this->processingUuids.begin()+ind);
     this->processingStates.erase(this->processingStates.begin()+ind);
     return 1;
-}
-
-int Workspace::FindAnnotWithUid(QUuid uidIn)
-{
-    for(unsigned int i=0;i<this->annotations.size();i++)
-    {
-        if(this->annotations[i]->GetAnnotUid() == uidIn)
-            return i;
-    }
-    return -1;
 }
 
 /*int Workspace::StartProcessing(unsigned int num)
@@ -248,8 +228,6 @@ int Workspace::NumProcessesBlockingShutdown()
 
 void Workspace::ClearProcessing()
 {
-
-    this->defaultFilename = "";
     this->processingList.clear();
     this->processingProgress.clear();
     this->processingUuids.clear();

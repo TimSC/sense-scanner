@@ -302,7 +302,7 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     {
         class BinaryData *data = (class BinaryData *)ev->raw;
         assert(data!=NULL);
-        QByteArray imgRaw(data->raw, data->size);
+        QByteArray imgRaw((const char *)data->raw, data->size);
         this->SendRawDataBlock(ev->data.c_str(), imgRaw);
     }
 
@@ -343,8 +343,9 @@ void AlgorithmProcess::ProcessAlgOutput()
     {
         std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_PROGRESS_UPDATE"));
         std::ostringstream tmp;
-        tmp << cmd.mid(9).constData() << "," << this->threadId;
+        tmp << cmd.mid(9).constData();
         openEv->data = tmp.str();
+        openEv->fromUuid = this->uid;
         el.SendEvent(openEv);
         ReadLineFromBuffer(this->algOutBuffer,1);//Pop this line
         return;
@@ -356,8 +357,9 @@ void AlgorithmProcess::ProcessAlgOutput()
 
         std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
         std::ostringstream tmp;
-        tmp << this->threadId << ",paused";
+        tmp << "paused";
         openEv->data = tmp.str();
+        openEv->fromUuid = this->uid;
         el.SendEvent(openEv);
         ReadLineFromBuffer(this->algOutBuffer,1);//Pop this line
         return;
@@ -369,8 +371,9 @@ void AlgorithmProcess::ProcessAlgOutput()
 
         std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
         std::ostringstream tmp;
-        tmp << this->threadId << ",running";
+        tmp << "running";
         openEv->data = tmp.str();
+        openEv->fromUuid = this->uid;
         el.SendEvent(openEv);
         ReadLineFromBuffer(this->algOutBuffer,1);//Pop this line
         return;
@@ -384,8 +387,9 @@ void AlgorithmProcess::ProcessAlgOutput()
 
         std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
         std::ostringstream tmp;
-        tmp << this->threadId << ",finished";
+        tmp << "finished";
         openEv->data = tmp.str();
+        openEv->fromUuid = this->uid;
         el.SendEvent(openEv);
         ReadLineFromBuffer(this->algOutBuffer,1);//Pop this line
         return;
@@ -568,7 +572,6 @@ QByteArray AlgorithmProcess::GetModel()
     }
     if(!this->dataBlockReceived)
     {
-        this->lock.unlock();
         throw std::runtime_error("Algorithm process timed out during GetModel()");
     }
 

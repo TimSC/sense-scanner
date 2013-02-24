@@ -25,10 +25,13 @@ Event::Event(std::string typeIn, unsigned long long idIn)
 
 Event::Event(const Event& other)
 {
+    assert(0); //Avoid copying with a raw pointer?
     this->type = other.type;
     this->id = other.id;
     this->data = other.data;
     this->raw = other.raw; //Note: this is a raw pointer
+    this->toUuid = other.toUuid;
+    this->fromUuid = other.fromUuid;
 }
 
 Event::~Event()

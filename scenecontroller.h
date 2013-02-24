@@ -66,7 +66,10 @@ public:
     void MouseLeaveEvent();
     unsigned long long GetSeekFowardTime();
     unsigned long long GetSeekBackTime();
-    void WriteShapeToStream(QTextStream &textStream);
+    static void WriteShapeToStream(
+            std::vector<std::vector<int> > links,
+            std::vector<std::vector<float> > shape,
+            QTextStream &out);
     std::vector<std::vector<float> > ProcessXmlDomFrame(QDomElement &e);
     QSharedPointer<MouseGraphicsScene> GetScene();
 
@@ -83,7 +86,6 @@ public slots:
     void SaveShape();
     void SetShapeFromCurentFrame();
     void ResetCurentFrameShape();
-    int GetShapeNumPoints();
     void LoadAnnotation();
     void SaveAnnotation();
 
@@ -100,7 +102,8 @@ public slots:
     //virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);
 
     void RefreshCurrentPos();
-    void RefreshShape();
+    std::vector<std::vector<float> > GetShape();
+    void SetShape(std::vector<std::vector<float> > shape);
     void RefreshLinks();
 protected:
 
@@ -140,6 +143,7 @@ protected:
     //QWidget *annotationControls;
     QPushButton *markFrameButton;
     QWidget *annotationControls;
+    int isShapeSet;
 
     //Keep track of frame times that are available
     std::map<unsigned long, unsigned long> frameTimes;

@@ -87,7 +87,7 @@ public:
     class Deletable *raw;
 
     QUuid toUuid;
-
+    QUuid fromUuid;
 };
 
 class EventReceiver

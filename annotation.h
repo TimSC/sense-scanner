@@ -5,6 +5,9 @@
 #include <QtCore/QMutex>
 #include <QtCore/QSharedPointer>
 #include <QtGui/QImage>
+#include <QtCore/QTextStream>
+#include <QtXml/QtXml>
+
 #include "eventloop.h"
 
 //**********************************************************************
@@ -54,6 +57,13 @@ protected:
     void RemovePoint(int index);
     unsigned long long GetSeekFowardTime(unsigned long long queryTime);
     unsigned long long GetSeekBackTime(unsigned long long queryTime);
+    void SetShape(std::vector<std::vector<float> > shapeIn);
+
+    void WriteShapeToStream(
+            std::vector<std::vector<int> > links,
+            std::vector<std::vector<float> > shape,
+            QTextStream &out);
+    void SaveShape();
 
     std::map<unsigned long long, std::vector<std::vector<float> > > pos; //contains annotation positions
     std::vector<std::vector<int> > links;
@@ -118,7 +128,7 @@ public:
     bool operator!= (const Annotation &other);
     void Clear();
     void SetTrack(class TrackingAnnotationData *trackIn);
-    void CloneTrack(class TrackingAnnotationData *trackIn);
+    void Clone(class QUuid parentUuid);
     class TrackingAnnotation *GetTrack();
 
     void SetAlgUid(QUuid uidIn); //Thread safe

@@ -1184,7 +1184,6 @@ void MainWindow::Load(QString fina, class AvBinMedia* mediaInterface)
                     QString uidStr = sourceEle.attribute("uid");
                     QUuid uid(uidStr);
                     if(uid.isNull()) uid = uid.createUuid();
-                    ann->SetAnnotUid(uid);
 
                     //Set alg Uid
                     QString algStr = sourceEle.attribute("alg");
@@ -1213,9 +1212,8 @@ void MainWindow::Load(QString fina, class AvBinMedia* mediaInterface)
 
                     }
 
-
                     ann->SetTrack(track);
-                    this->workspace.AddSource(ann);
+                    this->workspace.AddSource(ann, mediaInterface, uid);
                     sourceNode = sourceNode.nextSibling();
                 }
 

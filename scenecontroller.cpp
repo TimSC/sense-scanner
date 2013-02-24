@@ -73,6 +73,7 @@ TrackingSceneController::TrackingSceneController(QObject *parent)
     this->mousex = 0.f;
     this->mousey = 0.f;
     this->markFrameButton = NULL;
+    this->isShapeSet = 0;
 
     this->annotationControls = NULL;
     this->frameTimesEnd = 0;
@@ -303,7 +304,6 @@ void TrackingSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEve
         this->eventLoop->SendEvent(addEv);
 
         this->RefreshCurrentPos();
-        this->RefreshShape();
 
         this->Redraw();
     }
@@ -312,6 +312,7 @@ void TrackingSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEve
     {
         int nearestPoint = this->NearestPoint(pos.x(), pos.y(), currentFrame);
         if(nearestPoint>=0) this->RemovePoint(nearestPoint);
+        this->RefreshCurrentPos();
         this->activePoint = -1;
         this->Redraw();
     }
@@ -495,7 +496,7 @@ void TrackingSceneController::MarkFramePressed(bool val)
 
     if(val==1 && !isUsed) //Enable frame annotation
     {
-        if(this->shape.size() == 0)
+        if(!isShapeSet)
         {
             this->LoadShape();
         }
@@ -655,12 +656,12 @@ void TrackingSceneController::LoadShape()
     QDomElement rootElem = doc.documentElement();
 
     this->links.clear();
-    this->shape = this->ProcessXmlDomFrame(rootElem);
+    std::vector<std::vector<float> > shape = this->ProcessXmlDomFrame(rootElem);
 
     //Validate points
     int invalidShape = 0;
-    for(unsigned int i=0;i<this->shape.size();i++)
-        if(this->shape[i].size() != 2)
+    for(unsigned int i=0;i < shape.size();i++)
+        if(shape[i].size() != 2)
         {
             cout << "Error: missing point ID " << i << endl;
             invalidShape = 1;
@@ -674,12 +675,12 @@ void TrackingSceneController::LoadShape()
             cout << "Error: Invalid link" << endl;
             invalidShape = 1;
         }
-        if(this->links[i][0] < 0 || this->links[i][0] >= this->shape.size())
+        if(this->links[i][0] < 0 || this->links[i][0] >= shape.size())
         {
             cout << "Link refers to non-existent point " << this->links[i][0] << endl;
             invalidShape = 1;
         }
-        if(this->links[i][1] < 0 || this->links[i][1] >= this->shape.size())
+        if(this->links[i][1] < 0 || this->links[i][1] >= shape.size())
         {
             cout << "Link refers to non-existent point " << this->links[i][1] << endl;
             invalidShape = 1;
@@ -688,58 +689,14 @@ void TrackingSceneController::LoadShape()
 
     if(invalidShape)
     {
-        this->shape.clear();
+        shape.clear();
         this->links.clear();
         return;
     }
 
-    //Check existing data to see if has the correct number of points
-    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
-    for(it=this->pos.begin(); it != this->pos.end();it++)
-    {
-        std::vector<std::vector<float> > &frame = it->second;
-        while(frame.size() > this->shape.size())
-        {
-            frame.pop_back();
-        }
-        while(frame.size() < this->shape.size())
-        {
-            frame.push_back(this->shape[frame.size()]);
-        }
-    }
-}
+    //TODO
 
-void TrackingSceneController::WriteShapeToStream(QTextStream &out)
-{
-    out << "\t<shape>" << endl;
-
-    for(unsigned int i=0; i < this->shape.size(); i++)
-    {
-        out << "\t\t<point id='"<<i<<"' x='"<<this->shape[i][0]<<"' y='"<<this->shape[i][1]<<"'/>" << endl;
-    }
-    for(unsigned int i=0;i < this->links.size();i++)
-    {
-        out << "\t\t<link from='"<<this->links[i][0]<<"' to='"<<this->links[i][1]<<"'/>" << endl;
-    }
-
-    out << "\t</shape>" << endl;
-}
-
-void TrackingSceneController::SaveShape()
-{
-    //Get output filename from user
-    QString fileName = QFileDialog::getSaveFileName(0,
-      tr("Save Shape"), "", tr("Shapes (*.shape)"));
-    if(fileName.length() == 0) return;
-
-    //Save data to file
-    QFile f(fileName);
-    f.open( QIODevice::WriteOnly );
-    QTextStream out(&f);
-    out.setCodec("UTF-8");
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;;
-    this->WriteShapeToStream(out);
-    f.close();
+    this->isShapeSet = true;
 }
 
 void TrackingSceneController::SetShapeFromCurentFrame()
@@ -755,7 +712,7 @@ void TrackingSceneController::SetShapeFromCurentFrame()
     if(!found) return;
 
     //Set shape from current frame
-    this->shape = annotShape;
+    this->SetShape(annotShape);
 }
 
 void TrackingSceneController::ResetCurentFrameShape()
@@ -771,14 +728,10 @@ void TrackingSceneController::ResetCurentFrameShape()
     if(!isUsed) return;
 
     //Set current frame to canonical shape
-    this->SetAnnotationBetweenTimestamps(this->frameStartTime, this->frameEndTime, this->shape);
-    this->Redraw();
-}
+    assert(0); //TODO
 
-int TrackingSceneController::GetShapeNumPoints()
-{
-    int out = this->shape.size();
-    return out;
+    this->RefreshCurrentPos();
+    this->Redraw();
 }
 
 QSharedPointer<MouseGraphicsScene> TrackingSceneController::GetScene()
@@ -788,14 +741,7 @@ QSharedPointer<MouseGraphicsScene> TrackingSceneController::GetScene()
 
 //***************************************************
 
-unsigned int TrackingSceneController::NumMarkedFrames()
-{
-
-    unsigned int out = this->pos.size();
-    return out;
-}
-
-void TrackingSceneController::GetIndexAnnotationXml(unsigned int index, QTextStream *out)
+/*void TrackingSceneController::GetIndexAnnotationXml(unsigned int index, QTextStream *out)
 {
     std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it = this->pos.begin();
     for(unsigned int i=0;i<index;i++)
@@ -807,7 +753,7 @@ void TrackingSceneController::GetIndexAnnotationXml(unsigned int index, QTextStr
         *out << "\t\t<point id='"<<i<<"' x='"<<frame[i][0]<<"' y='"<<frame[i][1]<<"'/>" << endl;
     }
     *out << "\t</frame>" << endl;
-}
+}*/
 
 /*unsigned long long TrackingSceneController::GetIndexTimestamp(unsigned int index)
 {
@@ -845,7 +791,6 @@ void TrackingSceneController::SetAnnotationTrack(QUuid srcUuid)
 {
     this->annotationUuid = srcUuid;
     this->RefreshCurrentPos();
-    this->RefreshShape();
     this->RefreshLinks();
 }
 
@@ -889,7 +834,13 @@ void TrackingSceneController::RefreshCurrentPos()
 
 }
 
-void TrackingSceneController::RefreshShape()
+std::vector<std::vector<float> > TrackingSceneController::GetShape()
+{
+    assert(0);
+
+}
+
+void TrackingSceneController::SetShape(std::vector<std::vector<float> > shape)
 {
     assert(0);
 
