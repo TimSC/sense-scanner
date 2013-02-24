@@ -101,6 +101,12 @@ unsigned int Workspace::AddAutoAnnot(QUuid annotUid, QUuid algUid, class AvBinMe
     this->AddSource(ann, mediaInterface, QUuid::createUuid());
 }
 
+QList<QUuid> Workspace::GetAnnotationUuids()
+{
+    return this->annotationUuids;
+
+}
+
 //***********************************************************************
 
 void Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg)

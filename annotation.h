@@ -48,8 +48,12 @@ public:
     void WriteAnnotationXml(QTextStream &out);
     void ReadFramesXml(QDomElement &elem);
     void ReadDemoFramesXml(QDomElement &elem);
-    void LoadAnnotation();
-    void SaveAnnotation();
+
+    void FoundFrame(unsigned long startTi, unsigned long endTi);
+    void GetFramesAvailable(std::map<unsigned long, unsigned long> &frameTimesOut,
+                            unsigned long &frameTimesEndOut);
+
+    int GetShapeNumPoints();
 
 protected:
 
@@ -63,11 +67,18 @@ protected:
             std::vector<std::vector<int> > links,
             std::vector<std::vector<float> > shape,
             QTextStream &out);
-    void SaveShape();
+    void SaveShape(QString fileName);
+
+    void LoadAnnotation(QString fileName);
+    void SaveAnnotation(QString fileName);
 
     std::map<unsigned long long, std::vector<std::vector<float> > > pos; //contains annotation positions
     std::vector<std::vector<int> > links;
     std::vector<std::vector<float> > shape; //contains the default shape
+
+    //Keep track of frame times that are available
+    std::map<unsigned long, unsigned long> frameTimes;
+    unsigned long frameTimesEnd;
 };
 
 //****************************************************
@@ -90,6 +101,11 @@ public:
 
     void Update();
     void Finished();
+
+    void SendEvent(std::tr1::shared_ptr<class Event> event);
+    std::tr1::shared_ptr<class Event> WaitForEventId(unsigned long long id,
+                               unsigned timeOutMs = 50000);
+    unsigned long long GetNewEventId();
 
 protected:
 
@@ -117,8 +133,7 @@ class Annotation
 {
     /*!
     * Annotation contains various shared state information between
-    * the AnnotThread and the GUI. Some of the methods are thread safe
-    * to enable iteraction between the two.
+    * the AnnotThread and the GUI.
     */
 
 public:
@@ -129,7 +144,7 @@ public:
     void Clear();
     void SetTrack(class TrackingAnnotationData *trackIn);
     void Clone(class QUuid parentUuid);
-    class TrackingAnnotation *GetTrack();
+    class TrackingAnnotationData *GetTrack();
 
     void SetAlgUid(QUuid uidIn); //Thread safe
     QUuid GetAlgUid(); //Thread safe

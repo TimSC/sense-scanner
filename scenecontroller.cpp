@@ -13,9 +13,6 @@
 using namespace::std;
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
 
-#define DEMO_MODE
-#define SECRET_KEY "This is a secret..."
-
 //Custom graphics scene to catch mouse move and press
 
 MouseGraphicsScene::MouseGraphicsScene(QObject *parent) : QGraphicsScene(parent)
@@ -76,7 +73,6 @@ TrackingSceneController::TrackingSceneController(QObject *parent)
     this->isShapeSet = 0;
 
     this->annotationControls = NULL;
-    this->frameTimesEnd = 0;
     this->eventLoop = NULL;
     this->eventReceiver = NULL;
 }
@@ -393,12 +389,6 @@ int TrackingSceneController::NearestPoint(float x, float y, std::vector<std::vec
     return best;
 }
 
-unsigned long long AbsDiff(unsigned long long a, unsigned long long b)
-{
-    if(a>b) return a-b;
-    return b-a;
-}
-
 unsigned long long TrackingSceneController::GetSeekFowardTime()
 {
     assert(this!=NULL);
@@ -593,7 +583,8 @@ QMenu *TrackingSceneController::MenuFactory(QMenuBar *menuBar)
     return newMenu;
 }
 
-std::vector<std::vector<float> > TrackingSceneController::ProcessXmlDomFrame(QDomElement &rootElem)
+std::vector<std::vector<float> > TrackingSceneController::ProcessXmlDomFrame(QDomElement &rootElem,
+    std::vector<std::vector<int> > linksOut)
 {
     std::vector<std::vector<float> > out;
     QDomNode n = rootElem.firstChild();
@@ -620,7 +611,7 @@ std::vector<std::vector<float> > TrackingSceneController::ProcessXmlDomFrame(QDo
                 std::vector<int> link;
                 link.push_back(e.attribute("from").toInt());
                 link.push_back(e.attribute("to").toInt());
-                this->links.push_back(link);
+                linksOut.push_back(link);
             }
         }
     n = n.nextSibling();
@@ -656,7 +647,7 @@ void TrackingSceneController::LoadShape()
     QDomElement rootElem = doc.documentElement();
 
     this->links.clear();
-    std::vector<std::vector<float> > shape = this->ProcessXmlDomFrame(rootElem);
+    std::vector<std::vector<float> > shape = this->ProcessXmlDomFrame(rootElem, this->links);
 
     //Validate points
     int invalidShape = 0;
@@ -764,21 +755,6 @@ QSharedPointer<MouseGraphicsScene> TrackingSceneController::GetScene()
     return out;
 }*/
 
-void TrackingSceneController::FoundFrame(unsigned long startTi, unsigned long endTi)
-{
-    //Update store
-    this->frameTimes[startTi] = endTi;
-    if(endTi > this->frameTimesEnd)
-        this->frameTimesEnd = endTi;
-}
-
-void TrackingSceneController::GetFramesAvailable(std::map<unsigned long, unsigned long> &frameTimesOut,
-                        unsigned long &frameTimesEndOut)
-{
-    frameTimesOut = this->frameTimes;
-    frameTimesEndOut = this->frameTimesEnd;
-}
-
 void TrackingSceneController::SetEventLoop(class EventLoop *eventLoopIn)
 {
     if(this->eventReceiver) delete this->eventReceiver;
@@ -871,4 +847,52 @@ void TrackingSceneController::RemoveAnnotationAtTime(unsigned long long time)
 void TrackingSceneController::AddAnnotationAtTime(unsigned long long time)
 {
     assert(0);
+}
+
+void TrackingSceneController::LoadAnnotation()
+{
+    //Get input filename from user
+    QString fileName = QFileDialog::getOpenFileName(0,
+        tr("Load Annotation"), "", tr("Annotation (*.annot)"));
+    if(fileName.length() == 0) return;
+
+    std::tr1::shared_ptr<class Event> reqEv(new Event("LOAD_ANNOTATION"));
+    reqEv->toUuid = this->annotationUuid;
+    reqEv->data = fileName.toLocal8Bit().constData();
+    this->eventLoop->SendEvent(reqEv);
+}
+
+void TrackingSceneController::SaveAnnotation()
+{
+    //Get output filename from user
+    QString fileName = QFileDialog::getSaveFileName(0,
+      tr("Save Annotation Track"), "", tr("Annotation (*.annot)"));
+    if(fileName.length() == 0) return;
+
+    std::tr1::shared_ptr<class Event> reqEv(new Event("SAVE_ANNOTATION"));
+    reqEv->toUuid = this->annotationUuid;
+    reqEv->data = fileName.toLocal8Bit().constData();
+    this->eventLoop->SendEvent(reqEv);
+}
+
+void TrackingSceneController::SaveShape()
+{
+    //Get output filename from user
+    QString fileName = QFileDialog::getSaveFileName(0,
+      tr("Save Shape"), "", tr("Shapes (*.shape)"));
+    if(fileName.length() == 0) return;
+
+    std::tr1::shared_ptr<class Event> reqEv(new Event("SAVE_SHAPE"));
+    reqEv->toUuid = this->annotationUuid;
+    reqEv->data = fileName.toLocal8Bit().constData();
+    this->eventLoop->SendEvent(reqEv);
+}
+
+void TrackingSceneController::RemovePoint(int index)
+{
+    std::tr1::shared_ptr<class Event> reqEv(new Event("REMOVE_POINT"));
+    reqEv->toUuid = this->annotationUuid;
+    QString ind = QString("%1").arg(index);
+    reqEv->data = ind.toLocal8Bit().constData();
+    this->eventLoop->SendEvent(reqEv);
 }

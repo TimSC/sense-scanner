@@ -6,15 +6,24 @@
 #include <iostream>
 using namespace std;
 #include "qblowfish/src/qblowfish.h"
+#include "scenecontroller.h"
 
 #define TO_MILLISEC(x) (unsigned long long)(x / 1000. + 0.5)
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
+#define DEMO_MODE
+#define SECRET_KEY "This is a secret..."
+
+unsigned long long AbsDiff(unsigned long long a, unsigned long long b)
+{
+    if(a>b) return a-b;
+    return b-a;
+}
 
 //****************************************************************************
 
 TrackingAnnotationData::TrackingAnnotationData()
 {
-
+    this->frameTimesEnd = 0;
 }
 
 TrackingAnnotationData::TrackingAnnotationData(const TrackingAnnotationData &other)
@@ -32,6 +41,8 @@ TrackingAnnotationData& TrackingAnnotationData::operator= (const TrackingAnnotat
     this->pos = other.pos;
     this->links = other.links;
     this->shape = other.shape;
+    this->frameTimes = other.frameTimes;
+    this->frameTimesEnd = other.frameTimesEnd;
     return *this;
 }
 
@@ -171,14 +182,14 @@ void TrackingAnnotationData::ReadAnnotationXml(QDomElement &elem)
         if(!e.isNull()) {
             if(e.tagName() == "shape")
             {
-                std::vector<std::vector<float> > shapeData = ProcessXmlDomFrame(e);
+                std::vector<std::vector<float> > shapeData = TrackingSceneController::ProcessXmlDomFrame(e,this->links);
                 this->shape = shapeData;
             }
 
             //Obsolete format loading code here
             if(e.tagName() == "frame")
             {
-                std::vector<std::vector<float> > frame = ProcessXmlDomFrame(e);
+                std::vector<std::vector<float> > frame = TrackingSceneController::ProcessXmlDomFrame(e,this->links);
                 //cout << e.attribute("time").toFloat() << endl;
                 float timeSec = e.attribute("time").toFloat();
                 assert(timeSec > 0.f);
@@ -196,6 +207,7 @@ void TrackingAnnotationData::ReadAnnotationXml(QDomElement &elem)
             {
                 ReadDemoFramesXml(e);
             }
+
             if(e.tagName() == "available")
             {
                 this->frameTimes.clear();
@@ -214,7 +226,6 @@ void TrackingAnnotationData::ReadAnnotationXml(QDomElement &elem)
         }
         n = n.nextSibling();
     }
-    this->lock.unlock();
 }
 
 void TrackingAnnotationData::ReadFramesXml(QDomElement &elem)
@@ -224,7 +235,7 @@ void TrackingAnnotationData::ReadFramesXml(QDomElement &elem)
     {
         if(e.tagName() != "frame") continue;
 
-        std::vector<std::vector<float> > frame = ProcessXmlDomFrame(e);
+        std::vector<std::vector<float> > frame = TrackingSceneController::ProcessXmlDomFrame(e,this->links);
         //cout << e.attribute("time").toFloat() << endl;
         float timeSec = e.attribute("time").toFloat();
         assert(timeSec > 0.f);
@@ -266,7 +277,7 @@ void TrackingAnnotationData::ReadDemoFramesXml(QDomElement &elem)
 void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out)
 {
     out << "\t<tracking>" << endl;
-    this->WriteShapeToStream(out);
+    this->WriteShapeToStream(this->links, this->shape, out);
 
     std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
 
@@ -317,49 +328,6 @@ void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out)
 
     out << "\t</available>" << endl;
     out << "\t</tracking>" << endl;
-}
-
-
-void TrackingAnnotationData::LoadAnnotation()
-{
-    //Get input filename from user
-    QString fileName = QFileDialog::getOpenFileName(0,
-        tr("Load Annotation"), "", tr("Annotation (*.annot)"));
-    if(fileName.length() == 0) return;
-
-    //Parse XML to DOM
-    QFile f(fileName);
-    QDomDocument doc("mydocument");
-    QString errorMsg;
-    if (!doc.setContent(&f, &errorMsg))
-    {
-        cout << "Xml Error: "<< errorMsg.toLocal8Bit().constData() << endl;
-        f.close();
-        return;
-    }
-    f.close();
-
-    //Load points and links into memory
-    QDomElement rootElem = doc.documentElement();
-
-    this->ReadAnnotationXml(rootElem);
-}
-
-void TrackingAnnotationData::SaveAnnotation()
-{
-    //Get output filename from user
-    QString fileName = QFileDialog::getSaveFileName(0,
-      tr("Save Annotation Track"), "", tr("Annotation (*.annot)"));
-    if(fileName.length() == 0) return;
-
-    //Save data to file
-    QFile f(fileName);
-    f.open( QIODevice::WriteOnly );
-    QTextStream out(&f);
-    out.setCodec("UTF-8");
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;
-    this->WriteAnnotationXml(out);
-    f.close();
 }
 
 void TrackingAnnotationData::RemovePoint(int index)
@@ -504,13 +472,8 @@ void TrackingAnnotationData::WriteShapeToStream(
     out << "\t</shape>" << endl;
 }
 
-void TrackingAnnotationData::SaveShape()
+void TrackingAnnotationData::SaveShape(QString fileName)
 {
-    //Get output filename from user
-    QString fileName = QFileDialog::getSaveFileName(0,
-      tr("Save Shape"), "", tr("Shapes (*.shape)"));
-    if(fileName.length() == 0) return;
-
     //Save data to file
     QFile f(fileName);
     f.open( QIODevice::WriteOnly );
@@ -520,6 +483,59 @@ void TrackingAnnotationData::SaveShape()
     this->WriteShapeToStream(this->links,this->shape,out);
     f.close();
 }
+
+void TrackingAnnotationData::FoundFrame(unsigned long startTi, unsigned long endTi)
+{
+    //Update store
+    this->frameTimes[startTi] = endTi;
+    if(endTi > this->frameTimesEnd)
+        this->frameTimesEnd = endTi;
+}
+
+void TrackingAnnotationData::GetFramesAvailable(std::map<unsigned long, unsigned long> &frameTimesOut,
+                        unsigned long &frameTimesEndOut)
+{
+    frameTimesOut = this->frameTimes;
+    frameTimesEndOut = this->frameTimesEnd;
+}
+
+void TrackingAnnotationData::LoadAnnotation(QString fileName)
+{
+    //Parse XML to DOM
+    QFile f(fileName);
+    QDomDocument doc("mydocument");
+    QString errorMsg;
+    if (!doc.setContent(&f, &errorMsg))
+    {
+        cout << "Xml Error: "<< errorMsg.toLocal8Bit().constData() << endl;
+        f.close();
+        return;
+    }
+    f.close();
+
+    //Load points and links into memory
+    QDomElement rootElem = doc.documentElement();
+
+    this->ReadAnnotationXml(rootElem);
+}
+
+void TrackingAnnotationData::SaveAnnotation(QString fileName)
+{
+    //Save data to file
+    QFile f(fileName);
+    f.open( QIODevice::WriteOnly );
+    QTextStream out(&f);
+    out.setCodec("UTF-8");
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;
+    this->WriteAnnotationXml(out);
+    f.close();
+}
+
+int TrackingAnnotationData::GetShapeNumPoints()
+{
+    return this->shape.size();
+}
+
 
 //****************************************************
 
@@ -597,7 +613,7 @@ void AnnotThread::Update()
         return;
     }
 
-    class TrackingAnnotation *track = this->parentAnn->GetTrack();
+    class TrackingAnnotationData *track = this->parentAnn->GetTrack();
     assert(track!=NULL);
 
     if(!this->srcDurationSet)
@@ -901,7 +917,7 @@ void AnnotThread::ImageToProcess(unsigned long long startTi,
     try
     {
         std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(reqId,80000000);
-        class TrackingAnnotation *track = this->parentAnn->GetTrack();
+        class TrackingAnnotationData *track = this->parentAnn->GetTrack();
         assert(track!=NULL);
 
         if(ev->type!="PREDICTION_RESULT") return;
@@ -919,6 +935,25 @@ void AnnotThread::ImageToProcess(unsigned long long startTi,
     {
         cout << "Warning: Prediction timed out" << endl;
     }
+}
+
+void AnnotThread::SendEvent(std::tr1::shared_ptr<class Event> event)
+{
+    assert(this->eventLoop!=NULL);
+    this->eventLoop->SendEvent(event);
+
+}
+
+std::tr1::shared_ptr<class Event> AnnotThread::WaitForEventId(unsigned long long id,
+                           unsigned timeOutMs)
+{
+    assert(this->eventReceiver!=NULL);
+    return this->eventReceiver->WaitForEventId(id, timeOutMs);
+}
+
+unsigned long long AnnotThread::GetNewEventId()
+{
+    return this->eventLoop->GetId();
 }
 
 //*****************************************************
@@ -949,8 +984,7 @@ Annotation& Annotation::operator= (const Annotation &other)
     if(this->track) delete this->track;
     this->track = NULL;
 
-    QObject *par = other.track->parent();
-    this->SetTrack(new TrackingAnnotation(par));
+    this->SetTrack(new TrackingAnnotationData());
     *this->track = *other.track;
     return *this;
 }
@@ -977,7 +1011,7 @@ void Annotation::Clear()
     this->annotThread = thd;
 }
 
-void Annotation::SetTrack(class TrackingAnnotation *trackIn)
+void Annotation::SetTrack(class TrackingAnnotationData *trackIn)
 {
     if(this->track != NULL) delete this->track;
     this->track = trackIn;
@@ -985,17 +1019,40 @@ void Annotation::SetTrack(class TrackingAnnotation *trackIn)
 
 void Annotation::Clone(class QUuid parentUuid)
 {
-    assert(0); //This is not thread safe
+    assert(0); //This is not thread safe?
     this->SetTrack(NULL);
-    this->track = new class TrackingAnnotationData(annIn->track);
-    this->SetSource(annIn->GetSource());
-    *this->track = *trackIn;
+    this->track = new class TrackingAnnotationData();
+
+    //Get source filename
+    std::tr1::shared_ptr<class Event> getSourceNameEv(new Event("GET_SOURCE_FILENAME"));
+    getSourceNameEv->toUuid = parentUuid;
+    getSourceNameEv->id = this->annotThread->GetNewEventId();
+    this->annotThread->SendEvent(getSourceNameEv);
+
+    std::tr1::shared_ptr<class Event> sourceName =
+            this->annotThread->WaitForEventId(getSourceNameEv->id);
+    QString fina = sourceName->data.c_str();
+    this->SetSource(fina);
+
+    //Get annotated frames
+    std::tr1::shared_ptr<class Event> getAnnotationEv(new Event("GET_ANNOTATION_XML"));
+    getAnnotationEv->toUuid = parentUuid;
+    getAnnotationEv->id = this->annotThread->GetNewEventId();
+    this->annotThread->SendEvent(getAnnotationEv);
+
+    std::tr1::shared_ptr<class Event> annotData =
+            this->annotThread->WaitForEventId(getAnnotationEv->id);
+    QString data = annotData->data.c_str();
+
+    //Set annotation from response
+    assert(0); //TODO
+
 }
 
-class TrackingAnnotation *Annotation::GetTrack()
+class TrackingAnnotationData *Annotation::GetTrack()
 {
     this->lock.lock();
-    class TrackingAnnotation *out = this->track;
+    class TrackingAnnotationData *out = this->track;
     this->lock.unlock();
     return out;
 }

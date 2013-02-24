@@ -209,12 +209,12 @@ QByteArray AlgorithmProcess::ReadLineFromBuffer(QByteArray &buff, int popLine, i
     QByteArray cmd = buff.mid(skipPos,newLinePos-skipPos);
     if(popLine) buff = buff.mid(newLinePos+1);
 
-	/*if(cmd.length()>0)
-    {
-        this->algOutLog->write(cmd.constData());
-        this->algOutLog->write("\n");
-        this->algOutLog->flush();
-    }*/
+    //if(cmd.length()>0)
+    //{
+    //    this->algOutLog->write(cmd.constData());
+    //    this->algOutLog->write("\n");
+    //    this->algOutLog->flush();
+    //}
 
     return cmd;
 }
@@ -600,3 +600,4 @@ int AlgorithmProcess::IsBlockingShutdown()
     if(state == AlgorithmProcess::RUNNING_STOPPING) return 1;
     return 0;
 }
+

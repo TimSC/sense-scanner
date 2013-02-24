@@ -59,8 +59,6 @@ public:
     QWidget *ControlsFactory(QWidget *parent);
     QMenu *MenuFactory(QMenuBar *menuBar);
 
-    void RemovePoint(int index);
-
     int GetMouseOver();
     void MouseEnterEvent();
     void MouseLeaveEvent();
@@ -70,7 +68,8 @@ public:
             std::vector<std::vector<int> > links,
             std::vector<std::vector<float> > shape,
             QTextStream &out);
-    std::vector<std::vector<float> > ProcessXmlDomFrame(QDomElement &e);
+    static std::vector<std::vector<float> > ProcessXmlDomFrame(QDomElement &rootElem,
+        std::vector<std::vector<int> > linksOut);
     QSharedPointer<MouseGraphicsScene> GetScene();
 
 public slots:
@@ -89,9 +88,6 @@ public slots:
     void LoadAnnotation();
     void SaveAnnotation();
 
-    void FoundFrame(unsigned long startTi, unsigned long endTi);
-    void GetFramesAvailable(std::map<unsigned long, unsigned long> &frameTimesOut,
-                            unsigned long &frameTimesEndOut);
     void SetAnnotationBetweenTimestamps(unsigned long long startTime,
         unsigned long long endTime,
         std::vector<std::vector<float> > annot);
@@ -118,6 +114,7 @@ protected:
 
     void RemoveAnnotationAtTime(unsigned long long time);
     void AddAnnotationAtTime(unsigned long long time);
+    void RemovePoint(int index);
 
     class EventLoop *eventLoop;
     class EventReceiver *eventReceiver;
@@ -145,9 +142,6 @@ protected:
     QWidget *annotationControls;
     int isShapeSet;
 
-    //Keep track of frame times that are available
-    std::map<unsigned long, unsigned long> frameTimes;
-    unsigned long frameTimesEnd;
     QUuid annotationUuid;
 };
 

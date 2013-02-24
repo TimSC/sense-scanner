@@ -171,8 +171,8 @@ protected:
     void start (Priority priority = InheritPriority);
 
     class EventReceiver *eventReceiver;
-    int stopThreads;
     class EventLoop *eventLoop;
+    int stopThreads;    
     Mutex mutex;
     QUuid threadId;
     int id;
