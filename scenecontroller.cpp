@@ -10,6 +10,7 @@
 #include "assert.h"
 #include "vectors.h"
 #include "eventloop.h"
+#include "annotation.h"
 using namespace::std;
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
 
@@ -583,43 +584,6 @@ QMenu *TrackingSceneController::MenuFactory(QMenuBar *menuBar)
     return newMenu;
 }
 
-std::vector<std::vector<float> > TrackingSceneController::ProcessXmlDomFrame(QDomElement &rootElem,
-    std::vector<std::vector<int> > linksOut)
-{
-    std::vector<std::vector<float> > out;
-    QDomNode n = rootElem.firstChild();
-    while(!n.isNull()) {
-        QDomElement e = n.toElement(); // try to convert the node to an element.
-
-        if(!e.isNull()) {
-            //cout << qPrintable(e.tagName()) << endl; // the node really is an element.
-            if(e.tagName() == "point")
-            {
-                std::vector<float> p;
-                int id = e.attribute("id").toInt();
-                p.push_back(e.attribute("x").toFloat());
-                p.push_back(e.attribute("y").toFloat());
-                while(id >= out.size())
-                {
-                    std::vector<float> empty;
-                    out.push_back(empty);
-                }
-                out[id] = p;
-            }
-            if(e.tagName() == "link")
-            {
-                std::vector<int> link;
-                link.push_back(e.attribute("from").toInt());
-                link.push_back(e.attribute("to").toInt());
-                linksOut.push_back(link);
-            }
-        }
-    n = n.nextSibling();
-    }
-
-    return out;
-}
-
 void TrackingSceneController::LoadShape()
 {
 
@@ -647,7 +611,7 @@ void TrackingSceneController::LoadShape()
     QDomElement rootElem = doc.documentElement();
 
     this->links.clear();
-    std::vector<std::vector<float> > shape = this->ProcessXmlDomFrame(rootElem, this->links);
+    std::vector<std::vector<float> > shape = TrackingAnnotationData::ProcessXmlDomFrame(rootElem, this->links);
 
     //Validate points
     int invalidShape = 0;
@@ -859,8 +823,19 @@ void TrackingSceneController::RefreshLinks()
     assert(this->eventReceiver!=NULL);
     std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(reqEv->id);
 
-    assert(0);//TODO decode response
+    QDomDocument doc("mydocument");
+    QString errorMsg;
+    QString xmlStr(response->data.c_str());
+    if (!doc.setContent(xmlStr, &errorMsg))
+    {
+        cout << "Xml Error: "<< errorMsg.toLocal8Bit().constData() << endl;
+        return;
+    }
 
+    //Load points and links into memory
+    QDomElement rootElem = doc.documentElement();
+    TrackingAnnotationData::ProcessXmlDomFrame(rootElem, this->links);
+    return;
 }
 
 unsigned long long TrackingSceneController::GetSeekFowardTimeFromAnnot(unsigned long long queryTime)

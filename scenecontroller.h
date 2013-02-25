@@ -64,12 +64,6 @@ public:
     void MouseLeaveEvent();
     unsigned long long GetSeekFowardTime();
     unsigned long long GetSeekBackTime();
-    static void WriteShapeToStream(
-            std::vector<std::vector<int> > links,
-            std::vector<std::vector<float> > shape,
-            QTextStream &out);
-    static std::vector<std::vector<float> > ProcessXmlDomFrame(QDomElement &rootElem,
-        std::vector<std::vector<int> > linksOut);
     QSharedPointer<MouseGraphicsScene> GetScene();
 
 public slots:

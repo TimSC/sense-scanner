@@ -182,14 +182,14 @@ void TrackingAnnotationData::ReadAnnotationXml(QDomElement &elem)
         if(!e.isNull()) {
             if(e.tagName() == "shape")
             {
-                std::vector<std::vector<float> > shapeData = TrackingSceneController::ProcessXmlDomFrame(e,this->links);
+                std::vector<std::vector<float> > shapeData = this->ProcessXmlDomFrame(e,this->links);
                 this->shape = shapeData;
             }
 
             //Obsolete format loading code here
             if(e.tagName() == "frame")
             {
-                std::vector<std::vector<float> > frame = TrackingSceneController::ProcessXmlDomFrame(e,this->links);
+                std::vector<std::vector<float> > frame = this->ProcessXmlDomFrame(e,this->links);
                 //cout << e.attribute("time").toFloat() << endl;
                 float timeSec = e.attribute("time").toFloat();
                 assert(timeSec > 0.f);
@@ -235,7 +235,7 @@ void TrackingAnnotationData::ReadFramesXml(QDomElement &elem)
     {
         if(e.tagName() != "frame") continue;
 
-        std::vector<std::vector<float> > frame = TrackingSceneController::ProcessXmlDomFrame(e,this->links);
+        std::vector<std::vector<float> > frame = this->ProcessXmlDomFrame(e,this->links);
         //cout << e.attribute("time").toFloat() << endl;
         float timeSec = e.attribute("time").toFloat();
         assert(timeSec > 0.f);
@@ -476,6 +476,44 @@ void TrackingAnnotationData::WriteShapeToStream(
     }
 
     out << "\t</shape>" << endl;
+}
+
+std::vector<std::vector<float> > TrackingAnnotationData::ProcessXmlDomFrame(QDomElement &rootElem,
+    std::vector<std::vector<int> > linksOut)
+{
+    linksOut.clear();
+    std::vector<std::vector<float> > out;
+    QDomNode n = rootElem.firstChild();
+    while(!n.isNull()) {
+        QDomElement e = n.toElement(); // try to convert the node to an element.
+
+        if(!e.isNull()) {
+            cout << qPrintable(e.tagName()) << endl; // the node really is an element.
+            if(e.tagName() == "point")
+            {
+                std::vector<float> p;
+                int id = e.attribute("id").toInt();
+                p.push_back(e.attribute("x").toFloat());
+                p.push_back(e.attribute("y").toFloat());
+                while(id >= out.size())
+                {
+                    std::vector<float> empty;
+                    out.push_back(empty);
+                }
+                out[id] = p;
+            }
+            if(e.tagName() == "link")
+            {
+                std::vector<int> link;
+                link.push_back(e.attribute("from").toInt());
+                link.push_back(e.attribute("to").toInt());
+                linksOut.push_back(link);
+            }
+        }
+    n = n.nextSibling();
+    }
+
+    return out;
 }
 
 void TrackingAnnotationData::SaveShape(QString fileName)

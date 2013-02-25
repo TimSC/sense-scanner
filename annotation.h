@@ -66,6 +66,9 @@ public:
             std::vector<std::vector<float> > shape,
             QTextStream &out);
 
+    static std::vector<std::vector<float> > ProcessXmlDomFrame(QDomElement &rootElem,
+        std::vector<std::vector<int> > linksOut);
+
 protected:
 
     void AddPoint(std::vector<float> p);
