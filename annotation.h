@@ -168,10 +168,10 @@ public:
     bool visible;
 
     std::tr1::shared_ptr<class AnnotThread> annotThread;
+    class TrackingAnnotationData *track;
 
 protected:
     QMutex lock;
-    class TrackingAnnotationData *track;
     QUuid algUid, uid;
     QString source;
     int active;

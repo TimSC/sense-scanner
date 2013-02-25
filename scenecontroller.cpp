@@ -806,8 +806,20 @@ void TrackingSceneController::SetAnnotationBetweenTimestamps(unsigned long long 
 
 void TrackingSceneController::RefreshCurrentPos()
 {
-    assert(0);
+    unsigned long long annotationTimeTmp;
+    std::vector<std::vector<float> > currentShapeTmp;
 
+    int isUsed = this->GetAnnotationBetweenTimestamps(this->frameStartTime,
+                                                      this->frameEndTime,
+                                                      this->frameRequestTime,
+                                                      currentShapeTmp,
+                                                      annotationTimeTmp);
+    if(isUsed)
+    {
+        this->annotationTimeSet = 1;
+        this->currentShape = currentShapeTmp;
+        this->annotationTime = annotationTimeTmp;
+    }
 }
 
 std::vector<std::vector<float> > TrackingSceneController::GetShape()

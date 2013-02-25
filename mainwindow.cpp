@@ -835,7 +835,7 @@ void MainWindow::TrainModelPressed()
             //Get image data and send to process
             cout << marked[fr] << endl;
             unsigned long long startTimestamp = 0, endTimestamp = 0;
-            unsigned long long annotTimestamp = atoi(marked[fr].c_str()); //TODO make this use long long properly
+            unsigned long long annotTimestamp = STR_TO_ULL_SIMPLE(marked[fr].c_str()); //TODO make this use long long properly
             QSharedPointer<QImage> img;
             try
             {

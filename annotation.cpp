@@ -597,7 +597,30 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
     if(ev->type=="GET_ANNOTATION_BETWEEN_TIMES")
     {
-        assert(0);
+        //Decode request
+        std::vector<std::string> args = split(ev->data.c_str(),',');
+
+        unsigned long long startTime = STR_TO_ULL_SIMPLE(args[0].c_str());
+        unsigned long long endTime = STR_TO_ULL_SIMPLE(args[1].c_str());
+        unsigned long long requestedTime = STR_TO_ULL_SIMPLE(args[2].c_str());
+        std::vector<std::vector<float> > annot;
+        unsigned long long annotationTime;
+
+        //Perform request
+        assert(this->parentAnn!=NULL);
+        assert(this->parentAnn->track!=NULL);
+        int found = this->parentAnn->track->GetAnnotationBetweenTimestamps(startTime,
+            endTime, requestedTime,
+            annot, annotationTime);
+
+        //Return response by event
+        std::tr1::shared_ptr<class Event> responseEv(new Event("ANNOTATION_DATA"));
+        responseEv->fromUuid = algUid;
+        responseEv->data;
+
+        assert(0);//Encode data
+        responseEv->id = ev->id;
+        this->eventLoop->SendEvent(responseEv);
     }
 
     if(ev->type=="LOAD_ANNOTATION")

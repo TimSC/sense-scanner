@@ -20,4 +20,6 @@
 #define STR_TO_ULL std::strtoull
 #endif
 
+#define STR_TO_ULL_SIMPLE atoi //TODO change this to avoid loss of precision
+
 #endif //__LOCALINTS_H_
