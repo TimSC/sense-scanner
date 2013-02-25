@@ -44,6 +44,10 @@ public:
     void GetIndexAnnotationXml(unsigned int index, QTextStream *out);
     unsigned long long GetIndexTimestamp(unsigned int index);
 
+    static void FrameToXml(std::vector<std::vector<float> > &frame,
+                    double ti, QTextStream &out);
+    static void FrameFromXml(std::vector<std::vector<float> > &frame, QString xml);
+
     void ReadAnnotationXml(QDomElement &elem);
     void WriteAnnotationXml(QTextStream &out);
     void ReadFramesXml(QDomElement &elem);

@@ -760,7 +760,9 @@ void TrackingSceneController::SetEventLoop(class EventLoop *eventLoopIn)
     if(this->eventReceiver) delete this->eventReceiver;
     this->eventLoop = eventLoopIn;
     this->eventReceiver = new EventReceiver(this->eventLoop);
-    this->eventLoop->AddListener("FOUND_ANNOTATION",*eventReceiver);
+    this->eventLoop->AddListener("ANNOTATION_DATA",*eventReceiver);
+
+
 }
 
 void TrackingSceneController::SetAnnotationTrack(QUuid srcUuid)
@@ -789,7 +791,15 @@ int TrackingSceneController::GetAnnotationBetweenTimestamps(unsigned long long s
 
     assert(this->eventReceiver!=NULL);
     std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(reqEv->id);
-    assert(0);//TODO decode response
+    if(response->data == "FRAME_NOT_FOUND")
+    {
+        return 0;
+    }
+    else
+    {
+        assert(0);//TODO decode response
+        return 1;
+    }
 }
 
 void TrackingSceneController::SetAnnotationBetweenTimestamps(unsigned long long startTime,

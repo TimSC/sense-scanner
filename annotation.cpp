@@ -194,7 +194,7 @@ void TrackingAnnotationData::ReadAnnotationXml(QDomElement &elem)
                 float timeSec = e.attribute("time").toFloat();
                 assert(timeSec > 0.f);
                 assert(frame.size() == this->shape.size());
-                this->pos[(unsigned long long)(timeSec * 1000.f + 0.5)] = frame;
+                this->pos[(unsigned long long)(timeSec * 1000. + 0.5)] = frame;
             }
 
             //Newer frame XML format
@@ -240,7 +240,7 @@ void TrackingAnnotationData::ReadFramesXml(QDomElement &elem)
         float timeSec = e.attribute("time").toFloat();
         assert(timeSec > 0.f);
         assert(frame.size() == this->shape.size());
-        this->pos[(unsigned long long)(timeSec * 1000.f + 0.5)] = frame;
+        this->pos[(unsigned long long)(timeSec * 1000. + 0.5)] = frame;
 
         e = e.nextSiblingElement();
     }
@@ -274,6 +274,17 @@ void TrackingAnnotationData::ReadDemoFramesXml(QDomElement &elem)
     this->ReadFramesXml(rootElem);
 }
 
+void TrackingAnnotationData::FrameToXml(std::vector<std::vector<float> > &frame,
+                                        double ti, QTextStream &out)
+{
+    out << "\t<frame time='"<<ti<<"'>\n";
+    for(unsigned int i=0; i < frame.size(); i++)
+    {
+        out << "\t\t<point id='"<<i<<"' x='"<<frame[i][0]<<"' y='"<<frame[i][1]<<"'/>\n";
+    }
+    out << "\t</frame>" << endl;
+}
+
 void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out)
 {
     out << "\t<tracking>" << endl;
@@ -289,12 +300,7 @@ void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out)
     {
         std::vector<std::vector<float> > &frame = it->second;
         assert(frame.size() == this->shape.size());
-        frameXml << "\t<frame time='"<<(it->first/1000.f)<<"'>\n";
-        for(unsigned int i=0; i < frame.size(); i++)
-        {
-            frameXml << "\t\t<point id='"<<i<<"' x='"<<frame[i][0]<<"' y='"<<frame[i][1]<<"'/>\n";
-        }
-        frameXml << "\t</frame>" << endl;
+        this->FrameToXml(frame, (it->first/1000.), frameXml);
     }
     frameXml << "\t</frameset>" << endl;
 
@@ -616,9 +622,17 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         //Return response by event
         std::tr1::shared_ptr<class Event> responseEv(new Event("ANNOTATION_DATA"));
         responseEv->fromUuid = algUid;
-        responseEv->data;
-
-        assert(0);//Encode data
+        if(found)
+        {
+            QString xmlStr;
+            QTextStream xml(&xmlStr);
+            TrackingAnnotationData::FrameToXml(annot, annotationTime / 1000., xml);
+            responseEv->data = xmlStr.toLocal8Bit().constData();
+        }
+        else
+        {
+            responseEv->data = "FRAME_NOT_FOUND";
+        }
         responseEv->id = ev->id;
         this->eventLoop->SendEvent(responseEv);
     }
