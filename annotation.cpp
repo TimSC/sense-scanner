@@ -305,7 +305,6 @@ int TrackingAnnotationData::FrameFromXml(QString &xml,
     std::vector<std::vector<int> > links;
     frame = TrackingAnnotationData::ProcessXmlDomFrame(rootElem,links);
     tiOut = rootElem.attribute("time").toDouble();
-    assert(tiOut > 0.f);
     return 1;
 }
 
@@ -502,6 +501,63 @@ void TrackingAnnotationData::WriteShapeToStream(
     out << "\t</shape>" << endl;
 }
 
+int TrackingAnnotationData::XmlToShape(QString xml,
+                                        std::vector<std::vector<int> > &links,
+                                        std::vector<std::vector<float> > &shapeOut)
+{
+    //Parse XML to DOM
+    QDomDocument doc("mydocument");
+    QString errorMsg;
+    if (!doc.setContent(xml, &errorMsg))
+    {
+        cout << "Xml Error: "<< errorMsg.toLocal8Bit().constData() << endl;
+        return 0;
+    }
+
+    //Load points and links into memory
+    QDomElement rootElem = doc.documentElement();
+
+    links.clear();
+    shapeOut = TrackingAnnotationData::ProcessXmlDomFrame(rootElem, links);
+
+    //Validate points
+    int invalidShape = 0;
+    for(unsigned int i=0;i < shapeOut.size();i++)
+        if(shapeOut[i].size() != 2)
+        {
+            cout << "Error: missing point ID " << i << endl;
+            invalidShape = 1;
+        }
+
+    //Validate links
+    for(unsigned int i=0;i<links.size();i++)
+    {
+        if(links[i].size() != 2)
+        {
+            cout << "Error: Invalid link" << endl;
+            invalidShape = 1;
+        }
+        if(links[i][0] < 0 || links[i][0] >= shapeOut.size())
+        {
+            cout << "Link refers to non-existent point " << links[i][0] << endl;
+            invalidShape = 1;
+        }
+        if(links[i][1] < 0 || links[i][1] >= shapeOut.size())
+        {
+            cout << "Link refers to non-existent point " << links[i][1] << endl;
+            invalidShape = 1;
+        }
+    }
+
+    if(invalidShape)
+    {
+        shapeOut.clear();
+        links.clear();
+        return 0;
+    }
+    return 1;
+}
+
 std::vector<std::vector<float> > TrackingAnnotationData::ProcessXmlDomFrame(QDomElement &rootElem,
     std::vector<std::vector<int> > linksOut)
 {
@@ -512,6 +568,7 @@ std::vector<std::vector<float> > TrackingAnnotationData::ProcessXmlDomFrame(QDom
         QDomElement e = n.toElement(); // try to convert the node to an element.
 
         if(!e.isNull()) {
+            QString tagName = e.tagName();
             //cout << qPrintable(e.tagName()) << endl; // the node really is an element.
             if(e.tagName() == "point")
             {
@@ -609,6 +666,11 @@ std::vector<std::vector<int> > TrackingAnnotationData::GetLinks()
     return this->links;
 }
 
+void TrackingAnnotationData::SetLinks(std::vector<std::vector<int> > linksIn)
+{
+    this->links = linksIn;
+}
+
 std::vector<std::vector<float> > TrackingAnnotationData::GetShapePositions()
 {
     return this->shape;
@@ -660,6 +722,7 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("SAVE_SHAPE", *this->eventReceiver);
     this->eventLoop->AddListener("GET_SOURCE_FILENAME", *this->eventReceiver);
     this->eventLoop->AddListener("GET_SHAPE", *this->eventReceiver);
+    this->eventLoop->AddListener("SET_SHAPE", *this->eventReceiver);
     this->eventLoop->AddListener("ADD_ANNOTATION_AT_TIME", *this->eventReceiver);
     this->eventLoop->AddListener("REMOVE_ANNOTATION_AT_TIME", *this->eventReceiver);
 
@@ -760,6 +823,19 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         responseEv->data = xmlStr.toLocal8Bit().constData();
         responseEv->id = ev->id;
         this->eventLoop->SendEvent(responseEv);
+    }
+    if(ev->type=="SET_SHAPE")
+    {
+        QString xml = ev->data.c_str();
+        std::vector<std::vector<int> > links;
+        std::vector<std::vector<float> > shape;
+        int ret = TrackingAnnotationData::XmlToShape(xml, links, shape);
+
+        if(ret)
+        {
+            this->parentAnn->track->SetShape(shape);
+            this->parentAnn->track->SetLinks(links);
+        }
     }
     if(ev->type=="ADD_ANNOTATION_AT_TIME")
     {

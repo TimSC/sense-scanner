@@ -41,8 +41,8 @@ public:
 
     //Read individual frames
     unsigned int NumMarkedFrames();
-    void GetIndexAnnotationXml(unsigned int index, QTextStream *out);
-    unsigned long long GetIndexTimestamp(unsigned int index);
+    //void GetIndexAnnotationXml(unsigned int index, QTextStream *out);
+    //unsigned long long GetIndexTimestamp(unsigned int index);
 
     static void FrameToXml(std::vector<std::vector<float> > &frame,
                     double ti, QTextStream &out);
@@ -61,12 +61,17 @@ public:
 
     int GetShapeNumPoints();
     std::vector<std::vector<int> > GetLinks();
+    void SetLinks(std::vector<std::vector<int> > linksIn);
     std::vector<std::vector<float> > GetShapePositions();
+    void SetShape(std::vector<std::vector<float> > shapeIn);
 
     static void WriteShapeToStream(
             std::vector<std::vector<int> > links,
             std::vector<std::vector<float> > shape,
             QTextStream &out);
+    static int XmlToShape(QString xml,
+        std::vector<std::vector<int> > &links,
+        std::vector<std::vector<float> > &shape);
 
     static std::vector<std::vector<float> > ProcessXmlDomFrame(QDomElement &rootElem,
         std::vector<std::vector<int> > linksOut);
@@ -80,7 +85,7 @@ protected:
     void RemovePoint(int index);
     unsigned long long GetSeekFowardTime(unsigned long long queryTime);
     unsigned long long GetSeekBackTime(unsigned long long queryTime);
-    void SetShape(std::vector<std::vector<float> > shapeIn);
+
 
 
     void SaveShape(QString fileName);

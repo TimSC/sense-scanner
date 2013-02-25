@@ -594,62 +594,15 @@ void TrackingSceneController::LoadShape()
     {
         return;
     }
+    QFile shapeFile(fileName);
+    shapeFile.open(QIODevice::ReadOnly | QIODevice::Text);
+    QTextStream shapeStream(&shapeFile);
 
-    //Parse XML to DOM
-    QFile f(fileName);
-    QDomDocument doc("mydocument");
-    QString errorMsg;
-    if (!doc.setContent(&f, &errorMsg))
-    {
-        cout << "Xml Error: "<< errorMsg.toLocal8Bit().constData() << endl;
-        f.close();
-        return;
-    }
-    f.close();
-
-    //Load points and links into memory
-    QDomElement rootElem = doc.documentElement();
-
-    this->links.clear();
-    std::vector<std::vector<float> > shape = TrackingAnnotationData::ProcessXmlDomFrame(rootElem, this->links);
-
-    //Validate points
-    int invalidShape = 0;
-    for(unsigned int i=0;i < shape.size();i++)
-        if(shape[i].size() != 2)
-        {
-            cout << "Error: missing point ID " << i << endl;
-            invalidShape = 1;
-        }
-
-    //Validate links
-    for(unsigned int i=0;i<this->links.size();i++)
-    {
-        if(this->links[i].size() != 2)
-        {
-            cout << "Error: Invalid link" << endl;
-            invalidShape = 1;
-        }
-        if(this->links[i][0] < 0 || this->links[i][0] >= shape.size())
-        {
-            cout << "Link refers to non-existent point " << this->links[i][0] << endl;
-            invalidShape = 1;
-        }
-        if(this->links[i][1] < 0 || this->links[i][1] >= shape.size())
-        {
-            cout << "Link refers to non-existent point " << this->links[i][1] << endl;
-            invalidShape = 1;
-        }
-    }
-
-    if(invalidShape)
-    {
-        shape.clear();
-        this->links.clear();
-        return;
-    }
-
-    //TODO
+    std::tr1::shared_ptr<class Event> reqEv(new Event("SET_SHAPE"));
+    reqEv->toUuid = this->annotationUuid;
+    QString xml = shapeStream.readAll();
+    reqEv->data = xml.toLocal8Bit().constData();
+    this->eventLoop->SendEvent(reqEv);
 
     this->isShapeSet = true;
 }
