@@ -714,42 +714,27 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     MessagableThread::SetEventLoop(eventLoopIn);
     this->eventLoop->AddListener("PREDICTION_RESULT", *this->eventReceiver);
     this->eventLoop->AddListener("STOP_SPECIFIC_THREAD", *this->eventReceiver);
-    this->eventLoop->AddListener("ADD_POINT", *this->eventReceiver);
-    this->eventLoop->AddListener("REMOVE_POINT", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ANNOTATION_BETWEEN_TIMES", *this->eventReceiver);
     this->eventLoop->AddListener("SET_ANNOTATION_BETWEEN_TIMES", *this->eventReceiver);
-    this->eventLoop->AddListener("LOAD_ANNOTATION", *this->eventReceiver);
-    this->eventLoop->AddListener("SAVE_ANNOTATION", *this->eventReceiver);
-    this->eventLoop->AddListener("SAVE_SHAPE", *this->eventReceiver);
     this->eventLoop->AddListener("GET_SOURCE_FILENAME", *this->eventReceiver);
     this->eventLoop->AddListener("GET_SHAPE", *this->eventReceiver);
     this->eventLoop->AddListener("SET_SHAPE", *this->eventReceiver);
     this->eventLoop->AddListener("ADD_ANNOTATION_AT_TIME", *this->eventReceiver);
     this->eventLoop->AddListener("REMOVE_ANNOTATION_AT_TIME", *this->eventReceiver);
-
-
+   //this->eventLoop->AddListener("GET_ALG_UUID");
 }
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
-    cout << "AnnotThread " << (long long unsigned) this << endl;
+    //cout << "AnnotThread " << (long long unsigned) this << endl;
     QUuid algUid = this->parentAnn->GetAnnotUid();
 
     if(ev->toUuid == algUid)
     {
     if(ev->type=="STOP_SPECIFIC_THREAD")
     {
+        //TODO Is this redundant with the funtionality in the parent class?
         this->stopThreads = true;
-    }
-
-    if(ev->type=="ADD_POINT")
-    {
-        assert(0);
-    }
-
-    if(ev->type=="REMOVE_POINT")
-    {
-        assert(0);
     }
 
     if(ev->type=="GET_ANNOTATION_BETWEEN_TIMES")
@@ -811,21 +796,6 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         assert(this->parentAnn!=NULL);
         assert(this->parentAnn->track!=NULL);
         this->parentAnn->track->SetAnnotationBetweenTimestamps(startStr.toULongLong(), endStr.toULongLong(), frame);
-    }
-
-    if(ev->type=="LOAD_ANNOTATION")
-    {
-        assert(0);
-    }
-
-    if(ev->type=="SAVE_ANNOTATION")
-    {
-        assert(0);
-    }
-
-    if(ev->type=="SAVE_SHAPE")
-    {
-        assert(0);
     }
 
     if(ev->type=="GET_SOURCE_FILENAME")
