@@ -53,7 +53,6 @@ unsigned int Workspace::AddSource(QString &fina, QUuid uuid, class AvBinMedia* m
 {
     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
     ann->SetSource(fina);
-    ann->SetAnnotUid(uuid);
     TrackingAnnotationData *scenePtr = new TrackingAnnotationData();
     ann->SetTrack(scenePtr);
     return this->AddSource(ann, mediaInterface, uuid);
@@ -66,6 +65,7 @@ unsigned int Workspace::AddSource(std::tr1::shared_ptr<class Annotation> ann,
     std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann, mediaInterface));
     annotThread->SetEventLoop(this->eventLoop);
     annotThread->Start();
+    ann->SetAnnotUid(uuid);
 
     this->annotations.push_back(ann);
     this->annotationUuids.push_back(uuid);

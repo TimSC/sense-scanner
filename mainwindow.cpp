@@ -1191,12 +1191,6 @@ void MainWindow::Load(QString fina, class AvBinMedia* mediaInterface)
                     QUuid alg(algStr);
                     ann->SetAlgUid(alg);
 
-                    //Start annot worker thread
-                    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann, mediaInterface));
-                    annotThread->SetEventLoop(this->eventLoop);
-                    annotThread->Start();
-                    ann->annotThread = annotThread;
-
                     TrackingAnnotationData *track =
                             new TrackingAnnotationData();
 

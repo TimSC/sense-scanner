@@ -732,6 +732,7 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
+    cout << "AnnotThread " << (long long unsigned) this << endl;
     QUuid algUid = this->parentAnn->GetAnnotUid();
 
     if(ev->toUuid == algUid)
