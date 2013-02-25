@@ -721,7 +721,9 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("SET_SHAPE", *this->eventReceiver);
     this->eventLoop->AddListener("ADD_ANNOTATION_AT_TIME", *this->eventReceiver);
     this->eventLoop->AddListener("REMOVE_ANNOTATION_AT_TIME", *this->eventReceiver);
-   //this->eventLoop->AddListener("GET_ALG_UUID");
+    this->eventLoop->AddListener("GET_ALG_UUID", *this->eventReceiver);
+    this->eventLoop->AddListener("GET_ALL_ANNOTATION_XML", *this->eventReceiver);
+
 }
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
@@ -848,6 +850,18 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         assert(this->parentAnn!=NULL);
         assert(this->parentAnn->track!=NULL);
         this->parentAnn->track->RemoveAnnotationAtTime(ti);
+    }
+    if(ev->type=="GET_ALG_UUID")
+    {
+        std::tr1::shared_ptr<class Event> responseEv(new Event("ALG_UUID_FOR_ANNOTATION"));
+        responseEv->data = this->parentAnn->GetAlgUid().toString().toLocal8Bit().constData();
+        responseEv->fromUuid = algUid;
+        responseEv->id = ev->id;
+        this->eventLoop->SendEvent(responseEv);
+    }
+    if(ev->type=="GET_ALL_ANNOTATION_XML")
+    {
+        assert(0);
     }
     }
 
