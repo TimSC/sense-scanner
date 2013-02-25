@@ -760,7 +760,8 @@ void TrackingSceneController::SetEventLoop(class EventLoop *eventLoopIn)
     if(this->eventReceiver) delete this->eventReceiver;
     this->eventLoop = eventLoopIn;
     this->eventReceiver = new EventReceiver(this->eventLoop);
-    this->eventLoop->AddListener("ANNOTATION_DATA",*eventReceiver);
+    this->eventLoop->AddListener("ANNOTATION_FRAME",*eventReceiver);
+    this->eventLoop->AddListener("ANNOTATION_SHAPE",*eventReceiver);
 
 
 }
@@ -798,6 +799,8 @@ int TrackingSceneController::GetAnnotationBetweenTimestamps(unsigned long long s
     else
     {
         assert(0);//TODO decode response
+        annot;
+        annotationTime;
         return 1;
     }
 }
@@ -846,7 +849,17 @@ void TrackingSceneController::SetShape(std::vector<std::vector<float> > shape)
 
 void TrackingSceneController::RefreshLinks()
 {
-    assert(0);
+    assert(this->eventLoop!=NULL);
+
+    std::tr1::shared_ptr<class Event> reqEv(new Event("GET_SHAPE"));
+    reqEv->id = this->eventLoop->GetId();
+    reqEv->toUuid = this->annotationUuid;
+    this->eventLoop->SendEvent(reqEv);
+
+    assert(this->eventReceiver!=NULL);
+    std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(reqEv->id);
+
+    assert(0);//TODO decode response
 
 }
 

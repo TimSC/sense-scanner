@@ -58,6 +58,13 @@ public:
                             unsigned long &frameTimesEndOut);
 
     int GetShapeNumPoints();
+    std::vector<std::vector<int> > GetLinks();
+    std::vector<std::vector<float> > GetShapePositions();
+
+    static void WriteShapeToStream(
+            std::vector<std::vector<int> > links,
+            std::vector<std::vector<float> > shape,
+            QTextStream &out);
 
 protected:
 
@@ -67,10 +74,7 @@ protected:
     unsigned long long GetSeekBackTime(unsigned long long queryTime);
     void SetShape(std::vector<std::vector<float> > shapeIn);
 
-    void WriteShapeToStream(
-            std::vector<std::vector<int> > links,
-            std::vector<std::vector<float> > shape,
-            QTextStream &out);
+
     void SaveShape(QString fileName);
 
     void LoadAnnotation(QString fileName);

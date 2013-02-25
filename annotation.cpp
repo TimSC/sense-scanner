@@ -542,6 +542,15 @@ int TrackingAnnotationData::GetShapeNumPoints()
     return this->shape.size();
 }
 
+std::vector<std::vector<int> > TrackingAnnotationData::GetLinks()
+{
+    return this->links;
+}
+
+std::vector<std::vector<float> > TrackingAnnotationData::GetShapePositions()
+{
+    return this->shape;
+}
 
 //****************************************************
 
@@ -578,6 +587,8 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("SAVE_ANNOTATION", *this->eventReceiver);
     this->eventLoop->AddListener("SAVE_SHAPE", *this->eventReceiver);
     this->eventLoop->AddListener("GET_SOURCE_FILENAME", *this->eventReceiver);
+    this->eventLoop->AddListener("GET_SHAPE", *this->eventReceiver);
+
 }
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
@@ -620,7 +631,7 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             annot, annotationTime);
 
         //Return response by event
-        std::tr1::shared_ptr<class Event> responseEv(new Event("ANNOTATION_DATA"));
+        std::tr1::shared_ptr<class Event> responseEv(new Event("ANNOTATION_FRAME"));
         responseEv->fromUuid = algUid;
         if(found)
         {
@@ -657,6 +668,21 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         std::tr1::shared_ptr<class Event> responseEv(new Event("SOURCE_FILENAME"));
         responseEv->data = this->parentAnn->GetSource().toLocal8Bit().constData();
         responseEv->fromUuid = algUid;
+        responseEv->id = ev->id;
+        this->eventLoop->SendEvent(responseEv);
+    }
+
+    if(ev->type=="GET_SHAPE")
+    {
+        //Return response by event
+        std::tr1::shared_ptr<class Event> responseEv(new Event("ANNOTATION_SHAPE"));
+        responseEv->fromUuid = algUid;
+        QString xmlStr;
+        QTextStream xml(&xmlStr);
+        TrackingAnnotationData::WriteShapeToStream(this->parentAnn->track->GetLinks(),
+                                                   this->parentAnn->track->GetShapePositions(),
+                                                   xml);
+        responseEv->data = xmlStr.toLocal8Bit().constData();
         responseEv->id = ev->id;
         this->eventLoop->SendEvent(responseEv);
     }
