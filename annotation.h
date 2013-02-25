@@ -46,7 +46,9 @@ public:
 
     static void FrameToXml(std::vector<std::vector<float> > &frame,
                     double ti, QTextStream &out);
-    static void FrameFromXml(std::vector<std::vector<float> > &frame, QString xml);
+    static int FrameFromXml(QString &xml,
+                             std::vector<std::vector<float> > &frame,
+                             double &tiOut);
 
     void ReadAnnotationXml(QDomElement &elem);
     void WriteAnnotationXml(QTextStream &out);
@@ -68,6 +70,9 @@ public:
 
     static std::vector<std::vector<float> > ProcessXmlDomFrame(QDomElement &rootElem,
         std::vector<std::vector<int> > linksOut);
+
+    void AddAnnotationAtTime(unsigned long long ti);
+    void RemoveAnnotationAtTime(unsigned long long ti);
 
 protected:
 

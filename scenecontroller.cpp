@@ -762,9 +762,12 @@ int TrackingSceneController::GetAnnotationBetweenTimestamps(unsigned long long s
     }
     else
     {
-        assert(0);//TODO decode response
-        annot;
-        annotationTime;
+        double ti = 0.;
+        QString xml = response->data.c_str();
+        int ret = TrackingAnnotationData::FrameFromXml(xml, annot, ti);
+        if(ret==0) return 0; //Xml error
+
+        annotationTime = (unsigned long long)(ti * 1000. + 0.5);
         return 1;
     }
 }
@@ -850,13 +853,18 @@ unsigned long long TrackingSceneController::GetSeekBackwardTimeFromAnnot(unsigne
 
 void TrackingSceneController::RemoveAnnotationAtTime(unsigned long long time)
 {
-    assert(0);
-
+    std::tr1::shared_ptr<class Event> reqEv(new Event("REMOVE_ANNOTATION_AT_TIME"));
+    reqEv->toUuid = this->annotationUuid;
+    reqEv->data = QString("%1").arg(time).toLocal8Bit().constData();
+    this->eventLoop->SendEvent(reqEv);
 }
 
 void TrackingSceneController::AddAnnotationAtTime(unsigned long long time)
 {
-    assert(0);
+    std::tr1::shared_ptr<class Event> reqEv(new Event("ADD_ANNOTATION_AT_TIME"));
+    reqEv->toUuid = this->annotationUuid;
+    reqEv->data = QString("%1").arg(time).toLocal8Bit().constData();
+    this->eventLoop->SendEvent(reqEv);
 }
 
 void TrackingSceneController::LoadAnnotation()

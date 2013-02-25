@@ -285,6 +285,30 @@ void TrackingAnnotationData::FrameToXml(std::vector<std::vector<float> > &frame,
     out << "\t</frame>" << endl;
 }
 
+int TrackingAnnotationData::FrameFromXml(QString &xml,
+    std::vector<std::vector<float> > &frame,
+    double &tiOut)
+{
+    frame.clear();
+    tiOut = 0;
+    QDomDocument doc("mydocument");
+    QString errorMsg;
+    if (!doc.setContent(xml, &errorMsg))
+    {
+        cout << "Xml Error: "<< errorMsg.toLocal8Bit().constData() << endl;
+        return 0;
+    }
+
+    //Load points and links into memory
+    QDomElement rootElem = doc.documentElement();
+
+    std::vector<std::vector<int> > links;
+    frame = TrackingAnnotationData::ProcessXmlDomFrame(rootElem,links);
+    tiOut = rootElem.attribute("time").toDouble();
+    assert(tiOut > 0.f);
+    return 1;
+}
+
 void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out)
 {
     out << "\t<tracking>" << endl;
@@ -488,7 +512,7 @@ std::vector<std::vector<float> > TrackingAnnotationData::ProcessXmlDomFrame(QDom
         QDomElement e = n.toElement(); // try to convert the node to an element.
 
         if(!e.isNull()) {
-            cout << qPrintable(e.tagName()) << endl; // the node really is an element.
+            //cout << qPrintable(e.tagName()) << endl; // the node really is an element.
             if(e.tagName() == "point")
             {
                 std::vector<float> p;
@@ -590,6 +614,16 @@ std::vector<std::vector<float> > TrackingAnnotationData::GetShapePositions()
     return this->shape;
 }
 
+void TrackingAnnotationData::AddAnnotationAtTime(unsigned long long ti)
+{
+    this->pos[ti] = this->shape;
+}
+
+void TrackingAnnotationData::RemoveAnnotationAtTime(unsigned long long ti)
+{
+    this->pos.erase(ti);
+}
+
 //****************************************************
 
 AnnotThread::AnnotThread(class Annotation *annIn, class AvBinMedia* mediaInterfaceIn)
@@ -626,6 +660,9 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("SAVE_SHAPE", *this->eventReceiver);
     this->eventLoop->AddListener("GET_SOURCE_FILENAME", *this->eventReceiver);
     this->eventLoop->AddListener("GET_SHAPE", *this->eventReceiver);
+    this->eventLoop->AddListener("ADD_ANNOTATION_AT_TIME", *this->eventReceiver);
+    this->eventLoop->AddListener("REMOVE_ANNOTATION_AT_TIME", *this->eventReceiver);
+
 
 }
 
@@ -723,6 +760,21 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         responseEv->data = xmlStr.toLocal8Bit().constData();
         responseEv->id = ev->id;
         this->eventLoop->SendEvent(responseEv);
+    }
+    if(ev->type=="ADD_ANNOTATION_AT_TIME")
+    {
+        unsigned long long ti = STR_TO_ULL_SIMPLE(ev->data.c_str());
+        assert(this->parentAnn!=NULL);
+        assert(this->parentAnn->track!=NULL);
+        this->parentAnn->track->AddAnnotationAtTime(ti);
+
+    }
+    if(ev->type=="REMOVE_ANNOTATION_AT_TIME")
+    {
+        unsigned long long ti = STR_TO_ULL_SIMPLE(ev->data.c_str());
+        assert(this->parentAnn!=NULL);
+        assert(this->parentAnn->track!=NULL);
+        this->parentAnn->track->RemoveAnnotationAtTime(ti);
     }
     }
 
