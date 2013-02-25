@@ -717,6 +717,7 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("ADD_POINT", *this->eventReceiver);
     this->eventLoop->AddListener("REMOVE_POINT", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ANNOTATION_BETWEEN_TIMES", *this->eventReceiver);
+    this->eventLoop->AddListener("SET_ANNOTATION_BETWEEN_TIMES", *this->eventReceiver);
     this->eventLoop->AddListener("LOAD_ANNOTATION", *this->eventReceiver);
     this->eventLoop->AddListener("SAVE_ANNOTATION", *this->eventReceiver);
     this->eventLoop->AddListener("SAVE_SHAPE", *this->eventReceiver);
@@ -784,6 +785,31 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         }
         responseEv->id = ev->id;
         this->eventLoop->SendEvent(responseEv);
+    }
+
+    if(ev->type=="SET_ANNOTATION_BETWEEN_TIMES")
+    {
+        //Find first two commas and split the string to args
+        std::string::size_type firstComma = ev->data.find(",",0);
+        std::string::size_type secondComma = ev->data.find(",",firstComma+1);
+
+        QString startStr = ev->data.substr(0, firstComma).c_str();
+        QString endStr = ev->data.substr(firstComma+1, secondComma-firstComma).c_str();
+        QString xml = ev->data.substr(secondComma+1).c_str();
+        QString qxml(xml);
+        //unsigned long long startTime
+        //unsigned long long endTime
+
+        std::vector<std::vector<float> > frame;
+        double ti;
+        int ret = TrackingAnnotationData::FrameFromXml(qxml,
+                                     frame,
+                                     ti);
+
+        assert(ret);
+        assert(this->parentAnn!=NULL);
+        assert(this->parentAnn->track!=NULL);
+        this->parentAnn->track->SetAnnotationBetweenTimestamps(startStr.toULongLong(), endStr.toULongLong(), frame);
     }
 
     if(ev->type=="LOAD_ANNOTATION")
@@ -854,6 +880,7 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
     }
 
+    this->msleep(5);
     MessagableThread::HandleEvent(ev);
 }
 

@@ -734,6 +734,12 @@ void TrackingSceneController::SetAnnotationBetweenTimestamps(unsigned long long 
     std::tr1::shared_ptr<class Event> reqEv(new Event("SET_ANNOTATION_BETWEEN_TIMES"));
     reqEv->id = this->eventLoop->GetId();
     reqEv->toUuid = this->annotationUuid;
+    QString xml;
+    QTextStream xmlStr(&xml);
+    TrackingAnnotationData::FrameToXml(annot, 0., xmlStr);
+    QString data = QString("%1,%2,%3").arg(startTime).arg(endTime).arg(xml);
+    reqEv->data = data.toLocal8Bit().constData();
+
     this->eventLoop->SendEvent(reqEv);
 }
 
