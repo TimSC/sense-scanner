@@ -164,7 +164,7 @@ public:
     virtual void Update()=0;
     void SetId(int idIn);
     int GetId();
-    virtual void Finished()=0;
+    virtual void Finished() {};
     void SetThreadId(QUuid idIn);
 
 protected:

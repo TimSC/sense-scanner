@@ -143,7 +143,6 @@ public:
     bool operator!= (const Annotation &other);
     void Clear();
     void SetTrack(class TrackingAnnotationData *trackIn);
-    void Clone(class QUuid parentUuid);
     class TrackingAnnotationData *GetTrack();
 
     void SetAlgUid(QUuid uidIn); //Thread safe

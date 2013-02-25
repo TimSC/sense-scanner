@@ -63,6 +63,7 @@ protected:
     //Sources and annotation data
     std::vector<std::tr1::shared_ptr<class Annotation> > annotations;
     QList<QUuid> annotationUuids;
+    std::vector<std::tr1::shared_ptr<class AnnotThread> > annotationThreads;
 
     class EventLoop *eventLoop;
 

@@ -565,18 +565,64 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     MessagableThread::SetEventLoop(eventLoopIn);
     this->eventLoop->AddListener("PREDICTION_RESULT", *this->eventReceiver);
     this->eventLoop->AddListener("STOP_SPECIFIC_THREAD", *this->eventReceiver);
+    this->eventLoop->AddListener("ADD_POINT", *this->eventReceiver);
+    this->eventLoop->AddListener("REMOVE_POINT", *this->eventReceiver);
+    this->eventLoop->AddListener("GET_ANNOTATION_BETWEEN_TIMES", *this->eventReceiver);
+    this->eventLoop->AddListener("LOAD_ANNOTATION", *this->eventReceiver);
+    this->eventLoop->AddListener("SAVE_ANNOTATION", *this->eventReceiver);
+    this->eventLoop->AddListener("SAVE_SHAPE", *this->eventReceiver);
+    this->eventLoop->AddListener("GET_SOURCE_FILENAME", *this->eventReceiver);
 }
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
+    QUuid algUid = this->parentAnn->GetAnnotUid();
+
+    if(ev->toUuid == algUid)
+    {
     if(ev->type=="STOP_SPECIFIC_THREAD")
     {
-        QUuid algUid = this->parentAnn->GetAlgUid();
-        QUuid reqUid(ev->data.c_str());
-        if(algUid == reqUid)
-        {
-            this->stopThreads = true;
-        }
+        this->stopThreads = true;
+    }
+
+    if(ev->type=="ADD_POINT")
+    {
+        assert(0);
+    }
+
+    if(ev->type=="REMOVE_POINT")
+    {
+        assert(0);
+    }
+
+    if(ev->type=="GET_ANNOTATION_BETWEEN_TIMES")
+    {
+        assert(0);
+    }
+
+    if(ev->type=="LOAD_ANNOTATION")
+    {
+        assert(0);
+    }
+
+    if(ev->type=="SAVE_ANNOTATION")
+    {
+        assert(0);
+    }
+
+    if(ev->type=="SAVE_SHAPE")
+    {
+        assert(0);
+    }
+
+    if(ev->type=="GET_SOURCE_FILENAME")
+    {
+        std::tr1::shared_ptr<class Event> responseEv(new Event("SOURCE_FILENAME"));
+        responseEv->data = this->parentAnn->GetSource().toLocal8Bit().constData();
+        responseEv->fromUuid = algUid;
+        responseEv->id = ev->id;
+        this->eventLoop->SendEvent(responseEv);
+    }
     }
 
     MessagableThread::HandleEvent(ev);
@@ -1015,38 +1061,6 @@ void Annotation::SetTrack(class TrackingAnnotationData *trackIn)
 {
     if(this->track != NULL) delete this->track;
     this->track = trackIn;
-}
-
-void Annotation::Clone(class QUuid parentUuid)
-{
-    assert(0); //This is not thread safe?
-    this->SetTrack(NULL);
-    this->track = new class TrackingAnnotationData();
-
-    //Get source filename
-    std::tr1::shared_ptr<class Event> getSourceNameEv(new Event("GET_SOURCE_FILENAME"));
-    getSourceNameEv->toUuid = parentUuid;
-    getSourceNameEv->id = this->annotThread->GetNewEventId();
-    this->annotThread->SendEvent(getSourceNameEv);
-
-    std::tr1::shared_ptr<class Event> sourceName =
-            this->annotThread->WaitForEventId(getSourceNameEv->id);
-    QString fina = sourceName->data.c_str();
-    this->SetSource(fina);
-
-    //Get annotated frames
-    std::tr1::shared_ptr<class Event> getAnnotationEv(new Event("GET_ANNOTATION_XML"));
-    getAnnotationEv->toUuid = parentUuid;
-    getAnnotationEv->id = this->annotThread->GetNewEventId();
-    this->annotThread->SendEvent(getAnnotationEv);
-
-    std::tr1::shared_ptr<class Event> annotData =
-            this->annotThread->WaitForEventId(getAnnotationEv->id);
-    QString data = annotData->data.c_str();
-
-    //Set annotation from response
-    assert(0); //TODO
-
 }
 
 class TrackingAnnotationData *Annotation::GetTrack()

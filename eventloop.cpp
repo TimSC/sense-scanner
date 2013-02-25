@@ -122,8 +122,7 @@ std::tr1::shared_ptr<class Event> EventReceiver::WaitForEventId(unsigned long lo
 
             if(ev->type == "STOP_SPECIFIC_THREAD")
             {
-                QUuid reqId(ev->data.c_str());
-                if(reqId == this->threadId)
+                if(ev->toUuid == this->threadId)
                 {
                     this->mutex.unlock();
                     throw std::runtime_error("Thread shopping, wait aborted");
@@ -361,9 +360,8 @@ int MessagableThread::Stop()
     this->mutex.unlock();
 
     std::tr1::shared_ptr<class Event> stopReq(new Event("STOP_SPECIFIC_THREAD"));
-    stopReq->data = this->threadId.toString().toLocal8Bit().constData();
+    stopReq->toUuid = this->threadId;
     this->eventLoop->SendEvent(stopReq);
-
 
     for(int i=0;i<500;i++)
     {

@@ -233,6 +233,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("ALG_DATA_BLOCK",*eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_THREAD_PROGRESS",*eventReceiver);
     this->eventLoop->AddListener("AVBIN_VERSION",*eventReceiver);
+    this->eventLoop->AddListener("SOURCE_FILENAME",*eventReceiver);
 
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(0, this->eventLoop);

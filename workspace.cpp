@@ -53,6 +53,7 @@ unsigned int Workspace::AddSource(QString &fina, QUuid uuid, class AvBinMedia* m
 {
     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
     ann->SetSource(fina);
+    ann->SetAnnotUid(uuid);
     TrackingAnnotationData *scenePtr = new TrackingAnnotationData();
     ann->SetTrack(scenePtr);
     return this->AddSource(ann, mediaInterface, uuid);
@@ -68,6 +69,7 @@ unsigned int Workspace::AddSource(std::tr1::shared_ptr<class Annotation> ann,
 
     this->annotations.push_back(ann);
     this->annotationUuids.push_back(uuid);
+    this->annotationThreads.push_back(annotThread);
     return this->annotations.size();
 }
 
@@ -91,12 +93,15 @@ void Workspace::RemoveSource(QUuid uuid)
 
     this->annotations.erase(this->annotations.begin()+ind);
     this->annotationUuids.erase(this->annotationUuids.begin()+ind);
+    this->annotationThreads.erase(this->annotationThreads.begin()+ind);
 }
 
 unsigned int Workspace::AddAutoAnnot(QUuid annotUid, QUuid algUid, class AvBinMedia* mediaInterface)
 {
     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
-    ann->Clone(annotUid);
+
+    //TODO copy source filename and annotated frames to destination annotation
+    assert(0);
 
     this->AddSource(ann, mediaInterface, QUuid::createUuid());
 }
