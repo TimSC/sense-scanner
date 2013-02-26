@@ -649,29 +649,6 @@ QSharedPointer<MouseGraphicsScene> TrackingSceneController::GetScene()
 
 //***************************************************
 
-/*void TrackingSceneController::GetIndexAnnotationXml(unsigned int index, QTextStream *out)
-{
-    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it = this->pos.begin();
-    for(unsigned int i=0;i<index;i++)
-        it ++;
-    std::vector<std::vector<float> > &frame = it->second;
-    *out << "\t<frame time='"<<(it->first/1000.f)<<"'>" << endl;
-    for(unsigned int i=0; i < frame.size(); i++)
-    {
-        *out << "\t\t<point id='"<<i<<"' x='"<<frame[i][0]<<"' y='"<<frame[i][1]<<"'/>" << endl;
-    }
-    *out << "\t</frame>" << endl;
-}*/
-
-/*unsigned long long TrackingSceneController::GetIndexTimestamp(unsigned int index)
-{
-    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it = this->pos.begin();
-    for(unsigned int i=0;i<index;i++)
-        it ++;
-    unsigned long long out = it->first;
-    return out;
-}*/
-
 void TrackingSceneController::SetEventLoop(class EventLoop *eventLoopIn)
 {
     if(this->eventReceiver) delete this->eventReceiver;
