@@ -722,7 +722,7 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("REMOVE_ANNOTATION_AT_TIME", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ALG_UUID", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ALL_ANNOTATION_XML", *this->eventReceiver);
-
+    this->eventLoop->AddListener("SET_ANNOTATION_BY_XML", *this->eventReceiver);
 }
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
@@ -870,6 +870,22 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         responseEv->data = xml.toLocal8Bit().constData();
         this->eventLoop->SendEvent(responseEv);
     }
+    if(ev->type=="SET_ANNOTATION_BY_XML")
+    {
+        QDomDocument doc("mydocument");
+        QString errorMsg;
+        QString xml(ev->data.c_str());
+        if (!doc.setContent(xml, &errorMsg))
+        {
+            //throw runtime_error(errorMsg.toLocal8Bit().constData());
+            return;
+        }
+
+        //Load points and links into memory
+        QDomElement rootElem = doc.documentElement();
+        this->parentAnn->track->ReadAnnotationXml(rootElem);
+    }
+
     }
 
     this->msleep(5);

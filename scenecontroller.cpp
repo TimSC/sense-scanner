@@ -656,7 +656,7 @@ void TrackingSceneController::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventReceiver = new EventReceiver(this->eventLoop);
     this->eventLoop->AddListener("ANNOTATION_FRAME",*eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_SHAPE",*eventReceiver);
-
+    this->eventLoop->AddListener("ANNOTATION_DATA",*eventReceiver);
 
 }
 
@@ -810,9 +810,13 @@ void TrackingSceneController::LoadAnnotation()
         tr("Load Annotation"), "", tr("Annotation (*.annot)"));
     if(fileName.length() == 0) return;
 
-    std::tr1::shared_ptr<class Event> reqEv(new Event("LOAD_ANNOTATION"));
+    QFile inFile(fileName);
+    inFile.open(QIODevice::ReadOnly | QIODevice::Text);
+    QTextStream fileStream(&inFile);
+
+    std::tr1::shared_ptr<class Event> reqEv(new Event("SET_ANNOTATION_BY_XML"));
     reqEv->toUuid = this->annotationUuid;
-    reqEv->data = fileName.toLocal8Bit().constData();
+    reqEv->data = fileStream.readAll().toLocal8Bit().constData();
     this->eventLoop->SendEvent(reqEv);
 }
 
@@ -823,10 +827,21 @@ void TrackingSceneController::SaveAnnotation()
       tr("Save Annotation Track"), "", tr("Annotation (*.annot)"));
     if(fileName.length() == 0) return;
 
-    std::tr1::shared_ptr<class Event> reqEv(new Event("SAVE_ANNOTATION"));
+    //Request data
+    std::tr1::shared_ptr<class Event> reqEv(new Event("GET_ANNOTATION_BY_XML"));
     reqEv->toUuid = this->annotationUuid;
-    reqEv->data = fileName.toLocal8Bit().constData();
+    reqEv->id = this->eventLoop->GetId();
     this->eventLoop->SendEvent(reqEv);
+
+    //Wait for response
+    std::tr1::shared_ptr<class Event> resp = this->eventReceiver->WaitForEventId(reqEv->id);
+
+    //Write to file
+    QFile outFile(fileName);
+    outFile.open(QIODevice::WriteOnly | QIODevice::Text);
+    QTextStream fileStream(&outFile);
+    fileStream << resp->data.c_str();
+    fileStream.flush();
 }
 
 void TrackingSceneController::SaveShape()
