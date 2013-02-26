@@ -658,6 +658,7 @@ void MainWindow::NewWorkspace()
     this->workspace.ClearProcessing();
     this->workspaceAsStored = this->workspace;
     this->RegenerateSourcesList();
+    this->RegenerateProcessingList();
 }
 
 void MainWindow::LoadWorkspace()
