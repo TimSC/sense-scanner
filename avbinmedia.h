@@ -50,7 +50,6 @@ protected:
     class EventReceiver *eventReceiver;
     class EventLoop *eventLoop;
     int id;
-    QMutex lock;
     AvBinThread *mediaThread;
     QString currentFina;
 };

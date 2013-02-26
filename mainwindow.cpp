@@ -726,7 +726,11 @@ void MainWindow::SelectedSourceChanged(const QModelIndex ind)
 
 void MainWindow::SelectedSourceChanged(int selectedRow)
 {
-    assert(selectedRow>=0);
+    if(selectedRow==-1)
+    {
+        this->DeselectCurrentSource();
+        return;
+    }
 
     QList<QUuid> annotationUuids = this->workspace.GetAnnotationUuids();
     if(selectedRow < 0 && selectedRow >= annotationUuids.size())

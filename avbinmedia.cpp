@@ -100,19 +100,15 @@ QSharedPointer<QImage> AvBinMedia::Get(QString source,
                                        long long unsigned &outFrameEnd,
                                        long long unsigned timeout) //in milliseconds
 {
-
-    this->lock.lock();
     outFrameStart = 0;
     outFrameEnd = 0;
 
     if(this->mediaThread->IsStopFlagged())
     {
-        this->lock.unlock();
         throw runtime_error("Worker thread has been stopped");
     }
     if(!this->mediaThread->isRunning())
     {
-        this->lock.unlock();
         throw runtime_error("Worker thread is not running");
     }
 
@@ -138,14 +134,12 @@ QSharedPointer<QImage> AvBinMedia::Get(QString source,
     }
     catch(std::runtime_error e)
     {
-        this->lock.unlock();
         throw runtime_error(e.what());
     }
 
     QString evType = ev->type.c_str();
     if(evType.left(18) == "AVBIN_FRAME_FAILED")
     {
-        this->lock.unlock();
         throw runtime_error("Get frame failed");
     }
 
@@ -160,7 +154,6 @@ QSharedPointer<QImage> AvBinMedia::Get(QString source,
     QSharedPointer<QImage> img(new QImage(frame->width, frame->height,
                                           QImage::Format_RGB888));
     RawImgToQImage(frame, *img);
-    this->lock.unlock();
     assert(!img->isNull());
     return img;
 
@@ -172,16 +165,13 @@ QSharedPointer<QImage> AvBinMedia::Get(QString source,
 
 long long unsigned AvBinMedia::Length(QString source) //Get length (ms)
 {
-    this->lock.lock();
 
     if(this->mediaThread->IsStopFlagged())
     {
-        this->lock.unlock();
         throw runtime_error("Worker thread has been stopped");
     }
     if(!this->mediaThread->isRunning())
     {
-        this->lock.unlock();
         throw runtime_error("Worker thread is not running");
     }
 
@@ -191,7 +181,6 @@ long long unsigned AvBinMedia::Length(QString source) //Get length (ms)
     //For null source, return zero
     if(this->currentFina.length()==0)
     {
-        this->lock.unlock();
         return 0;
     }
 
@@ -208,12 +197,11 @@ long long unsigned AvBinMedia::Length(QString source) //Get length (ms)
     }
     catch(std::runtime_error &err)
     {
-        this->lock.unlock();
         throw std::runtime_error(err.what());
     }
 
     QString eventNameRx = QString("AVBIN_DURATION_RESPONSE%1").arg(this->id);
-    this->lock.unlock();
+
     if(ev->type == eventNameRx.toLocal8Bit().constData());
         return ROUND_TIMESTAMP(STR_TO_ULL(ev->data.c_str(),NULL,10) / 1000.);
     throw std::runtime_error("Invalid duration response");
@@ -231,16 +219,12 @@ long long unsigned AvBinMedia::GetFrameStartTime(QString source, long long unsig
 
 int AvBinMedia::RequestFrame(QString source, long long unsigned ti) //in milliseconds
 {
-    this->lock.lock();
-
     if(this->mediaThread->IsStopFlagged())
     {
-        this->lock.unlock();
         throw runtime_error("Worker thread has been stopped");
     }
     if(!this->mediaThread->isRunning())
     {
-        this->lock.unlock();
         throw runtime_error("Worker thread is not running");
     }
 
@@ -253,7 +237,7 @@ int AvBinMedia::RequestFrame(QString source, long long unsigned ti) //in millise
     tmp << ti * 1000;
     getFrameEvent->data = tmp.str();
     this->eventLoop->SendEvent(getFrameEvent);
-    this->lock.unlock();
+
     return id;
 }
 
