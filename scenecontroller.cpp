@@ -706,6 +706,7 @@ void TrackingSceneController::SetAnnotationBetweenTimestamps(unsigned long long 
     unsigned long long endTime,
     std::vector<std::vector<float> > annot)
 {
+    assert(endTime >= startTime);
     assert(this->eventLoop!=NULL);
 
     std::tr1::shared_ptr<class Event> reqEv(new Event("SET_ANNOTATION_BETWEEN_TIMES"));

@@ -786,7 +786,7 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         std::string::size_type secondComma = ev->data.find(",",firstComma+1);
 
         QString startStr = ev->data.substr(0, firstComma).c_str();
-        QString endStr = ev->data.substr(firstComma+1, secondComma-firstComma).c_str();
+        QString endStr = ev->data.substr(firstComma+1, secondComma-firstComma-1).c_str();
         QString xml = ev->data.substr(secondComma+1).c_str();
         QString qxml(xml);
         //unsigned long long startTime
