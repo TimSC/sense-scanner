@@ -532,6 +532,7 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             std::ostringstream tmp;
             tmp << this->Length();
             response->data = tmp.str();
+            response->id = ev->id;
             this->eventLoop->SendEvent(response);
         }
         catch (runtime_error &err)
@@ -539,6 +540,7 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             QString eventName = QString("AVBIN_REQUEST_FAILED%1").arg(this->id);
             std::tr1::shared_ptr<class Event> fail(new Event(eventName.toLocal8Bit().constData(), ev->id));
             fail->data = err.what();
+            fail->id = ev->id;
             this->eventLoop->SendEvent(fail);
         }
     }

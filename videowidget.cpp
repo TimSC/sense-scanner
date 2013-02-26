@@ -219,7 +219,14 @@ void VideoWidget::TimerUpdate()
     }
 
     //Check if any async messages are waiting from the source media
-    if(this->seq != NULL) this->seq->Update(FrameCallbackTest, (void *)this);
+    if(this->seq != NULL)
+    {
+        this->seq->Update(FrameCallbackTest, (void *)this);
+    }
+    else
+    {
+        int debug = 0;
+    }
 
     if(this->playActive)
     {

@@ -26,6 +26,8 @@ AvBinMedia::AvBinMedia(int idIn, class EventLoop *eventLoopIn) : AbstractMedia()
         this->eventLoop->AddListener(eventName2.toLocal8Bit().constData(), *this->eventReceiver);
         QString eventName3 = QString("AVBIN_FRAME_FAILED%1").arg(this->id);
         this->eventLoop->AddListener(eventName3.toLocal8Bit().constData(), *this->eventReceiver);
+        QString eventName4 = QString("AVBIN_REQUEST_FAILED%1").arg(this->id);
+        this->eventLoop->AddListener(eventName4.toLocal8Bit().constData(), *this->eventReceiver);
         //QString eventName4("STOP_THREADS");
         //this->eventLoop->AddListener(eventName4.toLocal8Bit().constData(), *this->eventReceiver);
     }
@@ -207,8 +209,9 @@ long long unsigned AvBinMedia::Length(QString source) //Get length (ms)
 
     QString eventNameRx = QString("AVBIN_DURATION_RESPONSE%1").arg(this->id);
     this->lock.unlock();
-    assert(ev->type == eventNameRx.toLocal8Bit().constData());
-    return ROUND_TIMESTAMP(STR_TO_ULL(ev->data.c_str(),NULL,10) / 1000.);
+    if(ev->type == eventNameRx.toLocal8Bit().constData());
+        return ROUND_TIMESTAMP(STR_TO_ULL(ev->data.c_str(),NULL,10) / 1000.);
+    throw std::runtime_error("Invalid duration response");
 }
 
 long long unsigned AvBinMedia::GetFrameStartTime(QString source, long long unsigned ti) //in milliseconds
