@@ -552,7 +552,7 @@ void MainWindow::ImportVideo()
 void MainWindow::RemoveVideo()
 {
     cout << "remove" << endl;
-    QList<QUuid> algUuids = this->workspace.GetProcessingUuids();
+    QList<QUuid> algUuids = this->workspace.GetAnnotationUuids();
     QItemSelectionModel *sourceSelected = this->ui->sourcesAlgGui->ui->dataSources->selectionModel();
     assert(sourceSelected!=NULL);
 
@@ -726,6 +726,8 @@ void MainWindow::SelectedSourceChanged(const QModelIndex ind)
 
 void MainWindow::SelectedSourceChanged(int selectedRow)
 {
+    assert(selectedRow>=0);
+
     QList<QUuid> annotationUuids = this->workspace.GetAnnotationUuids();
     if(selectedRow < 0 && selectedRow >= annotationUuids.size())
         return;
