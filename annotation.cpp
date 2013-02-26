@@ -723,6 +723,11 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("GET_ALG_UUID", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ALL_ANNOTATION_XML", *this->eventReceiver);
     this->eventLoop->AddListener("SET_ANNOTATION_BY_XML", *this->eventReceiver);
+
+    this->eventLoop->AddListener("GET_SEEK_BACKWARD_TIME", *this->eventReceiver);
+    this->eventLoop->AddListener("GET_SEEK_FOWARD_TIME", *this->eventReceiver);
+
+
 }
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
@@ -884,6 +889,48 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         //Load points and links into memory
         QDomElement rootElem = doc.documentElement();
         this->parentAnn->track->ReadAnnotationXml(rootElem);
+    }
+    if(ev->type=="GET_SEEK_BACKWARD_TIME")
+    {
+        unsigned long long ti = STR_TO_ULL_SIMPLE(ev->data.c_str());
+
+        try
+        {
+            unsigned long long ret = this->parentAnn->track->GetSeekBackTime(ti);
+            std::tr1::shared_ptr<class Event> responseEv(new Event("SEEK_RESULT"));
+            responseEv->id = ev->id;
+            QString dataStr = QString("%1").arg(ret);
+            responseEv->data = dataStr.toLocal8Bit().constData();
+            this->eventLoop->SendEvent(responseEv);
+        }
+        catch(exception &err)
+        {
+            std::tr1::shared_ptr<class Event> responseEv(new Event("SEEK_RESULT"));
+            responseEv->id = ev->id;
+            responseEv->data = "NOT_FOUND";
+            this->eventLoop->SendEvent(responseEv);
+        }
+    }
+    if(ev->type=="GET_SEEK_FOWARD_TIME")
+    {
+        unsigned long long ti = STR_TO_ULL_SIMPLE(ev->data.c_str());
+
+        try
+        {
+            unsigned long long ret = this->parentAnn->track->GetSeekFowardTime(ti);
+            std::tr1::shared_ptr<class Event> responseEv(new Event("SEEK_RESULT"));
+            responseEv->id = ev->id;
+            QString dataStr = QString("%1").arg(ret);
+            responseEv->data = dataStr.toLocal8Bit().constData();
+            this->eventLoop->SendEvent(responseEv);
+        }
+        catch(exception &err)
+        {
+            std::tr1::shared_ptr<class Event> responseEv(new Event("SEEK_RESULT"));
+            responseEv->id = ev->id;
+            responseEv->data = "NOT_FOUND";
+            this->eventLoop->SendEvent(responseEv);
+        }
     }
 
     }

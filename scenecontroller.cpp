@@ -657,7 +657,7 @@ void TrackingSceneController::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("ANNOTATION_FRAME",*eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_SHAPE",*eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_DATA",*eventReceiver);
-
+    this->eventLoop->AddListener("SEEK_RESULT",*eventReceiver);
 }
 
 void TrackingSceneController::SetAnnotationTrack(QUuid srcUuid)
@@ -779,12 +779,34 @@ void TrackingSceneController::RefreshLinks()
 
 unsigned long long TrackingSceneController::GetSeekFowardTimeFromAnnot(unsigned long long queryTime)
 {
-    assert(0);
+    std::tr1::shared_ptr<class Event> reqEv(new Event("GET_SEEK_FOWARD_TIME"));
+    reqEv->toUuid = this->annotationUuid;
+    reqEv->id = this->eventLoop->GetId();
+    reqEv->data = QString("%1").arg(queryTime).toLocal8Bit().constData();
+    this->eventLoop->SendEvent(reqEv);
+
+    std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(reqEv->id);
+    if(response->data=="NOT_FOUND")
+    {
+        throw runtime_error("Not found");
+    }
+    return STR_TO_ULL_SIMPLE(response->data.c_str());
 }
 
 unsigned long long TrackingSceneController::GetSeekBackwardTimeFromAnnot(unsigned long long queryTime)
 {
-    assert(0);
+    std::tr1::shared_ptr<class Event> reqEv(new Event("GET_SEEK_BACKWARD_TIME"));
+    reqEv->toUuid = this->annotationUuid;
+    reqEv->id = this->eventLoop->GetId();
+    reqEv->data = QString("%1").arg(queryTime).toLocal8Bit().constData();
+    this->eventLoop->SendEvent(reqEv);
+
+    std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(reqEv->id);
+    if(response->data=="NOT_FOUND")
+    {
+        throw runtime_error("Not found");
+    }
+    return STR_TO_ULL_SIMPLE(response->data.c_str());
 }
 
 void TrackingSceneController::RemoveAnnotationAtTime(unsigned long long time)

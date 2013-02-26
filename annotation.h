@@ -79,17 +79,13 @@ public:
     void AddAnnotationAtTime(unsigned long long ti);
     void RemoveAnnotationAtTime(unsigned long long ti);
 
+    unsigned long long GetSeekFowardTime(unsigned long long queryTime);
+    unsigned long long GetSeekBackTime(unsigned long long queryTime);
 protected:
 
     void AddPoint(std::vector<float> p);
     void RemovePoint(int index);
-    unsigned long long GetSeekFowardTime(unsigned long long queryTime);
-    unsigned long long GetSeekBackTime(unsigned long long queryTime);
-
-
-
     void SaveShape(QString fileName);
-
     void LoadAnnotation(QString fileName);
     void SaveAnnotation(QString fileName);
 
