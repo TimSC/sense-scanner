@@ -861,7 +861,15 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
     if(ev->type=="GET_ALL_ANNOTATION_XML")
     {
-        assert(0);
+        QString xml;
+        QTextStream xmlStr(&xml);
+        this->parentAnn->track->WriteAnnotationXml(xmlStr);
+
+        std::tr1::shared_ptr<class Event> responseEv(new Event("ANNOTATION_DATA"));
+        responseEv->fromUuid = algUid;
+        responseEv->id = ev->id;
+        responseEv->data = xml.toLocal8Bit().constData();
+        this->eventLoop->SendEvent(responseEv);
     }
     }
 

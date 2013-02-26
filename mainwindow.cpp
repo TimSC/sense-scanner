@@ -235,6 +235,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("AVBIN_VERSION",*eventReceiver);
     this->eventLoop->AddListener("SOURCE_FILENAME",*eventReceiver);
     this->eventLoop->AddListener("ALG_UUID_FOR_ANNOTATION",*eventReceiver);
+    this->eventLoop->AddListener("ANNOTATION_DATA",*eventReceiver);
 
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(0, this->eventLoop);
@@ -686,13 +687,13 @@ void MainWindow::LoadWorkspace()
 
 void MainWindow::SaveWorkspace()
 {
-    WaitPopUpDialog *waitDlg = new WaitPopUpDialog(this);
-    this->Save();
+    //WaitPopUpDialog *waitDlg = new WaitPopUpDialog(this);
+    int ret = this->Save();
 
-    waitDlg->Exec();
-    int ret = waitDlg->GetResultCode();
-    delete waitDlg;
-    waitDlg = NULL;
+    //waitDlg->Exec();
+    //int ret = waitDlg->GetResultCode();
+    //delete waitDlg;
+    //waitDlg = NULL;
 
     if(ret == 0) this->SaveAsWorkspace();
     else this->workspaceAsStored = this->workspace;
@@ -706,13 +707,13 @@ void MainWindow::SaveAsWorkspace()
       tr("Save Workspace"), "", tr("Workspaces (*.work)"));
     if(fileName.length() == 0) return;
 
-    WaitPopUpDialog *waitDlg = new WaitPopUpDialog(this);
+    //WaitPopUpDialog *waitDlg = new WaitPopUpDialog(this);
 
     this->SaveAs(fileName);
 
-    waitDlg->Exec();
-    delete waitDlg;
-    waitDlg = NULL;
+    //waitDlg->Exec();
+    //delete waitDlg;
+    //waitDlg = NULL;
 
     this->workspaceAsStored = this->workspace;
 }
