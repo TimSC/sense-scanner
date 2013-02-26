@@ -248,7 +248,8 @@ void Workspace::ClearProcessing()
 void Workspace::ClearAnnotation()
 {
     this->annotations.clear();
-
+    this->annotationThreads.clear();
+    this->annotationUuids.clear();
 }
 
 

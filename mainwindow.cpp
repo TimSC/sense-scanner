@@ -1163,6 +1163,8 @@ void MainWindow::Load(QString fina, class AvBinMedia* mediaInterface)
 {
     this->workspace.ClearAnnotation();
     this->workspace.ClearProcessing();
+    this->RegenerateSourcesList();
+    this->RegenerateProcessingList();
     this->defaultFilename = fina;
 
     //Parse XML to DOM
