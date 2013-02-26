@@ -294,11 +294,19 @@ void TrackingSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEve
 
         assert(this->eventLoop!=NULL);
 
-        std::tr1::shared_ptr<class Event> addEv(new Event("ADD_POINT"));
-        addEv->toUuid = this->annotationUuid;
-        QString args = QString("%1,%2").arg(pos.x()).arg(pos.y());
-        addEv->data = args.toLocal8Bit().constData();
-        this->eventLoop->SendEvent(addEv);
+        std::vector<float> pt;
+        pt.push_back(pos.x());
+        pt.push_back(pos.y());
+        this->currentShape.push_back(pt);
+
+        QString xml;
+        QTextStream xmlStr(&xml);
+        TrackingAnnotationData::WriteShapeToStream(this->links, this->currentShape, xmlStr);
+
+        std::tr1::shared_ptr<class Event> reqEv(new Event("SET_SHAPE"));
+        reqEv->toUuid = this->annotationUuid;
+        reqEv->data = xml.toLocal8Bit().constData();
+        this->eventLoop->SendEvent(reqEv);
 
         this->RefreshCurrentPos();
 
@@ -774,7 +782,7 @@ void TrackingSceneController::RefreshLinks()
 
     //Load points and links into memory
     QDomElement rootElem = doc.documentElement();
-    TrackingAnnotationData::ProcessXmlDomFrame(rootElem, this->links);
+    this->currentShape = TrackingAnnotationData::ProcessXmlDomFrame(rootElem, this->links);
     return;
 }
 
