@@ -623,7 +623,7 @@ void TrackingAnnotationData::GetFramesAvailable(std::map<unsigned long, unsigned
     frameTimesEndOut = this->frameTimesEnd;
 }
 
-void TrackingAnnotationData::LoadAnnotation(QString fileName)
+/*void TrackingAnnotationData::LoadAnnotation(QString fileName)
 {
     //Parse XML to DOM
     QFile f(fileName);
@@ -654,7 +654,7 @@ void TrackingAnnotationData::SaveAnnotation(QString fileName)
     this->WriteAnnotationXml(out);
     f.close();
 }
-
+*/
 int TrackingAnnotationData::GetShapeNumPoints()
 {
     return this->shape.size();

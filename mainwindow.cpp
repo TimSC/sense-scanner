@@ -1092,7 +1092,7 @@ int MainWindow::Save()
 
             //Format as XML
             out << "\t<source id=\""<<i<<"\" uid=\""<<Qt::escape(annotationUuids[i].toString())<<"\" file=\""<<
-                   Qt::escape(dir.relativeFilePath(fina))<<"\"";
+                   Qt::escape(dir.absoluteFilePath(fina))<<"\"";
 
             if(!algUuid.isNull())
                 out << " alg=\"" << algUuid.toString().toLocal8Bit().constData() << "\"";;
@@ -1197,8 +1197,9 @@ void MainWindow::Load(QString fina, class AvBinMedia* mediaInterface)
                     if(sourceEle.tagName() != "source") {sourceNode = sourceNode.nextSibling(); continue;}
 
                     QString sourceFiNa = sourceEle.attribute("file");
-                    QString sourceFiNaAbs = dir.absoluteFilePath(sourceFiNa);
-                    QFileInfo fileInfo(sourceFiNaAbs);
+                    //QString sourceFiNaAbs = dir.absoluteFilePath(sourceFiNa);
+
+                    QFileInfo fileInfo(sourceFiNa);
                     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
                     ann->SetSource(fileInfo.absoluteFilePath());
 
