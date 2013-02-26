@@ -74,6 +74,7 @@ void VideoWidget::SetSource(AbstractMedia *src, QString finaIn)
     this->seq = src;
     this->mediaLength = 0;
     this->fina = finaIn;
+    int lengthError = 0;
 
     if(this->seq!=NULL) try
     {
@@ -82,6 +83,7 @@ void VideoWidget::SetSource(AbstractMedia *src, QString finaIn)
     catch (std::runtime_error &e)
     {
         cout << "Warning: could not determine length of video" << endl;
+        lengthError = 1;
     }
 
     if(this->mediaLength > 0)
@@ -92,6 +94,11 @@ void VideoWidget::SetSource(AbstractMedia *src, QString finaIn)
     this->SetVisibleAtTime(0);
 
     this->fitWindowToNextFrame = 1;
+
+    if(lengthError)
+    {
+        throw runtime_error("Error setting source");
+    }
 }
 
 void VideoWidget::SetVisibleAtTime(long long unsigned ti)

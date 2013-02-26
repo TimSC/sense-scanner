@@ -751,7 +751,20 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
     this->annotationMenu = sceneController->MenuFactory(this->menuBar());
 
     //Set widget to use this source
-    this->ui->widget->SetSource(this->mediaInterfaceFront, fina);
+    try
+    {
+        this->ui->widget->SetSource(this->mediaInterfaceFront, fina);
+    }
+    catch(std::runtime_error &err)
+    {
+        cout << err.what() << "," << fina.toLocal8Bit().constData() << endl;
+        if(this->errMsg == NULL)
+            this->errMsg = new QMessageBox(this);
+        QString errMsgStr = QString("Could not open %1").arg(fina);
+        this->errMsg->setWindowTitle("Error opening video");
+        this->errMsg->setText(errMsgStr);
+        this->errMsg->exec();
+    }
 
 }
 

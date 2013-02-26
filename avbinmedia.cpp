@@ -28,6 +28,9 @@ AvBinMedia::AvBinMedia(int idIn, class EventLoop *eventLoopIn) : AbstractMedia()
         this->eventLoop->AddListener(eventName3.toLocal8Bit().constData(), *this->eventReceiver);
         QString eventName4 = QString("AVBIN_REQUEST_FAILED%1").arg(this->id);
         this->eventLoop->AddListener(eventName4.toLocal8Bit().constData(), *this->eventReceiver);
+        QString eventName5 = QString("AVBIN_OPEN_RESULT%1").arg(this->id);
+        this->eventLoop->AddListener(eventName5.toLocal8Bit().constData(), *this->eventReceiver);
+
         //QString eventName4("STOP_THREADS");
         //this->eventLoop->AddListener(eventName4.toLocal8Bit().constData(), *this->eventReceiver);
     }
@@ -56,7 +59,9 @@ int AvBinMedia::OpenFile(QString fina)
     std::tr1::shared_ptr<class Event> openEv(new Event(eventName.toLocal8Bit().constData(), evid));
     openEv->data = fina.toLocal8Bit().constData();
     this->eventLoop->SendEvent(openEv);
-    return 1;
+
+    std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(evid);
+    return atoi(ev->data.c_str());
 }
 
 void RawImgToQImage(DecodedFrame *frame, QImage &img)
@@ -318,8 +323,11 @@ void AvBinMedia::ChangeVidSource(QString fina)
     this->mediaThread->Start();
 
     cout << "Opening " << fina.toLocal8Bit().constData() << endl;
-    this->OpenFile(fina.toLocal8Bit().constData());
+    int ret = this->OpenFile(fina.toLocal8Bit().constData());
     this->currentFina = fina;
+    if(ret==0)
+        throw std::runtime_error("Error opening file");
+
 }
 
 
