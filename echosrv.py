@@ -39,7 +39,7 @@ def WorkerProcessProf(childPipeConn):
 		if childPipeConn.poll():
 			event = childPipeConn.recv()
 
-			print "Rx",event[0]
+			#print "Rx",event[0]
 			if event[0]=="RUN":
 				print "NOW_RUNNING"
 				paused = 0

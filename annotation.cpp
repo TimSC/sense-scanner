@@ -884,7 +884,7 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
             //Format as XML
             QTextStream xmlStr(&xml);
-            TrackingAnnotationData::FrameToXml(ann, ti, xmlStr);
+            TrackingAnnotationData::FrameToXml(ann, (ti / 1000.), xmlStr);
         }
         catch(exception &err)
         {
