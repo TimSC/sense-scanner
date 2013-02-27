@@ -708,6 +708,14 @@ void MainWindow::SaveAsWorkspace()
       tr("Save Workspace"), "", tr("Workspaces (*.work)"));
     if(fileName.length() == 0) return;
 
+    //If no file extension is set, use .work as the extension
+    QFileInfo fi(fileName);
+    QString csuffix = fi.completeSuffix();
+    if(csuffix.size()==0)
+    {
+        fileName.append(".work");
+    }
+
     //WaitPopUpDialog *waitDlg = new WaitPopUpDialog(this);
 
     this->SaveAs(fileName);

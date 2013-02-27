@@ -858,6 +858,14 @@ void TrackingSceneController::SaveAnnotation()
       tr("Save Annotation Track"), "", tr("Annotation (*.annot)"));
     if(fileName.length() == 0) return;
 
+    //If no file extension is set, use .annot as the extension
+    QFileInfo fi(fileName);
+    QString csuffix = fi.completeSuffix();
+    if(csuffix.size()==0)
+    {
+        fileName.append(".annot");
+    }
+
     //Request data
     std::tr1::shared_ptr<class Event> reqEv(new Event("GET_ANNOTATION_BY_XML"));
     reqEv->toUuid = this->annotationUuid;
