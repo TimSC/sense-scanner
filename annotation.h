@@ -79,6 +79,7 @@ public:
 
     void AddAnnotationAtTime(unsigned long long ti);
     void RemoveAnnotationAtTime(unsigned long long ti);
+    std::vector<std::vector<float> > GetAnnotationAtTime(unsigned long long ti);
 
     unsigned long long GetSeekFowardTime(unsigned long long queryTime);
     unsigned long long GetSeekBackTime(unsigned long long queryTime);

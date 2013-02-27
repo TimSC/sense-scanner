@@ -237,6 +237,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("ALG_UUID_FOR_ANNOTATION",*eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_DATA",*eventReceiver);
     this->eventLoop->AddListener("MARKED_LIST_RESPONSE",*eventReceiver);
+    this->eventLoop->AddListener("ANNOTATION_AT_TIME",*eventReceiver);
 
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(0, this->eventLoop);
@@ -910,8 +911,10 @@ void MainWindow::TrainModelPressed()
             this->eventLoop->SendEvent(foundImgEv);
 
             //Get annotation data and sent it to the algorithm
-            std::tr1::shared_ptr<class Event> getAnnotEv(new Event("GET_ALL_ANNOTATION_XML"));
+            std::tr1::shared_ptr<class Event> getAnnotEv(new Event("GET_ANNOTATION_AT_TIME"));
             getAnnotEv->toUuid = annotationUuids[ind.row()];
+            QString reqDataStr = QString("%1").arg(annotTimestamp);
+            getAnnotEv->data = reqDataStr.toLocal8Bit().constData();
             getAnnotEv->id = this->eventLoop->GetId();
             this->eventLoop->SendEvent(getAnnotEv);
 

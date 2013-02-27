@@ -695,6 +695,11 @@ void TrackingAnnotationData::RemoveAnnotationAtTime(unsigned long long ti)
     this->pos.erase(ti);
 }
 
+std::vector<std::vector<float> > TrackingAnnotationData::GetAnnotationAtTime(unsigned long long ti)
+{
+    return this->pos[ti];
+}
+
 //****************************************************
 
 AnnotThread::AnnotThread(class Annotation *annIn, class AvBinMedia* mediaInterfaceIn)
@@ -730,6 +735,7 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("SET_SHAPE", *this->eventReceiver);
     this->eventLoop->AddListener("ADD_ANNOTATION_AT_TIME", *this->eventReceiver);
     this->eventLoop->AddListener("REMOVE_ANNOTATION_AT_TIME", *this->eventReceiver);
+    this->eventLoop->AddListener("GET_ANNOTATION_AT_TIME", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ALG_UUID", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ALL_ANNOTATION_XML", *this->eventReceiver);
     this->eventLoop->AddListener("SET_ANNOTATION_BY_XML", *this->eventReceiver);
@@ -864,11 +870,42 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         assert(this->parentAnn->track!=NULL);
         this->parentAnn->track->RemoveAnnotationAtTime(ti);
     }
+    if(ev->type=="GET_ANNOTATION_AT_TIME")
+    {
+        //Check for annotation at this time
+        unsigned long long ti = STR_TO_ULL_SIMPLE(ev->data.c_str());
+        assert(this->parentAnn!=NULL);
+        assert(this->parentAnn->track!=NULL);
+        QString xml;
+
+        try
+        {
+            std::vector<std::vector<float> > ann = this->parentAnn->track->GetAnnotationAtTime(ti);
+
+            //Format as XML
+            QTextStream xmlStr(&xml);
+            TrackingAnnotationData::FrameToXml(ann, ti, xmlStr);
+        }
+        catch(exception &err)
+        {
+            std::tr1::shared_ptr<class Event> responseEv(new Event("ANNOTATION_AT_TIME"));
+            responseEv->id = ev->id;
+            responseEv->data = "NOT_FOUND";
+            this->eventLoop->SendEvent(responseEv);
+        }
+
+        //Return data as event
+        std::tr1::shared_ptr<class Event> responseEv(new Event("ANNOTATION_AT_TIME"));
+        responseEv->id = ev->id;
+        responseEv->data = xml.toLocal8Bit().constData();
+        this->eventLoop->SendEvent(responseEv);
+
+    }
     if(ev->type=="GET_ALG_UUID")
     {
         std::tr1::shared_ptr<class Event> responseEv(new Event("ALG_UUID_FOR_ANNOTATION"));
         responseEv->data = this->parentAnn->GetAlgUid().toString().toLocal8Bit().constData();
-        responseEv->fromUuid = algUid;
+        responseEv->fromUuid = this->parentAnn->GetAnnotUid();
         responseEv->id = ev->id;
         this->eventLoop->SendEvent(responseEv);
     }
@@ -879,7 +916,7 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         this->parentAnn->track->WriteAnnotationXml(xmlStr);
 
         std::tr1::shared_ptr<class Event> responseEv(new Event("ANNOTATION_DATA"));
-        responseEv->fromUuid = algUid;
+        responseEv->fromUuid = this->parentAnn->GetAnnotUid();
         responseEv->id = ev->id;
         responseEv->data = xml.toLocal8Bit().constData();
         this->eventLoop->SendEvent(responseEv);
