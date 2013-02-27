@@ -39,6 +39,7 @@ def WorkerProcessProf(childPipeConn):
 		if childPipeConn.poll():
 			event = childPipeConn.recv()
 
+			print "Rx",event[0]
 			if event[0]=="RUN":
 				print "NOW_RUNNING"
 				paused = 0
@@ -49,7 +50,7 @@ def WorkerProcessProf(childPipeConn):
 				running = 0
 			if event[0]=="GET_PROGRESS":
 				getProgress = True
-			if event[0]=="TRAIN":
+			if event[0]=="TRAINING_DATA_FINISH":
 				if len(trainImgs) == 0 and not modelReady:
 					print "Error: No images loaded in algorithm process"
 					continue

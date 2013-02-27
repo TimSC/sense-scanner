@@ -26,6 +26,11 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     //this->algOutLog->open(QIODevice::WriteOnly);
     this->eventReceiver = new class EventReceiver(this->eventLoop);
     this->eventLoop->AddListener("PREDICT_FRAME_REQUEST", *this->eventReceiver);
+    this->eventLoop->AddListener("TRAINING_IMG_FOUND", *this->eventReceiver);
+    this->eventLoop->AddListener("TRAINING_POS_FOUND", *this->eventReceiver);
+    this->eventLoop->AddListener("TRAINING_DATA_FINISH", *this->eventReceiver);
+    this->eventLoop->AddListener("GET_PROGRESS", *this->eventReceiver);
+    this->eventLoop->AddListener("GET_MODEL", *this->eventReceiver);
 
     QObject::connect(&this->timer, SIGNAL(timeout()), this, SLOT(Update()));
     this->timer.start(10); //in millisec
@@ -231,7 +236,7 @@ void AlgorithmProcess::Update()
         std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
 
         //Only process events addressed to this algorithm
-        if(ev->toUuid.isNull() || ev->toUuid != this->GetUid())
+        if(ev->toUuid.isNull() || ev->toUuid == this->GetUid())
             this->HandleEvent(ev);
     }
     catch(std::runtime_error e)
@@ -260,8 +265,6 @@ void AlgorithmProcess::Update()
 
 void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
-    if(QString(ev->data.c_str()) != this->uid.toString()) return; //Check if this is the appropriate algorithm
-
     if(ev->type == "PREDICT_FRAME_REQUEST")
     {
         //Encode request event into a serial data and send to process
@@ -316,7 +319,7 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
     if(ev->type == "TRAINING_DATA_FINISH")
     {
-        this->SendCommand("TRAIN\n");
+        this->SendCommand("TRAINING_DATA_FINISH\n");
     }
 
     if(ev->type == "GET_PROGRESS")
