@@ -906,7 +906,7 @@ void MainWindow::TrainModelPressed()
             this->eventLoop->SendEvent(foundImgEv);
 
             //Get annotation data and sent it to the algorithm
-            std::tr1::shared_ptr<class Event> getAnnotEv(new Event("GET_ANNOTATION_XML"));
+            std::tr1::shared_ptr<class Event> getAnnotEv(new Event("GET_ALL_ANNOTATION_XML"));
             getAnnotEv->toUuid = annotationUuids[ind.row()];
             getAnnotEv->id = this->eventLoop->GetId();
             this->eventLoop->SendEvent(getAnnotEv);
