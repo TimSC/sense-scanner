@@ -600,12 +600,16 @@ void MainWindow::Update()
         }
         if(ev->type=="THREAD_PROGRESS_UPDATE")
         {
-            std::vector<std::string> args = split(ev->data.c_str(),',');
-            this->workspace.ProcessingProgressChanged(QUuid(args[1].c_str()), atof(args[0].c_str()));
+            this->workspace.ProcessingProgressChanged(ev->fromUuid, atof(ev->data.c_str()));
             this->RegenerateProcessingList();
         }
         if(ev->type=="THREAD_STATUS_CHANGED")
         {
+            AlgorithmProcess::ProcessState state;
+            if(ev->data=="paused") state = AlgorithmProcess::PAUSED;
+            if(ev->data=="running") state = AlgorithmProcess::RUNNING;
+            if(ev->data=="finished") state = AlgorithmProcess::STOPPED;
+            this->workspace.ProcessingStateChanged(ev->fromUuid, state);
             this->RegenerateProcessingList();
         }
 

@@ -221,6 +221,7 @@ QByteArray AlgorithmProcess::ReadLineFromBuffer(QByteArray &buff, int popLine, i
 
 void AlgorithmProcess::Update()
 {
+    //cout << "AlgorithmProcess::Update()" << endl;
     //Process events from application
     int flushEvents = 1;
     while(flushEvents)

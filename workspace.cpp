@@ -210,9 +210,21 @@ float Workspace::GetProcessingProgress(QUuid uuid)
     throw std::runtime_error ("Uuid not found");
 }
 
+void Workspace::ProcessingStateChanged(QUuid uuid, AlgorithmProcess::ProcessState state)
+{
+    for(unsigned int i=0;i<this->processingUuids.size();i++)
+    {
+        if(uuid == this->processingUuids[i])
+        {
+            this->processingStates[i] = state;
+            return;
+        }
+    }
+    throw std::runtime_error ("Uuid not found");
+}
+
 AlgorithmProcess::ProcessState Workspace::GetProcessingState(QUuid uuid)
 {
-
     for(unsigned int i=0;i<this->processingUuids.size();i++)
     {
         if(uuid == this->processingUuids[i])
@@ -221,7 +233,6 @@ AlgorithmProcess::ProcessState Workspace::GetProcessingState(QUuid uuid)
         }
     }
     throw std::runtime_error ("Uuid not found");
-
 }
 
 int Workspace::NumProcessesBlockingShutdown()

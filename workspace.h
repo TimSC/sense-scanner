@@ -46,7 +46,10 @@ public:
     //std::tr1::shared_ptr<class AlgorithmProcess> GetProcessing(unsigned int num);
     void ProcessingProgressChanged(QUuid uuid, float progress);
     float GetProcessingProgress(QUuid uuid);
+
+    void ProcessingStateChanged(QUuid uuid, AlgorithmProcess::ProcessState state);
     AlgorithmProcess::ProcessState GetProcessingState(QUuid uuid);
+
     QList<QUuid> GetProcessingUuids();
 
     int NumProcessesBlockingShutdown();
