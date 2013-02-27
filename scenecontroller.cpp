@@ -86,12 +86,13 @@ TrackingSceneController::~TrackingSceneController()
     {
         this->scene->clear();
         this->scene->SetSceneControl(NULL);
-        this->scene = QSharedPointer<MouseGraphicsScene>(NULL);
     }
+    this->scene = QSharedPointer<MouseGraphicsScene>(NULL);
 
     if(this->annotationControls != NULL)
         delete annotationControls;
     annotationControls = NULL;
+
 }
 
 void TrackingSceneController::VideoImageChanged(QImage &fr, unsigned long long startTime,

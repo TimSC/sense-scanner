@@ -726,8 +726,7 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
 
     this->eventLoop->AddListener("GET_SEEK_BACKWARD_TIME", *this->eventReceiver);
     this->eventLoop->AddListener("GET_SEEK_FOWARD_TIME", *this->eventReceiver);
-
-
+    this->eventLoop->AddListener("GET_MARKED_LIST", *this->eventReceiver);
 }
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
@@ -932,6 +931,11 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             this->eventLoop->SendEvent(responseEv);
         }
     }
+    if(ev->type=="GET_MARKED_LIST")
+    {
+        int debug= 1;
+    }
+
 
     }
 
@@ -1329,6 +1333,8 @@ Annotation::~Annotation()
     {
         annotThread->Stop();
     }
+    std::tr1::shared_ptr<class AnnotThread> empty;
+    this->annotThread = empty;
     this->SetTrack(NULL);
 }
 
