@@ -599,9 +599,16 @@ void TrackingSceneController::LoadShape()
     QString fileName = QFileDialog::getOpenFileName(0,
         tr("Load Shape"), "", tr("Shapes (*.shape)"));
     if(fileName.length() == 0)
-    {
         return;
+
+    //If no file extension is set, use .shape as the extension
+    QFileInfo fi(fileName);
+    QString csuffix = fi.completeSuffix();
+    if(csuffix.size()==0)
+    {
+        fileName.append(".shape");
     }
+
     QFile shapeFile(fileName);
     shapeFile.open(QIODevice::ReadOnly | QIODevice::Text);
     QTextStream shapeStream(&shapeFile);
