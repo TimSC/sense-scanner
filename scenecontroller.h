@@ -92,7 +92,7 @@ public slots:
     //virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);
 
     void RefreshCurrentPos();
-    std::vector<std::vector<float> > GetShape();
+    std::vector<std::vector<float> > GetShape(std::vector<std::vector<int> > &linksOut);
     void SetShape(std::vector<std::vector<float> > shape);
     void RefreshLinks();
 protected:
