@@ -41,6 +41,7 @@ public:
 
     //Read individual frames
     unsigned int NumMarkedFrames();
+    std::vector<unsigned long long> GetMarkTimes();
     //void GetIndexAnnotationXml(unsigned int index, QTextStream *out);
     //unsigned long long GetIndexTimestamp(unsigned int index);
 

@@ -236,6 +236,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("SOURCE_FILENAME",*eventReceiver);
     this->eventLoop->AddListener("ALG_UUID_FOR_ANNOTATION",*eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_DATA",*eventReceiver);
+    this->eventLoop->AddListener("MARKED_LIST_RESPONSE",*eventReceiver);
 
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(0, this->eventLoop);

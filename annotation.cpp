@@ -168,6 +168,16 @@ void TrackingAnnotationData::SetAnnotationBetweenTimestamps(unsigned long long s
     this->pos[midTime] = annot;
 }
 
+std::vector<unsigned long long> TrackingAnnotationData::GetMarkTimes()
+{
+    std::vector<unsigned long long> out;
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it = this->pos.begin(); it != this->pos.end(); it++)
+    {
+        out.push_back(it->first);
+    }
+    return out;
+}
 
 //*********************************************************
 
@@ -933,9 +943,20 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
     if(ev->type=="GET_MARKED_LIST")
     {
-        int debug= 1;
-    }
+        std::vector<unsigned long long> tis = this->parentAnn->track->GetMarkTimes();
+        QString tisStr;
+        for(unsigned int i=0;i<tis.size();i++)
+        {
+            if(i>0) tisStr.append(",");
+            QString tmp = QString("%1").arg(tis[i]);
+            tisStr.append(tmp);
+        }
 
+        std::tr1::shared_ptr<class Event> responseEv(new Event("MARKED_LIST_RESPONSE"));
+        responseEv->id = ev->id;
+        responseEv->data = tisStr.toLocal8Bit().constData();
+        this->eventLoop->SendEvent(responseEv);
+    }
 
     }
 
