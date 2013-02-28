@@ -18,7 +18,6 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->paused = 1;
     this->pausing = 0;
     this->initDone = 0;
-    this->dataBlockReceived = 0;
 
 	//QString fina = "algout.txt";
     this->eventLoop = eventLoopIn;
@@ -106,7 +105,6 @@ void AlgorithmProcess::Init()
     this->paused = 1;
     this->pausing = 0;
     this->initDone = 1;
-    this->dataBlockReceived = 0;
 }
 
 void AlgorithmProcess::Pause()
@@ -329,14 +327,8 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
     if(ev->type == "GET_MODEL")
     {
-        QByteArray modelbin = this->GetModel();
-
-        //Return model by event
-        std::tr1::shared_ptr<class Event> responseEv(new Event("SAVED_MODEL_BINARY"));
-        responseEv->fromUuid = this->GetUid();
-        responseEv->id = ev->id;
-        responseEv->data = modelbin.constData();
-        this->eventLoop->SendEvent(responseEv);
+        this->saveModelRequestIds.push_back(ev->id);
+        this->GetModel();
     }
 }
 
@@ -420,8 +412,19 @@ void AlgorithmProcess::ProcessAlgOutput()
         //Remove used data from buffer
         this->algOutBuffer = this->algOutBuffer.mid(cmd.length() + blockArg.length() + blockLen + 2);
 
-		this->dataBlock = QByteArray::fromBase64(blockData);
-        this->dataBlockReceived = 1;
+        //Return model as event
+        std::tr1::shared_ptr<class Event> responseEv(new Event("SAVED_MODEL_BINARY"));
+        responseEv->data = QByteArray::fromBase64(blockData).constData();
+        responseEv->fromUuid = this->uid;
+        if(this->saveModelRequestIds.size()>=1)
+        {
+            responseEv->id = this->saveModelRequestIds[0];
+            this->saveModelRequestIds.pop_front();
+        }
+        else
+            responseEv->id = 0;
+        el.SendEvent(responseEv);
+
 
         return;
     }
@@ -564,33 +567,11 @@ unsigned int AlgorithmProcess::EncodedLength(QString cmd)
     return encodedCmd.length();
 }
 
-QByteArray AlgorithmProcess::GetModel()
+void AlgorithmProcess::GetModel()
 {
-
     //Send request to algorithm process
     assert(this->paused);
-    this->dataBlock = "";
-    this->dataBlockReceived = 0;
     this->SendCommand("SAVE_MODEL\n");
-
-    //Wait for response
-    int count = 0;
-    while(!this->dataBlockReceived)
-    {
-        this->waitForFinished(100);
-        //this->InternalUpdate();
-        count ++;
-    }
-    if(!this->dataBlockReceived)
-    {
-        throw std::runtime_error("Algorithm process timed out during GetModel()");
-    }
-
-    QByteArray out;
-	//out.append(QByteArray::fromBase64(this->dataBlock));
-	out.append(this->dataBlock);
-    int currentLen = out.length();
-    return out;
 }
 
 QUuid AlgorithmProcess::GetUid()

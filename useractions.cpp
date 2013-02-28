@@ -177,8 +177,7 @@ int UserActions::SaveAs(QString fina)
             this->eventLoop->SendEvent(getModelEv);
 
             std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(getModelEv->id);
-            class BinaryData *modelBin = (class BinaryData *)ev->raw;
-            QByteArray modelArr((const char *)modelBin->raw, modelBin->size);
+            QByteArray modelArr((const char *)ev->data.c_str(), ev->data.length());
 
             //Encode as XML binary blob
             QByteArray modelBase64 = modelArr.toBase64();

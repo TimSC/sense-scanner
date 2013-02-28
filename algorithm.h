@@ -56,7 +56,7 @@ protected:
     void SendCommand(QString cmd);
     void SendRawDataBlock(QString args, QByteArray data);
     unsigned int EncodedLength(QString cmd);
-    QByteArray GetModel();
+    void GetModel();
     void HandleEvent(std::tr1::shared_ptr<class Event> ev);
 
     int stopping;
@@ -67,13 +67,11 @@ protected:
     class EventLoop *eventLoop;
     class EventReceiver *eventReceiver;
 
-    QByteArray dataBlock;
-    int dataBlockReceived;
-
     QByteArray algOutBuffer;
     QByteArray algErrBuffer;
     QUuid uid;
     QTimer timer;
+    QList<unsigned long long> saveModelRequestIds;
 };
 
 #endif // ALGORITHM_H
