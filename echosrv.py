@@ -91,7 +91,7 @@ def WorkerProcessProf(childPipeConn):
 					#modelData = "bz2".encode("ascii")+bz2.compress(trackerStr)
 					modelData = "raw".encode("ascii")+trackerStr
 					modelDataB64 = base64.b64encode(modelData)
-					print "DATA_BLOCK={0}".format(len(modelDataB64)+3)
+					print "DATA_BLOCK={0}".format(len(modelDataB64))
 					sys.stdout.write("MODEL\n")
 					sys.stdout.flush()
 					sys.stdout.write(modelDataB64)
@@ -143,19 +143,20 @@ def WorkerProcessProf(childPipeConn):
 					#	print pid, x, y
 
 				if args[0]=="MODEL":
-					print "Loading model from string", len(event[2])
+					binModel = base64.b64decode(event[2])
+					modelFormat = binModel[:3]
+					print "Loading model from string", len(event[2]), modelFormat
+					print "Uncompressed size", len(binModel)
 					try:
-						modelFormat = event[2][:3]
 						modelData = None
 						if modelFormat == "bz2":
-							modelData = bz2.decompress(event[2][3:])
+							modelData = bz2.decompress(binModel[3:])
 						if modelFormat == "raw":
-							modelData = event[2][3:]
+							modelData = binModel[3:]
 						if modelFormat == "zlb":
-							modelData = zlib.decompress(event[2][3:])
+							modelData = zlib.decompress(binModel[3:])
 						assert modelData is not None
-
-						print "Uncompressed size", len(modelData)
+						
 						tracker = pickle.loads(modelData)
 						tracker.PostUnPickle()
 						print tracker

@@ -333,11 +333,6 @@ void UserActions::Load(QString fina)
                     foundModelEv->toUuid = uid;
                     this->eventLoop->SendEvent(foundModelEv);
 
-                    //Continue to train if needed
-                    std::tr1::shared_ptr<class Event> trainingFinishEv(new Event("TRAINING_DATA_FINISH"));
-                    trainingFinishEv->toUuid = uid;
-                    this->eventLoop->SendEvent(trainingFinishEv);
-
                     //Ask process to provide progress update
                     std::tr1::shared_ptr<class Event> getProgressEv(new Event("GET_PROGRESS"));
                     getProgressEv->toUuid = uid;

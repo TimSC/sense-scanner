@@ -336,7 +336,10 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type == "SET_MODEL")
     {
         cout << "Sending model with format " << ev->buffer.left(3).constData() << endl;
-        this->SendRawDataBlock("MODEL\n", ev->buffer.toBase64());
+        cout << "Raw length" << ev->buffer.size() << endl;
+        QByteArray b64bin = ev->buffer.toBase64();
+        cout << "Base64 length" << b64bin.size() << endl;
+        this->SendRawDataBlock("MODEL\n", b64bin);
     }
 }
 
@@ -405,9 +408,10 @@ void AlgorithmProcess::ProcessAlgOutput()
         QByteArray blockArg = this->ReadLineFromBuffer(this->algOutBuffer,0,1);
 		QString blockLenStr = cmd.mid(11);
         int blockLen = blockLenStr.toInt();
+        cout << "Expected block len " << blockLen << endl;
 
         //Wait for process to write the entire data block to standard output
-        if(this->algOutBuffer.length() < cmd.length() + blockArg.length() + blockLen)
+        if(this->algOutBuffer.length() < cmd.length() + blockArg.length() + blockLen + 2)
             return;
 
         QByteArray blockData = this->algOutBuffer.mid(cmd.length() + blockArg.length() + 2, blockLen);
@@ -416,9 +420,9 @@ void AlgorithmProcess::ProcessAlgOutput()
 
         //Return model as event
         std::tr1::shared_ptr<class Event> responseEv(new Event("SAVED_MODEL_BINARY"));
-        int test = blockData.size();
+        cout << "Base64 length" << blockData.size() << endl;
         responseEv->buffer = QByteArray::fromBase64(blockData);
-        int test2 = responseEv->buffer.size();
+        cout << "Raw length" << responseEv->buffer.size() << endl;
         responseEv->fromUuid = this->uid;
         if(this->saveModelRequestIds.size()>=1)
         {
