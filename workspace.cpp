@@ -63,6 +63,7 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
 
 unsigned int Workspace::AddSource(QUuid uuid)
 {
+    this->lock.lock();
     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
     TrackingAnnotationData *scenePtr = new TrackingAnnotationData();
     ann->SetTrack(scenePtr);
@@ -77,6 +78,7 @@ unsigned int Workspace::AddSource(QUuid uuid)
     this->annotationThreads.push_back(annotThread);
     unsigned int out = this->annotations.size();
 
+    this->lock.unlock();
     std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_ANNOTATION_CHANGED"));
     this->eventLoop->SendEvent(changeEv);
 
@@ -85,6 +87,7 @@ unsigned int Workspace::AddSource(QUuid uuid)
 
 void Workspace::RemoveSource(QUuid uuid)
 {
+    this->lock.lock();
     //Find index of uuid
     int ind = -1;
     for(unsigned int i=0;i<this->annotationUuids.size();i++)
@@ -95,7 +98,12 @@ void Workspace::RemoveSource(QUuid uuid)
             break;
         }
     }
-    if (ind == -1) throw std::runtime_error("No such uuid");
+    if (ind == -1)
+    {
+        this->lock.unlock();
+        throw std::runtime_error("No such uuid");
+    }
+
 
     //Prepare annotation for delete
     std::tr1::shared_ptr<class Annotation> ann = this->annotations[ind];
@@ -104,6 +112,7 @@ void Workspace::RemoveSource(QUuid uuid)
     this->annotations.erase(this->annotations.begin()+ind);
     this->annotationUuids.erase(this->annotationUuids.begin()+ind);
     this->annotationThreads.erase(this->annotationThreads.begin()+ind);
+    this->lock.unlock();
 
     std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_ANNOTATION_CHANGED"));
     this->eventLoop->SendEvent(changeEv);
@@ -131,7 +140,7 @@ QList<QUuid> Workspace::GetAnnotationUuids()
 
 void Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg)
 {
-
+    this->lock.lock();
     try
     {
         alg->Init();
@@ -143,6 +152,7 @@ void Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg)
         errPopUp->showMessage(err.what());
         errPopUp->exec();
         delete errPopUp;
+        this->lock.unlock();
         return;
     }
 
@@ -156,11 +166,12 @@ void Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg)
 
     std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_PROCESSING_CHANGED"));
     this->eventLoop->SendEvent(changeEv);
-
+    this->lock.unlock();
 }
 
 int Workspace::RemoveProcessing(QUuid uuid)
 {
+    this->lock.lock();
     int ind = 0, found = 0;
     for(unsigned int i=0;i<this->processingUuids.size();i++)
     {
@@ -191,6 +202,7 @@ int Workspace::RemoveProcessing(QUuid uuid)
     this->processingUuids.erase(this->processingUuids.begin()+ind);
     this->processingStates.erase(this->processingStates.begin()+ind);
 
+    this->lock.unlock();
     std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_PROCESSING_CHANGED"));
     this->eventLoop->SendEvent(changeEv);
     return 1;
@@ -281,10 +293,6 @@ void Workspace::ClearAnnotation()
 void Workspace::Update()
 {
 
-    //This tries to update but if mutex is locked, it returns immediately
-    bool havelock = this->lock.try_lock();
-    if(!havelock) return;
-
     //Process events from application
     int flushEvents = 1;
     while(flushEvents)
@@ -325,7 +333,6 @@ void Workspace::Update()
             count ++;
         }
     }
-    this->lock.unlock();
 }
 
 void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)

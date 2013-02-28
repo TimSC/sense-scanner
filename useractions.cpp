@@ -91,8 +91,11 @@ int UserActions::SaveAs(QString fina)
     this->eventLoop->SendEvent(getAnnotUuids);
 
     //Decode response
+    std::tr1::shared_ptr<class Event> resp = this->eventReceiver->WaitForEventId(getAnnotUuids->id);
     QList<QUuid> annotationUuids;
-    assert(0);
+    std::vector<std::string> splitUuids = split(resp->data.c_str(), ',');
+    for(unsigned int i=0;i<splitUuids.size();i++)
+        annotationUuids.push_back(QUuid(splitUuids[i].c_str()));
 
     for(unsigned int i=0;i<annotationUuids.size();i++)
     {
