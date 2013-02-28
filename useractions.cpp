@@ -62,11 +62,6 @@ void UserActions::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("LOAD_WORKSPACE", *this->eventReceiver);
 }
 
-void UserActions::SetMediaInterface(class AvBinMedia* mediaInterfaceIn)
-{
-    this->mediaInterface = mediaInterfaceIn;
-}
-
 int UserActions::SaveAs(QString fina)
 {
     int finaLen = fina.length();
@@ -234,8 +229,8 @@ void UserActions::Load(QString fina)
                     //QString sourceFiNaAbs = dir.absoluteFilePath(sourceFiNa);
 
                     QFileInfo fileInfo(sourceFiNa);
-                    std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
-                    ann->SetSource(fileInfo.absoluteFilePath());
+                    //std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
+                    //ann->SetSource(fileInfo.absoluteFilePath());
 
                     //Set source UID
                     QString uidStr = sourceEle.attribute("uid");
@@ -245,7 +240,7 @@ void UserActions::Load(QString fina)
                     //Set alg Uid
                     QString algStr = sourceEle.attribute("alg");
                     QUuid alg(algStr);
-                    ann->SetAlgUid(alg);
+                    //ann->SetAlgUid(alg);
 
                     TrackingAnnotationData *track =
                             new TrackingAnnotationData();
@@ -260,12 +255,20 @@ void UserActions::Load(QString fina)
                         track->ReadAnnotationXml(et);
 
                         trackData = trackData.nextSibling();
-
                     }
 
-                    ann->SetTrack(track);
-                    //this->workspace.AddSource(ann, mediaInterface, uid);
-                    assert(0);//TODO change to event basis
+                    std::tr1::shared_ptr<class Event> newAnnEv(new Event("NEW_ANNOTATION"));
+                    QString dataStr = QString("%1,%2,%3").arg(uid.toString()).arg(alg.toString()).arg(this->mediaUuid.toString());
+                    newAnnEv->data = dataStr.toLocal8Bit().constData();
+                    this->eventLoop->SendEvent(newAnnEv);
+
+                    this->sleep(10);
+                    //Set track xml
+                    assert(0);
+
+                    //Set source
+                    assert(0);
+
                     sourceNode = sourceNode.nextSibling();
                 }
 
@@ -319,4 +322,10 @@ void UserActions::Load(QString fina)
         }
         n = n.nextSibling();
     }
+}
+
+void UserActions::SetMediaUuid(QUuid mediaUuidIn)
+{
+    this->mediaUuid = mediaUuid;
+
 }

@@ -273,7 +273,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->userActions = new UserActions();
     this->userActions->SetEventLoop(this->eventLoop);
-    this->userActions->SetMediaInterface(this->mediaInterfaceBack);
+    this->userActions->SetMediaUuid(this->mediaInterfaceFront->GetUuid());
     this->userActions->Start();
 
     //Set visibility to show about box

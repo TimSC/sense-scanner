@@ -327,6 +327,11 @@ void AvBinMedia::ChangeVidSource(QString fina)
 
 }
 
+QUuid AvBinMedia::GetUuid()
+{
+    assert(this!=NULL);
+    return this->uuid;
+}
 
 //************************************************
 

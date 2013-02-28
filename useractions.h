@@ -2,6 +2,7 @@
 #define USERACTIONS_H
 
 #include "eventloop.h"
+#include <QtCore/QtCore>
 
 class UserActions : public MessagableThread
 {
@@ -13,12 +14,12 @@ public:
     virtual void Update();
     void SetEventLoop(class EventLoop *eventLoopIn);
 
-    void SetMediaInterface(class AvBinMedia* mediaInterfaceIn);
     int SaveAs(QString fina);
     void Load(QString fina);
+    void SetMediaUuid(QUuid mediaUuidIn);
 
 protected:
-    class AvBinMedia* mediaInterface;
+    QUuid mediaUuid;
 
 };
 

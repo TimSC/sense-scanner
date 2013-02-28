@@ -56,6 +56,7 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
     this->eventLoop = &eventLoopIn;
     if(this->eventReceiver!=NULL) delete this->eventReceiver;
     this->eventReceiver = new EventReceiver(this->eventLoop);
+    this->eventLoop->AddListener("NEW_ANNOTATION", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ANNOTATION_UUIDS", *this->eventReceiver);
     this->eventLoop->AddListener("GET_PROCESSING_UUIDS", *this->eventReceiver);
 }
@@ -341,6 +342,13 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type=="GET_PROCESSING_UUIDS")
     {
         int test=1;
+    }
+
+    //The following events are not uuid targetted
+    if(ev->type=="NEW_ANNOTATION")
+    {
+        int debug=  1;
+
     }
 }
 
