@@ -332,7 +332,11 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         QByteArray modelbin = this->GetModel();
 
         //Return model by event
-
+        std::tr1::shared_ptr<class Event> responseEv(new Event("SAVED_MODEL_BINARY"));
+        responseEv->fromUuid = this->GetUid();
+        responseEv->id = ev->id;
+        responseEv->data = modelbin.constData();
+        this->eventLoop->SendEvent(responseEv);
     }
 }
 

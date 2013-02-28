@@ -61,6 +61,13 @@ void UserActions::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("SAVE_WORKSPACE_AS", *this->eventReceiver);
     this->eventLoop->AddListener("LOAD_WORKSPACE", *this->eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_ADDED", *this->eventReceiver);
+    this->eventLoop->AddListener("ANNOTATION_UUIDS", *this->eventReceiver);
+    this->eventLoop->AddListener("PROCESSING_UUIDS", *this->eventReceiver);
+    this->eventLoop->AddListener("SOURCE_FILENAME", *this->eventReceiver);
+    this->eventLoop->AddListener("ALG_UUID_FOR_ANNOTATION", *this->eventReceiver);
+    this->eventLoop->AddListener("ANNOTATION_DATA", *this->eventReceiver);
+    this->eventLoop->AddListener("SAVED_MODEL_BINARY", *this->eventReceiver);
+
 }
 
 int UserActions::SaveAs(QString fina)
@@ -153,7 +160,7 @@ int UserActions::SaveAs(QString fina)
     this->eventLoop->SendEvent(getProcessingEv);
 
     //Decode response
-    std::tr1::shared_ptr<class Event> resp2 = this->eventReceiver->WaitForEventId(getAnnotUuids->id);
+    std::tr1::shared_ptr<class Event> resp2 = this->eventReceiver->WaitForEventId(getProcessingEv->id);
     QList<QUuid> processingUuids;
     std::vector<std::string> splitUuids2 = split(resp2->data.c_str(), ',');
     for(unsigned int i=0;i<splitUuids2.size();i++)

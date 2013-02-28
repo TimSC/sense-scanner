@@ -505,9 +505,9 @@ void MainWindow::RegenerateProcessingList()
         {
             std::ostringstream displayLine;
             float progress = this->workspace.GetProcessingProgress(algUuids[row]);
-            if(this->workspace.GetProcessingState(algUuids[row])!=AlgorithmProcess::STOPPED)
+            AlgorithmProcess::ProcessState state = this->workspace.GetProcessingState(algUuids[row]);
+            if(state!=AlgorithmProcess::STOPPED)
             {
-                AlgorithmProcess::ProcessState state = this->workspace.GetProcessingState(algUuids[row]);
                 if(state == AlgorithmProcess::STARTING) displayLine << "Starting " << progress;
                 if(state == AlgorithmProcess::RUNNING) displayLine << "Running " << progress;
                 if(state == AlgorithmProcess::RUNNING_PAUSING) displayLine << "Pausing... " << progress;

@@ -255,7 +255,10 @@ AlgorithmProcess::ProcessState Workspace::GetProcessingState(QUuid uuid)
     {
         if(uuid == this->processingUuids[i])
         {
-            return this->processingStates[i];
+            this->lock.lock();
+            AlgorithmProcess::ProcessState out = this->processingStates[i];
+            this->lock.unlock();
+            return out;
         }
     }
     throw std::runtime_error ("Uuid not found");
@@ -391,7 +394,8 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         {
             if(seekUuid == this->annotationUuids[i])
             {
-                this->processingProgress[i] = atof(ev->data.c_str());
+                //TODO
+                //this->annotationProgress[i] = atof(ev->data.c_str());
                 std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_ANNOTATION_CHANGED"));
                 this->eventLoop->SendEvent(changeEv);
             }
@@ -424,7 +428,8 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         {
             if(seekUuid == this->annotationUuids[i])
             {
-                this->processingProgress[i] = state;
+                //TODO
+                //this->annotationStates[i] = state;
                 std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_ANNOTATION_CHANGED"));
                 this->eventLoop->SendEvent(changeEv);
             }
@@ -435,7 +440,7 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         {
             if(seekUuid == this->processingUuids[i])
             {
-                this->processingProgress[i] = state;
+                this->processingStates[i] = state;
                 std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_PROCESSING_CHANGED"));
                 this->eventLoop->SendEvent(changeEv);
             }
