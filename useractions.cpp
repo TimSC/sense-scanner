@@ -243,43 +243,47 @@ void UserActions::Load(QString fina)
                     QUuid alg(algStr);
                     //ann->SetAlgUid(alg);
 
-                    TrackingAnnotationData *track =
-                            new TrackingAnnotationData();
-
                     QDomNode trackData = sourceNode.firstChild();
                     while(!trackData.isNull())
                     {
                         QDomElement et = trackData.toElement(); // try to convert the node to an element.
-                        if(et.isNull()) continue;
+                        if(et.isNull()) {trackData = trackData.nextSibling(); continue;}
                         if(et.tagName() != "tracking") {trackData = trackData.nextSibling(); continue;}
 
-                        track->ReadAnnotationXml(et);
+                        //Get XML of this annotation track
+                        QString xml;
+                        QTextStream xmlStream(&xml);
+                        et.save(xmlStream, 0);
+
+                        std::tr1::shared_ptr<class Event> newAnnEv(new Event("NEW_ANNOTATION"));
+                        QString dataStr = QString("%1").arg(uid.toString());
+                        newAnnEv->data = dataStr.toLocal8Bit().constData();
+                        newAnnEv->id = this->eventLoop->GetId();
+                        this->eventLoop->SendEvent(newAnnEv);
+
+                        //Wait for workspace to register this annotation
+                        this->eventReceiver->WaitForEventId(newAnnEv->id);
+
+                        //Set source
+                        std::tr1::shared_ptr<class Event> newAnnEv2(new Event("SET_SOURCE_FILENAME"));
+                        newAnnEv2->data = sourceFiNa.toLocal8Bit().constData();
+                        newAnnEv2->toUuid = uid;
+                        this->eventLoop->SendEvent(newAnnEv2);
+
+                        //Set annotation
+                        std::tr1::shared_ptr<class Event> newAnnEv3(new Event("SET_ANNOTATION_BY_XML"));
+                        newAnnEv3->toUuid = uid;
+                        newAnnEv3->data = xml.toLocal8Bit().constData();
+                        this->eventLoop->SendEvent(newAnnEv3);
+
+                        //Set alg uuid
+                        std::tr1::shared_ptr<class Event> newAnnEv4(new Event("SET_ALG_UUID"));
+                        newAnnEv4->toUuid = uid;
+                        newAnnEv4->data = xml.toLocal8Bit().constData();
+                        this->eventLoop->SendEvent(newAnnEv4);
 
                         trackData = trackData.nextSibling();
                     }
-
-                    std::tr1::shared_ptr<class Event> newAnnEv(new Event("NEW_ANNOTATION"));
-                    QString dataStr = QString("%1").arg(uid.toString());
-                    newAnnEv->data = dataStr.toLocal8Bit().constData();
-                    newAnnEv->id = this->eventLoop->GetId();
-                    this->eventLoop->SendEvent(newAnnEv);
-
-                    //Wait for workspace to register this annotation
-                    this->eventReceiver->WaitForEventId(newAnnEv->id);
-
-                    //Set source
-                    std::tr1::shared_ptr<class Event> newAnnEv2(new Event("SET_SOURCE_FILENAME"));
-                    newAnnEv2->data = sourceFiNa.toLocal8Bit().constData();
-                    newAnnEv2->toUuid = uid;
-                    this->eventLoop->SendEvent(newAnnEv2);
-
-                    this->sleep(10);
-                    //Set track xml
-                    assert(0);
-
-                    //Set alg uuid
-                    assert(0);
-
 
                     sourceNode = sourceNode.nextSibling();
                 }
