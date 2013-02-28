@@ -27,7 +27,8 @@ SOURCES += main.cpp\
     annotation.cpp \
     qblowfish/src/qblowfish.cpp \
     sourcealggui.cpp \
-    aboutgui.cpp
+    aboutgui.cpp \
+    useractions.cpp
 
 HEADERS  += mainwindow.h \
     videowidget.h \
@@ -46,7 +47,8 @@ HEADERS  += mainwindow.h \
     localsleep.h \
     annotation.h \
     sourcealggui.h \
-    aboutgui.h
+    aboutgui.h \
+    useractions.h
 
 FORMS    += mainwindow.ui \
     videowidget.ui \

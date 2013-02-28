@@ -10,6 +10,7 @@
 #include "avbinmedia.h"
 #include "workspace.h"
 #include "localmutex.h"
+#include "useractions.h"
 
 namespace Ui {
 class MainWindow;
@@ -166,6 +167,7 @@ private:
     int avbinVerChecked;
     int timeUpdatesEnabled;
     QString defaultFilename;
+    UserActions *userActions;
 
 public slots:
     void ImportVideo();

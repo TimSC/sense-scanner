@@ -271,6 +271,10 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->sourcesAlgGui->ui->dataSources->setSelectionMode(QListView::SelectionMode::ExtendedSelection);
     this->RegenerateSourcesList();
 
+    this->userActions = new UserActions();
+    this->userActions->SetEventLoop(this->eventLoop);
+    this->userActions->Start();
+
     //Set visibility to show about box
     //this->ui->workspaceLayout->hide();
     //this->ui->webViewLayout->hide();
@@ -297,6 +301,9 @@ MainWindow::~MainWindow()
 
     delete this->mediaInterfaceBack;
     this->mediaInterfaceBack = NULL;
+
+    delete this->userActions;
+    this->userActions = NULL;
 
 	delete this->eventLoop;
     this->eventLoop = NULL;

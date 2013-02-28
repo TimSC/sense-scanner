@@ -330,6 +330,9 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type == "GET_MODEL")
     {
         QByteArray modelbin = this->GetModel();
+
+        //Return model by event
+
     }
 }
 
