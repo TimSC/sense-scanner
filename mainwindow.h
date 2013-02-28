@@ -195,10 +195,6 @@ public slots:
 
     void AboutPressed();
     void ShowVideoPressed();
-
-    void Load(QString fina, class AvBinMedia* mediaInterface);
-    int Save();
-    void SaveAs(QString &fina);
 };
 
 #endif // MAINWINDOW_H
