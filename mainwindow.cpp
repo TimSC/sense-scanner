@@ -562,6 +562,9 @@ void MainWindow::ImportVideo()
     newAnnEv->data = dataStr.toLocal8Bit().constData();
     this->eventLoop->SendEvent(newAnnEv);
 
+    //Give the workspace an opportunity to create the annotation object
+    this->workspace.Update();
+
     //Set source
     std::tr1::shared_ptr<class Event> newAnnEv2(new Event("SET_SOURCE_FILENAME"));
     newAnnEv2->data = fileName.toLocal8Bit().constData();
