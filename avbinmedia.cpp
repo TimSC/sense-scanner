@@ -55,9 +55,10 @@ int AvBinMedia::OpenFile(QString fina)
 {
     assert(this->eventLoop);
     unsigned long long evid = this->eventLoop->GetId();
-    QString eventName = QString("AVBIN_OPEN_FILE%1").arg(this->id);
+    QString eventName = QString("AVBIN_OPEN_FILE");
     std::tr1::shared_ptr<class Event> openEv(new Event(eventName.toLocal8Bit().constData(), evid));
     openEv->data = fina.toLocal8Bit().constData();
+    openEv->toUuid = this->uuid;
     this->eventLoop->SendEvent(openEv);
 
     std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(evid);
@@ -89,7 +90,7 @@ void AvBinMedia::TerminateThread()
 {
     if(this->mediaThread!=NULL && this->mediaThread->isRunning())
     {
-        cout << "Warning: terminating buffer media thread " << this->id<<endl;
+        cout << "Warning: terminating buffer media thread " << this->uuid.toString().constData() <<endl;
         this->mediaThread->terminate();
     }
 }
@@ -118,11 +119,12 @@ QSharedPointer<QImage> AvBinMedia::Get(QString source,
     //Request the frame from the backend thread
     assert(this->eventLoop != NULL);
     unsigned long long evid = this->eventLoop->GetId();
-    QString eventName = QString("AVBIN_GET_FRAME%1").arg(this->id);
+    QString eventName = QString("AVBIN_GET_FRAME");
     std::tr1::shared_ptr<class Event> getFrameEvent(new Event(eventName.toLocal8Bit().constData(), evid));
     std::ostringstream tmp;
     tmp << ti * 1000;
     getFrameEvent->data = tmp.str();
+    getFrameEvent->toUuid = this->uuid;
     this->eventLoop->SendEvent(getFrameEvent);
 
     //Wait for frame response
@@ -186,8 +188,9 @@ long long unsigned AvBinMedia::Length(QString source) //Get length (ms)
 
     //Send message to avbin back end
     unsigned long long evid = this->eventLoop->GetId();
-    QString eventName = QString("AVBIN_GET_DURATION%1").arg(this->id);
+    QString eventName = QString("AVBIN_GET_DURATION");
     std::tr1::shared_ptr<class Event> durationEvent(new Event(eventName.toLocal8Bit().constData(), evid));
+    durationEvent->toUuid = this->uuid;
     this->eventLoop->SendEvent(durationEvent);
     assert(this->eventReceiver);
     std::tr1::shared_ptr<class Event> ev;
@@ -200,7 +203,7 @@ long long unsigned AvBinMedia::Length(QString source) //Get length (ms)
         throw std::runtime_error(err.what());
     }
 
-    QString eventNameRx = QString("AVBIN_DURATION_RESPONSE%1").arg(this->id);
+    QString eventNameRx = QString("AVBIN_DURATION_RESPONSE");
 
     if(ev->type == eventNameRx.toLocal8Bit().constData());
         return ROUND_TIMESTAMP(STR_TO_ULL(ev->data.c_str(),NULL,10) / 1000.);
@@ -217,7 +220,7 @@ long long unsigned AvBinMedia::GetFrameStartTime(QString source, long long unsig
 
 //*******************************************
 
-int AvBinMedia::RequestFrame(QString source, long long unsigned ti) //in milliseconds
+long long unsigned  AvBinMedia::RequestFrame(QString source, long long unsigned ti) //in milliseconds
 {
     if(this->mediaThread->IsStopFlagged())
     {
@@ -231,14 +234,16 @@ int AvBinMedia::RequestFrame(QString source, long long unsigned ti) //in millise
     //Request the frame from the backend thread
     assert(this->eventLoop != NULL);
     unsigned long long evid = this->eventLoop->GetId();
-    QString eventName = QString("AVBIN_GET_FRAME%1").arg(this->id);
+    QString eventName = QString("AVBIN_GET_FRAME");
     std::tr1::shared_ptr<class Event> getFrameEvent(new Event(eventName.toLocal8Bit().constData(), evid));
     std::ostringstream tmp;
     tmp << ti * 1000;
+    getFrameEvent->toUuid = this->uuid;
+    getFrameEvent->id = this->eventLoop->GetId();
     getFrameEvent->data = tmp.str();
     this->eventLoop->SendEvent(getFrameEvent);
 
-    return id;
+    return getFrameEvent->id;
 }
 
 void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long startTimestamp,
@@ -310,8 +315,8 @@ void AvBinMedia::ChangeVidSource(QString fina)
 
     //Create a new source
     this->mediaThread = new AvBinThread();
-    this->mediaThread->SetUuid(this->uuid);
     this->mediaThread->SetEventLoop(this->eventLoop);
+    this->mediaThread->SetUuid(this->uuid);
     this->mediaThread->Start();
 
     cout << "Opening " << fina.toLocal8Bit().constData() << endl;

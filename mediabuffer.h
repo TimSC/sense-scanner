@@ -83,7 +83,7 @@ public:
     virtual long long unsigned Length(QString source)=0; //Get length (ms)
     virtual long long unsigned GetFrameStartTime(QString source, long long unsigned ti)=0; //in milliseconds
 
-    virtual int RequestFrame(QString source, long long unsigned ti)=0;
+    virtual long long unsigned RequestFrame(QString source, long long unsigned ti)=0;
     virtual void Update(void (*frameCallback)(QImage& fr, unsigned long long startTimestamp,
                                               unsigned long long endTimestamp,
                                               unsigned long long requestedTimestamp,

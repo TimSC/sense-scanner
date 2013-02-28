@@ -37,7 +37,7 @@ public:
     virtual long long unsigned GetFrameStartTime(QString source, long long unsigned ti); //in milliseconds
     void TerminateThread();
 
-    int RequestFrame(QString source, long long unsigned ti);
+    long long unsigned RequestFrame(QString source, long long unsigned ti);
     void Update(void (*frameCallback)(QImage& fr, unsigned long long startTimestamp,
                                       unsigned long long endTimestamp,
                                       unsigned long long requestedTimestamp,
@@ -55,7 +55,6 @@ protected:
 
     class EventReceiver *eventReceiver;
     class EventLoop *eventLoop;
-    int id;
     AvBinThread *mediaThread;
     QString currentFina;
     QUuid uuid;
