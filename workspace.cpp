@@ -364,8 +364,12 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
     if(ev->type=="NEW_ANNOTATION")
     {
-
         this->AddSource(QUuid(ev->data.c_str()));
+
+        std::tr1::shared_ptr<class Event> changeEv2(new Event("ANNOTATION_ADDED"));
+        changeEv2->id = ev->id;
+        changeEv2->data = ev->data;
+        this->eventLoop->SendEvent(changeEv2);
     }
 }
 

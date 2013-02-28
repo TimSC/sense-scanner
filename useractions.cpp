@@ -60,6 +60,7 @@ void UserActions::SetEventLoop(class EventLoop *eventLoopIn)
 
     this->eventLoop->AddListener("SAVE_WORKSPACE_AS", *this->eventReceiver);
     this->eventLoop->AddListener("LOAD_WORKSPACE", *this->eventReceiver);
+    this->eventLoop->AddListener("ANNOTATION_ADDED", *this->eventReceiver);
 }
 
 int UserActions::SaveAs(QString fina)
@@ -260,7 +261,11 @@ void UserActions::Load(QString fina)
                     std::tr1::shared_ptr<class Event> newAnnEv(new Event("NEW_ANNOTATION"));
                     QString dataStr = QString("%1").arg(uid.toString());
                     newAnnEv->data = dataStr.toLocal8Bit().constData();
+                    newAnnEv->id = this->eventLoop->GetId();
                     this->eventLoop->SendEvent(newAnnEv);
+
+                    //Wait for workspace to register this annotation
+                    this->eventReceiver->WaitForEventId(newAnnEv->id);
 
                     //Set source
                     std::tr1::shared_ptr<class Event> newAnnEv2(new Event("SET_SOURCE_FILENAME"));
