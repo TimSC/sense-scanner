@@ -416,7 +416,9 @@ void AlgorithmProcess::ProcessAlgOutput()
 
         //Return model as event
         std::tr1::shared_ptr<class Event> responseEv(new Event("SAVED_MODEL_BINARY"));
-        responseEv->buffer = QByteArray::fromBase64(blockData).constData();
+        int test = blockData.size();
+        responseEv->buffer = QByteArray::fromBase64(blockData);
+        int test2 = responseEv->buffer.size();
         responseEv->fromUuid = this->uid;
         if(this->saveModelRequestIds.size()>=1)
         {
