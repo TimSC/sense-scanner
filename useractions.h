@@ -16,10 +16,9 @@ public:
 
     int SaveAs(QString fina);
     void Load(QString fina);
-    void SetMediaUuid(QUuid mediaUuidIn);
 
 protected:
-    QUuid mediaUuid;
+
 
 };
 

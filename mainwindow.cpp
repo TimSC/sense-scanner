@@ -239,9 +239,13 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("MARKED_LIST_RESPONSE",*eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_AT_TIME",*eventReceiver);
 
+    this->eventLoop->AddListener("WORKSPACE_ANNOTATION_CHANGED",*eventReceiver);
+    this->eventLoop->AddListener("WORKSPACE_PROCESSING_CHANGED",*eventReceiver);
+
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop);
     this->mediaInterfaceBack = new class AvBinMedia(this->eventLoop);
+    this->workspace.SetMediaUuid(this->mediaInterfaceFront->GetUuid());
 
     //Start event buffer timer
     this->timer = new QTimer();
@@ -257,7 +261,6 @@ MainWindow::MainWindow(QWidget *parent) :
     horLabelsAnn.push_back("Status");
     this->sourcesModel.setHorizontalHeaderLabels(horLabelsAnn);
     this->ui->sourcesAlgGui->ui->dataSources->setModel(&this->sourcesModel);
-    this->RegenerateSourcesList();
 
     QStringList horLabels;
     horLabels.push_back("Models");
@@ -273,7 +276,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->userActions = new UserActions();
     this->userActions->SetEventLoop(this->eventLoop);
-    this->userActions->SetMediaUuid(this->mediaInterfaceFront->GetUuid());
     this->userActions->Start();
 
     //Set visibility to show about box
@@ -554,9 +556,18 @@ void MainWindow::ImportVideo()
     if(fileName.length() == 0) return;
 
     QUuid uid = QUuid::createUuid();
-    unsigned int sourceId = this->workspace.AddSource(fileName, uid.toString(), this->mediaInterfaceBack);
 
-    this->RegenerateSourcesList();
+    std::tr1::shared_ptr<class Event> newAnnEv(new Event("NEW_ANNOTATION"));
+    QString dataStr = QString("%1").arg(uid.toString());
+    newAnnEv->data = dataStr.toLocal8Bit().constData();
+    this->eventLoop->SendEvent(newAnnEv);
+
+    //Set source
+    std::tr1::shared_ptr<class Event> newAnnEv2(new Event("SET_SOURCE_FILENAME"));
+    newAnnEv2->data = fileName.toLocal8Bit().constData();
+    newAnnEv2->toUuid = uid;
+    this->eventLoop->SendEvent(newAnnEv2);
+
 }
 
 void MainWindow::RemoveVideo()
@@ -577,7 +588,6 @@ void MainWindow::RemoveVideo()
         this->workspace.RemoveSource(algUuids[ind.row()]);
     }
 
-    this->RegenerateSourcesList();
 }
 
 void MainWindow::Update()
@@ -595,13 +605,11 @@ void MainWindow::Update()
         if(ev->type=="THREAD_STARTING")
         {
             this->threadCount ++;
-            this->RegenerateProcessingList();
         }
         if(ev->type=="THREAD_STOPPING")
         {
             assert(this->threadCount > 0);
             this->threadCount --;
-            this->RegenerateProcessingList();
         }
         if(ev->type=="AVBIN_OPEN_RESULT")
         {
@@ -609,26 +617,28 @@ void MainWindow::Update()
         }
         if(ev->type=="THREAD_PROGRESS_UPDATE")
         {
-            this->workspace.ProcessingProgressChanged(ev->fromUuid, atof(ev->data.c_str()));
-            this->RegenerateProcessingList();
+            assert(0);
+            //this->workspace.ProcessingProgressChanged(ev->fromUuid, atof(ev->data.c_str()));
+            //this->RegenerateProcessingList();
         }
         if(ev->type=="THREAD_STATUS_CHANGED")
         {
-            AlgorithmProcess::ProcessState state;
+            assert(0);
+            /*AlgorithmProcess::ProcessState state;
             if(ev->data=="paused") state = AlgorithmProcess::PAUSED;
             if(ev->data=="running") state = AlgorithmProcess::RUNNING;
             if(ev->data=="finished") state = AlgorithmProcess::STOPPED;
-            this->workspace.ProcessingStateChanged(ev->fromUuid, state);
-            this->RegenerateProcessingList();
+            this->workspace.ProcessingStateChanged(ev->fromUuid, state);*/
         }
 
         if(ev->type=="ANNOTATION_THREAD_PROGRESS")
         {
-            assert(ev->data.length()>=40);
+            assert(0);
+            /*assert(ev->data.length()>=40);
             QUuid annId(ev->data.substr(0, 38).c_str());
             QString progStr(ev->data.substr(39).c_str());
             this->annotProgress[annId] = progStr.toFloat();
-            this->RegenerateSourcesList();
+            this->RegenerateSourcesList();*/
         }
         if(ev->type=="AVBIN_VERSION")
         {
@@ -647,6 +657,15 @@ void MainWindow::Update()
             }
             this->avbinVerChecked = 1;
         }
+        if(ev->type=="WORKSPACE_ANNOTATION_CHANGED")
+        {
+            this->RegenerateSourcesList();
+        }
+        if(ev->type=="WORKSPACE_PROCESSING_CHANGED")
+        {
+            this->RegenerateSourcesList();
+        }
+
     }
     catch(std::runtime_error e) {flushing = 0;}
 
@@ -964,8 +983,6 @@ void MainWindow::TrainModelPressed()
     trainingFinishEv->toUuid = newUuid;
     this->eventLoop->SendEvent(trainingFinishEv);
 
-    //Update GUI to reflect changed workspace
-    this->RegenerateProcessingList();
 }
 
 void MainWindow::ApplyModelPressed()
@@ -1017,7 +1034,6 @@ void MainWindow::PauseProcessPressed()
         pauseEvent->toUuid = algUuids[ind.row()];
         this->eventLoop->SendEvent(pauseEvent);
     }
-    this->RegenerateProcessingList();
 }
 
 void MainWindow::RunProcessPressed()
@@ -1036,7 +1052,6 @@ void MainWindow::RunProcessPressed()
         this->eventLoop->SendEvent(pauseEvent);
 
     }
-    this->RegenerateProcessingList();
 }
 
 void MainWindow::RemoveProcessPressed()
@@ -1067,7 +1082,6 @@ void MainWindow::RemoveProcessPressed()
         int ret = this->workspace.RemoveProcessing(algUuids[ind.row()]);
 
     }
-    this->RegenerateProcessingList();
 }
 
 void MainWindow::AboutPressed()

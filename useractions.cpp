@@ -258,16 +258,23 @@ void UserActions::Load(QString fina)
                     }
 
                     std::tr1::shared_ptr<class Event> newAnnEv(new Event("NEW_ANNOTATION"));
-                    QString dataStr = QString("%1,%2,%3").arg(uid.toString()).arg(alg.toString()).arg(this->mediaUuid.toString());
+                    QString dataStr = QString("%1").arg(uid.toString());
                     newAnnEv->data = dataStr.toLocal8Bit().constData();
                     this->eventLoop->SendEvent(newAnnEv);
+
+                    //Set source
+                    std::tr1::shared_ptr<class Event> newAnnEv2(new Event("SET_SOURCE_FILENAME"));
+                    newAnnEv2->data = sourceFiNa.toLocal8Bit().constData();
+                    newAnnEv2->toUuid = uid;
+                    this->eventLoop->SendEvent(newAnnEv2);
 
                     this->sleep(10);
                     //Set track xml
                     assert(0);
 
-                    //Set source
+                    //Set alg uuid
                     assert(0);
+
 
                     sourceNode = sourceNode.nextSibling();
                 }
@@ -324,8 +331,3 @@ void UserActions::Load(QString fina)
     }
 }
 
-void UserActions::SetMediaUuid(QUuid mediaUuidIn)
-{
-    this->mediaUuid = mediaUuid;
-
-}

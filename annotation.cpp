@@ -702,7 +702,7 @@ std::vector<std::vector<float> > TrackingAnnotationData::GetAnnotationAtTime(uns
 
 //****************************************************
 
-AnnotThread::AnnotThread(class Annotation *annIn, class AvBinMedia* mediaInterfaceIn)
+AnnotThread::AnnotThread(class Annotation *annIn, QUuid mediaInterfaceIn)
 {
     this->parentAnn = annIn;
     this->srcDurationSet = 0;
@@ -730,6 +730,8 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("STOP_SPECIFIC_THREAD", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ANNOTATION_BETWEEN_TIMES", *this->eventReceiver);
     this->eventLoop->AddListener("SET_ANNOTATION_BETWEEN_TIMES", *this->eventReceiver);
+
+    this->eventLoop->AddListener("SET_SOURCE_FILENAME", *this->eventReceiver);
     this->eventLoop->AddListener("GET_SOURCE_FILENAME", *this->eventReceiver);
     this->eventLoop->AddListener("GET_SHAPE", *this->eventReceiver);
     this->eventLoop->AddListener("SET_SHAPE", *this->eventReceiver);
@@ -744,6 +746,8 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("GET_SEEK_FOWARD_TIME", *this->eventReceiver);
     this->eventLoop->AddListener("GET_MARKED_LIST", *this->eventReceiver);
 
+    this->eventLoop->AddListener("MEDIA_DURATION_RESPONSE", *this->eventReceiver);
+    this->eventLoop->AddListener("MEDIA_FRAME_RESPONSE", *this->eventReceiver);
 }
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
@@ -818,6 +822,11 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         assert(this->parentAnn!=NULL);
         assert(this->parentAnn->track!=NULL);
         this->parentAnn->track->SetAnnotationBetweenTimestamps(startStr.toULongLong(), endStr.toULongLong(), frame);
+    }
+
+    if(ev->type=="SET_SOURCE_FILENAME")
+    {
+        this->parentAnn->SetSource(ev->data.c_str());
     }
 
     if(ev->type=="GET_SOURCE_FILENAME")
@@ -1041,7 +1050,14 @@ void AnnotThread::Update()
         int err = 0;
         try
         {
-            this->srcDuration = this->mediaInterface->Length(src);
+            //Estimate progress and generate an event
+            std::tr1::shared_ptr<class Event> requestEv(new Event("GET_MEDIA_DURATION"));
+            requestEv->toUuid = this->mediaInterface;
+            requestEv->id = this->eventLoop->GetId();
+            this->eventLoop->SendEvent(requestEv);
+
+            std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(requestEv->id);
+            this->srcDuration = STR_TO_ULL_SIMPLE(response->data.c_str());
             cout << "Annot thread found length " << this->srcDuration << endl;
         }
         catch (std::runtime_error &errMsg)
@@ -1099,8 +1115,9 @@ void AnnotThread::Update()
         QSharedPointer<QImage> img;
         try
         {
-            img = this->mediaInterface->Get(src,
-                    0, this->currentStartTimestamp, this->currentEndTimestamp);
+            assert(0);
+            //img = this->mediaInterface->Get(src,
+            //        0, this->currentStartTimestamp, this->currentEndTimestamp);
             cout << "startTimestamp " << this->currentStartTimestamp << endl;
             cout << "endTimestamp " << this->currentEndTimestamp << endl;
 
@@ -1234,11 +1251,12 @@ void AnnotThread::Update()
 
         try
         {
+            assert(0);
             cout << "Current time " << milsec << "," << src.toLocal8Bit().constData() << endl;
-            img = this->mediaInterface->Get(src,
-                    milsec,
-                    this->currentStartTimestamp,
-                    this->currentEndTimestamp);
+            //img = this->mediaInterface->Get(src,
+            //        milsec,
+            //        this->currentStartTimestamp,
+            //        this->currentEndTimestamp);
 
             //Update annotation with frame that has been found
             track->FoundFrame(this->currentStartTimestamp, this->currentEndTimestamp);

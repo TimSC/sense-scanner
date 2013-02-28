@@ -61,20 +61,13 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
     this->eventLoop->AddListener("GET_PROCESSING_UUIDS", *this->eventReceiver);
 }
 
-unsigned int Workspace::AddSource(QString &fina, QUuid uuid, class AvBinMedia* mediaInterface)
+unsigned int Workspace::AddSource(QUuid uuid)
 {
     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
-    ann->SetSource(fina);
     TrackingAnnotationData *scenePtr = new TrackingAnnotationData();
     ann->SetTrack(scenePtr);
-    return this->AddSource(ann, mediaInterface, uuid);
-}
 
-unsigned int Workspace::AddSource(std::tr1::shared_ptr<class Annotation> ann,
-                                  class AvBinMedia* mediaInterface,
-                                  QUuid uuid)
-{
-    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann, mediaInterface));
+    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann, this->mediaUuid));
     annotThread->SetEventLoop(this->eventLoop);
     annotThread->Start();
     ann->SetAnnotUid(uuid);
@@ -83,6 +76,10 @@ unsigned int Workspace::AddSource(std::tr1::shared_ptr<class Annotation> ann,
     this->annotationUuids.push_back(uuid);
     this->annotationThreads.push_back(annotThread);
     unsigned int out = this->annotations.size();
+
+    std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_ANNOTATION_CHANGED"));
+    this->eventLoop->SendEvent(changeEv);
+
     return out;
 }
 
@@ -107,16 +104,19 @@ void Workspace::RemoveSource(QUuid uuid)
     this->annotations.erase(this->annotations.begin()+ind);
     this->annotationUuids.erase(this->annotationUuids.begin()+ind);
     this->annotationThreads.erase(this->annotationThreads.begin()+ind);
+
+    std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_ANNOTATION_CHANGED"));
+    this->eventLoop->SendEvent(changeEv);
+
 }
 
 unsigned int Workspace::AddAutoAnnot(QUuid annotUid, QUuid algUid, class AvBinMedia* mediaInterface)
 {
-    std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
+    QUuid uuid = QUuid::createUuid();
+    this->AddSource(uuid);
 
     //TODO copy source filename and annotated frames to destination annotation
     assert(0);
-
-    this->AddSource(ann, mediaInterface, QUuid::createUuid());
 }
 
 QList<QUuid> Workspace::GetAnnotationUuids()
@@ -153,6 +153,10 @@ void Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg)
     this->processingProgress.push_back(0.);
     this->processingUuids.push_back(alg->GetUid());
     this->processingStates.push_back(AlgorithmProcess::STARTING);
+
+    std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_PROCESSING_CHANGED"));
+    this->eventLoop->SendEvent(changeEv);
+
 }
 
 int Workspace::RemoveProcessing(QUuid uuid)
@@ -186,19 +190,11 @@ int Workspace::RemoveProcessing(QUuid uuid)
     this->processingProgress.erase(this->processingProgress.begin()+ind);
     this->processingUuids.erase(this->processingUuids.begin()+ind);
     this->processingStates.erase(this->processingStates.begin()+ind);
+
+    std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_PROCESSING_CHANGED"));
+    this->eventLoop->SendEvent(changeEv);
     return 1;
 }
-
-/*int Workspace::StartProcessing(unsigned int num)
-{
-    assert(num < this->processingList.size());
-    if(this->processingList[num]->GetState() == AlgorithmProcess::PAUSED)
-    {
-        this->processingList[num]->Unpause();
-        return 1;
-    }
-    return this->processingList[num]->Start();
-}*/
 
 void Workspace::ProcessingProgressChanged(QUuid uuid, float progress)
 {
@@ -336,19 +332,40 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
     if(ev->type=="GET_ANNOTATION_UUIDS")
     {
-        int test=1;
+        QList<QUuid> uuids = this->GetAnnotationUuids();
+        QString dataStr;
+        for(unsigned int i=0;i<uuids.size();i++)
+        {
+            if(i>0) dataStr.append(",");
+            dataStr.append(uuids[i].toString());
+        }
+
+        std::tr1::shared_ptr<class Event> respEv(new Event("ANNOTATION_UUIDS"));
+        respEv->data = dataStr.toLocal8Bit().constData();
+        respEv->id = ev->id;
+        this->eventLoop->SendEvent(respEv);
     }
 
     if(ev->type=="GET_PROCESSING_UUIDS")
     {
-        int test=1;
+        QList<QUuid> uuids = this->GetProcessingUuids();
+        QString dataStr;
+        for(unsigned int i=0;i<uuids.size();i++)
+        {
+            if(i>0) dataStr.append(",");
+            dataStr.append(uuids[i].toString());
+        }
+
+        std::tr1::shared_ptr<class Event> respEv(new Event("PROCESSING_UUIDS"));
+        respEv->data = dataStr.toLocal8Bit().constData();
+        respEv->id = ev->id;
+        this->eventLoop->SendEvent(respEv);
     }
 
-    //The following events are not uuid targetted
     if(ev->type=="NEW_ANNOTATION")
     {
-        int debug=  1;
 
+        this->AddSource(QUuid(ev->data.c_str()));
     }
 }
 
@@ -378,4 +395,8 @@ QList<QUuid> Workspace::GetProcessingUuids()
     return out;
 }
 
+void Workspace::SetMediaUuid(QUuid mediaUuidIn)
+{
+    this->mediaUuid = mediaUuid;
 
+}

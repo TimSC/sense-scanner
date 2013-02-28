@@ -31,9 +31,8 @@ public:
     void SetEventLoop(class EventLoop &eventLoopIn);
 
     //** Sources and annotations
-    unsigned int AddSource(QString &fina, QUuid uuid, class AvBinMedia* mediaInterface);
-    unsigned int AddSource(std::tr1::shared_ptr<class Annotation> ann,
-                           class AvBinMedia* mediaInterface, QUuid uuid);
+    unsigned int AddSource(QUuid uuid);
+
     void RemoveSource(QUuid uuid);
     unsigned int AddAutoAnnot(QUuid annotUid, QUuid algUid, class AvBinMedia* mediaInterface);
 
@@ -56,7 +55,6 @@ public:
     void Update();
     virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);
 
-
     int HasChanged();
 
     void TerminateThreads();
@@ -67,10 +65,9 @@ public:
     QList<QUuid> GetProcessingUuids();
     QList<QUuid> GetAnnotationUuids();
 
+    void SetMediaUuid(QUuid mediaUuidIn);
+
 protected:
-
-
-
     //Sources and annotation data
     std::vector<std::tr1::shared_ptr<class Annotation> > annotations;
     QList<QUuid> annotationUuids;
@@ -85,6 +82,7 @@ protected:
     QList<QUuid> processingUuids;
     QList<AlgorithmProcess::ProcessState> processingStates;
     Mutex lock;
+    QUuid mediaUuid;
 };
 
 #endif // WORKSPACE_H

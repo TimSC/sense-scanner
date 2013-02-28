@@ -112,7 +112,7 @@ class AnnotThread : public MessagableThread
     */
 
 public:
-    AnnotThread(class Annotation *annIn, class AvBinMedia* mediaInterface);
+    AnnotThread(class Annotation *annIn, QUuid mediaInterface);
     virtual ~AnnotThread();
 
     void SetEventLoop(class EventLoop *eventLoopIn);
@@ -136,7 +136,7 @@ protected:
     class Annotation *parentAnn;
     int srcDurationSet;
     long long unsigned srcDuration;
-    class AvBinMedia* mediaInterface;
+    QUuid mediaInterface;
 
     unsigned long long currentStartTimestamp, currentEndTimestamp;
     int currentTimeSet;

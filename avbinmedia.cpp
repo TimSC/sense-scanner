@@ -20,19 +20,13 @@ AvBinMedia::AvBinMedia(class EventLoop *eventLoopIn) : AbstractMedia()
     {
         this->eventReceiver = new class EventReceiver(eventLoopIn);
         this->eventLoop = eventLoopIn;
-        QString eventName = QString("AVBIN_DURATION_RESPONSE");
-        this->eventLoop->AddListener(eventName.toLocal8Bit().constData(), *this->eventReceiver);
-        QString eventName2 = QString("AVBIN_FRAME_RESPONSE");
-        this->eventLoop->AddListener(eventName2.toLocal8Bit().constData(), *this->eventReceiver);
-        QString eventName3 = QString("AVBIN_FRAME_FAILED");
-        this->eventLoop->AddListener(eventName3.toLocal8Bit().constData(), *this->eventReceiver);
-        QString eventName4 = QString("AVBIN_REQUEST_FAILED");
-        this->eventLoop->AddListener(eventName4.toLocal8Bit().constData(), *this->eventReceiver);
-        QString eventName5 = QString("AVBIN_OPEN_RESULT");
-        this->eventLoop->AddListener(eventName5.toLocal8Bit().constData(), *this->eventReceiver);
-
-        //QString eventName4("STOP_THREADS");
-        //this->eventLoop->AddListener(eventName4.toLocal8Bit().constData(), *this->eventReceiver);
+        this->eventLoop->AddListener("AVBIN_DURATION_RESPONSE", *this->eventReceiver);
+        this->eventLoop->AddListener("AVBIN_FRAME_RESPONSE", *this->eventReceiver);
+        this->eventLoop->AddListener("AVBIN_FRAME_FAILED", *this->eventReceiver);
+        this->eventLoop->AddListener("AVBIN_REQUEST_FAILED", *this->eventReceiver);
+        this->eventLoop->AddListener("AVBIN_OPEN_RESULT", *this->eventReceiver);
+        this->eventLoop->AddListener("GET_MEDIA_DURATION", *this->eventReceiver);
+        this->eventLoop->AddListener("GET_MEDIA_FRAME", *this->eventReceiver);
     }
 
     this->mediaThread = new AvBinThread();
@@ -298,6 +292,28 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev,
                       ROUND_TIMESTAMP(frame->endTimestamp / 1000.),
                       ROUND_TIMESTAMP(frame->requestedTimestamp / 1000.),
                       raw);
+    }
+
+    if(ev->type == "GET_MEDIA_DURATION")
+    {
+        //Estimate progress and generate an event
+        std::tr1::shared_ptr<class Event> requestEv(new Event("AVBIN_GET_DURATION"));
+        requestEv->toUuid = this->uuid;
+        requestEv->id = this->eventLoop->GetId();
+        this->eventLoop->SendEvent(requestEv);
+
+        std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(requestEv->id);
+
+        std::tr1::shared_ptr<class Event> responseEv(new Event("AVBIN_GET_DURATION"));
+        responseEv->toUuid = ev->fromUuid;
+        responseEv->id = ev->id;
+        responseEv->data = response->data;
+        this->eventLoop->SendEvent(responseEv);
+    }
+
+    if(ev->type == "GET_MEDIA_FRAME")
+    {
+        int debug = 1;
     }
 }
 
