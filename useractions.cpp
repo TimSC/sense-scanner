@@ -152,8 +152,12 @@ int UserActions::SaveAs(QString fina)
     getProcessingEv->id = this->eventLoop->GetId();
     this->eventLoop->SendEvent(getProcessingEv);
 
+    //Decode response
+    std::tr1::shared_ptr<class Event> resp2 = this->eventReceiver->WaitForEventId(getAnnotUuids->id);
     QList<QUuid> processingUuids;
-    assert(0);
+    std::vector<std::string> splitUuids2 = split(resp2->data.c_str(), ',');
+    for(unsigned int i=0;i<splitUuids2.size();i++)
+        processingUuids.push_back(QUuid(splitUuids2[i].c_str()));
 
     for(unsigned int i=0;i<processingUuids.size();i++)
     {

@@ -1233,8 +1233,9 @@ void AnnotThread::Update()
             {
                 //Estimate progress and generate an event
                 double progress = double(milsec) / this->srcDuration;
-                std::tr1::shared_ptr<class Event> requestEv(new Event("ANNOTATION_THREAD_PROGRESS"));
-                QString progressStr = QString("%0 %1").arg(this->parentAnn->GetAnnotUid()).arg(progress);
+                std::tr1::shared_ptr<class Event> requestEv(new Event("THREAD_PROGRESS_UPDATE"));
+                requestEv->fromUuid = this->parentAnn->GetAnnotUid();
+                QString progressStr = QString("%1").arg(progress);
                 requestEv->data = progressStr.toLocal8Bit().constData();
                 this->eventLoop->SendEvent(requestEv);
 

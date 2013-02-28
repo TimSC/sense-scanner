@@ -292,8 +292,6 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long startTimesta
 
 void VideoWidget::SetSceneControl(TrackingSceneController *sceneControlIn)
 {
-    cout << ">>> count " << this->ui->annotationTools->count() << endl;
-
     //Remove previous scene button controls
     while(this->ui->annotationTools->count()>0)
     {

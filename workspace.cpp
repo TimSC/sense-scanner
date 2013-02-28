@@ -59,6 +59,9 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
     this->eventLoop->AddListener("NEW_ANNOTATION", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ANNOTATION_UUIDS", *this->eventReceiver);
     this->eventLoop->AddListener("GET_PROCESSING_UUIDS", *this->eventReceiver);
+
+    this->eventLoop->AddListener("THREAD_PROGRESS_UPDATE", *this->eventReceiver);
+    this->eventLoop->AddListener("THREAD_STATUS_CHANGED", *this->eventReceiver);
 }
 
 unsigned int Workspace::AddSource(QUuid uuid)
@@ -378,6 +381,70 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         changeEv2->data = ev->data;
         this->eventLoop->SendEvent(changeEv2);
     }
+
+    if(ev->type=="THREAD_PROGRESS_UPDATE")
+    {
+        //Check for matching annotation
+        QUuid seekUuid = QUuid(ev->fromUuid);
+        this->lock.lock();
+        for(unsigned int i = 0; i < this->annotationUuids.size(); i++)
+        {
+            if(seekUuid == this->annotationUuids[i])
+            {
+                this->processingProgress[i] = atof(ev->data.c_str());
+                std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_ANNOTATION_CHANGED"));
+                this->eventLoop->SendEvent(changeEv);
+            }
+        }
+
+        //Check for matching processing algorithm
+        for(unsigned int i = 0; i < this->processingUuids.size(); i++)
+        {
+            if(seekUuid == this->processingUuids[i])
+            {
+                this->processingProgress[i] = atof(ev->data.c_str());
+                std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_PROCESSING_CHANGED"));
+                this->eventLoop->SendEvent(changeEv);
+            }
+        }
+        this->lock.unlock();
+    }
+
+    if(ev->type=="THREAD_STATUS_CHANGED")
+    {
+        AlgorithmProcess::ProcessState state;
+        if(ev->data=="paused") state = AlgorithmProcess::PAUSED;
+        if(ev->data=="running") state = AlgorithmProcess::RUNNING;
+        if(ev->data=="finished") state = AlgorithmProcess::STOPPED;
+
+        //Check for matching annotation
+        QUuid seekUuid = QUuid(ev->fromUuid);
+        this->lock.lock();
+        for(unsigned int i = 0; i < this->annotationUuids.size(); i++)
+        {
+            if(seekUuid == this->annotationUuids[i])
+            {
+                this->processingProgress[i] = state;
+                std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_ANNOTATION_CHANGED"));
+                this->eventLoop->SendEvent(changeEv);
+            }
+        }
+
+        //Check for matching processing algorithm
+        for(unsigned int i = 0; i < this->processingUuids.size(); i++)
+        {
+            if(seekUuid == this->processingUuids[i])
+            {
+                this->processingProgress[i] = state;
+                std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_PROCESSING_CHANGED"));
+                this->eventLoop->SendEvent(changeEv);
+            }
+        }
+        this->lock.unlock();
+
+
+    }
+
 }
 
 void Workspace::TerminateThreads()

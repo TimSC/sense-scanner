@@ -228,10 +228,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("THREAD_STARTING",*eventReceiver);
     this->eventLoop->AddListener("THREAD_STOPPING",*eventReceiver);
     this->eventLoop->AddListener("AVBIN_OPEN_RESULT",*eventReceiver);
-    this->eventLoop->AddListener("THREAD_PROGRESS_UPDATE",*eventReceiver);
-    this->eventLoop->AddListener("THREAD_STATUS_CHANGED",*eventReceiver);
     this->eventLoop->AddListener("ALG_DATA_BLOCK",*eventReceiver);
-    this->eventLoop->AddListener("ANNOTATION_THREAD_PROGRESS",*eventReceiver);
     this->eventLoop->AddListener("AVBIN_VERSION",*eventReceiver);
     this->eventLoop->AddListener("SOURCE_FILENAME",*eventReceiver);
     this->eventLoop->AddListener("ALG_UUID_FOR_ANNOTATION",*eventReceiver);
@@ -618,31 +615,7 @@ void MainWindow::Update()
         {
             cout << "Open result: " << ev->data << endl;
         }
-        if(ev->type=="THREAD_PROGRESS_UPDATE")
-        {
-            assert(0);
-            //this->workspace.ProcessingProgressChanged(ev->fromUuid, atof(ev->data.c_str()));
-            //this->RegenerateProcessingList();
-        }
-        if(ev->type=="THREAD_STATUS_CHANGED")
-        {
-            assert(0);
-            /*AlgorithmProcess::ProcessState state;
-            if(ev->data=="paused") state = AlgorithmProcess::PAUSED;
-            if(ev->data=="running") state = AlgorithmProcess::RUNNING;
-            if(ev->data=="finished") state = AlgorithmProcess::STOPPED;
-            this->workspace.ProcessingStateChanged(ev->fromUuid, state);*/
-        }
 
-        if(ev->type=="ANNOTATION_THREAD_PROGRESS")
-        {
-            assert(0);
-            /*assert(ev->data.length()>=40);
-            QUuid annId(ev->data.substr(0, 38).c_str());
-            QString progStr(ev->data.substr(39).c_str());
-            this->annotProgress[annId] = progStr.toFloat();
-            this->RegenerateSourcesList();*/
-        }
         if(ev->type=="AVBIN_VERSION")
         {
             cout << ev->type <<" "<< ev->data<< endl;
@@ -666,7 +639,7 @@ void MainWindow::Update()
         }
         if(ev->type=="WORKSPACE_PROCESSING_CHANGED")
         {
-            this->RegenerateSourcesList();
+            this->RegenerateProcessingList();
         }
 
     }
