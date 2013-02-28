@@ -47,7 +47,7 @@ public:
     void PrintAVbinFileInfo(AVbinFileInfo &info);
     void PrintAVbinStreamInfo(AVbinStreamInfo &info);
     void SetEventLoop(class EventLoop *eventLoopIn);
-    void SetId(int idIn);
+    void SetUuid(QUuid idIn);
 
 protected:
     AVbinFile *fi;
@@ -70,7 +70,7 @@ protected:
 
     uint8_t *audioBuffer;
     unsigned audioBufferSize;
-    int id;
+    QUuid uuid;
 };
 
 //************************************************
@@ -87,7 +87,7 @@ public:
     AvBinThread();
     virtual ~AvBinThread();
     void SetEventLoop(class EventLoop *eventLoopIn);
-    void SetId(int idIn);
+    void SetUuid(QUuid idIn);
 
     void Update();
     void Finished();

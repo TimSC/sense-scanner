@@ -148,6 +148,7 @@ void EventReceiver::MessageLoopDeleted()
 
 void EventReceiver::SetThreadId(QUuid idIn)
 {
+    assert(this!=NULL);
     this->mutex.lock();
     this->threadId = idIn;
     this->mutex.unlock();
@@ -267,7 +268,6 @@ MessagableThread::MessagableThread()
     this->eventReceiver = NULL;
     this->stopThreads = 0;
     this->eventLoop = NULL;
-    this->id = 0;
     this->threadId = QUuid::createUuid();
 }
 
@@ -399,20 +399,11 @@ void MessagableThread::start (Priority priority)
     QThread::start(priority);
 }
 
-void MessagableThread::SetId(int idIn)
-{
-    this->id = idIn;
-}
-
-int MessagableThread::GetId()
-{
-    return this->id;
-}
-
 void MessagableThread::SetThreadId(QUuid idIn)
 {
     this->mutex.lock();
     this->threadId = idIn;
+    assert(this->eventReceiver!=NULL); //Remember to use SetEventLoop first!
     this->eventReceiver->SetThreadId(idIn);
     this->mutex.unlock();
 }

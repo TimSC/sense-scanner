@@ -81,7 +81,8 @@ unsigned int Workspace::AddSource(std::tr1::shared_ptr<class Annotation> ann,
     this->annotations.push_back(ann);
     this->annotationUuids.push_back(uuid);
     this->annotationThreads.push_back(annotThread);
-    return this->annotations.size();
+    unsigned int out = this->annotations.size();
+    return out;
 }
 
 void Workspace::RemoveSource(QUuid uuid)
@@ -119,8 +120,10 @@ unsigned int Workspace::AddAutoAnnot(QUuid annotUid, QUuid algUid, class AvBinMe
 
 QList<QUuid> Workspace::GetAnnotationUuids()
 {
-    return this->annotationUuids;
-
+    this->lock.lock();
+    QList<QUuid> out = this->annotationUuids;
+    this->lock.unlock();
+    return out;
 }
 
 //***********************************************************************
@@ -261,17 +264,21 @@ int Workspace::NumProcessesBlockingShutdown()
 
 void Workspace::ClearProcessing()
 {
+    this->lock.lock();
     this->processingList.clear();
     this->processingProgress.clear();
     this->processingUuids.clear();
     this->processingStates.clear();
+    this->lock.unlock();
 }
 
 void Workspace::ClearAnnotation()
 {
+    this->lock.lock();
     this->annotations.clear();
     this->annotationThreads.clear();
     this->annotationUuids.clear();
+    this->lock.unlock();
 }
 
 void Workspace::Update()
@@ -357,7 +364,10 @@ void Workspace::SetAnnotThreadsInactive()
 
 QList<QUuid> Workspace::GetProcessingUuids()
 {
-    return this->processingUuids;
+    this->lock.lock();
+    QList<QUuid> out = this->processingUuids;
+    this->lock.unlock();
+    return out;
 }
 
 

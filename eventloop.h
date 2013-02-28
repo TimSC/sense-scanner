@@ -162,8 +162,8 @@ public:
     int Start();
     int IsStopFlagged();
     virtual void Update()=0;
-    void SetId(int idIn);
-    int GetId();
+    //void SetId(int idIn);
+    //int GetId();
     virtual void Finished() {};
     void SetThreadId(QUuid idIn);
 
@@ -175,7 +175,7 @@ protected:
     int stopThreads;    
     Mutex mutex;
     QUuid threadId;
-    int id;
+    //int id;
 };
 
 /*!

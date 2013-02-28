@@ -25,7 +25,6 @@ AvBinBackend::AvBinBackend()
     this->eventLoop = NULL;
     this->audioBuffer = NULL;
     this->audioBufferSize = 0;
-    this->id = 0;
 }
 
 AvBinBackend::AvBinBackend(const AvBinBackend &other)
@@ -76,12 +75,13 @@ void AvBinBackend::DoOpenFile(int requestId)
     this->fi = mod_avbin_open_filename(this->filename.c_str());
 
     //Create an event with the result
-    QString eventName = QString("AVBIN_OPEN_RESULT%1").arg(this->id);
+    QString eventName = QString("AVBIN_OPEN_RESULT");
     std::tr1::shared_ptr<class Event> resultEvent(new Event(eventName.toLocal8Bit().constData(), requestId));
     assert(this->eventLoop);
     std::ostringstream tmp;
     tmp << (this->fi != NULL);
     resultEvent->data = tmp.str();
+    resultEvent->toUuid = this->uuid;
     this->eventLoop->SendEvent(resultEvent);
 
     if(this->fi == NULL)
@@ -455,18 +455,18 @@ void AvBinBackend::SetEventLoop(class EventLoop *eventLoopIn)
     {
         this->eventReceiver = new class EventReceiver(eventLoopIn);
         this->eventLoop = eventLoopIn;
-        QString eventName = QString("AVBIN_OPEN_FILE%1").arg(this->id);
+        QString eventName = QString("AVBIN_OPEN_FILE");
         this->eventLoop->AddListener(eventName.toLocal8Bit().constData(), *this->eventReceiver);
-        QString eventName2 = QString("AVBIN_GET_DURATION%1").arg(this->id);
+        QString eventName2 = QString("AVBIN_GET_DURATION");
         this->eventLoop->AddListener(eventName2.toLocal8Bit().constData(), *this->eventReceiver);
-        QString eventName3 = QString("AVBIN_GET_FRAME%1").arg(this->id);
+        QString eventName3 = QString("AVBIN_GET_FRAME");
         this->eventLoop->AddListener(eventName3.toLocal8Bit().constData(), *this->eventReceiver);
     }
 }
 
-void AvBinBackend::SetId(int idIn)
+void AvBinBackend::SetUuid(QUuid idIn)
 {
-    this->id = idIn;
+    this->uuid = idIn;
 }
 
 int AvBinBackend::PlayUpdate()
@@ -516,39 +516,45 @@ int AvBinBackend::PlayUpdate()
 
 void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
+    //Only process events for this module
+    if(ev->toUuid != this->uuid) return;
+
     QString evType(ev->type.c_str());
-    if(evType.left(15)=="AVBIN_OPEN_FILE")
+    if(evType=="AVBIN_OPEN_FILE")
     {
         this->OpenFile(ev->data.c_str(), ev->id);
     }
-    if(evType.left(18)=="AVBIN_GET_DURATION")
+    if(evType=="AVBIN_GET_DURATION")
     {
         assert(this->eventLoop);
         try
         {
-            QString eventName = QString("AVBIN_DURATION_RESPONSE%1").arg(this->id);
+            QString eventName = QString("AVBIN_DURATION_RESPONSE");
             std::tr1::shared_ptr<class Event> response(
                         new Event(eventName.toLocal8Bit().constData(), ev->id));
             std::ostringstream tmp;
             tmp << this->Length();
             response->data = tmp.str();
             response->id = ev->id;
+            response->toUuid = ev->toUuid;
             this->eventLoop->SendEvent(response);
         }
         catch (runtime_error &err)
         {
-            QString eventName = QString("AVBIN_REQUEST_FAILED%1").arg(this->id);
+            QString eventName = QString("AVBIN_REQUEST_FAILED");
             std::tr1::shared_ptr<class Event> fail(new Event(eventName.toLocal8Bit().constData(), ev->id));
             fail->data = err.what();
             fail->id = ev->id;
+            fail->toUuid = ev->toUuid;
             this->eventLoop->SendEvent(fail);
         }
     }
-    if(evType.left(15)=="AVBIN_GET_FRAME")
+    if(evType=="AVBIN_GET_FRAME")
     {
         unsigned long long ti = STR_TO_ULL(ev->data.c_str(),NULL,10);
-        QString eventName = QString("AVBIN_FRAME_RESPONSE%1").arg(this->id);
+        QString eventName = QString("AVBIN_FRAME_RESPONSE");
         std::tr1::shared_ptr<class Event> response(new Event(eventName.toLocal8Bit().constData(), ev->id));
+        response->toUuid = this->uuid;
         class DecodedFrame* decodedFrame = new DecodedFrame();
         response->raw = decodedFrame;
         int found = this->GetFrame(ti, *decodedFrame);
@@ -564,8 +570,9 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         else
         {
             //Something went wrong, so a failure event is generated
-            QString eventName = QString("AVBIN_FRAME_FAILED%1").arg(this->id);
+            QString eventName = QString("AVBIN_FRAME_FAILED");
             std::tr1::shared_ptr<class Event> fail(new Event(eventName.toLocal8Bit().constData(), ev->id));
+            fail->toUuid = this->uuid;
             this->eventLoop->SendEvent(fail);
         }
     }
@@ -690,10 +697,10 @@ void AvBinThread::SetEventLoop(class EventLoop *eventLoopIn)
     eventLoopIn->SendEvent(verEv);
 }
 
-void AvBinThread::SetId(int idIn)
+void AvBinThread::SetUuid(QUuid idIn)
 {
-    this->avBinBackend.SetId(idIn);
-    MessagableThread::SetId(idIn);
+    this->avBinBackend.SetUuid(idIn);
+    MessagableThread::SetThreadId(idIn);
 }
 
 void AvBinThread::Finished()

@@ -9,26 +9,26 @@
 using namespace std;
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
 
-AvBinMedia::AvBinMedia(int idIn, class EventLoop *eventLoopIn) : AbstractMedia()
+AvBinMedia::AvBinMedia(class EventLoop *eventLoopIn) : AbstractMedia()
 {
     this->eventReceiver = NULL;
     this->eventLoop = eventLoopIn;
-    this->id = idIn;
     this->mediaThread = NULL;
+    this->uuid = QUuid::createUuid();
 
     if(this->eventReceiver == NULL)
     {
         this->eventReceiver = new class EventReceiver(eventLoopIn);
         this->eventLoop = eventLoopIn;
-        QString eventName = QString("AVBIN_DURATION_RESPONSE%1").arg(this->id);
+        QString eventName = QString("AVBIN_DURATION_RESPONSE");
         this->eventLoop->AddListener(eventName.toLocal8Bit().constData(), *this->eventReceiver);
-        QString eventName2 = QString("AVBIN_FRAME_RESPONSE%1").arg(this->id);
+        QString eventName2 = QString("AVBIN_FRAME_RESPONSE");
         this->eventLoop->AddListener(eventName2.toLocal8Bit().constData(), *this->eventReceiver);
-        QString eventName3 = QString("AVBIN_FRAME_FAILED%1").arg(this->id);
+        QString eventName3 = QString("AVBIN_FRAME_FAILED");
         this->eventLoop->AddListener(eventName3.toLocal8Bit().constData(), *this->eventReceiver);
-        QString eventName4 = QString("AVBIN_REQUEST_FAILED%1").arg(this->id);
+        QString eventName4 = QString("AVBIN_REQUEST_FAILED");
         this->eventLoop->AddListener(eventName4.toLocal8Bit().constData(), *this->eventReceiver);
-        QString eventName5 = QString("AVBIN_OPEN_RESULT%1").arg(this->id);
+        QString eventName5 = QString("AVBIN_OPEN_RESULT");
         this->eventLoop->AddListener(eventName5.toLocal8Bit().constData(), *this->eventReceiver);
 
         //QString eventName4("STOP_THREADS");
@@ -36,8 +36,8 @@ AvBinMedia::AvBinMedia(int idIn, class EventLoop *eventLoopIn) : AbstractMedia()
     }
 
     this->mediaThread = new AvBinThread();
-    this->mediaThread->SetId(this->id);
     this->mediaThread->SetEventLoop(this->eventLoop);
+    this->mediaThread->SetUuid(this->uuid);
     this->mediaThread->Start();
 }
 
@@ -243,7 +243,7 @@ int AvBinMedia::RequestFrame(QString source, long long unsigned ti) //in millise
 
 void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long startTimestamp,
                                               unsigned long long endTimestamp,
-                                              unsigned long long requestTimestamp,
+                                              unsigned long long requestedTimestamp,
                                               void *raw), void *raw)
 {
 
@@ -258,24 +258,7 @@ void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long sta
         {
             assert(this->eventReceiver);
             std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
-            QString evType = ev->type.c_str();
-            cout << evType.toLocal8Bit().constData() << endl;
-            if(evType.left(20) == "AVBIN_FRAME_RESPONSE")
-            {
-                DecodedFrame *frame = (DecodedFrame *)ev->raw;
-
-                //Convert to a QImage object
-                QSharedPointer<QImage> img(new QImage(frame->width, frame->height,
-                                                      QImage::Format_RGB888));
-                RawImgToQImage(frame, *img);
-                assert(!img->isNull());
-
-                //Return image to calling object by callback
-                frameCallback(*img, ROUND_TIMESTAMP(frame->timestamp / 1000.),
-                              ROUND_TIMESTAMP(frame->endTimestamp / 1000.),
-                              ROUND_TIMESTAMP(frame->requestedTimestamp / 1000.),
-                              raw);
-            }
+            this->HandleEvent(ev, frameCallback, raw);
         }
         catch(runtime_error &err)
         {
@@ -286,13 +269,38 @@ void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long sta
 
 }
 
+void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev,
+                             void (*frameCallback)(QImage& fr, unsigned long long startTimestamp,
+                                                                           unsigned long long endTimestamp,
+                                                                           unsigned long long requestTimestamp,
+                                                                           void *raw), void *raw)
+{
+    //Only process events for this module
+    if(ev->toUuid != this->uuid) return;
+
+    if(ev->type == "AVBIN_FRAME_RESPONSE")
+    {
+        DecodedFrame *frame = (DecodedFrame *)ev->raw;
+
+        //Convert to a QImage object
+        QSharedPointer<QImage> img(new QImage(frame->width, frame->height,
+                                              QImage::Format_RGB888));
+        RawImgToQImage(frame, *img);
+        assert(!img->isNull());
+
+        //Return image to calling object by callback
+        frameCallback(*img, ROUND_TIMESTAMP(frame->timestamp / 1000.),
+                      ROUND_TIMESTAMP(frame->endTimestamp / 1000.),
+                      ROUND_TIMESTAMP(frame->requestedTimestamp / 1000.),
+                      raw);
+    }
+}
+
+
 void AvBinMedia::ChangeVidSource(QString fina)
 {
     if(fina == this->currentFina) return;
     assert(this->mediaThread != NULL);
-
-    //Mark media interface as inactive
-    int threadId = this->mediaThread->GetId();
 
     //Shut down media thread and delete
     int result = this->mediaThread->Stop();
@@ -302,7 +310,7 @@ void AvBinMedia::ChangeVidSource(QString fina)
 
     //Create a new source
     this->mediaThread = new AvBinThread();
-    this->mediaThread->SetId(threadId);
+    this->mediaThread->SetUuid(this->uuid);
     this->mediaThread->SetEventLoop(this->eventLoop);
     this->mediaThread->Start();
 

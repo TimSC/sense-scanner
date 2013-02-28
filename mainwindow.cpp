@@ -240,8 +240,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("ANNOTATION_AT_TIME",*eventReceiver);
 
     //Create file reader worker thread
-    this->mediaInterfaceFront = new class AvBinMedia(0, this->eventLoop);
-    this->mediaInterfaceBack = new class AvBinMedia(1, this->eventLoop);
+    this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop);
+    this->mediaInterfaceBack = new class AvBinMedia(this->eventLoop);
 
     //Start event buffer timer
     this->timer = new QTimer();

@@ -24,7 +24,7 @@ class AvBinMedia : public AbstractMedia
     * performed by AvBinThread and AvBinBackend.
     */
 public:
-    explicit AvBinMedia(int idIn, class EventLoop *eventLoopIn);
+    explicit AvBinMedia(class EventLoop *eventLoopIn);
     virtual ~AvBinMedia();
 
     virtual QSharedPointer<QImage> Get(QString source,
@@ -42,6 +42,12 @@ public:
                                       unsigned long long endTimestamp,
                                       unsigned long long requestedTimestamp,
                                       void *raw), void *raw);
+    virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev,
+                             void (*frameCallback)(QImage& fr, unsigned long long startTimestamp,
+                                                                           unsigned long long endTimestamp,
+                                                                           unsigned long long requestTimestamp,
+                                                                           void *raw), void *raw);
+    QUuid GetUuid();
 
 protected:
     int OpenFile(QString fina);
@@ -52,6 +58,7 @@ protected:
     int id;
     AvBinThread *mediaThread;
     QString currentFina;
+    QUuid uuid;
 };
 
 #endif // AVBINMEDIA_H
