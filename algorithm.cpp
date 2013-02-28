@@ -30,6 +30,8 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->eventLoop->AddListener("TRAINING_DATA_FINISH", *this->eventReceiver);
     this->eventLoop->AddListener("GET_PROGRESS", *this->eventReceiver);
     this->eventLoop->AddListener("GET_MODEL", *this->eventReceiver);
+    this->eventLoop->AddListener("SET_MODEL", *this->eventReceiver);
+
 
     QObject::connect(&this->timer, SIGNAL(timeout()), this, SLOT(Update()));
     this->timer.start(10); //in millisec
@@ -330,6 +332,13 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         this->saveModelRequestIds.push_back(ev->id);
         this->GetModel();
     }
+
+    if(ev->type == "SET_MODEL")
+    {
+        QByteArray bin(ev->data.c_str(), ev->data.length());
+        cout << "Sending model with format " << ev->data.substr(0,3).c_str() << endl;
+        this->SendRawDataBlock("MODEL\n", bin);
+    }
 }
 
 void AlgorithmProcess::ProcessAlgOutput()
@@ -551,7 +560,7 @@ void AlgorithmProcess::SendRawDataBlock(QString args, QByteArray data)
     if(!running) return;
     assert(this->initDone);
 
-	QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(data.length());
+    QString imgPreamble1 = QString("DATA_BLOCK=%1\n").arg(data.length());
     this->SendCommand(imgPreamble1);
     this->SendCommand(args);
     this->write(data);

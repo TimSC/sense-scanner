@@ -61,6 +61,7 @@ void UserActions::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("SAVE_WORKSPACE_AS", *this->eventReceiver);
     this->eventLoop->AddListener("LOAD_WORKSPACE", *this->eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_ADDED", *this->eventReceiver);
+    this->eventLoop->AddListener("PROCESSING_ADDED", *this->eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_UUIDS", *this->eventReceiver);
     this->eventLoop->AddListener("PROCESSING_UUIDS", *this->eventReceiver);
     this->eventLoop->AddListener("SOURCE_FILENAME", *this->eventReceiver);
@@ -312,25 +313,24 @@ void UserActions::Load(QString fina)
                     if(modelEle.tagName() != "model") {modelNode = modelNode.nextSibling(); continue;}
 
                     QByteArray modelData = QByteArray::fromBase64(modelEle.text().toLocal8Bit().constData());
-                    std::tr1::shared_ptr<class AlgorithmProcess> alg(
-                                new class AlgorithmProcess(this->eventLoop, this));
-                    alg->Init();
 
                     QString uidStr = modelEle.attribute("uid");
                     QUuid uid(uidStr);
                     if(uid.isNull()) uid = uid.createUuid();
-                    alg->SetUid(uid);
-                    //this->workspace.AddProcessing(alg);
-                    assert(0);
-                    //TODO change to event basis
+
+                    //Create processing module
+                    std::tr1::shared_ptr<class Event> newAnnEv(new Event("NEW_PROCESSING"));
+                    QString dataStr = QString("%1").arg(uid.toString());
+                    newAnnEv->data = dataStr.toLocal8Bit().constData();
+                    newAnnEv->id = this->eventLoop->GetId();
+                    this->eventLoop->SendEvent(newAnnEv);
+
+                    //Wait for workspace to register this annotation
+                    this->eventReceiver->WaitForEventId(newAnnEv->id);
 
                     //Send data to algorithm process
-                    std::tr1::shared_ptr<class Event> foundModelEv(new Event("ALG_MODEL_FOUND"));
-                    QString imgPreamble2 = QString("MODEL\n");
-                    foundModelEv->data = imgPreamble2.toLocal8Bit().constData();
-                    class BinaryData *modelRaw = new BinaryData();
-                    modelRaw->Copy((const unsigned char *)modelData.constData(), modelData.size());
-                    foundModelEv->raw = modelRaw;
+                    std::tr1::shared_ptr<class Event> foundModelEv(new Event("SET_MODEL"));
+                    foundModelEv->data = modelData.constData();
                     foundModelEv->toUuid = uid;
                     this->eventLoop->SendEvent(foundModelEv);
 

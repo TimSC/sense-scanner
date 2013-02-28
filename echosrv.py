@@ -102,6 +102,7 @@ def WorkerProcessProf(childPipeConn):
 
 			if event[0]=="DATA_BLOCK":
 				args = event[1].split(" ")
+				print "DATA_BLOCK args", args
 				if args[0] == "RGB_IMAGE_DATA":
 					#Decode image from raw data block
 					args.pop(0)

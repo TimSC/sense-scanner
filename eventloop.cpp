@@ -193,6 +193,7 @@ void EventLoop::SendEvent(std::tr1::shared_ptr<class Event> event)
             this->eventReceivers.find(event->type);
     if(it == this->eventReceivers.end())
     {
+        cout << "Warning: No listeners for event " << event->type << endl;
         //No listeners found
         this->mutex.unlock();
         return;

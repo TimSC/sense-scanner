@@ -58,6 +58,8 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
     this->eventReceiver = new EventReceiver(this->eventLoop);
     this->eventLoop->AddListener("NEW_ANNOTATION", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ANNOTATION_UUIDS", *this->eventReceiver);
+
+    this->eventLoop->AddListener("NEW_PROCESSING", *this->eventReceiver);
     this->eventLoop->AddListener("GET_PROCESSING_UUIDS", *this->eventReceiver);
 
     this->eventLoop->AddListener("THREAD_PROGRESS_UPDATE", *this->eventReceiver);
@@ -380,6 +382,19 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         this->AddSource(QUuid(ev->data.c_str()));
 
         std::tr1::shared_ptr<class Event> changeEv2(new Event("ANNOTATION_ADDED"));
+        changeEv2->id = ev->id;
+        changeEv2->data = ev->data;
+        this->eventLoop->SendEvent(changeEv2);
+    }
+
+    if(ev->type=="NEW_PROCESSING")
+    {
+        std::tr1::shared_ptr<class AlgorithmProcess> alg(new class AlgorithmProcess(this->eventLoop, this));
+        alg->Init();
+        alg->SetUid(QUuid(ev->data.c_str()));
+        this->AddProcessing(alg);
+
+        std::tr1::shared_ptr<class Event> changeEv2(new Event("PROCESSING_ADDED"));
         changeEv2->id = ev->id;
         changeEv2->data = ev->data;
         this->eventLoop->SendEvent(changeEv2);
