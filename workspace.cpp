@@ -11,11 +11,18 @@ Workspace::Workspace() : QObject()
     this->ClearAnnotation();
     this->ClearProcessing();
     this->eventLoop = NULL;
+    this->eventReceiver = NULL;
 }
 
 Workspace::Workspace(const Workspace &other) : QObject()
 {
     this->operator =(other);
+}
+
+Workspace::~Workspace()
+{
+    if(this->eventReceiver!=NULL) delete this->eventReceiver;
+    this->eventReceiver = NULL;
 }
 
 Workspace& Workspace::operator= (const Workspace &other)
@@ -47,6 +54,10 @@ bool Workspace::operator!= (const Workspace &other)
 void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
 {
     this->eventLoop = &eventLoopIn;
+    if(this->eventReceiver!=NULL) delete this->eventReceiver;
+    this->eventReceiver = new EventReceiver(this->eventLoop);
+    this->eventLoop->AddListener("GET_ANNOTATION_UUIDS", *this->eventReceiver);
+    this->eventLoop->AddListener("GET_PROCESSING_UUIDS", *this->eventReceiver);
 }
 
 unsigned int Workspace::AddSource(QString &fina, QUuid uuid, class AvBinMedia* mediaInterface)
@@ -263,14 +274,27 @@ void Workspace::ClearAnnotation()
     this->annotationUuids.clear();
 }
 
-
-
 void Workspace::Update()
 {
 
     //This tries to update but if mutex is locked, it returns immediately
     bool havelock = this->lock.try_lock();
     if(!havelock) return;
+
+    //Process events from application
+    int flushEvents = 1;
+    while(flushEvents)
+    try
+    {
+        assert(this->eventReceiver);
+        std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
+
+        this->HandleEvent(ev);
+    }
+    catch(std::runtime_error e)
+    {
+        flushEvents = 0;
+    }
 
     //Set annotations to inactive when they do not need active status
     for(unsigned int i=0;i<this->annotations.size();i++)
@@ -300,6 +324,19 @@ void Workspace::Update()
     this->lock.unlock();
 }
 
+void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
+{
+    if(ev->type=="GET_ANNOTATION_UUIDS")
+    {
+        int test=1;
+    }
+
+    if(ev->type=="GET_PROCESSING_UUIDS")
+    {
+        int test=1;
+    }
+}
+
 void Workspace::TerminateThreads()
 {
     for(unsigned int i=0;i<this->annotations.size();i++)
@@ -322,3 +359,5 @@ QList<QUuid> Workspace::GetProcessingUuids()
 {
     return this->processingUuids;
 }
+
+

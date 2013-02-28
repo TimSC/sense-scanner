@@ -5,6 +5,7 @@
 #include <QtGui/QtGui>
 #include <QtXml/QtXml>
 #include <iostream>
+#include <assert.h>
 
 using namespace std;
 
@@ -31,7 +32,22 @@ void UserActions::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
 void UserActions::Update()
 {
-    //Do nothing, this thread only responds to incoming events
+    //Process events from application
+    int flushEvents = 1;
+    while(flushEvents)
+    try
+    {
+        assert(this->eventReceiver);
+        std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
+
+        //Only process events addressed to this algorithm
+        //if(ev->toUuid.isNull() || ev->toUuid == this->GetUid())
+        this->HandleEvent(ev);
+    }
+    catch(std::runtime_error e)
+    {
+        flushEvents = 0;
+    }
 }
 
 void UserActions::SetMediaInterface(class AvBinMedia* mediaInterfaceIn)
@@ -60,7 +76,16 @@ int UserActions::SaveAs(QString fina)
     out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;
     out << "<workspace>" << endl;
     out << "<sources>" << endl;
-    QList<QUuid> annotationUuids = this->workspace.GetAnnotationUuids();
+
+    //Get list of annotation uuids
+    std::tr1::shared_ptr<class Event> getAnnotUuids(new Event("GET_ANNOTATION_UUIDS"));
+    getAnnotUuids->id = this->eventLoop->GetId();
+    this->eventLoop->SendEvent(getAnnotUuids);
+
+    //Decode response
+    QList<QUuid> annotationUuids;
+    assert(0);
+
     for(unsigned int i=0;i<annotationUuids.size();i++)
     {
         try
@@ -111,7 +136,14 @@ int UserActions::SaveAs(QString fina)
 
     out << "</sources>" << endl;
     out << "<models>" << endl;
-    QList<QUuid> processingUuids = this->workspace.GetProcessingUuids();
+
+    std::tr1::shared_ptr<class Event> getProcessingEv(new Event("GET_PROCESSING_UUIDS"));
+    getProcessingEv->id = this->eventLoop->GetId();
+    this->eventLoop->SendEvent(getProcessingEv);
+
+    QList<QUuid> processingUuids;
+    assert(0);
+
     for(unsigned int i=0;i<processingUuids.size();i++)
     {
         try
@@ -220,7 +252,8 @@ void UserActions::Load(QString fina)
                     }
 
                     ann->SetTrack(track);
-                    this->workspace.AddSource(ann, mediaInterface, uid);
+                    //this->workspace.AddSource(ann, mediaInterface, uid);
+                    assert(0);//TODO change to event basis
                     sourceNode = sourceNode.nextSibling();
                 }
 
@@ -243,7 +276,9 @@ void UserActions::Load(QString fina)
                     QUuid uid(uidStr);
                     if(uid.isNull()) uid = uid.createUuid();
                     alg->SetUid(uid);
-                    this->workspace.AddProcessing(alg);
+                    //this->workspace.AddProcessing(alg);
+                    assert(0);
+                    //TODO change to event basis
 
                     //Send data to algorithm process
                     std::tr1::shared_ptr<class Event> foundModelEv(new Event("ALG_MODEL_FOUND"));

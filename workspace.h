@@ -23,6 +23,8 @@ class Workspace : public QObject
 public:
     explicit Workspace();
     explicit Workspace(const Workspace &other);
+    virtual ~Workspace();
+
     Workspace& operator= (const Workspace &other);
     bool operator!= (const Workspace &other);
 
@@ -54,6 +56,7 @@ public:
 
     int NumProcessesBlockingShutdown();
     void Update();
+    virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);
 
     void ClearProcessing();
     void ClearAnnotation();
@@ -69,6 +72,7 @@ protected:
     std::vector<std::tr1::shared_ptr<class AnnotThread> > annotationThreads;
 
     class EventLoop *eventLoop;
+    class EventReceiver *eventReceiver;
 
     //Processing data
     std::vector<std::tr1::shared_ptr<class AlgorithmProcess> > processingList;
