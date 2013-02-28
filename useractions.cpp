@@ -23,8 +23,12 @@ void UserActions::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
     if(ev->type=="SAVE_WORKSPACE_AS")
     {
-        int debug = 1;
+        this->SaveAs(ev->data.c_str());
+    }
 
+    if(ev->type=="LOAD_WORKSPACE")
+    {
+        this->Load(ev->data.c_str());
     }
 
     MessagableThread::HandleEvent(ev);
@@ -48,6 +52,14 @@ void UserActions::Update()
     {
         flushEvents = 0;
     }
+}
+
+void UserActions::SetEventLoop(class EventLoop *eventLoopIn)
+{
+    MessagableThread::SetEventLoop(eventLoopIn);
+
+    this->eventLoop->AddListener("SAVE_WORKSPACE_AS", *this->eventReceiver);
+    this->eventLoop->AddListener("LOAD_WORKSPACE", *this->eventReceiver);
 }
 
 void UserActions::SetMediaInterface(class AvBinMedia* mediaInterfaceIn)

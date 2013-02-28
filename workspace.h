@@ -40,8 +40,6 @@ public:
     //void SetTrack(unsigned int trackNum, TrackingAnnotation *track);
     //TrackingAnnotation *GetTrack(unsigned int trackNum);
 
-    QList<QUuid> GetAnnotationUuids();
-
     //** Processing
     void AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg);
     int RemoveProcessing(QUuid uuid);
@@ -52,20 +50,27 @@ public:
     void ProcessingStateChanged(QUuid uuid, AlgorithmProcess::ProcessState state);
     AlgorithmProcess::ProcessState GetProcessingState(QUuid uuid);
 
-    QList<QUuid> GetProcessingUuids();
+
 
     int NumProcessesBlockingShutdown();
     void Update();
     virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);
 
-    void ClearProcessing();
-    void ClearAnnotation();
+
     int HasChanged();
 
     void TerminateThreads();
     void SetAnnotThreadsInactive();
 
+    void ClearProcessing();
+    void ClearAnnotation();
+    QList<QUuid> GetProcessingUuids();
+    QList<QUuid> GetAnnotationUuids();
+
 protected:
+
+
+
     //Sources and annotation data
     std::vector<std::tr1::shared_ptr<class Annotation> > annotations;
     QList<QUuid> annotationUuids;

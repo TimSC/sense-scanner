@@ -11,6 +11,7 @@ public:
 
     virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);
     virtual void Update();
+    void SetEventLoop(class EventLoop *eventLoopIn);
 
     void SetMediaInterface(class AvBinMedia* mediaInterfaceIn);
     int SaveAs(QString fina);
