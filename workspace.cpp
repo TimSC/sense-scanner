@@ -379,7 +379,7 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
     if(ev->type=="NEW_ANNOTATION")
     {
-        this->AddSource(QUuid(ev->data.c_str()));
+        this->AddSource(QUuid(ev->data));
 
         std::tr1::shared_ptr<class Event> changeEv2(new Event("ANNOTATION_ADDED"));
         changeEv2->id = ev->id;
@@ -391,7 +391,7 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     {
         std::tr1::shared_ptr<class AlgorithmProcess> alg(new class AlgorithmProcess(this->eventLoop, this));
         alg->Init();
-        alg->SetUid(QUuid(ev->data.c_str()));
+        alg->SetUid(QUuid(ev->data));
         this->AddProcessing(alg);
 
         std::tr1::shared_ptr<class Event> changeEv2(new Event("PROCESSING_ADDED"));
@@ -421,7 +421,7 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         {
             if(seekUuid == this->processingUuids[i])
             {
-                this->processingProgress[i] = atof(ev->data.c_str());
+                this->processingProgress[i] = ev->data.toFloat();
                 std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_PROCESSING_CHANGED"));
                 this->eventLoop->SendEvent(changeEv);
             }

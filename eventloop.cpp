@@ -16,7 +16,7 @@ Event::Event()
     this->raw = NULL;
 }
 
-Event::Event(std::string typeIn, unsigned long long idIn)
+Event::Event(QString typeIn, unsigned long long idIn)
 {
     this->type = typeIn;
     this->id = idIn;
@@ -32,6 +32,7 @@ Event::Event(const Event& other)
     this->raw = other.raw; //Note: this is a raw pointer
     this->toUuid = other.toUuid;
     this->fromUuid = other.fromUuid;
+    this->buffer = other.buffer;
 }
 
 Event::~Event()
@@ -165,7 +166,7 @@ EventLoop::~EventLoop()
 {
     cout << "EventLoop::~EventLoop()" << endl;
     this->mutex.lock();
-    std::map<std::string, std::vector<EventReceiver *> >::iterator it =
+    std::map<QString, std::vector<EventReceiver *> >::iterator it =
             this->eventReceivers.begin();
     while(it != this->eventReceivers.end())
     {
@@ -189,11 +190,11 @@ void EventLoop::SendEvent(std::tr1::shared_ptr<class Event> event)
     //Get a local copy of listeners
     this->mutex.lock();
 
-    std::map<std::string, std::vector<EventReceiver *> >::iterator it =
+    std::map<QString, std::vector<EventReceiver *> >::iterator it =
             this->eventReceivers.find(event->type);
     if(it == this->eventReceivers.end())
     {
-        cout << "Warning: No listeners for event " << event->type << endl;
+        cout << "Warning: No listeners for event " << qPrintable(event->type) << endl;
         //No listeners found
         this->mutex.unlock();
         return;
@@ -211,12 +212,12 @@ void EventLoop::SendEvent(std::tr1::shared_ptr<class Event> event)
     }
 }
 
-void EventLoop::AddListener(std::string type, class EventReceiver &rx)
+void EventLoop::AddListener(QString type, class EventReceiver &rx)
 {
     //cout << "Add listener " << type.c_str() << "," << (unsigned long)&rx << endl;
 
     this->mutex.lock();
-    std::map<std::string, std::vector<EventReceiver *> >::iterator it = this->eventReceivers.find(type);
+    std::map<QString, std::vector<EventReceiver *> >::iterator it = this->eventReceivers.find(type);
     if(it == this->eventReceivers.end())
         this->eventReceivers[type] = std::vector<EventReceiver *> ();
     it = this->eventReceivers.find(type);
@@ -231,7 +232,7 @@ void EventLoop::RemoveListener(class EventReceiver &rx)
     this->mutex.lock();
 
     //Remove listener based on pointer location
-    std::map<std::string, std::vector<EventReceiver *> >::iterator it =
+    std::map<QString, std::vector<EventReceiver *> >::iterator it =
             this->eventReceivers.begin();
     while(it != this->eventReceivers.end())
     {
@@ -311,7 +312,7 @@ void MessagableThread::run()
         {
             assert(this->eventReceiver);
             std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
-            cout << "Event type " << ev->type << endl;
+            cout << "Event type " << qPrintable(ev->type) << endl;
             this->HandleEvent(ev);
         }
         catch(std::runtime_error e)
@@ -335,8 +336,8 @@ void MessagableThread::run()
 
 void MessagableThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
-    QString evType = ev->type.c_str();
-    if(evType.left(12) == "STOP_THREADS")
+    QString evType = ev->type;
+    if(evType == "STOP_THREADS")
     {
         this->mutex.lock();
         this->stopThreads = 1;

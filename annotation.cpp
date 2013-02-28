@@ -767,7 +767,7 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type=="GET_ANNOTATION_BETWEEN_TIMES")
     {
         //Decode request
-        std::vector<std::string> args = split(ev->data.c_str(),',');
+        std::vector<std::string> args = split(ev->data.toLocal8Bit().constData(),',');
 
         unsigned long long startTime = STR_TO_ULL_SIMPLE(args[0].c_str());
         unsigned long long endTime = STR_TO_ULL_SIMPLE(args[1].c_str());
@@ -803,12 +803,13 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type=="SET_ANNOTATION_BETWEEN_TIMES")
     {
         //Find first two commas and split the string to args
-        std::string::size_type firstComma = ev->data.find(",",0);
-        std::string::size_type secondComma = ev->data.find(",",firstComma+1);
+        std::string dataStr(ev->data.toLocal8Bit().constData());
+        std::string::size_type firstComma = dataStr.find(",",0);
+        std::string::size_type secondComma = dataStr.find(",",firstComma+1);
 
-        QString startStr = ev->data.substr(0, firstComma).c_str();
-        QString endStr = ev->data.substr(firstComma+1, secondComma-firstComma-1).c_str();
-        QString xml = ev->data.substr(secondComma+1).c_str();
+        QString startStr = dataStr.substr(0, firstComma).c_str();
+        QString endStr = dataStr.substr(firstComma+1, secondComma-firstComma-1).c_str();
+        QString xml = dataStr.substr(secondComma+1).c_str();
         QString qxml(xml);
         //unsigned long long startTime
         //unsigned long long endTime
@@ -827,7 +828,7 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
     if(ev->type=="SET_SOURCE_FILENAME")
     {
-        this->parentAnn->SetSource(ev->data.c_str());
+        this->parentAnn->SetSource(ev->data);
     }
 
     if(ev->type=="GET_SOURCE_FILENAME")
@@ -855,7 +856,7 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
     if(ev->type=="SET_SHAPE")
     {
-        QString xml = ev->data.c_str();
+        QString xml = ev->data;
         std::vector<std::vector<int> > links;
         std::vector<std::vector<float> > shape;
         int ret = TrackingAnnotationData::XmlToShape(xml, links, shape);
@@ -868,7 +869,7 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
     if(ev->type=="ADD_ANNOTATION_AT_TIME")
     {
-        unsigned long long ti = STR_TO_ULL_SIMPLE(ev->data.c_str());
+        unsigned long long ti = ev->data.toULongLong();
         assert(this->parentAnn!=NULL);
         assert(this->parentAnn->track!=NULL);
         this->parentAnn->track->AddAnnotationAtTime(ti);
@@ -876,7 +877,7 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
     if(ev->type=="REMOVE_ANNOTATION_AT_TIME")
     {
-        unsigned long long ti = STR_TO_ULL_SIMPLE(ev->data.c_str());
+        unsigned long long ti = ev->data.toULongLong();
         assert(this->parentAnn!=NULL);
         assert(this->parentAnn->track!=NULL);
         this->parentAnn->track->RemoveAnnotationAtTime(ti);
@@ -884,7 +885,7 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type=="GET_ANNOTATION_AT_TIME")
     {
         //Check for annotation at this time
-        unsigned long long ti = STR_TO_ULL_SIMPLE(ev->data.c_str());
+        unsigned long long ti = ev->data.toULongLong();
         assert(this->parentAnn!=NULL);
         assert(this->parentAnn->track!=NULL);
         QString xml;
@@ -914,7 +915,7 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
     if(ev->type=="SET_ALG_UUID")
     {
-        this->parentAnn->SetAlgUid(QUuid(ev->data.c_str()));
+        this->parentAnn->SetAlgUid(QUuid(ev->data));
     }
 
     if(ev->type=="GET_ALG_UUID")
@@ -941,7 +942,7 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     {
         QDomDocument doc("mydocument");
         QString errorMsg;
-        QString xml(ev->data.c_str());
+        QString xml(ev->data);
         if (!doc.setContent(xml, &errorMsg))
         {
             //throw runtime_error(errorMsg.toLocal8Bit().constData());
@@ -954,7 +955,7 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
     if(ev->type=="GET_SEEK_BACKWARD_TIME")
     {
-        unsigned long long ti = STR_TO_ULL_SIMPLE(ev->data.c_str());
+        unsigned long long ti = ev->data.toULongLong();
 
         try
         {
@@ -975,7 +976,7 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
     if(ev->type=="GET_SEEK_FOWARD_TIME")
     {
-        unsigned long long ti = STR_TO_ULL_SIMPLE(ev->data.c_str());
+        unsigned long long ti = ev->data.toULongLong();
 
         try
         {
@@ -1063,7 +1064,7 @@ void AnnotThread::Update()
             this->eventLoop->SendEvent(requestEv);
 
             std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(requestEv->id);
-            this->srcDuration = STR_TO_ULL_SIMPLE(response->data.c_str());
+            this->srcDuration = response->data.toULongLong();
             cout << "Annot thread found length " << this->srcDuration << endl;
         }
         catch (std::runtime_error &errMsg)

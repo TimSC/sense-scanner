@@ -427,7 +427,7 @@ void MainWindow::RegenerateSourcesList()
             this->eventLoop->SendEvent(getSourceNameEv);
 
             std::tr1::shared_ptr<class Event> sourceName = this->eventReceiver->WaitForEventId(getSourceNameEv->id);
-            QString fina = sourceName->data.c_str();
+            QString fina = sourceName->data;
             QFileInfo finaInfo(fina);
 
             QStandardItem *item = this->sourcesModel.item(row, column);
@@ -600,7 +600,7 @@ void MainWindow::Update()
         assert(this->eventReceiver);
         std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
         assert(ev != NULL);
-        cout << "Event type " << ev->type << endl;
+        cout << "Event type " << qPrintable(ev->type) << endl;
 
         if(ev->type=="THREAD_STARTING")
         {
@@ -613,21 +613,21 @@ void MainWindow::Update()
         }
         if(ev->type=="AVBIN_OPEN_RESULT")
         {
-            cout << "Open result: " << ev->data << endl;
+            cout << "Open result: " << qPrintable(ev->data) << endl;
         }
 
         if(ev->type=="AVBIN_VERSION")
         {
-            cout << ev->type <<" "<< ev->data<< endl;
+            cout << qPrintable(ev->type) <<" "<< qPrintable(ev->data) << endl;
             //The software does not function properly for versions before 11
             //so display a warning if an old avbin is detected
-            if(atoi(ev->data.c_str())<11 && !this->avbinVerChecked)
+            if(ev->data.toInt()<11 && !this->avbinVerChecked)
             {
                 if(this->errMsg == NULL)
                     this->errMsg = new QMessageBox(this);
                 this->errMsg->setWindowTitle("Warning: Old Avbin version detected");
                 QString errTxt = QString("You have Avbin version %1 but at least version %2 is recommended")
-                    .arg(ev->data.c_str()).arg(11);
+                    .arg(ev->data).arg(11);
                 this->errMsg->setText(errTxt);
                 this->errMsg->exec();
             }
@@ -781,7 +781,7 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
     this->eventLoop->SendEvent(getSourceNameEv);
 
     std::tr1::shared_ptr<class Event> sourceName = this->eventReceiver->WaitForEventId(getSourceNameEv->id);
-    QString fina = sourceName->data.c_str();
+    QString fina = sourceName->data;
 
     this->DeselectCurrentSource();
 
@@ -845,7 +845,7 @@ void MainWindow::TrainModelPressed()
         this->eventLoop->SendEvent(getMarkedEv);
 
         std::tr1::shared_ptr<class Event> markedEv = this->eventReceiver->WaitForEventId(getMarkedEv->id);
-        std::vector<std::string> splitMarked = split(markedEv->data.c_str(),',');
+        std::vector<std::string> splitMarked = split(markedEv->data.toLocal8Bit().constData(),',');
         seqMarked.push_back(splitMarked);
         countMarkedFrames += splitMarked.size();
     }
@@ -883,7 +883,7 @@ void MainWindow::TrainModelPressed()
         this->eventLoop->SendEvent(getSourceNameEv);
 
         std::tr1::shared_ptr<class Event> sourceName = this->eventReceiver->WaitForEventId(getSourceNameEv->id);
-        QString fina = sourceName->data.c_str();
+        QString fina = sourceName->data;
         std::vector<std::string> marked = seqMarked[i];
         //For each annotated frame
 
@@ -945,7 +945,7 @@ void MainWindow::TrainModelPressed()
 
             QString annotXml;
             QTextStream test(&annotXml);
-            test << annotXmlRet->data.c_str();
+            test << qPrintable(annotXmlRet->data);
             assert(annotXml.mid(annotXml.length()-1).toLocal8Bit().constData()[0]=='\n');
 
             std::tr1::shared_ptr<class Event> foundPosEv(new Event("TRAINING_POS_FOUND"));

@@ -307,13 +307,13 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         class BinaryData *data = (class BinaryData *)ev->raw;
         assert(data!=NULL);
         QByteArray imgRaw((const char *)data->raw, data->size);
-        this->SendRawDataBlock(ev->data.c_str(), imgRaw);
+        this->SendRawDataBlock(ev->data, imgRaw);
     }
 
     if(ev->type == "TRAINING_POS_FOUND")
     {
         QString preamble2 = QString("XML_DATA\n");
-        QByteArray posRaw(ev->data.c_str(), ev->data.size());
+        QByteArray posRaw(ev->data.toUtf8().constData(), ev->data.size());
         this->SendRawDataBlock(preamble2, posRaw);
     }
 
@@ -335,9 +335,8 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
     if(ev->type == "SET_MODEL")
     {
-        QByteArray bin(ev->data.c_str(), ev->data.length());
-        cout << "Sending model with format " << ev->data.substr(0,3).c_str() << endl;
-        this->SendRawDataBlock("MODEL\n", bin);
+        cout << "Sending model with format " << ev->buffer.left(3).constData() << endl;
+        this->SendRawDataBlock("MODEL\n", ev->buffer.toBase64());
     }
 }
 
@@ -356,7 +355,7 @@ void AlgorithmProcess::ProcessAlgOutput()
         std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_PROGRESS_UPDATE"));
         std::ostringstream tmp;
         tmp << cmd.mid(9).constData();
-        openEv->data = tmp.str();
+        openEv->data = tmp.str().c_str();
         openEv->fromUuid = this->uid;
         el.SendEvent(openEv);
         ReadLineFromBuffer(this->algOutBuffer,1);//Pop this line
@@ -368,9 +367,7 @@ void AlgorithmProcess::ProcessAlgOutput()
         this->paused = 1;
 
         std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
-        std::ostringstream tmp;
-        tmp << "paused";
-        openEv->data = tmp.str();
+        openEv->data = "paused";
         openEv->fromUuid = this->uid;
         el.SendEvent(openEv);
         ReadLineFromBuffer(this->algOutBuffer,1);//Pop this line
@@ -382,9 +379,7 @@ void AlgorithmProcess::ProcessAlgOutput()
         this->paused = 0;
 
         std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
-        std::ostringstream tmp;
-        tmp << "running";
-        openEv->data = tmp.str();
+        openEv->data = "running";
         openEv->fromUuid = this->uid;
         el.SendEvent(openEv);
         ReadLineFromBuffer(this->algOutBuffer,1);//Pop this line
@@ -398,9 +393,7 @@ void AlgorithmProcess::ProcessAlgOutput()
         this->initDone = 0;
 
         std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
-        std::ostringstream tmp;
-        tmp << "finished";
-        openEv->data = tmp.str();
+        openEv->data = "finished";
         openEv->fromUuid = this->uid;
         el.SendEvent(openEv);
         ReadLineFromBuffer(this->algOutBuffer,1);//Pop this line
@@ -423,7 +416,7 @@ void AlgorithmProcess::ProcessAlgOutput()
 
         //Return model as event
         std::tr1::shared_ptr<class Event> responseEv(new Event("SAVED_MODEL_BINARY"));
-        responseEv->data = QByteArray::fromBase64(blockData).constData();
+        responseEv->buffer = QByteArray::fromBase64(blockData).constData();
         responseEv->fromUuid = this->uid;
         if(this->saveModelRequestIds.size()>=1)
         {

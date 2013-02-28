@@ -21,5 +21,5 @@
 #endif
 
 #define STR_TO_ULL_SIMPLE atoi //TODO change this to avoid loss of precision
-
+//STR_TO_ULL(ev->data.c_str(),NULL,10);
 #endif //__LOCALINTS_H_

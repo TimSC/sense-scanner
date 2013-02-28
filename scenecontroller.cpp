@@ -716,7 +716,7 @@ int TrackingSceneController::GetAnnotationBetweenTimestamps(unsigned long long s
     else
     {
         double ti = 0.;
-        QString xml = response->data.c_str();
+        QString xml = response->data;
         int ret = TrackingAnnotationData::FrameFromXml(xml, annot, ti);
         if(ret==0) return 0; //Xml error
 
@@ -774,7 +774,7 @@ std::vector<std::vector<float> > TrackingSceneController::GetShape(std::vector<s
 
     QDomDocument doc("mydocument");
     QString errorMsg;
-    QString xmlStr(response->data.c_str());
+    QString xmlStr(response->data);
     std::vector<std::vector<float> > shape;
     if (!doc.setContent(xmlStr, &errorMsg))
     {
@@ -824,7 +824,7 @@ unsigned long long TrackingSceneController::GetSeekFowardTimeFromAnnot(unsigned 
     {
         throw runtime_error("Not found");
     }
-    return STR_TO_ULL_SIMPLE(response->data.c_str());
+    return response->data.toULongLong();
 }
 
 unsigned long long TrackingSceneController::GetSeekBackwardTimeFromAnnot(unsigned long long queryTime)
@@ -832,7 +832,7 @@ unsigned long long TrackingSceneController::GetSeekBackwardTimeFromAnnot(unsigne
     std::tr1::shared_ptr<class Event> reqEv(new Event("GET_SEEK_BACKWARD_TIME"));
     reqEv->toUuid = this->annotationUuid;
     reqEv->id = this->eventLoop->GetId();
-    reqEv->data = QString("%1").arg(queryTime).toLocal8Bit().constData();
+    reqEv->data = QString("%1").arg(queryTime);
     this->eventLoop->SendEvent(reqEv);
 
     std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(reqEv->id);
@@ -840,14 +840,14 @@ unsigned long long TrackingSceneController::GetSeekBackwardTimeFromAnnot(unsigne
     {
         throw runtime_error("Not found");
     }
-    return STR_TO_ULL_SIMPLE(response->data.c_str());
+    return response->data.toULongLong();
 }
 
 void TrackingSceneController::RemoveAnnotationAtTime(unsigned long long time)
 {
     std::tr1::shared_ptr<class Event> reqEv(new Event("REMOVE_ANNOTATION_AT_TIME"));
     reqEv->toUuid = this->annotationUuid;
-    reqEv->data = QString("%1").arg(time).toLocal8Bit().constData();
+    reqEv->data = QString("%1").arg(time);
     this->eventLoop->SendEvent(reqEv);
 }
 
@@ -855,7 +855,7 @@ void TrackingSceneController::AddAnnotationAtTime(unsigned long long time)
 {
     std::tr1::shared_ptr<class Event> reqEv(new Event("ADD_ANNOTATION_AT_TIME"));
     reqEv->toUuid = this->annotationUuid;
-    reqEv->data = QString("%1").arg(time).toLocal8Bit().constData();
+    reqEv->data = QString("%1").arg(time);
     this->eventLoop->SendEvent(reqEv);
 }
 
@@ -872,7 +872,7 @@ void TrackingSceneController::LoadAnnotation()
 
     std::tr1::shared_ptr<class Event> reqEv(new Event("SET_ANNOTATION_BY_XML"));
     reqEv->toUuid = this->annotationUuid;
-    reqEv->data = fileStream.readAll().toLocal8Bit().constData();
+    reqEv->data = fileStream.readAll();
     this->eventLoop->SendEvent(reqEv);
 }
 
@@ -904,7 +904,7 @@ void TrackingSceneController::SaveAnnotation()
     QFile outFile(fileName);
     outFile.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream fileStream(&outFile);
-    fileStream << resp->data.c_str();
+    fileStream << resp->data.toUtf8().constData();
     fileStream.flush();
 }
 

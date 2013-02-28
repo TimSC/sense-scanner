@@ -56,7 +56,7 @@ int AvBinMedia::OpenFile(QString fina)
     this->eventLoop->SendEvent(openEv);
 
     std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(evid);
-    return atoi(ev->data.c_str());
+    return ev->data.toInt();
 }
 
 void RawImgToQImage(DecodedFrame *frame, QImage &img)
@@ -117,7 +117,7 @@ QSharedPointer<QImage> AvBinMedia::Get(QString source,
     std::tr1::shared_ptr<class Event> getFrameEvent(new Event(eventName.toLocal8Bit().constData(), evid));
     std::ostringstream tmp;
     tmp << ti * 1000;
-    getFrameEvent->data = tmp.str();
+    getFrameEvent->data = tmp.str().c_str();
     getFrameEvent->toUuid = this->uuid;
     this->eventLoop->SendEvent(getFrameEvent);
 
@@ -133,7 +133,7 @@ QSharedPointer<QImage> AvBinMedia::Get(QString source,
         throw runtime_error(e.what());
     }
 
-    QString evType = ev->type.c_str();
+    QString evType = ev->type;
     if(evType.left(18) == "AVBIN_FRAME_FAILED")
     {
         throw runtime_error("Get frame failed");
@@ -199,8 +199,8 @@ long long unsigned AvBinMedia::Length(QString source) //Get length (ms)
 
     QString eventNameRx = QString("AVBIN_DURATION_RESPONSE");
 
-    if(ev->type == eventNameRx.toLocal8Bit().constData());
-        return ROUND_TIMESTAMP(STR_TO_ULL(ev->data.c_str(),NULL,10) / 1000.);
+    if(ev->type == eventNameRx);
+        return ROUND_TIMESTAMP(ev->data.toULongLong() / 1000.);
     throw std::runtime_error("Invalid duration response");
 }
 
@@ -234,7 +234,7 @@ long long unsigned  AvBinMedia::RequestFrame(QString source, long long unsigned 
     tmp << ti * 1000;
     getFrameEvent->toUuid = this->uuid;
     getFrameEvent->id = this->eventLoop->GetId();
-    getFrameEvent->data = tmp.str();
+    getFrameEvent->data = tmp.str().c_str();
     this->eventLoop->SendEvent(getFrameEvent);
 
     return getFrameEvent->id;

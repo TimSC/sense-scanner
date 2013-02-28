@@ -4,6 +4,7 @@
 #include <vector>
 #include <QtCore/QThread>
 #include <QtCore/QUuid>
+#include <QtCore/QtCore>
 #include <map>
 #include "localmutex.h"
 #include "localints.h"
@@ -73,15 +74,16 @@ class Event
 
 public:
     Event();
-    Event(std::string typeIn, unsigned long long idIn = 0);
+    Event(QString typeIn, unsigned long long idIn = 0);
     Event(const Event& other);
     virtual ~Event();
 
-    std::string type;
+    QString type;
     unsigned long long id;
 
     //String data
-    std::string data;
+    QString data;
+    QByteArray buffer;
 
     //Pointer to a custom class that contains additional data
     class Deletable *raw;
@@ -129,7 +131,7 @@ public:
     virtual ~EventLoop();
 
     void SendEvent(std::tr1::shared_ptr<class Event> event);
-    void AddListener(std::string type, class EventReceiver &rx);
+    void AddListener(QString, class EventReceiver &rx);
     void RemoveListener(class EventReceiver &rx);
 
     //! This generates a unique message ID number that can be used to wait
@@ -137,7 +139,7 @@ public:
     unsigned long long GetId();
 
 protected:
-    std::map<std::string, std::vector<EventReceiver *> > eventReceivers;
+    std::map<QString, std::vector<EventReceiver *> > eventReceivers;
     Mutex mutex;
     unsigned long long nextId;
 };

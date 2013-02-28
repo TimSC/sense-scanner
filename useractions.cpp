@@ -23,12 +23,12 @@ void UserActions::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
     if(ev->type=="SAVE_WORKSPACE_AS")
     {
-        this->SaveAs(ev->data.c_str());
+        this->SaveAs(ev->data);
     }
 
     if(ev->type=="LOAD_WORKSPACE")
     {
-        this->Load(ev->data.c_str());
+        this->Load(ev->data);
     }
 
     MessagableThread::HandleEvent(ev);
@@ -101,7 +101,7 @@ int UserActions::SaveAs(QString fina)
     //Decode response
     std::tr1::shared_ptr<class Event> resp = this->eventReceiver->WaitForEventId(getAnnotUuids->id);
     QList<QUuid> annotationUuids;
-    std::vector<std::string> splitUuids = split(resp->data.c_str(), ',');
+    std::vector<std::string> splitUuids = split(resp->data.toLocal8Bit().constData(), ',');
     for(unsigned int i=0;i<splitUuids.size();i++)
         annotationUuids.push_back(QUuid(splitUuids[i].c_str()));
 
@@ -116,7 +116,7 @@ int UserActions::SaveAs(QString fina)
             this->eventLoop->SendEvent(getSourceNameEv);
 
             std::tr1::shared_ptr<class Event> sourceName = this->eventReceiver->WaitForEventId(getSourceNameEv->id);
-            QString fina = sourceName->data.c_str();
+            QString fina = sourceName->data;
 
             //Get algorithm Uuid for this annotation track
             std::tr1::shared_ptr<class Event> getAlgUuidEv(new Event("GET_ALG_UUID"));
@@ -125,7 +125,7 @@ int UserActions::SaveAs(QString fina)
             this->eventLoop->SendEvent(getAlgUuidEv);
 
             std::tr1::shared_ptr<class Event> algUuidEv = this->eventReceiver->WaitForEventId(getAlgUuidEv->id);
-            QUuid algUuid(algUuidEv->data.c_str());
+            QUuid algUuid(algUuidEv->data);
 
             //Get annotation data
             std::tr1::shared_ptr<class Event> getAnnotEv(new Event("GET_ALL_ANNOTATION_XML"));
@@ -143,7 +143,7 @@ int UserActions::SaveAs(QString fina)
                 out << " alg=\"" << algUuid.toString().toLocal8Bit().constData() << "\"";;
 
             out << ">" << endl;
-            out << annotXmlRet->data.c_str();
+            out << annotXmlRet->data;
             out << "\t</source>" << endl;
         }
         catch(std::runtime_error err)
@@ -163,7 +163,7 @@ int UserActions::SaveAs(QString fina)
     //Decode response
     std::tr1::shared_ptr<class Event> resp2 = this->eventReceiver->WaitForEventId(getProcessingEv->id);
     QList<QUuid> processingUuids;
-    std::vector<std::string> splitUuids2 = split(resp2->data.c_str(), ',');
+    std::vector<std::string> splitUuids2 = split(resp2->data.toLocal8Bit().constData(), ',');
     for(unsigned int i=0;i<splitUuids2.size();i++)
         processingUuids.push_back(QUuid(splitUuids2[i].c_str()));
 
@@ -178,10 +178,9 @@ int UserActions::SaveAs(QString fina)
             this->eventLoop->SendEvent(getModelEv);
 
             std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(getModelEv->id);
-            QByteArray modelArr((const char *)ev->data.c_str(), ev->data.length());
 
             //Encode as XML binary blob
-            QByteArray modelBase64 = modelArr.toBase64();
+            QByteArray modelBase64 = ev->buffer.toBase64();
             out << "<model uid=\""<< processingUuids[i] <<"\">" << endl;
             for(unsigned int pos=0;pos<modelBase64.length();pos+=512)
             {
@@ -330,7 +329,7 @@ void UserActions::Load(QString fina)
 
                     //Send data to algorithm process
                     std::tr1::shared_ptr<class Event> foundModelEv(new Event("SET_MODEL"));
-                    foundModelEv->data = modelData.constData();
+                    foundModelEv->buffer = modelData;
                     foundModelEv->toUuid = uid;
                     this->eventLoop->SendEvent(foundModelEv);
 

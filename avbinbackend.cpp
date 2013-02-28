@@ -80,7 +80,7 @@ void AvBinBackend::DoOpenFile(int requestId)
     assert(this->eventLoop);
     std::ostringstream tmp;
     tmp << (this->fi != NULL);
-    resultEvent->data = tmp.str();
+    resultEvent->data = tmp.str().c_str();
     resultEvent->toUuid = this->uuid;
     this->eventLoop->SendEvent(resultEvent);
 
@@ -483,7 +483,7 @@ int AvBinBackend::PlayUpdate()
         std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
         //cout << "Event type " << ev->type << endl;
         foundEvent++;
-        QString evType = ev->type.c_str();
+        QString evType = ev->type;
         if(evType.left(15) == "AVBIN_GET_FRAME")
             this->incomingFrameRequests.push_back(ev);
         else
@@ -519,10 +519,10 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     //Only process events for this module
     if(ev->toUuid != this->uuid) return;
 
-    QString evType(ev->type.c_str());
+    QString evType(ev->type);
     if(evType=="AVBIN_OPEN_FILE")
     {
-        this->OpenFile(ev->data.c_str(), ev->id);
+        this->OpenFile(ev->data.toLocal8Bit().constData(), ev->id);
     }
     if(evType=="AVBIN_GET_DURATION")
     {
@@ -534,7 +534,7 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
                         new Event(eventName.toLocal8Bit().constData(), ev->id));
             std::ostringstream tmp;
             tmp << this->Length();
-            response->data = tmp.str();
+            response->data = tmp.str().c_str();
             response->id = ev->id;
             response->toUuid = ev->toUuid;
             this->eventLoop->SendEvent(response);
@@ -551,7 +551,7 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
     if(evType=="AVBIN_GET_FRAME")
     {
-        unsigned long long ti = STR_TO_ULL(ev->data.c_str(),NULL,10);
+        unsigned long long ti = ev->data.toULongLong();
         QString eventName = QString("AVBIN_FRAME_RESPONSE");
         std::tr1::shared_ptr<class Event> response(new Event(eventName.toLocal8Bit().constData(), ev->id));
         response->toUuid = this->uuid;
@@ -693,7 +693,7 @@ void AvBinThread::SetEventLoop(class EventLoop *eventLoopIn)
     std::tr1::shared_ptr<class Event> verEv(new Event(eventName.toLocal8Bit().constData()));
     QString verStr;
     verStr.setNum(backendVer);
-    verEv->data.append(verStr.toLocal8Bit().constData(), verStr.length());
+    verEv->data.append(verStr);
     eventLoopIn->SendEvent(verEv);
 }
 
