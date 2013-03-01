@@ -900,7 +900,7 @@ void MainWindow::TrainModelPressed()
             //Get image data and send to process
             cout << marked[fr] << endl;
             unsigned long long startTimestamp = 0, endTimestamp = 0;
-            unsigned long long annotTimestamp = STR_TO_ULL_SIMPLE(marked[fr].c_str()); //TODO make this use long long properly
+            unsigned long long annotTimestamp = STR_TO_ULL_SIMPLE(marked[fr].c_str());
             QSharedPointer<QImage> img;
             try
             {
@@ -916,13 +916,11 @@ void MainWindow::TrainModelPressed()
                 assert(resp->type=="MEDIA_FRAME_RESPONSE");
 
                 MediaResponseFrame processedImg(resp);
-                QSharedPointer<QImage> img(new QImage(processedImg.img));
-                annotTimestamp = processedImg.req;
+                img = QSharedPointer<QImage>(new QImage(processedImg.img));
+                //annotTimestamp = processedImg.req;
                 startTimestamp = processedImg.start;
                 endTimestamp = processedImg.end;
 
-                //img = this->mediaInterfaceBack->Get(fina,
-                //        annotTimestamp, startTimestamp, endTimestamp);
             }
             catch (std::runtime_error &err)
             {
@@ -930,7 +928,7 @@ void MainWindow::TrainModelPressed()
                 continue;
             }
 
-            if(annotTimestamp * 1000 < startTimestamp || annotTimestamp * 1000 > endTimestamp)
+            if(annotTimestamp < startTimestamp || annotTimestamp > endTimestamp)
             {
                 cout << "Warning: found a frame but it does not cover requested time" << endl;
                 cout << "Requested: " << annotTimestamp << endl;
