@@ -240,8 +240,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("WORKSPACE_PROCESSING_CHANGED",*eventReceiver);
 
     //Create file reader worker thread
-    this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop);
-    this->mediaInterfaceBack = new class AvBinMedia(this->eventLoop);
+    this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop,0);
+    this->mediaInterfaceBack = new class AvBinMedia(this->eventLoop,1);
     this->workspace.SetMediaUuid(this->mediaInterfaceBack->GetUuid());
 
     //Start event buffer timer

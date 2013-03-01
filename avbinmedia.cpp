@@ -9,7 +9,29 @@
 using namespace std;
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
 
-AvBinMedia::AvBinMedia(class EventLoop *eventLoopIn) : AbstractMedia()
+
+AvBinMediaTimer::AvBinMediaTimer(class AvBinMedia *in) : QObject()
+{
+    this->timer = new QTimer(this);
+    this->parent = in;
+    QObject::connect(this->timer, SIGNAL(timeout()), this, SLOT(Update()));
+    this->timer->start(10); //in millisec
+}
+
+AvBinMediaTimer::~AvBinMediaTimer()
+{
+    delete this->timer;
+    this->timer = NULL;
+}
+
+void AvBinMediaTimer::Update()
+{
+    if(this->parent) parent->Update(NULL,NULL);
+}
+
+//***************************************
+
+AvBinMedia::AvBinMedia(class EventLoop *eventLoopIn, int selfTimerIn) : AbstractMedia()
 {
     this->eventReceiver = NULL;
     this->eventLoop = eventLoopIn;
@@ -33,11 +55,19 @@ AvBinMedia::AvBinMedia(class EventLoop *eventLoopIn) : AbstractMedia()
     this->mediaThread->SetEventLoop(this->eventLoop);
     this->mediaThread->SetUuid(this->uuid);
     this->mediaThread->Start();
+
+    if(selfTimerIn)
+        this->timer = new AvBinMediaTimer(this);
+    else
+        this->timer = NULL;
+
 }
 
 AvBinMedia::~AvBinMedia()
 {
     cout << "AvBinMedia::~AvBinMedia()" << endl;
+    if(this->timer!=NULL) delete this->timer;
+    this->timer = NULL;
     if(this->eventReceiver) delete this->eventReceiver;
     this->eventReceiver = NULL;
     if(this->mediaThread!=NULL)
@@ -247,7 +277,7 @@ void AvBinMedia::Update(void (*frameCallback)(QImage& fr, unsigned long long sta
 {
 
     //Update to check for async frames send to video widget
-
+    //cout << "AvBinMedia::Update " << (unsigned long long) this << endl;
     //Check for new frames from media backend.
     int checking = 1;
     //cout << "GUI receive queue " << this->eventReceiver->BufferSize() << endl;
@@ -288,6 +318,7 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev,
         assert(!img->isNull());
 
         //Return image to calling object by callback
+        assert(frameCallback!=NULL);
         frameCallback(*img, ROUND_TIMESTAMP(frame->timestamp / 1000.),
                       ROUND_TIMESTAMP(frame->endTimestamp / 1000.),
                       ROUND_TIMESTAMP(frame->requestedTimestamp / 1000.),
@@ -304,7 +335,7 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev,
 
         std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(requestEv->id);
 
-        std::tr1::shared_ptr<class Event> responseEv(new Event("AVBIN_GET_DURATION"));
+        std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_DURATION_RESPONSE"));
         responseEv->toUuid = ev->fromUuid;
         responseEv->id = ev->id;
         responseEv->data = response->data;

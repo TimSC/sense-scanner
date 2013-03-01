@@ -1025,11 +1025,6 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
 void AnnotThread::Update()
 {
-    if(this->parentAnn->debug)
-    {
-        cout << qPrintable(this->parentAnn->GetAnnotUid()) << " start update" << endl;
-    }
-
     //Check if this thread should be active and access the video
     assert(this->parentAnn != NULL);
     QUuid algUid = this->parentAnn->GetAlgUid();
@@ -1039,17 +1034,7 @@ void AnnotThread::Update()
     if(!activeStateDesired)
     {
         this->msleep(5);
-        if(this->parentAnn->debug)
-        {
-            cout << qPrintable(this->parentAnn->GetAnnotUid()) << " a" << endl;
-        }
-
         return;
-    }
-
-    if(this->parentAnn->debug)
-    {
-        cout << qPrintable(this->parentAnn->GetAnnotUid()) << " b" << endl;
     }
 
     if(algUid.isNull())
@@ -1068,11 +1053,6 @@ void AnnotThread::Update()
     {
         this->msleep(5);
         return;
-    }
-
-    if(this->parentAnn->debug)
-    {
-        cout << qPrintable(this->parentAnn->GetAnnotUid()) << " c" << endl;
     }
 
     class TrackingAnnotationData *track = this->parentAnn->GetTrack();
@@ -1102,11 +1082,6 @@ void AnnotThread::Update()
         return;
     }
 
-    if(this->parentAnn->debug)
-    {
-        cout << qPrintable(this->parentAnn->GetAnnotUid()) << " d" << endl;
-    }
-
     //Get list of avilable frames
     if(!this->frameTimesSet)
     {
@@ -1114,12 +1089,6 @@ void AnnotThread::Update()
         this->frameTimesSet = true;
         return;
     }
-
-    if(this->parentAnn->debug)
-    {
-        cout << qPrintable(this->parentAnn->GetAnnotUid()) << " e" << endl;
-    }
-
 
     unsigned long long frameDuration = 0; //microsec
     unsigned long long avTi = 0; //microsec
@@ -1151,11 +1120,6 @@ void AnnotThread::Update()
             this->currentStartTimestamp = start;
             this->currentEndTimestamp = end;
         }
-    }
-
-    if(this->parentAnn->debug)
-    {
-        cout << qPrintable(this->parentAnn->GetAnnotUid()) << " f" << endl;
     }
 
     //If needed, get the first frame from the video
@@ -1367,11 +1331,6 @@ void AnnotThread::Update()
     else
     {
         this->parentAnn->SetActiveStateDesired(0);
-    }
-
-    if(this->parentAnn->debug)
-    {
-        cout << qPrintable(this->parentAnn->GetAnnotUid()) << " d" << endl;
     }
 
     this->msleep(5);

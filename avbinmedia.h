@@ -17,14 +17,30 @@
 
 //*************************************************
 
+class AvBinMediaTimer : public QObject
+{
+    Q_OBJECT
+public:
+    explicit AvBinMediaTimer(class AvBinMedia *in);
+    virtual ~AvBinMediaTimer();
+
+public slots:
+    void Update();
+
+protected:
+    QTimer *timer;
+    class AvBinMedia *parent;
+};
+
 class AvBinMedia : public AbstractMedia
 {
     /*!
     * A high level interface to retrieve video frames. The decoding is
     * performed by AvBinThread and AvBinBackend.
     */
+
 public:
-    explicit AvBinMedia(class EventLoop *eventLoopIn);
+    explicit AvBinMedia(class EventLoop *eventLoopIn, int selfTimerIn);
     virtual ~AvBinMedia();
 
     virtual QSharedPointer<QImage> Get(QString source,
@@ -58,6 +74,8 @@ protected:
     AvBinThread *mediaThread;
     QString currentFina;
     QUuid uuid;
+    class AvBinMediaTimer *timer;
+
 };
 
 #endif // AVBINMEDIA_H
