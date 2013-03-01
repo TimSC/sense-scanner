@@ -1155,7 +1155,7 @@ void AnnotThread::Update()
 
             //Update annotation with frame that has been found
             track->FoundFrame(this->currentStartTimestamp, this->currentEndTimestamp);
-            avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5); //microsec
+            avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5); //millisec
 
             //Check if annotation is in this frame
             std::vector<std::vector<float> > foundAnnot;
