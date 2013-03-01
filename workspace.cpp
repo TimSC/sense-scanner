@@ -124,15 +124,6 @@ void Workspace::RemoveSource(QUuid uuid)
 
 }
 
-unsigned int Workspace::AddAutoAnnot(QUuid annotUid, QUuid algUid, class AvBinMedia* mediaInterface)
-{
-    QUuid uuid = QUuid::createUuid();
-    this->AddSource(uuid);
-
-    //TODO copy source filename and annotated frames to destination annotation
-    assert(0);
-}
-
 QList<QUuid> Workspace::GetAnnotationUuids()
 {
     this->lock.lock();

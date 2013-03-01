@@ -1027,7 +1027,7 @@ void AnnotThread::Update()
     int activeStateDesired = this->parentAnn->GetActiveStateDesired();
     if(!activeStateDesired)
     {
-        this->msleep(100);
+        this->msleep(5);
         return;
     }
 
@@ -1038,14 +1038,14 @@ void AnnotThread::Update()
         if(this->parentAnn->GetActive())
             this->parentAnn->SetActiveStateDesired(0);
         else
-            this->msleep(100);
+            this->msleep(5);
         return;
     }
 
     int isActive = this->parentAnn->GetActive();
     if(!isActive)
     {
-        this->msleep(100);
+        this->msleep(5);
         return;
     }
 
@@ -1326,7 +1326,7 @@ void AnnotThread::Update()
         this->parentAnn->SetActiveStateDesired(0);
     }
 
-    this->msleep(100);
+    this->msleep(5);
 }
 
 void AnnotThread::Finished()

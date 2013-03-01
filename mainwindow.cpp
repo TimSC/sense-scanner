@@ -980,7 +980,8 @@ void MainWindow::ApplyModelPressed()
 
         //Load appropriate video
         //QString fina = this->workspace.GetSourceName(ind.row());
-        QUuid uid = annotationUuids[ind.row()];
+        QUuid srcUid = annotationUuids[ind.row()];
+        QUuid algUuid = algUuids[modelSelList[0].row()];
         //ChangeVidSource(&this->mediaThreadBack,this->mediaInterfaceBack,this->eventLoop,fina);
 
         //Apply models to selected video
@@ -988,10 +989,46 @@ void MainWindow::ApplyModelPressed()
         {
             QModelIndex &mind = modelSelList[i];
             cout << "model "<< mind.row() << "," << mind.column() << endl;
-            this->workspace.AddAutoAnnot(uid.toString(), algUuids[i], this->mediaInterfaceBack);
+
+            //Create new annotation with new uuid
+            QUuid newAnn = QUuid::createUuid();
+            this->workspace.AddSource(newAnn);
+
+            //Copy source
+            std::tr1::shared_ptr<class Event> getSourceNameEv(new Event("GET_SOURCE_FILENAME"));
+            getSourceNameEv->toUuid = srcUid;
+            getSourceNameEv->id = this->eventLoop->GetId();
+            this->eventLoop->SendEvent(getSourceNameEv);
+
+            std::tr1::shared_ptr<class Event> sourceName = this->eventReceiver->WaitForEventId(getSourceNameEv->id);
+            QString fina = sourceName->data;
+
+            std::tr1::shared_ptr<class Event> setSourceNameEv(new Event("SET_SOURCE_FILENAME"));
+            setSourceNameEv->toUuid = newAnn;
+            setSourceNameEv->data = fina;
+            this->eventLoop->SendEvent(setSourceNameEv);
+
+            //Copy annotations
+            std::tr1::shared_ptr<class Event> getAnnotEv(new Event("GET_ALL_ANNOTATION_XML"));
+            getAnnotEv->toUuid = srcUid;
+            getAnnotEv->id = this->eventLoop->GetId();
+            this->eventLoop->SendEvent(getAnnotEv);
+
+            std::tr1::shared_ptr<class Event> annotXmlRet = this->eventReceiver->WaitForEventId(getAnnotEv->id);
+            QString xml = annotXmlRet->data;
+
+            std::tr1::shared_ptr<class Event> setAnnotEv(new Event("SET_ANNOTATION_BY_XML"));
+            setAnnotEv->toUuid = newAnn;
+            setAnnotEv->data = xml;
+            this->eventLoop->SendEvent(setAnnotEv);
+
+            //Set algorithm
+            std::tr1::shared_ptr<class Event> setAlgEv(new Event("SET_ALG_UUID"));
+            setAlgEv->toUuid = newAnn;
+            setAlgEv->data = algUuid;
+            this->eventLoop->SendEvent(setAlgEv);
         }
     }
-    this->RegenerateSourcesList();
 
 }
 

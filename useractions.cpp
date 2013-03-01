@@ -52,6 +52,7 @@ void UserActions::Update()
     {
         flushEvents = 0;
     }
+    this->msleep(100);
 }
 
 void UserActions::SetEventLoop(class EventLoop *eventLoopIn)

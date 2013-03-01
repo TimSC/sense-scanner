@@ -32,12 +32,7 @@ public:
 
     //** Sources and annotations
     unsigned int AddSource(QUuid uuid);
-
     void RemoveSource(QUuid uuid);
-    unsigned int AddAutoAnnot(QUuid annotUid, QUuid algUid, class AvBinMedia* mediaInterface);
-
-    //void SetTrack(unsigned int trackNum, TrackingAnnotation *track);
-    //TrackingAnnotation *GetTrack(unsigned int trackNum);
 
     //** Processing
     void AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg);
