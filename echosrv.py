@@ -185,11 +185,12 @@ def WorkerProcessProf(childPipeConn):
 					#	continue
 
 					im = Image.frombuffer("RGB", (width, height), combinedRaw[:imgBytes], 'raw', "RGB", 0, 1)
-					if training:
+					if modelReady:
 						#Post-training phase
 						#print "Store image"
 						#im.save("alg.jpg")
 
+						#Encode xml and make predictions
 						outXml = "<prediction>\n"
 						xmlData = combinedRaw[imgBytes:imgBytes+xmlBytes].decode('utf8')
 						tree = ET.fromstring(xmlData)
@@ -214,7 +215,7 @@ def WorkerProcessProf(childPipeConn):
 						sys.stdout.write(outXmlEnc)
 						sys.stdout.flush()
 
-					else:
+					if training and not modelReady:
 						print "ALG_NOT_READY"
 
 				print "DATA_BLOCK_PROCESSED"
