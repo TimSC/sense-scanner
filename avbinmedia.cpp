@@ -132,18 +132,15 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type == "AVBIN_FRAME_RESPONSE")
     {
         std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_FRAME_RESPONSE"));
-        /*responseEv->data = ev->data;
-        this->eventLoop->SendEvent(responseEv);*/
-        assert(0);
+
+        cout << "x" ;
     }
 
     if(ev->type=="AVBIN_FRAME_FAILED")
     {
         std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_DURATION_RESPONSE"));
-        /*responseEv->toUuid = ev->fromUuid;
-        responseEv->data = "FAILED";
-        this->eventLoop->SendEvent(responseEv);*/
-        assert(0);
+
+        cout << "y";
     }
 
     if(ev->type == "GET_MEDIA_DURATION")
@@ -161,6 +158,7 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         {
             std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_DURATION_RESPONSE"));
             responseEv->toUuid = ev->fromUuid;
+            responseEv->fromUuid = this->uuid;
             responseEv->id = ev->id;
             responseEv->data = "FAILED";
             this->eventLoop->SendEvent(responseEv);
@@ -169,6 +167,7 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         {
             std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_DURATION_RESPONSE"));
             responseEv->toUuid = ev->fromUuid;
+            responseEv->fromUuid = this->uuid;
             responseEv->id = ev->id;
             responseEv->data = QString("%1").arg(response->data.toULongLong() / 1000.);
             this->eventLoop->SendEvent(responseEv);
@@ -209,6 +208,7 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         {
             std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_FRAME_RESPONSE"));
             responseEv->toUuid = ev->fromUuid;
+            responseEv->fromUuid = this->uuid;
             responseEv->id = ev->id;
             responseEv->data = "FAILED";
             this->eventLoop->SendEvent(responseEv);
@@ -219,6 +219,7 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             MediaResponseFrameBasic fd(response);
             std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_FRAME_RESPONSE"));
             responseEv->toUuid = ev->fromUuid;
+            responseEv->fromUuid = this->uuid;
             responseEv->id = ev->id;
             QString datastr = QString("%1,%2,%3,%4,%5").arg(fd.start).arg(fd.end).arg(fd.req).arg(fd.width).arg(fd.height);
             responseEv->data = datastr;

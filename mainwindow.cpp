@@ -243,9 +243,11 @@ MainWindow::MainWindow(QWidget *parent) :
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop,1);
     this->mediaInterfaceFront->Start();
+    cout << "Front buff media " << qPrintable(this->mediaInterfaceFront->GetUuid()) << endl;
 
     this->mediaInterfaceBack = new class AvBinMedia(this->eventLoop,0);
     this->mediaInterfaceBack->Start();
+    cout << "Back buff media " << qPrintable(this->mediaInterfaceBack->GetUuid()) << endl;
 
     this->workspace.SetMediaUuid(this->mediaInterfaceBack->GetUuid());
 

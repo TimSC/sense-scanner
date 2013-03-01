@@ -2,6 +2,7 @@
 #include "scenecontroller.h"
 #include "avbinmedia.h"
 #include "localsleep.h"
+#include "videowidget.h"
 #include <assert.h>
 #include <iostream>
 using namespace std;
@@ -145,7 +146,7 @@ void TrackingAnnotationData::SetAnnotationBetweenTimestamps(unsigned long long s
         return;
     }
 
-    //Set annotation for preset frames
+    //Set annotation for annotated frames that already exist
     int found = 0;
     std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
     for(it = this->pos.begin(); it != this->pos.end(); it++)
@@ -1060,25 +1061,26 @@ void AnnotThread::Update()
 
     if(!this->srcDurationSet)
     {
-        int err = 0;
         try
         {
             //Estimate progress and generate an event
             std::tr1::shared_ptr<class Event> requestEv(new Event("GET_MEDIA_DURATION"));
             assert(!this->mediaInterface.isNull());
             requestEv->toUuid = this->mediaInterface;
+            requestEv->data = src;
             requestEv->id = this->eventLoop->GetId();
             this->eventLoop->SendEvent(requestEv);
 
             std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(requestEv->id);
             this->srcDuration = response->data.toULongLong();
             cout << "Annot thread found length " << this->srcDuration << endl;
+            this->srcDurationSet = 1;
         }
         catch (std::runtime_error &errMsg)
         {
-            err = 1;
+
         }
-        if(!err) this->srcDurationSet = 1;
+        this->msleep(5);
         return;
     }
 
@@ -1087,6 +1089,7 @@ void AnnotThread::Update()
     {
         track->GetFramesAvailable(this->frameTimes, this->frameTimesEnd);
         this->frameTimesSet = true;
+        this->msleep(5);
         return;
     }
 
@@ -1097,19 +1100,20 @@ void AnnotThread::Update()
     //Check algorithm is ready to work
     //TODO
 
+    //WHAT is this for? Getting the start frame time from cache?
     if(this->frameTimesSet && this->currentTimeSet==false && this->frameTimes.size() > 0)
     {
         std::map<unsigned long, unsigned long>::iterator it = this->frameTimes.begin();
         assert(it!=this->frameTimes.end());
         unsigned long start = it->first;
         unsigned long end = it->second;
-        avTi = (unsigned long long)(0.5 * (start + end) + 0.5); //microsec
+        avTi = (unsigned long long)(0.5 * (start + end) + 0.5); //millisec
 
         std::vector<std::vector<float> > foundAnnot;
         unsigned long long foundAnnotationTime=0;
-        int found = track->GetAnnotationBetweenTimestamps(TO_MILLISEC(start),
-                                              TO_MILLISEC(end),
-                                              TO_MILLISEC(avTi),
+        int found = track->GetAnnotationBetweenTimestamps(start,
+                                              end,
+                                              avTi,
                                               foundAnnot,
                                               foundAnnotationTime);
 
@@ -1129,9 +1133,23 @@ void AnnotThread::Update()
         QSharedPointer<QImage> img;
         try
         {
-            assert(0);
-            //img = this->mediaInterface->Get(src,
-            //        0, this->currentStartTimestamp, this->currentEndTimestamp);
+            std::tr1::shared_ptr<class Event> reqEv(new Event("GET_MEDIA_FRAME"));
+            reqEv->toUuid = this->mediaInterface;
+            reqEv->data = src;
+            QString tiStr = QString("0");
+            reqEv->buffer = tiStr.toLocal8Bit().constData();
+            reqEv->id = this->eventLoop->GetId();
+            this->eventLoop->SendEvent(reqEv);
+
+            std::tr1::shared_ptr<class Event> resp = this->eventReceiver->WaitForEventId(reqEv->id);
+            assert(resp->type=="MEDIA_FRAME_RESPONSE");
+
+            MediaResponseFrame processedImg(resp);
+            img = QSharedPointer<QImage>(new QImage(processedImg.img));
+            //annotTimestamp = processedImg.req;
+            this->currentStartTimestamp = processedImg.start;
+            this->currentEndTimestamp = processedImg.end;
+
             cout << "startTimestamp " << this->currentStartTimestamp << endl;
             cout << "endTimestamp " << this->currentEndTimestamp << endl;
 
@@ -1143,8 +1161,8 @@ void AnnotThread::Update()
             std::vector<std::vector<float> > foundAnnot;
             unsigned long long foundAnnotationTime=0;
             int found = track->GetAnnotationBetweenTimestamps(0,
-                                                  TO_MILLISEC(this->currentEndTimestamp),
-                                                  TO_MILLISEC(avTi),
+                                                  this->currentEndTimestamp,
+                                                  avTi,
                                                   foundAnnot,
                                                   foundAnnotationTime);
 
@@ -1159,8 +1177,8 @@ void AnnotThread::Update()
 
                 //If not annotation here, make a prediction
                 if(this->currentModelSet == true)
-                this->ImageToProcess(TO_MILLISEC(this->currentStartTimestamp),
-                                     TO_MILLISEC(this->currentEndTimestamp),
+                this->ImageToProcess(this->currentStartTimestamp,
+                                     this->currentEndTimestamp,
                                      img, this->currentModel);
             }
 
@@ -1169,9 +1187,11 @@ void AnnotThread::Update()
         catch (std::runtime_error &err)
         {
             cout << "Timeout getting frame 0" << endl;
+            this->msleep(5);
             return;
         }
         this->currentTimeSet = true;
+        this->msleep(5);
         return;
     }
 
@@ -1180,17 +1200,17 @@ void AnnotThread::Update()
 
     //Estimate mid time of next frame
     assert(this->currentTimeSet==true);
-    frameDuration = this->currentEndTimestamp - this->currentStartTimestamp; //microsec
-    avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5); //microsec
-    nextTi = avTi + frameDuration; //microsec
+    frameDuration = this->currentEndTimestamp - this->currentStartTimestamp; //millisec
+    avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5); //millisec
+    nextTi = avTi + frameDuration; //millisec
     assert(nextTi > 0);
 
     //Check if known frames can satisfy iterations
     int knownFrame = 1;
     int countKnown = 0;
-    if(nextTi < srcDuration * 1000) while(knownFrame)
+    if(nextTi < this->srcDuration) while(knownFrame)
     {
-        unsigned long long milsec = TO_MILLISEC(nextTi);
+        unsigned long long milsec = nextTi;
 
         //Check if the next frame start and end is already known
         std::map<unsigned long, unsigned long>::iterator fit = this->frameTimes.find(this->currentEndTimestamp);
@@ -1212,8 +1232,8 @@ void AnnotThread::Update()
             {
                 //Get frames anywhere in frame iterval (slow)
                 found = track->GetAnnotationBetweenTimestamps(
-                    TO_MILLISEC(this->currentStartTimestamp),
-                    TO_MILLISEC(this->currentEndTimestamp),
+                    this->currentStartTimestamp,
+                    this->currentEndTimestamp,
                     milsec,
                     foundAnnot,
                     foundAnnotationTime);
@@ -1236,8 +1256,8 @@ void AnnotThread::Update()
             else
                 knownFrame = 0;
 
-            //After 100 frames, return to allow thread messages to be processed
-            if(countKnown>1000)
+            //After 1 frame, return to allow thread messages to be processed
+            if(countKnown>0)
             {
                 //Estimate progress and generate an event
                 double progress = double(milsec) / this->srcDuration;
@@ -1246,7 +1266,7 @@ void AnnotThread::Update()
                 QString progressStr = QString("%1").arg(progress);
                 requestEv->data = progressStr.toLocal8Bit().constData();
                 this->eventLoop->SendEvent(requestEv);
-
+                this->msleep(5);
                 return;
             }
 
@@ -1256,9 +1276,9 @@ void AnnotThread::Update()
     }
 
     //Get subsequent frames
-    if(nextTi < srcDuration * 1000)
+    if(nextTi < srcDuration)
     {
-        unsigned long long milsec = TO_MILLISEC(nextTi);
+        unsigned long long milsec = nextTi;
 
         QSharedPointer<QImage> img;
 
@@ -1266,8 +1286,24 @@ void AnnotThread::Update()
 
         try
         {
-            assert(0);
-            cout << "Current time " << milsec << "," << src.toLocal8Bit().constData() << endl;
+            std::tr1::shared_ptr<class Event> reqEv(new Event("GET_MEDIA_FRAME"));
+            reqEv->toUuid = this->mediaInterface;
+            reqEv->data = src;
+            QString tiStr = QString("%1").arg(milsec);
+            reqEv->buffer = tiStr.toLocal8Bit().constData();
+            reqEv->id = this->eventLoop->GetId();
+            this->eventLoop->SendEvent(reqEv);
+
+            std::tr1::shared_ptr<class Event> resp = this->eventReceiver->WaitForEventId(reqEv->id);
+            assert(resp->type=="MEDIA_FRAME_RESPONSE");
+
+            MediaResponseFrame processedImg(resp);
+            img = QSharedPointer<QImage>(new QImage(processedImg.img));
+            //annotTimestamp = processedImg.req;
+            this->currentStartTimestamp = processedImg.start;
+            this->currentEndTimestamp = processedImg.end;
+
+            //cout << "Current time " << milsec << "," << src.toLocal8Bit().constData() << endl;
             //img = this->mediaInterface->Get(src,
             //        milsec,
             //        this->currentStartTimestamp,
@@ -1280,6 +1316,7 @@ void AnnotThread::Update()
         {
             this->parentAnn->SetActiveStateDesired(0);
             this->currentTimeSet = false;
+            this->msleep(5);
             return;
         }
 
@@ -1293,8 +1330,8 @@ void AnnotThread::Update()
         //Check if annotation is in this frame
         std::vector<std::vector<float> > foundAnnot;
         unsigned long long foundAnnotationTime;
-        int found = track->GetAnnotationBetweenTimestamps(TO_MILLISEC(this->currentStartTimestamp),
-                                              TO_MILLISEC(this->currentEndTimestamp),
+        int found = track->GetAnnotationBetweenTimestamps(this->currentStartTimestamp,
+                                              this->currentEndTimestamp,
                                               milsec,
                                               foundAnnot,
                                               foundAnnotationTime);
@@ -1310,8 +1347,8 @@ void AnnotThread::Update()
 
             //If not annotation here, make a prediction
             if(this->currentModelSet != 0)
-            this->ImageToProcess(TO_MILLISEC(this->currentStartTimestamp),
-                                 TO_MILLISEC(this->currentEndTimestamp),
+            this->ImageToProcess(this->currentStartTimestamp,
+                                 this->currentEndTimestamp,
                                  img, this->currentModel);
         }
 
@@ -1326,6 +1363,7 @@ void AnnotThread::Update()
         frameDuration = this->currentEndTimestamp - this->currentStartTimestamp;
         avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5);
         nextTi = avTi + frameDuration;
+        this->msleep(5);
         return;
     }
     else

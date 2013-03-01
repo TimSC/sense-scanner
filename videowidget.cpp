@@ -270,6 +270,9 @@ void VideoWidget::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
     if(ev->type=="MEDIA_FRAME_RESPONSE")
     {
+        //Ignore frames not directed at widget
+        if(ev->fromUuid != this->seq) return;
+
         MediaResponseFrame processedImg(ev);
         this->AsyncFrameReceived(processedImg.img, processedImg.start,
                                  processedImg.end, processedImg.req);
