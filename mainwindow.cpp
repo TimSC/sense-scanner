@@ -240,7 +240,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("WORKSPACE_PROCESSING_CHANGED",*eventReceiver);
 
     //Create file reader worker thread
-    this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop,0);
+    this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop,1);
     this->mediaInterfaceBack = new class AvBinMedia(this->eventLoop,1);
     this->workspace.SetMediaUuid(this->mediaInterfaceBack->GetUuid());
 
@@ -251,7 +251,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
     this->setWindowTitle("Kinatomic Sense Scanner");
-    this->ui->widget->SetSource(this->mediaInterfaceFront,"");
+    this->ui->widget->SetSource(this->mediaInterfaceFront->GetUuid(),"");
 
     QStringList horLabelsAnn;
     horLabelsAnn.push_back("Sources");
@@ -279,7 +279,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //this->ui->workspaceLayout->hide();
     //this->ui->webViewLayout->hide();
     this->ui->sourcesAlgGui->mainWindow = this;
-
+    this->ui->widget->SetEventLoop(this->eventLoop);
 }
 
 MainWindow::~MainWindow()
@@ -374,7 +374,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
     //Disconnect video widget from media source
     cout << "Disconnect video from source" << endl;
-    AbstractMedia *nullSrc = NULL;
+    QUuid nullSrc;
     this->ui->widget->SetSource(nullSrc,"");
 
     //Signal worker threads to stop
@@ -798,7 +798,7 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
     //Set widget to use this source
     try
     {
-        this->ui->widget->SetSource(this->mediaInterfaceFront, fina);
+        this->ui->widget->SetSource(this->mediaInterfaceFront->GetUuid(), fina);
     }
     catch(std::runtime_error &err)
     {
@@ -899,8 +899,9 @@ void MainWindow::TrainModelPressed()
             QSharedPointer<QImage> img;
             try
             {
-                img = this->mediaInterfaceBack->Get(fina,
-                        annotTimestamp, startTimestamp, endTimestamp);
+                assert(0);
+                //img = this->mediaInterfaceBack->Get(fina,
+                //        annotTimestamp, startTimestamp, endTimestamp);
             }
             catch (std::runtime_error &err)
             {

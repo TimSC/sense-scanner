@@ -32,7 +32,7 @@ protected:
     class AvBinMedia *parent;
 };
 
-class AvBinMedia : public AbstractMedia
+class AvBinMedia
 {
     /*!
     * A high level interface to retrieve video frames. The decoding is
@@ -43,26 +43,11 @@ public:
     explicit AvBinMedia(class EventLoop *eventLoopIn, int selfTimerIn);
     virtual ~AvBinMedia();
 
-    virtual QSharedPointer<QImage> Get(QString source,
-                                       long long unsigned ti,
-                                       long long unsigned &outFrameStart,
-                                       long long unsigned &outFrameEnd,
-                                       long long unsigned timeout = 5000); //in milliseconds
-
-    virtual long long unsigned Length(QString source); //Get length (ms)
-    virtual long long unsigned GetFrameStartTime(QString source, long long unsigned ti); //in milliseconds
     void TerminateThread();
 
     long long unsigned RequestFrame(QString source, long long unsigned ti);
-    void Update(void (*frameCallback)(QImage& fr, unsigned long long startTimestamp,
-                                      unsigned long long endTimestamp,
-                                      unsigned long long requestedTimestamp,
-                                      void *raw), void *raw);
-    virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev,
-                             void (*frameCallback)(QImage& fr, unsigned long long startTimestamp,
-                                                                           unsigned long long endTimestamp,
-                                                                           unsigned long long requestTimestamp,
-                                                                           void *raw), void *raw);
+    void Update();
+    virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);
     QUuid GetUuid();
 
 protected:

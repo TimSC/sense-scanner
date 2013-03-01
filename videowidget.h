@@ -8,6 +8,7 @@
 #include <vector>
 #include "mediabuffer.h"
 #include "scenecontroller.h"
+#include "eventloop.h"
 
 namespace Ui {
 class VideoWidget;
@@ -37,7 +38,7 @@ class VideoWidget : public QWidget
 {
     /*
     * VideoWidget handles the video controls and display based on
-    * an AbstractMedia data source. The TrackingAnnotation provides
+    * an AvBinMedia data source. The TrackingAnnotation provides
     * the GUI code for inside the video area.
     */
 
@@ -47,7 +48,7 @@ public:
     virtual ~VideoWidget();
 
 public slots:
-    void SetSource(AbstractMedia *src, QString finaIn);
+    void SetSource(QUuid src, QString finaIn);
     void SliderMoved(int newValue);
     void Pause();
     void Play();
@@ -61,12 +62,13 @@ public slots:
     void SetAnnotationTrack(QUuid srcUuid);
     void FitToWindow();
     void TimeChanged(QTime time);
-
+    void SetEventLoop(class EventLoop *eventLoopIn);
+    virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);
 protected:
     void SetVisibleAtTime(long long unsigned ti);
 
     TrackingSceneController *sceneControl;
-    AbstractMedia *seq;
+    QUuid seq;
     QSharedPointer<QTimer> timer;
 
     QTime playPressedTime;
@@ -76,6 +78,9 @@ protected:
     int fitWindowToNextFrame;
     long long unsigned lastRequestedTime;
     QString fina;
+
+    class EventLoop *eventLoop;
+    class EventReceiver *eventReceiver;
 
 private:
     Ui::VideoWidget *ui;

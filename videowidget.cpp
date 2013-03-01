@@ -14,6 +14,29 @@ using namespace std;
 
 //Custom graphics view to catch mouse wheel
 
+void RawImgToQImage(DecodedFrame *frame, QImage &img)
+{
+    assert(frame != NULL);
+    assert(frame->width > 0);
+    assert(frame->height > 0);
+    assert(frame->buff != NULL);
+    assert(frame->buffSize > 0);
+
+    uint8_t *raw = &*frame->buff;
+    unsigned int cursor = 0;
+    for(unsigned int j=0;j<frame->height;j++)
+        for(unsigned int i=0;i<frame->width;i++)
+        {
+            cursor = i * 3 + (j * frame->width * 3);
+            assert(cursor + 2 < frame->buffSize);
+
+            QRgb value = qRgb(raw[cursor], raw[cursor+1], raw[cursor+2]);
+            img.setPixel(i, j, value);
+        }
+}
+
+//***************************************
+
 ZoomGraphicsView::ZoomGraphicsView(QWidget *parent) : QGraphicsView(parent)
 {
     this->scaleFactor = 1.;
@@ -53,6 +76,8 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->sceneControl = NULL;
     this->fitWindowToNextFrame = 0;
     this->lastRequestedTime = 1;
+    this->eventLoop = NULL;
+    this->eventReceiver = NULL;
 
     this->SetVisibleAtTime(0);
 
@@ -66,10 +91,13 @@ VideoWidget::VideoWidget(QWidget *parent) :
 
 VideoWidget::~VideoWidget()
 {
+    if(this->eventReceiver!=NULL)
+        delete this->eventReceiver;
+    this->eventReceiver = NULL;
     delete ui;
 }
 
-void VideoWidget::SetSource(AbstractMedia *src, QString finaIn)
+void VideoWidget::SetSource(QUuid src, QString finaIn)
 {
     this->seq = src;
     this->mediaLength = 0;
@@ -78,7 +106,8 @@ void VideoWidget::SetSource(AbstractMedia *src, QString finaIn)
 
     if(this->seq!=NULL) try
     {
-        this->mediaLength = this->seq->Length(this->fina);
+        assert(0);
+        //this->mediaLength = this->seq->Length(this->fina);
     }
     catch (std::runtime_error &e)
     {
@@ -116,7 +145,8 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
     //Get image from sequence
     try
     {
-        this->seq->RequestFrame(this->fina, ti);
+        assert(0);
+        //this->seq->RequestFrame(this->fina, ti);
     }
     catch(std::runtime_error &err)
     {
@@ -206,16 +236,23 @@ void VideoWidget::SeekForward()
     catch(exception &err) {}
 }
 
-
-void FrameCallbackTest(QImage& fr, unsigned long long startTimestamp,
-                       unsigned long long endTimestamp,
-                       unsigned long long requestTimestamp,
-                       void *raw)
+void VideoWidget::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
-    VideoWidget *widget = (VideoWidget *)raw;
-    widget->AsyncFrameReceived(fr, startTimestamp,
-                               endTimestamp,
-                               requestTimestamp);
+    if(ev->type=="MEDIA_FRAME_RESPONSE")
+    {
+        DecodedFrame *frame = (DecodedFrame *)ev->raw;
+
+        unsigned long long ti = ROUND_TIMESTAMP(frame->timestamp / 1000.);
+        unsigned long long end = ROUND_TIMESTAMP(frame->endTimestamp / 1000.);
+        unsigned long long req = ROUND_TIMESTAMP(frame->requestedTimestamp / 1000.);
+        //Convert to a QImage object
+        QImage img(frame->width, frame->height,
+                                              QImage::Format_RGB888);
+        RawImgToQImage(frame, img);
+        this->AsyncFrameReceived(img, ti, end, req);
+
+    }
+
 }
 
 void VideoWidget::TimerUpdate()
@@ -225,15 +262,27 @@ void VideoWidget::TimerUpdate()
         this->Pause();
     }
 
+    try
+    {
+        assert(this->eventReceiver);
+        std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
+        cout << "Event type " << qPrintable(ev->type) << endl;
+        this->HandleEvent(ev);
+    }
+    catch(std::runtime_error e)
+    {
+
+    }
+
     //Check if any async messages are waiting from the source media
-    if(this->seq != NULL)
+    /*if(this->seq != NULL)
     {
         this->seq->Update(FrameCallbackTest, (void *)this);
     }
     else
     {
         int debug = 0;
-    }
+    }*/
 
     if(this->playActive)
     {
@@ -372,4 +421,11 @@ void VideoWidget::TimeChanged(QTime time)
     t += time.hour() * 3600000;
     this->ui->horizontalScrollBar->setValue(t);
     this->SetVisibleAtTime(t);
+}
+
+void VideoWidget::SetEventLoop(class EventLoop *eventLoopIn)
+{
+    this->eventLoop = eventLoopIn;
+    this->eventReceiver = new EventReceiver(this->eventLoop);
+    this->eventLoop->AddListener("MEDIA_FRAME_RESPONSE", *this->eventReceiver);
 }
