@@ -9,26 +9,25 @@
 #include <stdexcept>
 #include <cstdlib>
 #include <math.h>
+#include "eventloop.h"
 using namespace std;
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
 
 //Custom graphics view to catch mouse wheel
 
-void RawImgToQImage(DecodedFrame *frame, QImage &img)
+void RawImgToQImage(QByteArray &pix, unsigned width, unsigned height, QImage &img)
 {
-    assert(frame != NULL);
-    assert(frame->width > 0);
-    assert(frame->height > 0);
-    assert(frame->buff != NULL);
-    assert(frame->buffSize > 0);
+    assert(width > 0);
+    assert(height > 0);
+    assert(pix.size() > 0);
 
-    uint8_t *raw = &*frame->buff;
+    uint8_t *raw = (uint8_t *)pix.constBegin();
     unsigned int cursor = 0;
-    for(unsigned int j=0;j<frame->height;j++)
-        for(unsigned int i=0;i<frame->width;i++)
+    for(unsigned int j=0;j<height;j++)
+        for(unsigned int i=0;i<width;i++)
         {
-            cursor = i * 3 + (j * frame->width * 3);
-            assert(cursor + 2 < frame->buffSize);
+            cursor = i * 3 + (j * width * 3);
+            assert(cursor + 2 < pix.size());
 
             QRgb value = qRgb(raw[cursor], raw[cursor+1], raw[cursor+2]);
             img.setPixel(i, j, value);
@@ -38,13 +37,19 @@ void RawImgToQImage(DecodedFrame *frame, QImage &img)
 MediaResponseFrame::MediaResponseFrame(std::tr1::shared_ptr<class Event> ev)
 {
     assert(ev->type=="MEDIA_FRAME_RESPONSE");
-    DecodedFrame *frame = (DecodedFrame *)ev->raw;
-    this->start = ROUND_TIMESTAMP(frame->timestamp / 1000.);
-    this->end = ROUND_TIMESTAMP(frame->endTimestamp / 1000.);
-    this->req = ROUND_TIMESTAMP(frame->requestedTimestamp / 1000.);
+    assert(ev->data!="FAILED");
+
+    std::string tmp(ev->data.toLocal8Bit().constData());
+    std::vector<std::string> args = split(tmp,',');
+    this->start = atof(args[0].c_str());
+    this->end = atof(args[1].c_str());
+    this->req = atof(args[2].c_str());
+    unsigned width = atoi(args[3].c_str());
+    unsigned height = atoi(args[4].c_str());
+
     //Convert to a QImage object
-    QImage img2(frame->width, frame->height,QImage::Format_RGB888);
-    RawImgToQImage(frame, img2);
+    QImage img2(width, height,QImage::Format_RGB888);
+    RawImgToQImage(ev->buffer, width, height, img2);
     this->img = img2;
 }
 
@@ -122,6 +127,7 @@ void VideoWidget::SetSource(QUuid src, QString finaIn)
         std::tr1::shared_ptr<class Event> requestEv(new Event("GET_MEDIA_DURATION"));
         assert(!this->seq.isNull());
         requestEv->toUuid = this->seq;
+        requestEv->data = this->fina;
         requestEv->id = this->eventLoop->GetId();
         this->eventLoop->SendEvent(requestEv);
 
@@ -154,7 +160,7 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
     assert(this!=NULL);
 
     //Check the sequence is valid
-    if(!this->seq.isNull()) return;
+    if(this->seq.isNull()) return;
 
     //Check the requested time has not already been set
     if(this->lastRequestedTime == ti)
@@ -166,6 +172,9 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
     {
         std::tr1::shared_ptr<class Event> reqEv(new Event("GET_MEDIA_FRAME"));
         reqEv->toUuid = this->seq;
+        reqEv->data = this->fina;
+        QString tiStr = QString("%1").arg(ti);
+        reqEv->buffer = tiStr.toLocal8Bit().constData();
         reqEv->id = this->eventLoop->GetId();
         this->eventLoop->SendEvent(reqEv);
     }

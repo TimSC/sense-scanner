@@ -9,6 +9,19 @@
 using namespace std;
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
 
+MediaResponseFrameBasic::MediaResponseFrameBasic(std::tr1::shared_ptr<class Event> ev)
+{
+    assert(ev->type=="AVBIN_FRAME_RESPONSE");
+    DecodedFrame *frame = (DecodedFrame *)ev->raw;
+    assert(frame!=NULL);
+    this->start = ROUND_TIMESTAMP(frame->timestamp / 1000.);
+    this->end = ROUND_TIMESTAMP(frame->endTimestamp / 1000.);
+    this->req = ROUND_TIMESTAMP(frame->requestedTimestamp / 1000.);
+    this->height = frame->height;
+    this->width = frame->width;
+    this->img = QByteArray((const char *)frame->buff, frame->buffSize);
+}
+
 //***************************************
 
 AvBinMedia::AvBinMedia(class EventLoop *eventLoopIn) : MessagableThread()
@@ -74,7 +87,7 @@ void AvBinMedia::TerminateThread()
 
 //*******************************************
 
-long long unsigned  AvBinMedia::RequestFrame(QString source, long long unsigned ti) //in milliseconds
+/*long long unsigned  AvBinMedia::RequestFrame(QString source, long long unsigned ti) //in milliseconds
 {
     if(this->mediaThread->IsStopFlagged())
     {
@@ -98,7 +111,7 @@ long long unsigned  AvBinMedia::RequestFrame(QString source, long long unsigned 
     this->eventLoop->SendEvent(getFrameEvent);
 
     return getFrameEvent->id;
-}
+}*/
 
 void AvBinMedia::Update()
 {
@@ -124,7 +137,9 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
     if(ev->type == "GET_MEDIA_DURATION")
     {
-        //Estimate progress and generate an event
+        if(ev->data != this->currentFina)
+            this->ChangeVidSource(ev->data);
+
         std::tr1::shared_ptr<class Event> requestEv(new Event("AVBIN_GET_DURATION"));
         requestEv->toUuid = this->uuid;
         requestEv->id = this->eventLoop->GetId();
@@ -144,15 +159,43 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_DURATION_RESPONSE"));
             responseEv->toUuid = ev->fromUuid;
             responseEv->id = ev->id;
-            responseEv->data = response->data;
+            responseEv->data = QString("%1").arg(response->data.toULongLong() / 1000.);
             this->eventLoop->SendEvent(responseEv);
         }
     }
 
     if(ev->type == "GET_MEDIA_FRAME")
     {
-        int debug = 1;
-        assert(0);
+        if(ev->data != this->currentFina)
+            this->ChangeVidSource(ev->data);
+
+        std::tr1::shared_ptr<class Event> requestEv(new Event("AVBIN_GET_FRAME"));
+        requestEv->toUuid = this->uuid;
+        requestEv->data = QString("%1").arg(ev->buffer.toULongLong() * 1000);
+        requestEv->id = this->eventLoop->GetId();
+        this->eventLoop->SendEvent(requestEv);
+
+        std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(requestEv->id);
+        if(response->type=="AVBIN_FRAME_FAILED")
+        {
+            std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_FRAME_RESPONSE"));
+            responseEv->toUuid = ev->fromUuid;
+            responseEv->id = ev->id;
+            responseEv->data = "FAILED";
+            this->eventLoop->SendEvent(responseEv);
+        }
+        else
+        {
+            QString test = response->type;
+            MediaResponseFrameBasic fd(response);
+            std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_FRAME_RESPONSE"));
+            responseEv->toUuid = ev->fromUuid;
+            responseEv->id = ev->id;
+            QString datastr = QString("%1,%2,%3,%4,%5").arg(fd.start).arg(fd.end).arg(fd.req).arg(fd.width).arg(fd.height);
+            responseEv->data = datastr;
+            responseEv->buffer = fd.img;
+            this->eventLoop->SendEvent(responseEv);
+        }
     }
 
     MessagableThread::HandleEvent(ev);

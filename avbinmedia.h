@@ -15,6 +15,19 @@
 #include "eventloop.h"
 #include "avbinbackend.h"
 
+class MediaResponseFrameBasic
+{
+public:
+    MediaResponseFrameBasic(std::tr1::shared_ptr<class Event> ev);
+
+    QByteArray img;
+
+    unsigned long long start;
+    unsigned long long end;
+    unsigned long long req;
+    unsigned height, width;
+};
+
 //*************************************************
 
 class AvBinMedia : public MessagableThread
