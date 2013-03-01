@@ -35,6 +35,19 @@ void RawImgToQImage(DecodedFrame *frame, QImage &img)
         }
 }
 
+MediaResponseFrame::MediaResponseFrame(std::tr1::shared_ptr<class Event> ev)
+{
+    assert(ev->type=="MEDIA_FRAME_RESPONSE");
+    DecodedFrame *frame = (DecodedFrame *)ev->raw;
+    this->start = ROUND_TIMESTAMP(frame->timestamp / 1000.);
+    this->end = ROUND_TIMESTAMP(frame->endTimestamp / 1000.);
+    this->req = ROUND_TIMESTAMP(frame->requestedTimestamp / 1000.);
+    //Convert to a QImage object
+    QImage img2(frame->width, frame->height,QImage::Format_RGB888);
+    RawImgToQImage(frame, img2);
+    this->img = img2;
+}
+
 //***************************************
 
 ZoomGraphicsView::ZoomGraphicsView(QWidget *parent) : QGraphicsView(parent)
@@ -72,7 +85,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->currentTime = 0;
     this->playActive = false;
     this->mediaLength = 0;
-    this->seq = NULL;
+    this->seq = QUuid();
     this->sceneControl = NULL;
     this->fitWindowToNextFrame = 0;
     this->lastRequestedTime = 1;
@@ -104,10 +117,16 @@ void VideoWidget::SetSource(QUuid src, QString finaIn)
     this->fina = finaIn;
     int lengthError = 0;
 
-    if(this->seq!=NULL) try
+    if(!this->seq.isNull() && this->eventLoop!=NULL) try
     {
-        assert(0);
-        //this->mediaLength = this->seq->Length(this->fina);
+        std::tr1::shared_ptr<class Event> requestEv(new Event("GET_MEDIA_DURATION"));
+        assert(!this->seq.isNull());
+        requestEv->toUuid = this->seq;
+        requestEv->id = this->eventLoop->GetId();
+        this->eventLoop->SendEvent(requestEv);
+
+        std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(requestEv->id);
+        this->mediaLength = response->data.toULongLong();
     }
     catch (std::runtime_error &e)
     {
@@ -135,7 +154,7 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
     assert(this!=NULL);
 
     //Check the sequence is valid
-    if(this->seq == NULL) return;
+    if(!this->seq.isNull()) return;
 
     //Check the requested time has not already been set
     if(this->lastRequestedTime == ti)
@@ -143,10 +162,12 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
     this->lastRequestedTime = ti;
 
     //Get image from sequence
-    try
+    if(this->eventLoop) try
     {
-        assert(0);
-        //this->seq->RequestFrame(this->fina, ti);
+        std::tr1::shared_ptr<class Event> reqEv(new Event("GET_MEDIA_FRAME"));
+        reqEv->toUuid = this->seq;
+        reqEv->id = this->eventLoop->GetId();
+        this->eventLoop->SendEvent(reqEv);
     }
     catch(std::runtime_error &err)
     {
@@ -240,24 +261,16 @@ void VideoWidget::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
     if(ev->type=="MEDIA_FRAME_RESPONSE")
     {
-        DecodedFrame *frame = (DecodedFrame *)ev->raw;
-
-        unsigned long long ti = ROUND_TIMESTAMP(frame->timestamp / 1000.);
-        unsigned long long end = ROUND_TIMESTAMP(frame->endTimestamp / 1000.);
-        unsigned long long req = ROUND_TIMESTAMP(frame->requestedTimestamp / 1000.);
-        //Convert to a QImage object
-        QImage img(frame->width, frame->height,
-                                              QImage::Format_RGB888);
-        RawImgToQImage(frame, img);
-        this->AsyncFrameReceived(img, ti, end, req);
-
+        MediaResponseFrame processedImg(ev);
+        this->AsyncFrameReceived(processedImg.img, processedImg.start,
+                                 processedImg.end, processedImg.req);
     }
 
 }
 
 void VideoWidget::TimerUpdate()
 {
-    if(this->seq == NULL && this->playActive)
+    if(this->seq.isNull() && this->playActive)
     {
         this->Pause();
     }
@@ -275,7 +288,7 @@ void VideoWidget::TimerUpdate()
     }
 
     //Check if any async messages are waiting from the source media
-    /*if(this->seq != NULL)
+    /*if(!this->seq.isNull())
     {
         this->seq->Update(FrameCallbackTest, (void *)this);
     }
@@ -428,4 +441,5 @@ void VideoWidget::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop = eventLoopIn;
     this->eventReceiver = new EventReceiver(this->eventLoop);
     this->eventLoop->AddListener("MEDIA_FRAME_RESPONSE", *this->eventReceiver);
+    this->eventLoop->AddListener("MEDIA_DURATION_RESPONSE", *this->eventReceiver);
 }

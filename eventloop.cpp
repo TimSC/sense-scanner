@@ -312,7 +312,7 @@ void MessagableThread::run()
         {
             assert(this->eventReceiver);
             std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
-            cout << "Event type " << qPrintable(ev->type) << endl;
+            cout << "Event type " << qPrintable(ev->type) << "," << ev->id << endl;
             this->HandleEvent(ev);
         }
         catch(std::runtime_error e)

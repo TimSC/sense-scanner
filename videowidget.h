@@ -14,6 +14,19 @@ namespace Ui {
 class VideoWidget;
 }
 
+class MediaResponseFrame
+{
+public:
+    MediaResponseFrame(std::tr1::shared_ptr<class Event> ev);
+
+    QImage img;
+
+    unsigned long long start;
+    unsigned long long end;
+    unsigned long long req;
+};
+
+
 class ZoomGraphicsView : public QGraphicsView
 {
     /*!
