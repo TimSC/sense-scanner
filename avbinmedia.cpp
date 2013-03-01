@@ -131,8 +131,18 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type == "AVBIN_FRAME_RESPONSE")
     {
         std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_FRAME_RESPONSE"));
-        responseEv->data = ev->data;
-        this->eventLoop->SendEvent(responseEv);
+        /*responseEv->data = ev->data;
+        this->eventLoop->SendEvent(responseEv);*/
+        assert(0);
+    }
+
+    if(ev->type=="AVBIN_FRAME_FAILED")
+    {
+        std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_DURATION_RESPONSE"));
+        /*responseEv->toUuid = ev->fromUuid;
+        responseEv->data = "FAILED";
+        this->eventLoop->SendEvent(responseEv);*/
+        assert(0);
     }
 
     if(ev->type == "GET_MEDIA_DURATION")
@@ -166,6 +176,16 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
     if(ev->type == "GET_MEDIA_FRAME")
     {
+        //To prevent a backlog of frame requests developing, old requests
+        //may be discarded from the queue at this stage
+        int removeOldRequests = 1;
+        if(removeOldRequests)
+        {
+
+
+        }
+
+
         if(ev->data != this->currentFina)
             this->ChangeVidSource(ev->data);
 
@@ -175,6 +195,10 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         requestEv->id = this->eventLoop->GetId();
         this->eventLoop->SendEvent(requestEv);
 
+        //If request id is non-zero, block until the result is returned
+        //This makes it conceptually easier to return the frames to the appropriate clients
+        if(requestEv->id>0)
+        {
         std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(requestEv->id);
         if(response->type=="AVBIN_FRAME_FAILED")
         {
@@ -195,6 +219,7 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             responseEv->data = datastr;
             responseEv->buffer = fd.img;
             this->eventLoop->SendEvent(responseEv);
+        }
         }
     }
 
