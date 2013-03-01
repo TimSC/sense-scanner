@@ -235,6 +235,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("ANNOTATION_DATA",*eventReceiver);
     this->eventLoop->AddListener("MARKED_LIST_RESPONSE",*eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_AT_TIME",*eventReceiver);
+    this->eventLoop->AddListener("MEDIA_FRAME_RESPONSE",*eventReceiver);
 
     this->eventLoop->AddListener("WORKSPACE_ANNOTATION_CHANGED",*eventReceiver);
     this->eventLoop->AddListener("WORKSPACE_PROCESSING_CHANGED",*eventReceiver);
@@ -903,7 +904,23 @@ void MainWindow::TrainModelPressed()
             QSharedPointer<QImage> img;
             try
             {
-                assert(0);
+                std::tr1::shared_ptr<class Event> reqEv(new Event("GET_MEDIA_FRAME"));
+                reqEv->toUuid = this->mediaInterfaceBack->GetUuid();
+                reqEv->data = fina;
+                QString tiStr = QString("%1").arg(annotTimestamp);
+                reqEv->buffer = tiStr.toLocal8Bit().constData();
+                reqEv->id = this->eventLoop->GetId();
+                this->eventLoop->SendEvent(reqEv);
+
+                std::tr1::shared_ptr<class Event> resp = this->eventReceiver->WaitForEventId(reqEv->id);
+                assert(resp->type=="MEDIA_FRAME_RESPONSE");
+
+                MediaResponseFrame processedImg(resp);
+                QSharedPointer<QImage> img(new QImage(processedImg.img));
+                annotTimestamp = processedImg.req;
+                startTimestamp = processedImg.start;
+                endTimestamp = processedImg.end;
+
                 //img = this->mediaInterfaceBack->Get(fina,
                 //        annotTimestamp, startTimestamp, endTimestamp);
             }
