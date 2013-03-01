@@ -66,17 +66,19 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
     this->eventLoop->AddListener("THREAD_STATUS_CHANGED", *this->eventReceiver);
 }
 
-unsigned int Workspace::AddSource(QUuid uuid)
+unsigned int Workspace::AddSource(QUuid uuid, int debugMode)
 {
     this->lock.lock();
     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
+    ann->debug = debugMode;
     TrackingAnnotationData *scenePtr = new TrackingAnnotationData();
     ann->SetTrack(scenePtr);
+    ann->SetAnnotUid(uuid);
 
+    assert(!this->mediaUuid.isNull());
     std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann, this->mediaUuid));
     annotThread->SetEventLoop(this->eventLoop);
     annotThread->Start();
-    ann->SetAnnotUid(uuid);
 
     this->annotations.push_back(ann);
     this->annotationUuids.push_back(uuid);
@@ -370,7 +372,7 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
     if(ev->type=="NEW_ANNOTATION")
     {
-        this->AddSource(QUuid(ev->data));
+        this->AddSource(QUuid(ev->data), 0);
 
         std::tr1::shared_ptr<class Event> changeEv2(new Event("ANNOTATION_ADDED"));
         changeEv2->id = ev->id;
@@ -486,6 +488,6 @@ QList<QUuid> Workspace::GetProcessingUuids()
 
 void Workspace::SetMediaUuid(QUuid mediaUuidIn)
 {
-    this->mediaUuid = mediaUuid;
+    this->mediaUuid = mediaUuidIn;
 
 }

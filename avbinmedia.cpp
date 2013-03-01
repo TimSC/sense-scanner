@@ -314,6 +314,7 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev,
     if(ev->type == "GET_MEDIA_FRAME")
     {
         int debug = 1;
+        assert(0);
     }
 }
 

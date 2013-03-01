@@ -189,6 +189,7 @@ public:
     std::tr1::shared_ptr<class AnnotThread> annotThread;
     class TrackingAnnotationData *track;
 
+    int debug;
 protected:
     QMutex lock;
     QUuid algUid, uid;

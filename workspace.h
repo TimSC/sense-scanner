@@ -31,7 +31,7 @@ public:
     void SetEventLoop(class EventLoop &eventLoopIn);
 
     //** Sources and annotations
-    unsigned int AddSource(QUuid uuid);
+    unsigned int AddSource(QUuid uuid, int debugMode);
     void RemoveSource(QUuid uuid);
 
     //** Processing

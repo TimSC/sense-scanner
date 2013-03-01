@@ -242,7 +242,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop);
     this->mediaInterfaceBack = new class AvBinMedia(this->eventLoop);
-    this->workspace.SetMediaUuid(this->mediaInterfaceFront->GetUuid());
+    this->workspace.SetMediaUuid(this->mediaInterfaceBack->GetUuid());
 
     //Start event buffer timer
     this->timer = new QTimer();
@@ -782,6 +782,7 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
 
     std::tr1::shared_ptr<class Event> sourceName = this->eventReceiver->WaitForEventId(getSourceNameEv->id);
     QString fina = sourceName->data;
+    assert(fina.size()>0);
 
     this->DeselectCurrentSource();
 
@@ -992,7 +993,7 @@ void MainWindow::ApplyModelPressed()
 
             //Create new annotation with new uuid
             QUuid newAnn = QUuid::createUuid();
-            this->workspace.AddSource(newAnn);
+            this->workspace.AddSource(newAnn, 1);
 
             //Copy source
             std::tr1::shared_ptr<class Event> getSourceNameEv(new Event("GET_SOURCE_FILENAME"));

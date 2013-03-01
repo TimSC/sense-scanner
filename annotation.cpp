@@ -753,6 +753,11 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
+    if(this->parentAnn->debug)
+    {
+        cout << qPrintable(this->parentAnn->GetAnnotUid()) << "," << qPrintable(ev->type) << endl;
+    }
+
     //cout << "AnnotThread " << (long long unsigned) this << endl;
     QUuid algUid = this->parentAnn->GetAnnotUid();
 
@@ -1020,15 +1025,31 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
 void AnnotThread::Update()
 {
+    if(this->parentAnn->debug)
+    {
+        cout << qPrintable(this->parentAnn->GetAnnotUid()) << " start update" << endl;
+    }
+
     //Check if this thread should be active and access the video
     assert(this->parentAnn != NULL);
     QUuid algUid = this->parentAnn->GetAlgUid();
+
     QString src = this->parentAnn->GetSource();
     int activeStateDesired = this->parentAnn->GetActiveStateDesired();
     if(!activeStateDesired)
     {
         this->msleep(5);
+        if(this->parentAnn->debug)
+        {
+            cout << qPrintable(this->parentAnn->GetAnnotUid()) << " a" << endl;
+        }
+
         return;
+    }
+
+    if(this->parentAnn->debug)
+    {
+        cout << qPrintable(this->parentAnn->GetAnnotUid()) << " b" << endl;
     }
 
     if(algUid.isNull())
@@ -1049,6 +1070,11 @@ void AnnotThread::Update()
         return;
     }
 
+    if(this->parentAnn->debug)
+    {
+        cout << qPrintable(this->parentAnn->GetAnnotUid()) << " c" << endl;
+    }
+
     class TrackingAnnotationData *track = this->parentAnn->GetTrack();
     assert(track!=NULL);
 
@@ -1059,6 +1085,7 @@ void AnnotThread::Update()
         {
             //Estimate progress and generate an event
             std::tr1::shared_ptr<class Event> requestEv(new Event("GET_MEDIA_DURATION"));
+            assert(!this->mediaInterface.isNull());
             requestEv->toUuid = this->mediaInterface;
             requestEv->id = this->eventLoop->GetId();
             this->eventLoop->SendEvent(requestEv);
@@ -1075,6 +1102,11 @@ void AnnotThread::Update()
         return;
     }
 
+    if(this->parentAnn->debug)
+    {
+        cout << qPrintable(this->parentAnn->GetAnnotUid()) << " d" << endl;
+    }
+
     //Get list of avilable frames
     if(!this->frameTimesSet)
     {
@@ -1082,6 +1114,12 @@ void AnnotThread::Update()
         this->frameTimesSet = true;
         return;
     }
+
+    if(this->parentAnn->debug)
+    {
+        cout << qPrintable(this->parentAnn->GetAnnotUid()) << " e" << endl;
+    }
+
 
     unsigned long long frameDuration = 0; //microsec
     unsigned long long avTi = 0; //microsec
@@ -1113,6 +1151,11 @@ void AnnotThread::Update()
             this->currentStartTimestamp = start;
             this->currentEndTimestamp = end;
         }
+    }
+
+    if(this->parentAnn->debug)
+    {
+        cout << qPrintable(this->parentAnn->GetAnnotUid()) << " f" << endl;
     }
 
     //If needed, get the first frame from the video
@@ -1326,6 +1369,11 @@ void AnnotThread::Update()
         this->parentAnn->SetActiveStateDesired(0);
     }
 
+    if(this->parentAnn->debug)
+    {
+        cout << qPrintable(this->parentAnn->GetAnnotUid()) << " d" << endl;
+    }
+
     this->msleep(5);
 }
 
@@ -1477,8 +1525,6 @@ void Annotation::SetAlgUid(QUuid uidIn)
 {
     this->lock.lock();
     this->algUid = uidIn;
-    if(this->annotThread!=NULL)
-        this->annotThread->SetThreadId(uidIn);
     this->lock.unlock();
 }
 
