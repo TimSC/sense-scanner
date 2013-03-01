@@ -88,6 +88,32 @@ std::tr1::shared_ptr<class Event> EventReceiver::PopEvent()
     return ev;
 }
 
+std::tr1::shared_ptr<class Event> EventReceiver::GetLatestDiscardOlder(QString typeIn)
+{
+    this->mutex.lock();
+    std::tr1::shared_ptr<class Event> tmp;
+    std::tr1::shared_ptr<class Event> ev;
+    unsigned i=0, count=0;
+
+    while(i<this->eventBuffer.size())
+    {
+        tmp = this->eventBuffer[i];
+        if(tmp->type!=typeIn)
+        {
+            i++;
+            continue;
+        }
+        ev = tmp;
+        this->eventBuffer.erase(this->eventBuffer.begin()+i);
+        count++;
+    }
+
+    this->mutex.unlock();
+    if(count==0)
+        throw std::runtime_error("Event type not found");
+    return ev;
+}
+
 std::tr1::shared_ptr<class Event> EventReceiver::WaitForEventId(unsigned long long idIn,
                                           unsigned timeOutMs)
 {

@@ -177,10 +177,6 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
         reqEv->buffer = tiStr.toLocal8Bit().constData();
         reqEv->id = this->eventLoop->GetId();
         this->eventLoop->SendEvent(reqEv);
-
-        //Wait for response
-        std::tr1::shared_ptr<class Event> resp = this->eventReceiver->WaitForEventId(reqEv->id);
-        this->HandleEvent(resp);
     }
     catch(std::runtime_error &err)
     {

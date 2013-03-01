@@ -38,7 +38,7 @@ class AvBinMedia : public MessagableThread
     */
 
 public:
-    explicit AvBinMedia(class EventLoop *eventLoopIn);
+    explicit AvBinMedia(class EventLoop *eventLoopIn, bool removeOldRequestsIn);
     virtual ~AvBinMedia();
 
     void TerminateThread();
@@ -55,6 +55,7 @@ protected:
     AvBinThread *mediaThread;
     QString currentFina;
     QUuid uuid;
+    bool removeOldRequests;
 
 };
 

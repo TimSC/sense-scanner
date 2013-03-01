@@ -24,11 +24,12 @@ MediaResponseFrameBasic::MediaResponseFrameBasic(std::tr1::shared_ptr<class Even
 
 //***************************************
 
-AvBinMedia::AvBinMedia(class EventLoop *eventLoopIn) : MessagableThread()
+AvBinMedia::AvBinMedia(class EventLoop *eventLoopIn, bool removeOldRequestsIn) : MessagableThread()
 {
     this->eventReceiver = NULL;
     this->eventLoop = eventLoopIn;
     this->mediaThread = NULL;
+    this->removeOldRequests = removeOldRequestsIn;
     this->uuid = QUuid::createUuid();
     MessagableThread::SetEventLoop(eventLoopIn);
 
@@ -176,15 +177,19 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
     if(ev->type == "GET_MEDIA_FRAME")
     {
-        //To prevent a backlog of frame requests developing, old requests
-        //may be discarded from the queue at this stage
-        int removeOldRequests = 1;
-        if(removeOldRequests)
+        if(this->removeOldRequests)
         {
-
-
+            //To prevent a backlog of frame requests developing, old requests
+            //may be discarded from the queue at this stage
+            try
+            {
+                ev = this->eventReceiver->GetLatestDiscardOlder("GET_MEDIA_FRAME");
+            }
+            catch(std::runtime_error &err)
+            {
+                //No later event found
+            }
         }
-
 
         if(ev->data != this->currentFina)
             this->ChangeVidSource(ev->data);
