@@ -28,7 +28,8 @@ SOURCES += main.cpp\
     qblowfish/src/qblowfish.cpp \
     sourcealggui.cpp \
     aboutgui.cpp \
-    useractions.cpp
+    useractions.cpp \
+    applymodel.cpp
 
 HEADERS  += mainwindow.h \
     videowidget.h \
@@ -48,7 +49,8 @@ HEADERS  += mainwindow.h \
     annotation.h \
     sourcealggui.h \
     aboutgui.h \
-    useractions.h
+    useractions.h \
+    applymodel.h
 
 FORMS    += mainwindow.ui \
     videowidget.ui \

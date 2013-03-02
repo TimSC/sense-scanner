@@ -10,25 +10,6 @@
 #include <QtXml/QtXml>
 using namespace std;
 
-//**************************************************
-
-AlgProcessTimer::AlgProcessTimer(class AlgorithmProcess *algIn)
-{
-    this->alg = algIn;
-    this->Start();
-}
-
-AlgProcessTimer::~AlgProcessTimer()
-{
-
-}
-
-void AlgProcessTimer::Update()
-{
-    this->alg->Update();
-    this->msleep(10);
-}
-
 //************************************************
 
 AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent) : QProcess(parent)
@@ -38,7 +19,7 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->pausing = 0;
     this->initDone = 0;
 
-	//QString fina = "algout.txt";
+    //QString fina = "algout.txt";
     this->eventLoop = eventLoopIn;
     //this->algOutLog = new QFile(fina);
     //this->algOutLog->open(QIODevice::WriteOnly);
@@ -52,16 +33,13 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->eventLoop->AddListener("SET_MODEL", *this->eventReceiver);
 
 
-    this->timer = new AlgProcessTimer(this);
-    this->timer->SetEventLoop(this->eventLoop);
+    QObject::connect(&this->timer, SIGNAL(timeout()), this, SLOT(Update()));
+    this->timer.start(10); //in millisec
 }
 
 AlgorithmProcess::~AlgorithmProcess()
 {
     this->Stop();
-    if(this->timer!=NULL)
-        delete this->timer;
-    this->timer = NULL;
     if(this->eventReceiver != NULL)
         delete this->eventReceiver;
     this->eventReceiver = NULL;
@@ -72,44 +50,44 @@ void AlgorithmProcess::Init()
     if(this->initDone) return;
     assert(this->state() != QProcess::Running);
 
-	//Determine which python executable to run
-	QList<QString> programCandidates;
-	programCandidates.append("python.exe");
+    //Determine which python executable to run
+    QList<QString> programCandidates;
     programCandidates.append("python.exe");
-	programCandidates.append("/usr/bin/python");
-	programCandidates.append("c:\\dev\\Python27\\python.exe");
+    programCandidates.append("python.exe");
+    programCandidates.append("/usr/bin/python");
+    programCandidates.append("c:\\dev\\Python27\\python.exe");
 
-	QString program = "";
-	for(unsigned i=0;i<programCandidates.size();i++)
-	{
-		QFile programFile(programCandidates[i]);
-		if(programFile.exists())
-		{
-			program = programCandidates[i];
-			break;
-		}
-	}
-	if(program.length()==0)
+    QString program = "";
+    for(unsigned i=0;i<programCandidates.size();i++)
+    {
+        QFile programFile(programCandidates[i]);
+        if(programFile.exists())
+        {
+            program = programCandidates[i];
+            break;
+        }
+    }
+    if(program.length()==0)
     {
         throw std::runtime_error("Python runtime executable not found");
     }
 
-	//Find the main python script
-	QList<QString> scriptCandidates;
-	scriptCandidates.append("../QtMedia/echosrv.py");
-	scriptCandidates.append("echosrv.py");
-	scriptCandidates.append("../echosrv.py");
-	QString mainScript = "";
-	for(unsigned i=0;i<scriptCandidates.size();i++)
-	{
-		QFile scriptFile(scriptCandidates[i]);
-		if(scriptFile.exists())
-		{
-			mainScript = scriptCandidates[i];
-			break;
-		}
-	}
-	if(mainScript.length()==0)
+    //Find the main python script
+    QList<QString> scriptCandidates;
+    scriptCandidates.append("../QtMedia/echosrv.py");
+    scriptCandidates.append("echosrv.py");
+    scriptCandidates.append("../echosrv.py");
+    QString mainScript = "";
+    for(unsigned i=0;i<scriptCandidates.size();i++)
+    {
+        QFile scriptFile(scriptCandidates[i]);
+        if(scriptFile.exists())
+        {
+            mainScript = scriptCandidates[i];
+            break;
+        }
+    }
+    if(mainScript.length()==0)
     {
         throw std::runtime_error("Algorithm python script not found");
     }
@@ -173,7 +151,7 @@ int AlgorithmProcess::Start()
     this->pausing = 0;
     this->stopping = 0;
     this->Unpause(); //Start process in running state
-    
+
     return 1;
 }
 
@@ -248,6 +226,7 @@ QByteArray AlgorithmProcess::ReadLineFromBuffer(QByteArray &buff, int popLine, i
 
 void AlgorithmProcess::Update()
 {
+    //cout << "AlgorithmProcess::Update()" << endl;
     //Process events from application
     int flushEvents = 1;
     while(flushEvents)
@@ -310,16 +289,16 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
         xml+="</predict>\n";
         QByteArray xmlBytes(xml.toUtf8().constData());
-		QByteArray imgRaw((const char *)img->bits(), img->byteCount());
-		QByteArray combinedRaw = imgRaw;
-		combinedRaw.append(xmlBytes);
+        QByteArray imgRaw((const char *)img->bits(), img->byteCount());
+        QByteArray combinedRaw = imgRaw;
+        combinedRaw.append(xmlBytes);
 
         QString imgPreamble2 = QString("RGB_IMAGE_AND_XML HEIGHT=%1 WIDTH=%2 IMGBYTES=%3 XMLBYTES=%4 ID=%5\n").
                 arg(img->height()).
                 arg(img->width()).
                 arg(img->byteCount()).
                 arg(xmlBytes.length()).
-                arg(ev->id);   
+                arg(ev->id);
         this->SendRawDataBlock(imgPreamble2, combinedRaw);
     }
 
@@ -372,7 +351,7 @@ void AlgorithmProcess::ProcessAlgOutput()
     //Get first line of console output without modifying the buffer
     QByteArray cmd = ReadLineFromBuffer(this->algOutBuffer,0);
     if(cmd.length()==0) return;
-	cmd = cmd.trimmed(); //Remove whitespace from command
+    cmd = cmd.trimmed(); //Remove whitespace from command
 
     if(cmd.left(9)=="PROGRESS=")
     {
@@ -427,7 +406,7 @@ void AlgorithmProcess::ProcessAlgOutput()
     if(cmd.left(11)=="DATA_BLOCK=")
     {
         QByteArray blockArg = this->ReadLineFromBuffer(this->algOutBuffer,0,1);
-		QString blockLenStr = cmd.mid(11);
+        QString blockLenStr = cmd.mid(11);
         int blockLen = blockLenStr.toInt();
         cout << "Expected block len " << blockLen << endl;
 
@@ -461,7 +440,7 @@ void AlgorithmProcess::ProcessAlgOutput()
     if(cmd.left(10)=="XML_BLOCK=")
     {
         QByteArray blockArg = this->ReadLineFromBuffer(this->algOutBuffer,0,1);
-		QString blockLenStr = cmd.mid(10);
+        QString blockLenStr = cmd.mid(10);
         int blockLen = blockLenStr.toInt();
         std::vector<std::string> splitArgs = split(blockArg.constData(),' ');
         unsigned long long responseId = 0;
@@ -480,8 +459,8 @@ void AlgorithmProcess::ProcessAlgOutput()
         if(this->algOutBuffer.length() < cmd.length() + blockArg.length() + blockLen + 2)
             return;
 
-		QByteArray blockDataB64 = this->algOutBuffer.mid(cmd.length() + blockArg.length() + 2, blockLen);
-		QByteArray blockData = QByteArray::fromBase64(blockDataB64);
+        QByteArray blockDataB64 = this->algOutBuffer.mid(cmd.length() + blockArg.length() + 2, blockLen);
+        QByteArray blockData = QByteArray::fromBase64(blockDataB64);
 
         QTextStream dec(blockData);
         dec.setCodec("UTF-8");
@@ -584,7 +563,7 @@ void AlgorithmProcess::SendRawDataBlock(QString args, QByteArray data)
     this->SendCommand(imgPreamble1);
     this->SendCommand(args);
     this->write(data);
-	//this->waitForBytesWritten();
+    //this->waitForBytesWritten();
 }
 
 unsigned int AlgorithmProcess::EncodedLength(QString cmd)
