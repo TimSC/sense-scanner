@@ -9,6 +9,58 @@
 using namespace std;
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
 
+void RawImgToQImage(QByteArray &pix, unsigned width, unsigned height, QImage &img)
+{
+    assert(width > 0);
+    assert(height > 0);
+    assert(pix.size() > 0);
+
+    uint8_t *raw = (uint8_t *)pix.constBegin();
+    unsigned int cursor = 0;
+    for(unsigned int j=0;j<height;j++)
+        for(unsigned int i=0;i<width;i++)
+        {
+            cursor = i * 3 + (j * width * 3);
+            assert(cursor + 2 < pix.size());
+
+            QRgb value = qRgb(raw[cursor], raw[cursor+1], raw[cursor+2]);
+            img.setPixel(i, j, value);
+        }
+}
+
+MediaResponseFrame::MediaResponseFrame()
+{
+    start = 0;
+    end = 0;
+    req = 0;
+}
+
+MediaResponseFrame::MediaResponseFrame(std::tr1::shared_ptr<class Event> ev)
+{
+    this->Process(ev);
+}
+
+void MediaResponseFrame::Process(std::tr1::shared_ptr<class Event> ev)
+{
+    assert(ev->type=="MEDIA_FRAME_RESPONSE");
+    assert(ev->data!="FAILED");
+
+    std::string tmp(ev->data.toLocal8Bit().constData());
+    std::vector<std::string> args = split(tmp,',');
+    this->start = atof(args[0].c_str());
+    this->end = atof(args[1].c_str());
+    this->req = atof(args[2].c_str());
+    unsigned width = atoi(args[3].c_str());
+    unsigned height = atoi(args[4].c_str());
+
+    //Convert to a QImage object
+    QImage img2(width, height,QImage::Format_RGB888);
+    RawImgToQImage(ev->buffer, width, height, img2);
+    this->img = img2;
+}
+
+//***************************************
+
 MediaResponseFrameBasic::MediaResponseFrameBasic(std::tr1::shared_ptr<class Event> ev)
 {
     assert(ev->type=="AVBIN_FRAME_RESPONSE");
@@ -267,16 +319,39 @@ QUuid AvBinMedia::GetUuid()
 //************************************************
 
 unsigned long long AvBinMedia::GetMediaDuration(QString fina,
-                                                QUuid annotUuid,
+                                                QUuid mediaUuid,
                                                 class EventLoop *eventLoop,
                                                 class EventReceiver *eventReceiver)
 {
     std::tr1::shared_ptr<class Event> requestEv(new Event("GET_MEDIA_DURATION"));
-    requestEv->toUuid = annotUuid;
+    requestEv->toUuid = mediaUuid;
     requestEv->data = fina;
     requestEv->id = eventLoop->GetId();
     eventLoop->SendEvent(requestEv);
 
     std::tr1::shared_ptr<class Event> response = eventReceiver->WaitForEventId(requestEv->id);
+    assert(response->type == "MEDIA_DURATION_RESPONSE");
     return response->data.toULongLong();
+
+}
+
+void AvBinMedia::GetMediaFrame(QString fina,
+                     unsigned long long ti,
+                     QUuid mediaUuid,
+                     class EventLoop *eventLoop,
+                     class EventReceiver *eventReceiver,
+                     MediaResponseFrame &out)
+{
+    std::tr1::shared_ptr<class Event> reqEv(new Event("GET_MEDIA_FRAME"));
+    reqEv->toUuid = mediaUuid;
+    reqEv->data = fina;
+    QString tiStr = QString("%1").arg(ti);
+    reqEv->buffer = tiStr.toLocal8Bit().constData();
+    reqEv->id = eventLoop->GetId();
+    eventLoop->SendEvent(reqEv);
+
+    std::tr1::shared_ptr<class Event> resp = eventReceiver->WaitForEventId(reqEv->id);
+    assert(resp->type=="MEDIA_FRAME_RESPONSE");
+
+    out.Process(resp);
 }

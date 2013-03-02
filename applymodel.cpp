@@ -1,6 +1,7 @@
 #include "applymodel.h"
 #include "annotation.h"
 #include "avbinmedia.h"
+#include <assert.h>
 #include <iostream>
 using namespace std;
 
@@ -11,6 +12,9 @@ ApplyModel::ApplyModel(QUuid annotUuidIn) : MessagableThread()
     this->srcFinaSet = 0;
     this->srcDurationSet = 0;
     this->srcDuration = 0;
+    this->currentTimeSet = 0;
+    this->currentStartTimestamp = 0;
+    this->currentEndTimestamp = 0;
 }
 
 ApplyModel::~ApplyModel()
@@ -112,14 +116,14 @@ void ApplyModel::Update()
         this->msleep(5);
         return;
     }
-
+*/
     unsigned long long frameDuration = 0; //millisec
     unsigned long long avTi = 0; //millisec
     unsigned long long nextTi = 0; //millisec
 
     //Check algorithm is ready to work
     //TODO
-
+/*
     //WHAT is this for? Getting the start frame time from cache?
     if(this->frameTimesSet && this->currentTimeSet==false && this->frameTimes.size() > 0)
     {
@@ -145,7 +149,7 @@ void ApplyModel::Update()
             this->currentEndTimestamp = end;
         }
     }
-
+*/
     //If needed, get the first frame from the video
     if(this->currentTimeSet==false)
     {
@@ -153,18 +157,16 @@ void ApplyModel::Update()
         QSharedPointer<QImage> img;
         try
         {
-            std::tr1::shared_ptr<class Event> reqEv(new Event("GET_MEDIA_FRAME"));
-            reqEv->toUuid = this->mediaInterface;
-            reqEv->data = src;
-            QString tiStr = QString("0");
-            reqEv->buffer = tiStr.toLocal8Bit().constData();
-            reqEv->id = this->eventLoop->GetId();
-            this->eventLoop->SendEvent(reqEv);
 
-            std::tr1::shared_ptr<class Event> resp = this->eventReceiver->WaitForEventId(reqEv->id);
-            assert(resp->type=="MEDIA_FRAME_RESPONSE");
+            MediaResponseFrame processedImg;
 
-            MediaResponseFrame processedImg(resp);
+            AvBinMedia::GetMediaFrame(this->srcFina,
+                                 0,
+                                 this->mediaInterface,
+                                 this->eventLoop,
+                                 this->eventReceiver,
+                                 processedImg);
+
             img = QSharedPointer<QImage>(new QImage(processedImg.img));
             //annotTimestamp = processedImg.req;
             this->currentStartTimestamp = processedImg.start;
@@ -174,19 +176,19 @@ void ApplyModel::Update()
             cout << "endTimestamp " << this->currentEndTimestamp << endl;
 
             //Update annotation with frame that has been found
-            track->FoundFrame(this->currentStartTimestamp, this->currentEndTimestamp);
+            //track->FoundFrame(this->currentStartTimestamp, this->currentEndTimestamp);
             avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5); //millisec
 
             //Check if annotation is in this frame
             std::vector<std::vector<float> > foundAnnot;
             unsigned long long foundAnnotationTime=0;
-            int found = track->GetAnnotationBetweenTimestamps(0,
+            /*int found = track->GetAnnotationBetweenTimestamps(0,
                                                   this->currentEndTimestamp,
                                                   avTi,
                                                   foundAnnot,
                                                   foundAnnotationTime);
-
-            if(found)
+*/
+            /*if(found)
             {
                 //Update current model from annotation
                 this->currentModel = foundAnnot;
@@ -200,7 +202,7 @@ void ApplyModel::Update()
                 this->ImageToProcess(this->currentStartTimestamp,
                                      this->currentEndTimestamp,
                                      img, this->currentModel);
-            }
+            }*/
 
 
         }
@@ -214,7 +216,7 @@ void ApplyModel::Update()
         this->msleep(5);
         return;
     }
-
+/*
     //If the list of frames has not been set, assume it is blank
     this->frameTimesSet = true;
 

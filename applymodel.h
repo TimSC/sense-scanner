@@ -16,10 +16,13 @@ public:
 protected:
     QUuid annotUuid;
     QUuid algUuid;
-    int algUuidSet, srcFinaSet, srcDurationSet;
+    bool algUuidSet, srcFinaSet, srcDurationSet;
     QString srcFina;
     unsigned long long srcDuration;
     QUuid mediaInterface;
+
+    bool currentTimeSet;
+    unsigned long long currentStartTimestamp, currentEndTimestamp;
 };
 
 class ApplyModelPool

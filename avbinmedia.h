@@ -15,6 +15,20 @@
 #include "eventloop.h"
 #include "avbinbackend.h"
 
+class MediaResponseFrame
+{
+public:
+    MediaResponseFrame();
+    MediaResponseFrame(std::tr1::shared_ptr<class Event> ev);
+    void Process(std::tr1::shared_ptr<class Event> ev);
+
+    QImage img;
+
+    unsigned long long start;
+    unsigned long long end;
+    unsigned long long req;
+};
+
 class MediaResponseFrameBasic
 {
 public:
@@ -52,6 +66,13 @@ public:
                                                     QUuid annotUuid,
                                                     class EventLoop *eventLoop,
                                                     class EventReceiver *eventReceiver);
+
+    static void GetMediaFrame(QString fina,
+                         unsigned long long ti,
+                         QUuid mediaUuid,
+                         class EventLoop *eventLoop,
+                         class EventReceiver *eventReceiver,
+                         MediaResponseFrame &out);
 
 protected:
     int OpenFile(QString fina);
