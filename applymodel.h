@@ -23,6 +23,8 @@ protected:
 
     bool currentTimeSet;
     unsigned long long currentStartTimestamp, currentEndTimestamp;
+
+    bool issueEnountered;
 };
 
 class ApplyModelPool

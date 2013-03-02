@@ -15,6 +15,7 @@ ApplyModel::ApplyModel(QUuid annotUuidIn) : MessagableThread()
     this->currentTimeSet = 0;
     this->currentStartTimestamp = 0;
     this->currentEndTimestamp = 0;
+    this->issueEnountered = 0;
 }
 
 ApplyModel::~ApplyModel()
@@ -38,6 +39,11 @@ void ApplyModel::SetMediaInterface(QUuid mediaInterfaceIn)
 
 void ApplyModel::Update()
 {
+    if(issueEnountered)
+    {
+        this->msleep(5);
+        return;
+    }
 
     //Get source filename for annotation
     if(!srcFinaSet)
@@ -325,8 +331,7 @@ void ApplyModel::Update()
         }
         catch (std::runtime_error &err)
         {
-            //TODO stop work on failure?
-            assert(0);
+            this->issueEnountered = true;
 
             this->currentTimeSet = false;
             this->msleep(5);
@@ -335,8 +340,7 @@ void ApplyModel::Update()
 
         if(this->currentEndTimestamp < nextTi)
         {
-            //TODO stop work on failure?
-            assert(0);
+            this->issueEnountered = true;
 
             this->currentTimeSet = false;
             throw runtime_error("Earlier frame found than was requested");
