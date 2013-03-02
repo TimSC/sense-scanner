@@ -266,3 +266,17 @@ QUuid AvBinMedia::GetUuid()
 
 //************************************************
 
+unsigned long long AvBinMedia::GetMediaDuration(QString fina,
+                                                QUuid annotUuid,
+                                                class EventLoop *eventLoop,
+                                                class EventReceiver *eventReceiver)
+{
+    std::tr1::shared_ptr<class Event> requestEv(new Event("GET_MEDIA_DURATION"));
+    requestEv->toUuid = annotUuid;
+    requestEv->data = fina;
+    requestEv->id = eventLoop->GetId();
+    eventLoop->SendEvent(requestEv);
+
+    std::tr1::shared_ptr<class Event> response = eventReceiver->WaitForEventId(requestEv->id);
+    return response->data.toULongLong();
+}

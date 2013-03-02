@@ -703,18 +703,9 @@ std::vector<std::vector<float> > TrackingAnnotationData::GetAnnotationAtTime(uns
 
 //****************************************************
 
-AnnotThread::AnnotThread(class Annotation *annIn, QUuid mediaInterfaceIn)
+AnnotThread::AnnotThread(class Annotation *annIn)
 {
     this->parentAnn = annIn;
-    this->srcDurationSet = 0;
-    this->srcDuration = 0;
-    this->mediaInterface = mediaInterfaceIn;
-
-    this->currentStartTimestamp = 0;
-    this->currentEndTimestamp = 0;
-    this->currentTimeSet = 0;
-    this->currentModelSet = 0;
-
     this->frameTimesEnd = 0;
     this->frameTimesSet = false;
 }
@@ -1029,56 +1020,6 @@ void AnnotThread::Finished()
 {
     QString src = this->parentAnn->GetSource();
     cout << "AnnotThread::Finished()" << src.toLocal8Bit().constData() << endl;
-
-}
-
-void AnnotThread::ImageToProcess(unsigned long long startTi,
-                                 unsigned long long endTi,
-                                 QSharedPointer<QImage> img,
-                                 std::vector<std::vector<float> > &model)
-{
-    QUuid algUid = this->parentAnn->GetAlgUid();
-    assert(img->format() == QImage::Format_RGB888);
-
-    assert(this->eventLoop!=NULL);
-    int reqId = this->eventLoop->GetId();
-
-    //Ask alg process to make a prediction
-    std::tr1::shared_ptr<class Event> requestEv(new Event("PREDICT_FRAME_REQUEST"));
-    class ProcessingRequestOrResponse *req = new class ProcessingRequestOrResponse;
-    req->img = img;
-    req->pos.clear();
-    req->pos.push_back(model);
-    requestEv->raw = req;
-    requestEv->id = reqId;
-    requestEv->data = algUid.toString().toLocal8Bit().constData();
-
-    this->eventLoop->SendEvent(requestEv);
-
-    //Wait for response
-    try
-    {
-        std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(reqId,80000000);
-
-        class TrackingAnnotationData *track = this->parentAnn->GetTrack();
-        assert(track!=NULL);
-
-
-        if(ev->type!="PREDICTION_RESULT") return;
-        class ProcessingRequestOrResponse *response = (class ProcessingRequestOrResponse *)ev->raw;
-
-        cout << "Rx prediction for " << response->pos[0].size() << endl;
-        cout << "Expected " << track->GetShapeNumPoints() << endl;
-
-        if(response->pos[0].size() == track->GetShapeNumPoints())
-            track->SetAnnotationBetweenTimestamps(startTi, endTi, response->pos[0]);
-        this->currentModel = response->pos[0];
-        this->currentModelSet = true;
-    }
-    catch(std::runtime_error e)
-    {
-        cout << "Warning: Prediction timed out" << endl;
-    }
 
 }
 

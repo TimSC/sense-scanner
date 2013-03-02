@@ -1053,10 +1053,9 @@ void MainWindow::ApplyModelPressed()
             this->eventLoop->SendEvent(setAlgEv);
 
             //Start thread to apply model
-            this->applyModelPool.Add(QUuid::createUuid(), newAnn);
+            this->applyModelPool.Add(QUuid::createUuid(), newAnn, this->mediaInterfaceBack->GetUuid());
         }
     }
-
 }
 
 void MainWindow::PauseProcessPressed()

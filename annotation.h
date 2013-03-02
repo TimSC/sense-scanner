@@ -112,7 +112,7 @@ class AnnotThread : public MessagableThread
     */
 
 public:
-    AnnotThread(class Annotation *annIn, QUuid mediaInterface);
+    AnnotThread(class Annotation *annIn);
     virtual ~AnnotThread();
 
     void SetEventLoop(class EventLoop *eventLoopIn);
@@ -128,20 +128,7 @@ public:
 
 protected:
 
-    void ImageToProcess(unsigned long long startTi,
-                        unsigned long long endTi,
-                        QSharedPointer<QImage> img,
-                        std::vector<std::vector<float> > &model);
-
     class Annotation *parentAnn;
-    int srcDurationSet;
-    long long unsigned srcDuration;
-    QUuid mediaInterface;
-
-    unsigned long long currentStartTimestamp, currentEndTimestamp;
-    int currentTimeSet;
-    std::vector<std::vector<float> > currentModel;
-    int currentModelSet;
 
     std::map<unsigned long, unsigned long> frameTimes;
     unsigned long frameTimesEnd;

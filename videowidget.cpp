@@ -1,5 +1,6 @@
 #include "videowidget.h"
 #include "ui_videowidget.h"
+#include "avbinmedia.h"
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QObject>
@@ -124,15 +125,10 @@ void VideoWidget::SetSource(QUuid src, QString finaIn)
 
     if(!this->seq.isNull() && this->eventLoop!=NULL) try
     {
-        std::tr1::shared_ptr<class Event> requestEv(new Event("GET_MEDIA_DURATION"));
-        assert(!this->seq.isNull());
-        requestEv->toUuid = this->seq;
-        requestEv->data = this->fina;
-        requestEv->id = this->eventLoop->GetId();
-        this->eventLoop->SendEvent(requestEv);
-
-        std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(requestEv->id);
-        this->mediaLength = response->data.toULongLong();
+        this->mediaLength = AvBinMedia::GetMediaDuration(this->fina,
+                                            this->seq,
+                                            this->eventLoop,
+                                            this->eventReceiver);
     }
     catch (std::runtime_error &e)
     {

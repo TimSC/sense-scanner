@@ -1,11 +1,16 @@
 #include "applymodel.h"
 #include "annotation.h"
+#include "avbinmedia.h"
 #include <iostream>
 using namespace std;
 
 ApplyModel::ApplyModel(QUuid annotUuidIn) : MessagableThread()
 {
     this->annotUuid = annotUuidIn;
+    this->algUuidSet = 0;
+    this->srcFinaSet = 0;
+    this->srcDurationSet = 0;
+    this->srcDuration = 0;
 }
 
 ApplyModel::~ApplyModel()
@@ -21,21 +26,37 @@ void ApplyModel::SetEventLoop(class EventLoop *eventLoopIn)
 
 }
 
+void ApplyModel::SetMediaInterface(QUuid mediaInterfaceIn)
+{
+    this->mediaInterface = mediaInterfaceIn;
+}
+
 void ApplyModel::Update()
 {
 
     //Get source filename for annotation
-    QString fina = Annotation::GetSourceFilename(this->annotUuid,
+    if(!srcFinaSet)
+    {
+        this->srcFina = Annotation::GetSourceFilename(this->annotUuid,
                                                      this->eventLoop,
                                                      this->eventReceiver);
-
-    cout << qPrintable(fina) << endl;
+        this->srcFinaSet = 1;
+        this->msleep(5);
+        return;
+    }
+    cout << qPrintable(srcFina) << endl;
 
     //Get algorithm Uuid for this annotation track
-    QUuid algUuid = Annotation::GetAlgUuid(this->annotUuid,
+    if(!this->algUuidSet)
+    {
+        this->algUuid = Annotation::GetAlgUuid(this->annotUuid,
                                            this->eventLoop,
                                            this->eventReceiver);
 
+        this->algUuidSet = 1;
+        this->msleep(5);
+        return;
+    }
     cout << qPrintable(algUuid) << endl;
 
     /*
@@ -69,7 +90,19 @@ void ApplyModel::Update()
         this->msleep(5);
         return;
     }
+*/
 
+    if(!this->srcDurationSet)
+    {
+        this->srcDuration = AvBinMedia::GetMediaDuration(this->srcFina,
+                                            this->mediaInterface,
+                                            this->eventLoop,
+                                            this->eventReceiver);
+        this->srcDurationSet = 1;
+        this->msleep(5);
+        return;
+    }
+    /*
     class TrackingAnnotationData *track = this->parentAnn->GetTrack();
     assert(track!=NULL);
 
@@ -418,12 +451,13 @@ void ApplyModelPool::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop = eventLoopIn;
 }
 
-void ApplyModelPool::Add(QUuid uuid, QUuid annotUuid)
+void ApplyModelPool::Add(QUuid uuid, QUuid annotUuid, QUuid mediaInterface)
 {
     std::tr1::shared_ptr<class ApplyModel> am(new ApplyModel(annotUuid));
     this->pool[uuid] = am;
     this->pool[uuid]->SetEventLoop(this->eventLoop);
     this->pool[uuid]->SetThreadId(uuid);
+    this->pool[uuid]->SetMediaInterface(mediaInterface);
     this->pool[uuid]->Start();
 }
 

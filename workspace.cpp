@@ -76,7 +76,7 @@ unsigned int Workspace::AddSource(QUuid uuid)
     ann->SetAnnotUid(uuid);
 
     assert(!this->mediaUuid.isNull());
-    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann, this->mediaUuid));
+    std::tr1::shared_ptr<class AnnotThread> annotThread(new class AnnotThread(&*ann));
     annotThread->SetEventLoop(this->eventLoop);
     annotThread->Start();
 

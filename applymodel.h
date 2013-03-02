@@ -12,9 +12,14 @@ public:
     void Update();
     void HandleEvent(std::tr1::shared_ptr<class Event> ev);
     void SetEventLoop(class EventLoop *eventLoopIn);
-
+    void SetMediaInterface(QUuid mediaInterfaceIn);
 protected:
     QUuid annotUuid;
+    QUuid algUuid;
+    int algUuidSet, srcFinaSet, srcDurationSet;
+    QString srcFina;
+    unsigned long long srcDuration;
+    QUuid mediaInterface;
 };
 
 class ApplyModelPool
@@ -24,7 +29,7 @@ public:
     virtual ~ApplyModelPool();
 
     void SetEventLoop(class EventLoop *eventLoopIn);
-    void Add(QUuid uuid, QUuid annotUuid);
+    void Add(QUuid uuid, QUuid annotUuid, QUuid mediaInterface);
     void Remove(QUuid uuid);
     void Clear();
 

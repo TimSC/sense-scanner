@@ -48,6 +48,11 @@ public:
     virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);
     QUuid GetUuid();
 
+    static unsigned long long GetMediaDuration(QString fina,
+                                                    QUuid annotUuid,
+                                                    class EventLoop *eventLoop,
+                                                    class EventReceiver *eventReceiver);
+
 protected:
     int OpenFile(QString fina);
     void ChangeVidSource(QString fina);
