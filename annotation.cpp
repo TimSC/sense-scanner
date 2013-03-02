@@ -1155,6 +1155,7 @@ QString Annotation::GetSourceFilename(QUuid annotUuid,
     eventLoop->SendEvent(getSourceNameEv);
 
     std::tr1::shared_ptr<class Event> sourceName = eventReceiver->WaitForEventId(getSourceNameEv->id);
+    assert(sourceName->type=="SOURCE_FILENAME");
     return sourceName->data;
 }
 
@@ -1169,5 +1170,41 @@ QUuid Annotation::GetAlgUuid(QUuid annotUuid,
     eventLoop->SendEvent(getAlgUuidEv);
 
     std::tr1::shared_ptr<class Event> algUuidEv = eventReceiver->WaitForEventId(getAlgUuidEv->id);
+    assert(algUuidEv->type=="ALG_UUID_FOR_ANNOTATION");
     return QUuid(algUuidEv->data);
+}
+
+int Annotation::GetAnnotationBetweenFrames(unsigned long long startTime,
+                                           unsigned long long endTime,
+                                           unsigned long long requestedTime,
+                                           QUuid annotUuid,
+                                           class EventLoop *eventLoop,
+                                           class EventReceiver *eventReceiver,
+                                           std::vector<std::vector<float> > &frameOut,
+                                           double &tiOut)
+{
+    frameOut.clear();
+    tiOut = 0.;
+    std::tr1::shared_ptr<class Event> reqEv(new Event("GET_ANNOTATION_BETWEEN_TIMES"));
+    reqEv->id = eventLoop->GetId();
+    QString arg = QString("%1,%2,%3").arg(startTime).arg(endTime).arg(requestedTime);
+    reqEv->data = arg.toLocal8Bit().constData();
+    reqEv->toUuid = annotUuid;
+    eventLoop->SendEvent(reqEv);
+
+    assert(eventReceiver!=NULL);
+    std::tr1::shared_ptr<class Event> response = eventReceiver->WaitForEventId(reqEv->id);
+    assert(response->type=="ANNOTATION_FRAME");
+    if(response->data == "FRAME_NOT_FOUND")
+    {
+        return 0;
+    }
+    else
+    {
+        double ti = 0.;
+        QString xml = response->data;
+        int ret = TrackingAnnotationData::FrameFromXml(xml, frameOut, tiOut);
+        if(ret==0) return 0; //Xml error
+        return 1;
+    }
 }

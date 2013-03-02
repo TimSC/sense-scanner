@@ -43,7 +43,7 @@ MediaResponseFrame::MediaResponseFrame(std::tr1::shared_ptr<class Event> ev)
 void MediaResponseFrame::Process(std::tr1::shared_ptr<class Event> ev)
 {
     assert(ev->type=="MEDIA_FRAME_RESPONSE");
-    if(ev->data!="FAILED")
+    if(ev->data=="FAILED")
         throw std::runtime_error("Failed to get frame.");
 
     std::string tmp(ev->data.toLocal8Bit().constData());
@@ -140,32 +140,6 @@ void AvBinMedia::TerminateThread()
 }
 
 //*******************************************
-
-/*long long unsigned  AvBinMedia::RequestFrame(QString source, long long unsigned ti) //in milliseconds
-{
-    if(this->mediaThread->IsStopFlagged())
-    {
-        throw runtime_error("Worker thread has been stopped");
-    }
-    if(!this->mediaThread->isRunning())
-    {
-        throw runtime_error("Worker thread is not running");
-    }
-
-    //Request the frame from the backend thread
-    assert(this->eventLoop != NULL);
-    unsigned long long evid = this->eventLoop->GetId();
-    QString eventName = QString("AVBIN_GET_FRAME");
-    std::tr1::shared_ptr<class Event> getFrameEvent(new Event(eventName.toLocal8Bit().constData(), evid));
-    std::ostringstream tmp;
-    tmp << ti * 1000;
-    getFrameEvent->toUuid = this->uuid;
-    getFrameEvent->id = this->eventLoop->GetId();
-    getFrameEvent->data = tmp.str().c_str();
-    this->eventLoop->SendEvent(getFrameEvent);
-
-    return getFrameEvent->id;
-}*/
 
 void AvBinMedia::Update()
 {

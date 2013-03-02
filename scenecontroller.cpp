@@ -696,33 +696,18 @@ int TrackingSceneController::GetAnnotationBetweenTimestamps(unsigned long long s
     std::vector<std::vector<float> > &annot,
     unsigned long long &annotationTime)
 {
-    assert(this->eventLoop!=NULL);
-    annot.clear();
-    annotationTime = 0;
+    double ti = 0.;
+    int ret = Annotation::GetAnnotationBetweenFrames(startTime,
+                                               endTime,
+                                               requestedTime,
+                                               annotationUuid,
+                                               this->eventLoop,
+                                               this->eventReceiver,
+                                               annot,
+                                               ti);
 
-    std::tr1::shared_ptr<class Event> reqEv(new Event("GET_ANNOTATION_BETWEEN_TIMES"));
-    reqEv->id = this->eventLoop->GetId();
-    QString arg = QString("%1,%2,%3").arg(startTime).arg(endTime).arg(requestedTime);
-    reqEv->data = arg.toLocal8Bit().constData();
-    reqEv->toUuid = this->annotationUuid;
-    this->eventLoop->SendEvent(reqEv);
-
-    assert(this->eventReceiver!=NULL);
-    std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(reqEv->id);
-    if(response->data == "FRAME_NOT_FOUND")
-    {
-        return 0;
-    }
-    else
-    {
-        double ti = 0.;
-        QString xml = response->data;
-        int ret = TrackingAnnotationData::FrameFromXml(xml, annot, ti);
-        if(ret==0) return 0; //Xml error
-
-        annotationTime = (unsigned long long)(ti * 1000. + 0.5);
-        return 1;
-    }
+    annotationTime = (unsigned long long)(ti * 1000. + 0.5);
+    return ret;
 }
 
 void TrackingSceneController::SetAnnotationBetweenTimestamps(unsigned long long startTime,

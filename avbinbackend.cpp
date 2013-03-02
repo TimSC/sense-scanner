@@ -480,36 +480,14 @@ int AvBinBackend::PlayUpdate()
         //cout << "avbin thread queue " << this->eventReceiver->BufferSize() << endl;
         while(1)
         {
-        std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
-        //cout << "Event type " << ev->type << endl;
-        foundEvent++;
-        QString evType = ev->type;
-        //if(evType.left(15) == "AVBIN_GET_FRAME")
-        //    this->incomingFrameRequests.push_back(ev);
-        //else
-        this->HandleEvent(ev);
+            std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
+            //cout << "Event type " << ev->type << endl;
+            foundEvent++;
+            QString evType = ev->type;
+            this->HandleEvent(ev);
         }
     }
     catch(std::runtime_error e) {}
-
-    //Process all frames in queue
-    //std::list<std::tr1::shared_ptr<class Event> >::iterator it;
-    //cout << foundEvent << endl;
-    //for(it=this->incomingFrameRequests.begin();it!=this->incomingFrameRequests.end();it++)
-    //{
-    //    this->HandleEvent(*it);
-    //}
-
-    /*if(!this->incomingFrameRequests.empty())
-    {
-        //Only process the most recent request, discard the others
-        std::list<std::tr1::shared_ptr<class Event> >::iterator it;
-        it = this->incomingFrameRequests.end();
-        it --;
-        this->HandleEvent(*it);
-    }
-
-    this->incomingFrameRequests.clear();*/
 
     return foundEvent > 0;
 }

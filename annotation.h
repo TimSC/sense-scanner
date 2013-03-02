@@ -173,6 +173,15 @@ public:
                                  class EventLoop *eventLoop,
                                  class EventReceiver *eventReceiver);
 
+    static int GetAnnotationBetweenFrames(unsigned long long startTime,
+                                               unsigned long long endTime,
+                                               unsigned long long requestedTime,
+                                               QUuid annotUuid,
+                                               class EventLoop *eventLoop,
+                                               class EventReceiver *eventReceiver,
+                                               std::vector<std::vector<float> > &frameOut,
+                                               double &tiOut);
+
 
     std::tr1::shared_ptr<class AnnotThread> annotThread;
     class TrackingAnnotationData *track;
