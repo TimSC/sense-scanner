@@ -287,6 +287,9 @@ MainWindow::MainWindow(QWidget *parent) :
     //this->ui->webViewLayout->hide();
     this->ui->sourcesAlgGui->mainWindow = this;
     this->ui->widget->SetEventLoop(this->eventLoop);
+
+    this->applyModelPool.SetEventLoop(this->eventLoop);
+    this->applyModelPool.Add(QUuid::createUuid());
 }
 
 MainWindow::~MainWindow()

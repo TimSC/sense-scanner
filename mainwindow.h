@@ -11,6 +11,7 @@
 #include "workspace.h"
 #include "localmutex.h"
 #include "useractions.h"
+#include "applymodel.h"
 
 namespace Ui {
 class MainWindow;
@@ -168,6 +169,7 @@ private:
     int timeUpdatesEnabled;
     QString defaultFilename;
     UserActions *userActions;
+    ApplyModelPool applyModelPool;
 
 public slots:
     void ImportVideo();
