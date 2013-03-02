@@ -241,6 +241,7 @@ void EventLoop::SendEvent(std::tr1::shared_ptr<class Event> event)
 void EventLoop::AddListener(QString type, class EventReceiver &rx)
 {
     //cout << "Add listener " << type.c_str() << "," << (unsigned long)&rx << endl;
+    assert(this!=NULL);
 
     this->mutex.lock();
     std::map<QString, std::vector<EventReceiver *> >::iterator it = this->eventReceivers.find(type);

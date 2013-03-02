@@ -1282,3 +1282,17 @@ void Annotation::PreDelete()
 {
 
 }
+
+QString Annotation::GetSourceFilename(QUuid annotUuid,
+                                      class EventLoop *eventLoop,
+                                      class EventReceiver *eventReceiver)
+{
+    //Get source filename for annotation
+    std::tr1::shared_ptr<class Event> getSourceNameEv(new Event("GET_SOURCE_FILENAME"));
+    getSourceNameEv->toUuid = annotUuid;
+    getSourceNameEv->id = eventLoop->GetId();
+    eventLoop->SendEvent(getSourceNameEv);
+
+    std::tr1::shared_ptr<class Event> sourceName = eventReceiver->WaitForEventId(getSourceNameEv->id);
+    return sourceName->data;
+}

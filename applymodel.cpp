@@ -1,4 +1,7 @@
 #include "applymodel.h"
+#include "annotation.h"
+#include <iostream>
+using namespace std;
 
 ApplyModel::ApplyModel(QUuid annotUuidIn) : MessagableThread()
 {
@@ -10,10 +13,25 @@ ApplyModel::~ApplyModel()
 
 }
 
+void ApplyModel::SetEventLoop(class EventLoop *eventLoopIn)
+{
+    MessagableThread::SetEventLoop(eventLoopIn);
+    this->eventLoop->AddListener("SOURCE_FILENAME", *this->eventReceiver);
+
+
+}
+
 void ApplyModel::Update()
 {
 
-    int debug=1;
+    //Get source filename for annotation
+    QString fina = Annotation::GetSourceFilename(this->annotUuid,
+                                                     this->eventLoop,
+                                                     this->eventReceiver);
+
+
+    cout << qPrintable(fina) << endl;
+
     /*
 
     //Check if this thread should be active and access the video
@@ -368,12 +386,13 @@ void ApplyModel::Update()
     }
 */
 
-    this->msleep(5);
+    this->msleep(1000);
 }
 
 void ApplyModel::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
 
+    MessagableThread::HandleEvent(ev);
 }
 
 //**********************************************************

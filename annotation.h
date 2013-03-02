@@ -184,6 +184,10 @@ public:
     void Terminate();
     void PreDelete();
 
+    static QString GetSourceFilename(QUuid annotUuid,
+                                                 class EventLoop *eventLoop,
+                                                 class EventReceiver *eventReceiver);
+
     bool visible;
 
     std::tr1::shared_ptr<class AnnotThread> annotThread;

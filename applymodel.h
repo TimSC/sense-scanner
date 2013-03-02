@@ -11,6 +11,7 @@ public:
 
     void Update();
     void HandleEvent(std::tr1::shared_ptr<class Event> ev);
+    void SetEventLoop(class EventLoop *eventLoopIn);
 
 protected:
     QUuid annotUuid;

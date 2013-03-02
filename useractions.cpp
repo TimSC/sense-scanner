@@ -111,13 +111,9 @@ int UserActions::SaveAs(QString fina)
         try
         {
             //Get source filename for annotation
-            std::tr1::shared_ptr<class Event> getSourceNameEv(new Event("GET_SOURCE_FILENAME"));
-            getSourceNameEv->toUuid = annotationUuids[i];
-            getSourceNameEv->id = this->eventLoop->GetId();
-            this->eventLoop->SendEvent(getSourceNameEv);
-
-            std::tr1::shared_ptr<class Event> sourceName = this->eventReceiver->WaitForEventId(getSourceNameEv->id);
-            QString fina = sourceName->data;
+            QString fina = Annotation::GetSourceFilename(annotationUuids[i],
+                                                             this->eventLoop,
+                                                             this->eventReceiver);
 
             //Get algorithm Uuid for this annotation track
             std::tr1::shared_ptr<class Event> getAlgUuidEv(new Event("GET_ALG_UUID"));
