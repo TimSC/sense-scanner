@@ -188,6 +188,10 @@ public:
                                                  class EventLoop *eventLoop,
                                                  class EventReceiver *eventReceiver);
 
+    static QUuid GetAlgUuid(QUuid annotUuid,
+                                 class EventLoop *eventLoop,
+                                 class EventReceiver *eventReceiver);
+
     bool visible;
 
     std::tr1::shared_ptr<class AnnotThread> annotThread;

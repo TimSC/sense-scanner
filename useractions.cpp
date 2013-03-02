@@ -116,13 +116,9 @@ int UserActions::SaveAs(QString fina)
                                                              this->eventReceiver);
 
             //Get algorithm Uuid for this annotation track
-            std::tr1::shared_ptr<class Event> getAlgUuidEv(new Event("GET_ALG_UUID"));
-            getAlgUuidEv->toUuid = annotationUuids[i];
-            getAlgUuidEv->id = this->eventLoop->GetId();
-            this->eventLoop->SendEvent(getAlgUuidEv);
-
-            std::tr1::shared_ptr<class Event> algUuidEv = this->eventReceiver->WaitForEventId(getAlgUuidEv->id);
-            QUuid algUuid(algUuidEv->data);
+            QUuid algUuid = Annotation::GetAlgUuid(annotationUuids[i],
+                                                   this->eventLoop,
+                                                   this->eventReceiver);
 
             //Get annotation data
             std::tr1::shared_ptr<class Event> getAnnotEv(new Event("GET_ALL_ANNOTATION_XML"));

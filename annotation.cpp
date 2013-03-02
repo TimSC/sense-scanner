@@ -1296,3 +1296,17 @@ QString Annotation::GetSourceFilename(QUuid annotUuid,
     std::tr1::shared_ptr<class Event> sourceName = eventReceiver->WaitForEventId(getSourceNameEv->id);
     return sourceName->data;
 }
+
+QUuid Annotation::GetAlgUuid(QUuid annotUuid,
+                             class EventLoop *eventLoop,
+                             class EventReceiver *eventReceiver)
+{
+    //Get algorithm Uuid for this annotation track
+    std::tr1::shared_ptr<class Event> getAlgUuidEv(new Event("GET_ALG_UUID"));
+    getAlgUuidEv->toUuid = annotUuid;
+    getAlgUuidEv->id = eventLoop->GetId();
+    eventLoop->SendEvent(getAlgUuidEv);
+
+    std::tr1::shared_ptr<class Event> algUuidEv = eventReceiver->WaitForEventId(getAlgUuidEv->id);
+    return QUuid(algUuidEv->data);
+}

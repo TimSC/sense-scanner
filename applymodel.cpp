@@ -17,7 +17,7 @@ void ApplyModel::SetEventLoop(class EventLoop *eventLoopIn)
 {
     MessagableThread::SetEventLoop(eventLoopIn);
     this->eventLoop->AddListener("SOURCE_FILENAME", *this->eventReceiver);
-
+    this->eventLoop->AddListener("ALG_UUID_FOR_ANNOTATION", *this->eventReceiver);
 
 }
 
@@ -29,8 +29,14 @@ void ApplyModel::Update()
                                                      this->eventLoop,
                                                      this->eventReceiver);
 
-
     cout << qPrintable(fina) << endl;
+
+    //Get algorithm Uuid for this annotation track
+    QUuid algUuid = Annotation::GetAlgUuid(this->annotUuid,
+                                           this->eventLoop,
+                                           this->eventReceiver);
+
+    cout << qPrintable(algUuid) << endl;
 
     /*
 
