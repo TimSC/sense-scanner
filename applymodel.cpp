@@ -28,6 +28,7 @@ void ApplyModel::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("SOURCE_FILENAME", *this->eventReceiver);
     this->eventLoop->AddListener("ALG_UUID_FOR_ANNOTATION", *this->eventReceiver);
     this->eventLoop->AddListener("MEDIA_DURATION_RESPONSE", *this->eventReceiver);
+    this->eventLoop->AddListener("MEDIA_FRAME_RESPONSE", *this->eventReceiver);
 }
 
 void ApplyModel::SetMediaInterface(QUuid mediaInterfaceIn)
@@ -172,9 +173,6 @@ void ApplyModel::Update()
             this->currentStartTimestamp = processedImg.start;
             this->currentEndTimestamp = processedImg.end;
 
-            cout << "startTimestamp " << this->currentStartTimestamp << endl;
-            cout << "endTimestamp " << this->currentEndTimestamp << endl;
-
             //Update annotation with frame that has been found
             //track->FoundFrame(this->currentStartTimestamp, this->currentEndTimestamp);
             avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5); //millisec
@@ -219,14 +217,14 @@ void ApplyModel::Update()
 /*
     //If the list of frames has not been set, assume it is blank
     this->frameTimesSet = true;
-
+*/
     //Estimate mid time of next frame
     assert(this->currentTimeSet==true);
     frameDuration = this->currentEndTimestamp - this->currentStartTimestamp; //millisec
     avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5); //millisec
     nextTi = avTi + frameDuration; //millisec
     assert(nextTi > 0);
-
+/*
     //Check if known frames can satisfy iterations
     int knownFrame = 1;
     int countKnown = 0;
@@ -296,12 +294,11 @@ void ApplyModel::Update()
         else
             knownFrame = 0;
     }
+*/
 
     //Get subsequent frames
-    if(nextTi < srcDuration)
+    if(nextTi < this->srcDuration)
     {
-        unsigned long long milsec = nextTi;
-
         QSharedPointer<QImage> img;
 
         //If needed, get the next frame from video
@@ -309,54 +306,48 @@ void ApplyModel::Update()
         try
         {
 
-            std::tr1::shared_ptr<class Event> reqEv(new Event("GET_MEDIA_FRAME"));
-            reqEv->toUuid = this->mediaInterface;
-            reqEv->data = src;
-            QString tiStr = QString("%1").arg(milsec);
-            reqEv->buffer = tiStr.toLocal8Bit().constData();
-            reqEv->id = this->eventLoop->GetId();
-            this->eventLoop->SendEvent(reqEv);
+            MediaResponseFrame processedImg;
 
-            std::tr1::shared_ptr<class Event> resp = this->eventReceiver->WaitForEventId(reqEv->id);
-            assert(resp->type=="MEDIA_FRAME_RESPONSE");
+            AvBinMedia::GetMediaFrame(this->srcFina,
+                                 nextTi,
+                                 this->mediaInterface,
+                                 this->eventLoop,
+                                 this->eventReceiver,
+                                 processedImg);
 
-            MediaResponseFrame processedImg(resp);
             img = QSharedPointer<QImage>(new QImage(processedImg.img));
-            //annotTimestamp = processedImg.req;
             this->currentStartTimestamp = processedImg.start;
             this->currentEndTimestamp = processedImg.end;
 
-            //cout << "Current time " << milsec << "," << src.toLocal8Bit().constData() << endl;
-            //img = this->mediaInterface->Get(src,
-            //        milsec,
-            //        this->currentStartTimestamp,
-            //        this->currentEndTimestamp);
-
             //Update annotation with frame that has been found
-            track->FoundFrame(this->currentStartTimestamp, this->currentEndTimestamp);
+            //track->FoundFrame(this->currentStartTimestamp, this->currentEndTimestamp);
         }
         catch (std::runtime_error &err)
         {
-            this->parentAnn->SetActiveStateDesired(0);
+            //TODO stop work on failure?
+            assert(0);
+
             this->currentTimeSet = false;
             this->msleep(5);
             return;
         }
 
-        if(this->currentEndTimestamp < milsec)
+        if(this->currentEndTimestamp < nextTi)
         {
-            this->parentAnn->SetActiveStateDesired(0);
+            //TODO stop work on failure?
+            assert(0);
+
             this->currentTimeSet = false;
             throw runtime_error("Earlier frame found than was requested");
         }
 
 
         //Check if annotation is in this frame
-        std::vector<std::vector<float> > foundAnnot;
+        /*std::vector<std::vector<float> > foundAnnot;
         unsigned long long foundAnnotationTime;
         int found = track->GetAnnotationBetweenTimestamps(this->currentStartTimestamp,
                                               this->currentEndTimestamp,
-                                              milsec,
+                                              nextTi,
                                               foundAnnot,
                                               foundAnnotationTime);
 
@@ -375,17 +366,16 @@ void ApplyModel::Update()
             this->ImageToProcess(this->currentStartTimestamp,
                                  this->currentEndTimestamp,
                                  img, this->currentModel);
-        }
+        }*/
 
 
 
         //Estimate progress and generate an event
-        double progress = double(milsec) / this->srcDuration;
+        double progress = double(nextTi) / this->srcDuration;
         std::tr1::shared_ptr<class Event> requestEv(new Event("ANNOTATION_THREAD_PROGRESS"));
-        QString progressStr = QString("%0 %1").arg(this->parentAnn->GetAnnotUid()).arg(progress);
+        QString progressStr = QString("%0 %1").arg(this->annotUuid.toString()).arg(progress);
         requestEv->data = progressStr.toLocal8Bit().constData();
         this->eventLoop->SendEvent(requestEv);
-
 
         //Estimate mid time of next frame
         frameDuration = this->currentEndTimestamp - this->currentStartTimestamp;
@@ -396,9 +386,8 @@ void ApplyModel::Update()
     }
     else
     {
-        this->parentAnn->SetActiveStateDesired(0);
+        //All done, stop work
     }
-*/
 
     this->msleep(1000);
 }
