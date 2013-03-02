@@ -23,7 +23,7 @@ void ApplyModel::SetEventLoop(class EventLoop *eventLoopIn)
     MessagableThread::SetEventLoop(eventLoopIn);
     this->eventLoop->AddListener("SOURCE_FILENAME", *this->eventReceiver);
     this->eventLoop->AddListener("ALG_UUID_FOR_ANNOTATION", *this->eventReceiver);
-
+    this->eventLoop->AddListener("MEDIA_DURATION_RESPONSE", *this->eventReceiver);
 }
 
 void ApplyModel::SetMediaInterface(QUuid mediaInterfaceIn)
@@ -102,35 +102,8 @@ void ApplyModel::Update()
         this->msleep(5);
         return;
     }
-    /*
-    class TrackingAnnotationData *track = this->parentAnn->GetTrack();
-    assert(track!=NULL);
 
-    if(!this->srcDurationSet)
-    {
-        try
-        {
-            //Estimate progress and generate an event
-            std::tr1::shared_ptr<class Event> requestEv(new Event("GET_MEDIA_DURATION"));
-            assert(!this->mediaInterface.isNull());
-            requestEv->toUuid = this->mediaInterface;
-            requestEv->data = src;
-            requestEv->id = this->eventLoop->GetId();
-            this->eventLoop->SendEvent(requestEv);
-
-            std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(requestEv->id);
-            this->srcDuration = response->data.toULongLong();
-            cout << "Annot thread found length " << this->srcDuration << endl;
-            this->srcDurationSet = 1;
-        }
-        catch (std::runtime_error &errMsg)
-        {
-
-        }
-        this->msleep(5);
-        return;
-    }
-
+/*
     //Get list of avilable frames
     if(!this->frameTimesSet)
     {

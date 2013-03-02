@@ -634,38 +634,6 @@ void TrackingAnnotationData::GetFramesAvailable(std::map<unsigned long, unsigned
     frameTimesEndOut = this->frameTimesEnd;
 }
 
-/*void TrackingAnnotationData::LoadAnnotation(QString fileName)
-{
-    //Parse XML to DOM
-    QFile f(fileName);
-    QDomDocument doc("mydocument");
-    QString errorMsg;
-    if (!doc.setContent(&f, &errorMsg))
-    {
-        cout << "Xml Error: "<< errorMsg.toLocal8Bit().constData() << endl;
-        f.close();
-        return;
-    }
-    f.close();
-
-    //Load points and links into memory
-    QDomElement rootElem = doc.documentElement();
-
-    this->ReadAnnotationXml(rootElem);
-}
-
-void TrackingAnnotationData::SaveAnnotation(QString fileName)
-{
-    //Save data to file
-    QFile f(fileName);
-    f.open( QIODevice::WriteOnly );
-    QTextStream out(&f);
-    out.setCodec("UTF-8");
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;
-    this->WriteAnnotationXml(out);
-    f.close();
-}
-*/
 int TrackingAnnotationData::GetShapeNumPoints()
 {
     return this->shape.size();
