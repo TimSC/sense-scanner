@@ -228,10 +228,16 @@ void VideoWidget::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     {
         //Ignore frames not directed at widget
         if(ev->fromUuid != this->seq) return;
-
+        if(ev->data!="FAILED")
+        {
         MediaResponseFrame processedImg(ev);
         this->AsyncFrameReceived(processedImg.img, processedImg.start,
                                  processedImg.end, processedImg.req);
+        }
+        else
+        {
+            cout << "Warning: frame request failed in VideoWidget::HandleEvent" << endl;
+        }
     }
 
 }

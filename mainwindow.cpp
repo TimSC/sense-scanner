@@ -241,7 +241,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("WORKSPACE_PROCESSING_CHANGED",*eventReceiver);
 
     //Create file reader worker thread
-    this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop,0);
+    this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop,1);
     this->mediaInterfaceFront->Start();
     cout << "Front buff media " << qPrintable(this->mediaInterfaceFront->GetUuid()) << endl;
 

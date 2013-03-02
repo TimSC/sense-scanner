@@ -234,7 +234,7 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             //may be discarded from the queue at this stage
             try
             {
-                //ev = this->eventReceiver->GetLatestDiscardOlder("GET_MEDIA_FRAME");
+                ev = this->eventReceiver->GetLatestDiscardOlder("GET_MEDIA_FRAME");
             }
             catch(std::runtime_error &err)
             {

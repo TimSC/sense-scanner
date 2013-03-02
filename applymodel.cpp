@@ -295,6 +295,7 @@ void ApplyModel::Update()
             knownFrame = 0;
     }
 */
+    cout << "test2 "<<qPrintable(this->mediaInterface)<< endl;
 
     //Get subsequent frames
     if(nextTi < this->srcDuration)

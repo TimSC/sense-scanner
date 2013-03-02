@@ -484,10 +484,10 @@ int AvBinBackend::PlayUpdate()
         //cout << "Event type " << ev->type << endl;
         foundEvent++;
         QString evType = ev->type;
-        if(evType.left(15) == "AVBIN_GET_FRAME")
-            this->incomingFrameRequests.push_back(ev);
-        else
-            this->HandleEvent(ev);
+        //if(evType.left(15) == "AVBIN_GET_FRAME")
+        //    this->incomingFrameRequests.push_back(ev);
+        //else
+        this->HandleEvent(ev);
         }
     }
     catch(std::runtime_error e) {}
@@ -500,7 +500,7 @@ int AvBinBackend::PlayUpdate()
     //    this->HandleEvent(*it);
     //}
 
-    if(!this->incomingFrameRequests.empty())
+    /*if(!this->incomingFrameRequests.empty())
     {
         //Only process the most recent request, discard the others
         std::list<std::tr1::shared_ptr<class Event> >::iterator it;
@@ -509,7 +509,7 @@ int AvBinBackend::PlayUpdate()
         this->HandleEvent(*it);
     }
 
-    this->incomingFrameRequests.clear();
+    this->incomingFrameRequests.clear();*/
 
     return foundEvent > 0;
 }
@@ -551,7 +551,11 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
     if(evType=="AVBIN_GET_FRAME")
     {
+
         unsigned long long ti = ev->data.toULongLong();
+
+        cout << "AVBIN_GET_FRAME " << ti << "," << qPrintable(this->uuid) << endl;
+
         QString eventName = QString("AVBIN_FRAME_RESPONSE");
         std::tr1::shared_ptr<class Event> response(new Event(eventName.toLocal8Bit().constData(), ev->id));
         response->toUuid = this->uuid;
