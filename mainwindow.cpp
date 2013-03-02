@@ -289,7 +289,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->widget->SetEventLoop(this->eventLoop);
 
     this->applyModelPool.SetEventLoop(this->eventLoop);
-    this->applyModelPool.Add(QUuid::createUuid());
+
 }
 
 MainWindow::~MainWindow()
@@ -675,6 +675,7 @@ void MainWindow::NewWorkspace()
 
     this->workspace.ClearAnnotation();
     this->workspace.ClearProcessing();
+    this->applyModelPool.Clear();
     this->workspaceAsStored = this->workspace;
     this->RegenerateSourcesList();
     this->RegenerateProcessingList();
@@ -1053,6 +1054,9 @@ void MainWindow::ApplyModelPressed()
             setAlgEv->toUuid = newAnn;
             setAlgEv->data = algUuid;
             this->eventLoop->SendEvent(setAlgEv);
+
+            //Start thread to apply model
+            this->applyModelPool.Add(QUuid::createUuid(), newAnn);
         }
     }
 

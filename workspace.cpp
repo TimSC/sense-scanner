@@ -308,32 +308,6 @@ void Workspace::Update()
     {
         flushEvents = 0;
     }
-
-    //Set annotations to inactive when they do not need active status
-    for(unsigned int i=0;i<this->annotations.size();i++)
-    {
-        std::tr1::shared_ptr<class Annotation> ann = this->annotations[i];
-        if(!ann->GetActiveStateDesired() && ann->GetActive())
-            ann->SetActive(0);
-    }
-
-    //Check which annotation track is active (in terms of accessing the video interface)
-    int count = 0;
-    for(unsigned int i=0;i<this->annotations.size();i++)
-    {
-        std::tr1::shared_ptr<class Annotation> ann = this->annotations[i];
-        count += ann->GetActive();
-    }
-
-    for(unsigned int i=0;i<this->annotations.size();i++)
-    {
-        std::tr1::shared_ptr<class Annotation> ann = this->annotations[i];
-        if(ann->GetActiveStateDesired() && count == 0)
-        {
-            ann->SetActive(1);
-            count ++;
-        }
-    }
 }
 
 void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
