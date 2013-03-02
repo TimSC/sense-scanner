@@ -43,7 +43,8 @@ MediaResponseFrame::MediaResponseFrame(std::tr1::shared_ptr<class Event> ev)
 void MediaResponseFrame::Process(std::tr1::shared_ptr<class Event> ev)
 {
     assert(ev->type=="MEDIA_FRAME_RESPONSE");
-    assert(ev->data!="FAILED");
+    if(ev->data!="FAILED")
+        throw Exception("Failed to get frame.")
 
     std::string tmp(ev->data.toLocal8Bit().constData());
     std::vector<std::string> args = split(tmp,',');
