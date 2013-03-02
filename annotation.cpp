@@ -1043,9 +1043,6 @@ void AnnotThread::ImageToProcess(unsigned long long startTi,
     assert(this->eventLoop!=NULL);
     int reqId = this->eventLoop->GetId();
 
-    if(this->parentAnn->debug)
-        cout << "AnnotThread::Update() 9" << endl;
-
     //Ask alg process to make a prediction
     std::tr1::shared_ptr<class Event> requestEv(new Event("PREDICT_FRAME_REQUEST"));
     class ProcessingRequestOrResponse *req = new class ProcessingRequestOrResponse;
@@ -1058,16 +1055,10 @@ void AnnotThread::ImageToProcess(unsigned long long startTi,
 
     this->eventLoop->SendEvent(requestEv);
 
-    if(this->parentAnn->debug)
-        cout << "AnnotThread::Update() 10" << endl;
-
     //Wait for response
     try
     {
         std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(reqId,80000000);
-
-        if(this->parentAnn->debug)
-            cout << "AnnotThread::Update() 11" << endl;
 
         class TrackingAnnotationData *track = this->parentAnn->GetTrack();
         assert(track!=NULL);
@@ -1088,8 +1079,6 @@ void AnnotThread::ImageToProcess(unsigned long long startTi,
     {
         cout << "Warning: Prediction timed out" << endl;
     }
-    if(this->parentAnn->debug)
-        cout << "AnnotThread::Update() 12" << endl;
 
 }
 
@@ -1117,9 +1106,6 @@ unsigned long long AnnotThread::GetNewEventId()
 Annotation::Annotation()
 {
     this->track = NULL;
-    this->visible = true;
-    this->active = 0;
-    this->activeStateDesired = 1;
 }
 
 Annotation::~Annotation()
@@ -1137,7 +1123,6 @@ Annotation& Annotation::operator= (const Annotation &other)
 {
     source = other.source;
     uid = other.uid;
-    visible = other.visible;
     algUid = other.algUid;
     if(this->track) delete this->track;
     this->track = NULL;
@@ -1150,7 +1135,6 @@ Annotation& Annotation::operator= (const Annotation &other)
 bool Annotation::operator!= (const Annotation &other)
 {
     if(source != other.source) return true;
-    if(visible != other.visible) return true;
     if(uid != other.uid) return true;
     if(*track != *other.track) return true;
     if(algUid != other.algUid) return true;
@@ -1160,7 +1144,6 @@ bool Annotation::operator!= (const Annotation &other)
 void Annotation::Clear()
 {
     this->SetTrack(NULL);
-    this->visible = true;
     QUuid uidBlank;
     this->SetAnnotUid(uidBlank);
     this->algUid = algUid;
@@ -1229,37 +1212,6 @@ QString Annotation::GetSource()
     this->lock.unlock();
     return out;
 }
-
-void Annotation::SetActive(int activeIn)
-{
-    this->lock.lock();
-    this->active = activeIn;
-    this->lock.unlock();
-}
-
-int Annotation::GetActive()
-{
-    this->lock.lock();
-    int out = this->active;
-    this->lock.unlock();
-    return out;
-}
-
-void Annotation::SetActiveStateDesired(int desiredIn)
-{
-    this->lock.lock();
-    this->activeStateDesired = desiredIn;
-    this->lock.unlock();
-}
-
-int Annotation::GetActiveStateDesired()
-{
-    this->lock.lock();
-    int out = this->activeStateDesired;
-    this->lock.unlock();
-    return out;
-}
-
 
 void Annotation::Terminate()
 {

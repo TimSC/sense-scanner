@@ -871,9 +871,6 @@ void MainWindow::TrainModelPressed()
         return;
     }
 
-    //Suspend access from annot threads to media interface (for now)
-    this->workspace.SetAnnotThreadsInactive();
-
     //Create worker process
     std::tr1::shared_ptr<class AlgorithmProcess> alg(new class AlgorithmProcess(this->eventLoop, this));
     QUuid newUuid = QUuid::createUuid();
@@ -1019,7 +1016,7 @@ void MainWindow::ApplyModelPressed()
 
             //Create new annotation with new uuid
             QUuid newAnn = QUuid::createUuid();
-            this->workspace.AddSource(newAnn, 1);
+            this->workspace.AddSource(newAnn);
 
             //Copy source
             std::tr1::shared_ptr<class Event> getSourceNameEv(new Event("GET_SOURCE_FILENAME"));

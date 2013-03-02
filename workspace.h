@@ -31,7 +31,7 @@ public:
     void SetEventLoop(class EventLoop &eventLoopIn);
 
     //** Sources and annotations
-    unsigned int AddSource(QUuid uuid, int debugMode);
+    unsigned int AddSource(QUuid uuid);
     void RemoveSource(QUuid uuid);
 
     //** Processing
@@ -44,8 +44,6 @@ public:
     void ProcessingStateChanged(QUuid uuid, AlgorithmProcess::ProcessState state);
     AlgorithmProcess::ProcessState GetProcessingState(QUuid uuid);
 
-
-
     int NumProcessesBlockingShutdown();
     void Update();
     virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);
@@ -53,7 +51,6 @@ public:
     int HasChanged();
 
     void TerminateThreads();
-    void SetAnnotThreadsInactive();
 
     void ClearProcessing();
     void ClearAnnotation();

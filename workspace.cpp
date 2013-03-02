@@ -66,11 +66,11 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
     this->eventLoop->AddListener("THREAD_STATUS_CHANGED", *this->eventReceiver);
 }
 
-unsigned int Workspace::AddSource(QUuid uuid, int debugMode)
+unsigned int Workspace::AddSource(QUuid uuid)
 {
     this->lock.lock();
     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
-    ann->debug = debugMode;
+
     TrackingAnnotationData *scenePtr = new TrackingAnnotationData();
     ann->SetTrack(scenePtr);
     ann->SetAnnotUid(uuid);
@@ -346,7 +346,7 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
     if(ev->type=="NEW_ANNOTATION")
     {
-        this->AddSource(QUuid(ev->data), 0);
+        this->AddSource(QUuid(ev->data));
 
         std::tr1::shared_ptr<class Event> changeEv2(new Event("ANNOTATION_ADDED"));
         changeEv2->id = ev->id;
@@ -440,15 +440,6 @@ void Workspace::TerminateThreads()
     {
         std::tr1::shared_ptr<class Annotation> ann = this->annotations[i];
         ann->Terminate();
-    }
-}
-
-void Workspace::SetAnnotThreadsInactive()
-{
-    for(unsigned int i=0;i<this->annotations.size();i++)
-    {
-        std::tr1::shared_ptr<class Annotation> ann = this->annotations[i];
-        ann->SetActive(0);
     }
 }
 

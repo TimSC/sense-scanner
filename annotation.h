@@ -164,20 +164,14 @@ public:
     void SetTrack(class TrackingAnnotationData *trackIn);
     class TrackingAnnotationData *GetTrack();
 
-    void SetAlgUid(QUuid uidIn); //Thread safe
-    QUuid GetAlgUid(); //Thread safe
+    void SetAlgUid(QUuid uidIn);
+    QUuid GetAlgUid();
 
-    void SetAnnotUid(QUuid uidIn); //Thread safe
-    QUuid GetAnnotUid(); //Thread safe
+    void SetAnnotUid(QUuid uidIn);
+    QUuid GetAnnotUid();
 
-    void SetSource(QString uidIn); //Thread safe
-    QString GetSource(); //Thread safe
-
-    void SetActive(int activeIn);
-    int GetActive();
-
-    void SetActiveStateDesired(int desiredIn);
-    int GetActiveStateDesired();
+    void SetSource(QString uidIn);
+    QString GetSource();
 
     void FoundFrame(unsigned long startTi, unsigned long endTi);
 
@@ -192,18 +186,14 @@ public:
                                  class EventLoop *eventLoop,
                                  class EventReceiver *eventReceiver);
 
-    bool visible;
 
     std::tr1::shared_ptr<class AnnotThread> annotThread;
     class TrackingAnnotationData *track;
 
-    int debug;
 protected:
     QMutex lock;
     QUuid algUid, uid;
     QString source;
-    int active;
-    int activeStateDesired;
 
 };
 
