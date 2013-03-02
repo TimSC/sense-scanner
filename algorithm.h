@@ -9,6 +9,17 @@
 #include <vector>
 #include "localmutex.h"
 
+class AlgProcessTimer : public MessagableThread
+{
+public:
+    AlgProcessTimer(class AlgorithmProcess *algIn);
+    virtual ~AlgProcessTimer();
+
+    void Update();
+protected:
+    class AlgorithmProcess *alg;
+};
+
 class AlgorithmProcess : public QProcess
 {
     /*!
@@ -70,7 +81,7 @@ protected:
     QByteArray algOutBuffer;
     QByteArray algErrBuffer;
     QUuid uid;
-    QTimer timer;
+    class AlgProcessTimer *timer;
     QList<unsigned long long> saveModelRequestIds;
 };
 

@@ -754,10 +754,6 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
-    if(this->parentAnn->debug)
-    {
-        cout << qPrintable(this->parentAnn->GetAnnotUid()) << "," << qPrintable(ev->type) << endl;
-    }
 
     //cout << "AnnotThread " << (long long unsigned) this << endl;
     QUuid algUid = this->parentAnn->GetAnnotUid();
@@ -1026,6 +1022,9 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
 void AnnotThread::Update()
 {
+    if(this->parentAnn->debug)
+        cout << "AnnotThread::Update() a" << endl;
+
     //Check if this thread should be active and access the video
     assert(this->parentAnn != NULL);
     QUuid algUid = this->parentAnn->GetAlgUid();
@@ -1035,6 +1034,8 @@ void AnnotThread::Update()
     if(!activeStateDesired)
     {
         this->msleep(5);
+        if(this->parentAnn->debug)
+            cout << "AnnotThread::Update() b" << endl;
         return;
     }
 
@@ -1046,6 +1047,8 @@ void AnnotThread::Update()
             this->parentAnn->SetActiveStateDesired(0);
         else
             this->msleep(5);
+        if(this->parentAnn->debug)
+            cout << "AnnotThread::Update() c" << endl;
         return;
     }
 
@@ -1053,6 +1056,8 @@ void AnnotThread::Update()
     if(!isActive)
     {
         this->msleep(5);
+        if(this->parentAnn->debug)
+            cout << "AnnotThread::Update() d" << endl;
         return;
     }
 
@@ -1081,6 +1086,8 @@ void AnnotThread::Update()
 
         }
         this->msleep(5);
+        if(this->parentAnn->debug)
+            cout << "AnnotThread::Update() e" << endl;
         return;
     }
 
@@ -1090,12 +1097,14 @@ void AnnotThread::Update()
         track->GetFramesAvailable(this->frameTimes, this->frameTimesEnd);
         this->frameTimesSet = true;
         this->msleep(5);
+        if(this->parentAnn->debug)
+            cout << "AnnotThread::Update() f" << endl;
         return;
     }
 
-    unsigned long long frameDuration = 0; //microsec
-    unsigned long long avTi = 0; //microsec
-    unsigned long long nextTi = 0; //microsec
+    unsigned long long frameDuration = 0; //millisec
+    unsigned long long avTi = 0; //millisec
+    unsigned long long nextTi = 0; //millisec
 
     //Check algorithm is ready to work
     //TODO
@@ -1188,10 +1197,14 @@ void AnnotThread::Update()
         {
             cout << "Timeout getting frame 0" << endl;
             this->msleep(5);
+            if(this->parentAnn->debug)
+                cout << "AnnotThread::Update() i" << endl;
             return;
         }
         this->currentTimeSet = true;
         this->msleep(5);
+        if(this->parentAnn->debug)
+            cout << "AnnotThread::Update() j" << endl;
         return;
     }
 
@@ -1267,6 +1280,8 @@ void AnnotThread::Update()
                 requestEv->data = progressStr.toLocal8Bit().constData();
                 this->eventLoop->SendEvent(requestEv);
                 this->msleep(5);
+                if(this->parentAnn->debug)
+                    cout << "AnnotThread::Update() h" << endl;
                 return;
             }
 
@@ -1274,6 +1289,8 @@ void AnnotThread::Update()
         else
             knownFrame = 0;
     }
+    if(this->parentAnn->debug)
+        cout << "AnnotThread::Update() 2" << endl;
 
     //Get subsequent frames
     if(nextTi < srcDuration)
@@ -1286,6 +1303,9 @@ void AnnotThread::Update()
 
         try
         {
+            if(this->parentAnn->debug)
+                cout << "AnnotThread::Update() 3" << endl;
+
             std::tr1::shared_ptr<class Event> reqEv(new Event("GET_MEDIA_FRAME"));
             reqEv->toUuid = this->mediaInterface;
             reqEv->data = src;
@@ -1317,6 +1337,8 @@ void AnnotThread::Update()
             this->parentAnn->SetActiveStateDesired(0);
             this->currentTimeSet = false;
             this->msleep(5);
+            if(this->parentAnn->debug)
+                cout << "AnnotThread::Update() g" << endl;
             return;
         }
 
@@ -1327,6 +1349,9 @@ void AnnotThread::Update()
             throw runtime_error("Earlier frame found than was requested");
         }
 
+        if(this->parentAnn->debug)
+            cout << "AnnotThread::Update() 1" << endl;
+
         //Check if annotation is in this frame
         std::vector<std::vector<float> > foundAnnot;
         unsigned long long foundAnnotationTime;
@@ -1336,21 +1361,31 @@ void AnnotThread::Update()
                                               foundAnnot,
                                               foundAnnotationTime);
 
+        if(this->parentAnn->debug)
+            cout << "AnnotThread::Update() 6" << endl;
+
         if(found)
         {
             //Update current model from annotation
             this->currentModel = foundAnnot;
             this->currentModelSet = 1;
+            if(this->parentAnn->debug)
+                cout << "AnnotThread::Update() 7" << endl;
         }
         else
         {
 
+            if(this->parentAnn->debug)
+                cout << "AnnotThread::Update() 8" << endl;
             //If not annotation here, make a prediction
             if(this->currentModelSet != 0)
             this->ImageToProcess(this->currentStartTimestamp,
                                  this->currentEndTimestamp,
                                  img, this->currentModel);
         }
+
+        if(this->parentAnn->debug)
+            cout << "AnnotThread::Update() 4" << endl;
 
         //Estimate progress and generate an event
         double progress = double(milsec) / this->srcDuration;
@@ -1359,11 +1394,16 @@ void AnnotThread::Update()
         requestEv->data = progressStr.toLocal8Bit().constData();
         this->eventLoop->SendEvent(requestEv);
 
+        if(this->parentAnn->debug)
+            cout << "AnnotThread::Update() 5" << endl;
+
         //Estimate mid time of next frame
         frameDuration = this->currentEndTimestamp - this->currentStartTimestamp;
         avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5);
         nextTi = avTi + frameDuration;
         this->msleep(5);
+        if(this->parentAnn->debug)
+            cout << "AnnotThread::Update() k" << endl;
         return;
     }
     else
@@ -1372,6 +1412,8 @@ void AnnotThread::Update()
     }
 
     this->msleep(5);
+    if(this->parentAnn->debug)
+        cout << "AnnotThread::Update() l" << endl;
 }
 
 void AnnotThread::Finished()
@@ -1392,6 +1434,9 @@ void AnnotThread::ImageToProcess(unsigned long long startTi,
     assert(this->eventLoop!=NULL);
     int reqId = this->eventLoop->GetId();
 
+    if(this->parentAnn->debug)
+        cout << "AnnotThread::Update() 9" << endl;
+
     //Ask alg process to make a prediction
     std::tr1::shared_ptr<class Event> requestEv(new Event("PREDICT_FRAME_REQUEST"));
     class ProcessingRequestOrResponse *req = new class ProcessingRequestOrResponse;
@@ -1404,12 +1449,20 @@ void AnnotThread::ImageToProcess(unsigned long long startTi,
 
     this->eventLoop->SendEvent(requestEv);
 
+    if(this->parentAnn->debug)
+        cout << "AnnotThread::Update() 10" << endl;
+
     //Wait for response
     try
     {
         std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(reqId,80000000);
+
+        if(this->parentAnn->debug)
+            cout << "AnnotThread::Update() 11" << endl;
+
         class TrackingAnnotationData *track = this->parentAnn->GetTrack();
         assert(track!=NULL);
+
 
         if(ev->type!="PREDICTION_RESULT") return;
         class ProcessingRequestOrResponse *response = (class ProcessingRequestOrResponse *)ev->raw;
@@ -1426,6 +1479,9 @@ void AnnotThread::ImageToProcess(unsigned long long startTi,
     {
         cout << "Warning: Prediction timed out" << endl;
     }
+    if(this->parentAnn->debug)
+        cout << "AnnotThread::Update() 12" << endl;
+
 }
 
 void AnnotThread::SendEvent(std::tr1::shared_ptr<class Event> event)

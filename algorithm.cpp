@@ -10,6 +10,25 @@
 #include <QtXml/QtXml>
 using namespace std;
 
+//**************************************************
+
+AlgProcessTimer::AlgProcessTimer(class AlgorithmProcess *algIn)
+{
+    this->alg = algIn;
+    this->Start();
+}
+
+AlgProcessTimer::~AlgProcessTimer()
+{
+
+}
+
+void AlgProcessTimer::Update()
+{
+    this->alg->Update();
+    this->msleep(10);
+}
+
 //************************************************
 
 AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent) : QProcess(parent)
@@ -33,13 +52,16 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->eventLoop->AddListener("SET_MODEL", *this->eventReceiver);
 
 
-    QObject::connect(&this->timer, SIGNAL(timeout()), this, SLOT(Update()));
-    this->timer.start(10); //in millisec
+    this->timer = new AlgProcessTimer(this);
+    this->timer->SetEventLoop(this->eventLoop);
 }
 
 AlgorithmProcess::~AlgorithmProcess()
 {
     this->Stop();
+    if(this->timer!=NULL)
+        delete this->timer;
+    this->timer = NULL;
     if(this->eventReceiver != NULL)
         delete this->eventReceiver;
     this->eventReceiver = NULL;
@@ -226,7 +248,6 @@ QByteArray AlgorithmProcess::ReadLineFromBuffer(QByteArray &buff, int popLine, i
 
 void AlgorithmProcess::Update()
 {
-    //cout << "AlgorithmProcess::Update()" << endl;
     //Process events from application
     int flushEvents = 1;
     while(flushEvents)
