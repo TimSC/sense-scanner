@@ -57,6 +57,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->lastRequestedTime = 1;
     this->eventLoop = NULL;
     this->eventReceiver = NULL;
+    this->lastRequestedTimeSet = false;
 
     this->SetVisibleAtTime(0);
 
@@ -109,6 +110,11 @@ void VideoWidget::SetSource(QUuid src, QString finaIn)
     {
         throw runtime_error("Error setting source");
     }
+
+    //Get first frame of video
+    this->lastRequestedTimeSet = false;
+    this->SetVisibleAtTime(0);
+
 }
 
 void VideoWidget::SetVisibleAtTime(long long unsigned ti)
@@ -119,9 +125,10 @@ void VideoWidget::SetVisibleAtTime(long long unsigned ti)
     if(this->seq.isNull()) return;
 
     //Check the requested time has not already been set
-    if(this->lastRequestedTime == ti)
+    if(this->lastRequestedTime == ti && this->lastRequestedTimeSet)
         return;
     this->lastRequestedTime = ti;
+    this->lastRequestedTimeSet = true;
 
     //Get image from sequence
     if(this->eventLoop) try

@@ -77,6 +77,7 @@ protected:
     long long unsigned mediaLength;
     int fitWindowToNextFrame;
     long long unsigned lastRequestedTime;
+    bool lastRequestedTimeSet;
     QString fina;
 
     class EventLoop *eventLoop;
