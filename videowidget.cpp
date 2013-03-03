@@ -113,7 +113,7 @@ void VideoWidget::SetSource(QUuid src, QString finaIn)
 
     //Get first frame of video
     this->lastRequestedTimeSet = false;
-    this->SetVisibleAtTime(0);
+    //this->SetVisibleAtTime(0);
 
 }
 

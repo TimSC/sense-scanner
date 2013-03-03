@@ -135,7 +135,7 @@ void AvBinBackend::DoOpenFile(int requestId)
 
     //Open stream decoders
     if(this->streams.empty())
-        this->OpenStreams();
+        this->OpenStream(this->firstVideoStream);
 
     //Load some frames to get the video decoders to behave correctly
     AVbinPacket packet;
@@ -156,6 +156,7 @@ void AvBinBackend::DoOpenFile(int requestId)
         assert(timestamp >= 0);
         AVbinStreamInfo *sinfo = this->streamInfos[packet.stream_index];
         AVbinStream *stream = this->streams[packet.stream_index];
+        if(stream==NULL) continue;
 
         //Check if all streams have received some data
         done = true;
@@ -326,13 +327,14 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
 
         if(this->streams.empty())
         {
-            this->OpenStreams();
+            this->OpenStream(this->firstVideoStream);
         }
 
         AVbinTimestamp &timestamp = packet.timestamp;
         assert(timestamp >= 0);
         AVbinStreamInfo *sinfo = this->streamInfos[packet.stream_index];
         AVbinStream *stream = this->streams[packet.stream_index];
+        if(stream==NULL) continue;
 
         //cout << "Packet of stream " << packet.stream_index << " at " << timestamp
         //     << " type=" << sinfo->type;
@@ -574,10 +576,30 @@ void AvBinBackend::OpenStreams()
     }
 }
 
+void AvBinBackend::OpenStream(int in)
+{
+    assert(this->fi != NULL);
+    this->CloseStreams();
+
+    for(int32_t i = 0; i<numStreams; i++)
+    {
+        if(i == in)
+        {
+            AVbinStream *stream = mod_avbin_open_stream(this->fi, i);
+            this->streams.push_back(stream);
+        }
+        else
+            this->streams.push_back(NULL);
+    }
+}
+
 void AvBinBackend::CloseStreams()
 {
     for(unsigned int i =0; i < this->streams.size(); i++)
+    {
+        if(this->streams[i]==NULL) continue;
         mod_avbin_close_stream(this->streams[i]);
+    }
     this->streams.clear();
 }
 

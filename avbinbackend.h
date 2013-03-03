@@ -42,6 +42,7 @@ public:
     void HandleEvent(std::tr1::shared_ptr<class Event> ev);
 
     void OpenStreams();
+    void OpenStream(int in);
     void CloseStreams();
     void DoOpenFile(int requestId = 0);
     void PrintAVbinFileInfo(AVbinFileInfo &info);
