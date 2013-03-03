@@ -239,6 +239,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->eventLoop->AddListener("WORKSPACE_ANNOTATION_CHANGED",*eventReceiver);
     this->eventLoop->AddListener("WORKSPACE_PROCESSING_CHANGED",*eventReceiver);
+    this->eventLoop->AddListener("ANNOTATION_THREAD_PROGRESS", *eventReceiver);
+    this->eventLoop->AddListener("PREDICTION_END", *eventReceiver);
 
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop,1);
@@ -411,7 +413,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
     this->workspace.TerminateThreads();
 
-
     //Continu shut down in parent object
     cout << "Continuing shut down of QT framework" << endl;
     QMainWindow::closeEvent(event);
@@ -451,11 +452,30 @@ void MainWindow::RegenerateSourcesList()
         for (int column = 1; column < 2; ++column)
         {
             std::ostringstream displayLine;
-            //float progress = this->workspace.GetProgress(row);
             QUuid annotId = annotationUuids[row];
+
+            unsigned long long progress = 0;
+            /*unsigned long long progress = Annotation::GetPredictionEnd(annotId,
+                                            this->eventLoop,
+                                            this->eventReceiver);*/
+            QMap<QUuid, unsigned long long>::iterator it = this->predictionProgress.find(annotId);
+            if(it != this->predictionProgress.end())
+            {
+                progress = it.value();
+            }
+            else
+            {
+
+            }
+
+
+            displayLine << progress;
+
+            //float progress = this->workspace.GetProgress(row);
+
             //cout << annotId.toString().toLocal8Bit().constData() << endl;
 
-            std::map<QUuid, float>::iterator it = this->annotProgress.find(annotId);
+            /*std::map<QUuid, float>::iterator it = this->annotProgress.find(annotId);
             if(it != this->annotProgress.end())
             {
                 displayLine << it->second;
@@ -463,7 +483,7 @@ void MainWindow::RegenerateSourcesList()
             else
             {
                 displayLine << "Unknown";
-            }
+            }*/
 
             QStandardItem *item = this->sourcesModel.item(row, column);
             if(item!=NULL)
@@ -512,7 +532,7 @@ void MainWindow::RegenerateProcessingList()
         }
 
         for (int column = 1; column < 2; ++column)
-        {
+        {   
             std::ostringstream displayLine;
             float progress = this->workspace.GetProcessingProgress(algUuids[row]);
             AlgorithmProcess::ProcessState state = this->workspace.GetProcessingState(algUuids[row]);
@@ -600,6 +620,56 @@ void MainWindow::RemoveVideo()
 
 }
 
+void MainWindow::HandleEvent(std::tr1::shared_ptr<class Event> ev)
+{
+
+    if(ev->type=="THREAD_STARTING")
+    {
+        this->threadCount ++;
+    }
+    if(ev->type=="THREAD_STOPPING")
+    {
+        assert(this->threadCount > 0);
+        this->threadCount --;
+    }
+    if(ev->type=="AVBIN_OPEN_RESULT")
+    {
+        cout << "Open result: " << qPrintable(ev->data) << endl;
+    }
+
+    if(ev->type=="AVBIN_VERSION")
+    {
+        cout << qPrintable(ev->type) <<" "<< qPrintable(ev->data) << endl;
+        //The software does not function properly for versions before 11
+        //so display a warning if an old avbin is detected
+        if(ev->data.toInt()<11 && !this->avbinVerChecked)
+        {
+            if(this->errMsg == NULL)
+                this->errMsg = new QMessageBox(this);
+            this->errMsg->setWindowTitle("Warning: Old Avbin version detected");
+            QString errTxt = QString("You have Avbin version %1 but at least version %2 is recommended")
+                .arg(ev->data).arg(11);
+            this->errMsg->setText(errTxt);
+            this->errMsg->exec();
+        }
+        this->avbinVerChecked = 1;
+    }
+    if(ev->type=="WORKSPACE_ANNOTATION_CHANGED")
+    {
+        this->RegenerateSourcesList();
+    }
+    if(ev->type=="WORKSPACE_PROCESSING_CHANGED")
+    {
+        this->RegenerateProcessingList();
+    }
+    if(ev->type=="ANNOTATION_THREAD_PROGRESS")
+    {
+        QUuid msgAnnotUuid(ev->buffer);
+        this->predictionProgress[msgAnnotUuid] = ev->data.toULongLong();
+        this->RegenerateSourcesList();
+    }
+}
+
 void MainWindow::Update()
 {
     //Check for and handle events
@@ -612,46 +682,7 @@ void MainWindow::Update()
         assert(ev != NULL);
         cout << "Event type " << qPrintable(ev->type) << endl;
 
-        if(ev->type=="THREAD_STARTING")
-        {
-            this->threadCount ++;
-        }
-        if(ev->type=="THREAD_STOPPING")
-        {
-            assert(this->threadCount > 0);
-            this->threadCount --;
-        }
-        if(ev->type=="AVBIN_OPEN_RESULT")
-        {
-            cout << "Open result: " << qPrintable(ev->data) << endl;
-        }
-
-        if(ev->type=="AVBIN_VERSION")
-        {
-            cout << qPrintable(ev->type) <<" "<< qPrintable(ev->data) << endl;
-            //The software does not function properly for versions before 11
-            //so display a warning if an old avbin is detected
-            if(ev->data.toInt()<11 && !this->avbinVerChecked)
-            {
-                if(this->errMsg == NULL)
-                    this->errMsg = new QMessageBox(this);
-                this->errMsg->setWindowTitle("Warning: Old Avbin version detected");
-                QString errTxt = QString("You have Avbin version %1 but at least version %2 is recommended")
-                    .arg(ev->data).arg(11);
-                this->errMsg->setText(errTxt);
-                this->errMsg->exec();
-            }
-            this->avbinVerChecked = 1;
-        }
-        if(ev->type=="WORKSPACE_ANNOTATION_CHANGED")
-        {
-            this->RegenerateSourcesList();
-        }
-        if(ev->type=="WORKSPACE_PROCESSING_CHANGED")
-        {
-            this->RegenerateProcessingList();
-        }
-
+        this->HandleEvent(ev);
     }
     catch(std::runtime_error e) {flushing = 0;}
 

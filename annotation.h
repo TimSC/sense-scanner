@@ -83,6 +83,9 @@ public:
 
     unsigned long long GetSeekFowardTime(unsigned long long queryTime);
     unsigned long long GetSeekBackTime(unsigned long long queryTime);
+
+    //Keep track of prediction progress
+    unsigned long long predictionEnd;
 protected:
 
     void AddPoint(std::vector<float> p);
@@ -97,7 +100,8 @@ protected:
 
     //Keep track of frame times that are available
     std::map<unsigned long, unsigned long> frameTimes;
-    unsigned long frameTimesEnd;
+    unsigned long long frameTimesEnd;
+
 };
 
 //****************************************************
@@ -187,6 +191,16 @@ public:
                                     std::vector<std::vector<float> > annot,
                                     QUuid annotUuid,
                                     class EventLoop *eventLoop);
+
+    static unsigned long long GetPredictionEnd(QUuid annotUuid,
+                                    class EventLoop *eventLoop,
+                                    class EventReceiver *eventReceiver);
+
+    static void UpdateAnnotationThreadProgress(unsigned long long progress,
+                                        QUuid srcUuid,
+                                        QUuid annotUuid,
+                                        class EventLoop *eventLoop);
+
 
     std::tr1::shared_ptr<class AnnotThread> annotThread;
     class TrackingAnnotationData *track;

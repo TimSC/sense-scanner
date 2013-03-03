@@ -170,6 +170,7 @@ private:
     QString defaultFilename;
     UserActions *userActions;
     ApplyModelPool applyModelPool;
+    QMap<QUuid, unsigned long long> predictionProgress;
 
 public slots:
     void ImportVideo();
@@ -194,6 +195,7 @@ public slots:
     void SelectedSourceChanged(int selectedRow);
     void DeselectCurrentSource();
     QString CheckIfDataShouldBeDiscarded(QString discardMsg);
+    void HandleEvent(std::tr1::shared_ptr<class Event> ev);
 
     void AboutPressed();
     void ShowVideoPressed();

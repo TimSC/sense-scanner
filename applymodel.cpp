@@ -59,7 +59,6 @@ void ApplyModel::Update()
         this->msleep(5);
         return;
     }
-    cout << qPrintable(srcFina) << endl;
 
     //Get algorithm Uuid for this annotation track
     if(!this->algUuidSet)
@@ -72,7 +71,6 @@ void ApplyModel::Update()
         this->msleep(5);
         return;
     }
-    cout << qPrintable(algUuid) << endl;
 
     /*
 
@@ -307,7 +305,6 @@ void ApplyModel::Update()
             knownFrame = 0;
     }
 */
-    cout << "test2 "<<qPrintable(this->mediaInterface)<< endl;
 
     //Get subsequent frames
     if(nextTi < this->srcDuration)
@@ -382,14 +379,11 @@ void ApplyModel::Update()
                                  img, this->currentModel);
         }
 
-
-
         //Estimate progress and generate an event
-        double progress = double(nextTi) / this->srcDuration;
-        std::tr1::shared_ptr<class Event> requestEv(new Event("ANNOTATION_THREAD_PROGRESS"));
-        QString progressStr = QString("%0 %1").arg(this->annotUuid.toString()).arg(progress);
-        requestEv->data = progressStr.toLocal8Bit().constData();
-        this->eventLoop->SendEvent(requestEv);
+        Annotation::UpdateAnnotationThreadProgress(nextTi,
+                                            this->threadId,
+                                            this->annotUuid,
+                                            this->eventLoop);
 
         //Estimate mid time of next frame
         frameDuration = this->currentEndTimestamp - this->currentStartTimestamp;
@@ -401,6 +395,7 @@ void ApplyModel::Update()
     else
     {
         //All done, stop work
+        this->issueEnountered = true;
     }
 
     this->msleep(1000);

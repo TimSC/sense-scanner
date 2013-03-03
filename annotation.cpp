@@ -25,6 +25,7 @@ unsigned long long AbsDiff(unsigned long long a, unsigned long long b)
 TrackingAnnotationData::TrackingAnnotationData()
 {
     this->frameTimesEnd = 0;
+    this->predictionEnd = 0;
 }
 
 TrackingAnnotationData::TrackingAnnotationData(const TrackingAnnotationData &other)
@@ -709,6 +710,9 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
 
     this->eventLoop->AddListener("MEDIA_DURATION_RESPONSE", *this->eventReceiver);
     this->eventLoop->AddListener("MEDIA_FRAME_RESPONSE", *this->eventReceiver);
+    this->eventLoop->AddListener("ANNOTATION_THREAD_PROGRESS", *this->eventReceiver);
+
+    this->eventLoop->AddListener("GET_PREDICTION_END", *this->eventReceiver);
 }
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
@@ -973,7 +977,28 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         this->eventLoop->SendEvent(responseEv);
     }
 
+    if(ev->type=="GET_PREDICTION_END")
+    {
+        std::tr1::shared_ptr<class Event> responseEv(new Event("PREDICTION_END"));
+        QString dataStr = QString("%1").arg(this->parentAnn->track->predictionEnd);
+        responseEv->data = dataStr;
+        responseEv->fromUuid = this->parentAnn->GetAnnotUid();
+        responseEv->id = ev->id;
+        this->eventLoop->SendEvent(responseEv);
     }
+    }
+
+    //This uses a different field to filter uuids
+    if(ev->type=="ANNOTATION_THREAD_PROGRESS")
+    {
+        QUuid msgAnnotUuid(ev->buffer);
+        if(algUid == msgAnnotUuid)
+        {
+            this->parentAnn->track->predictionEnd = ev->data.toULongLong();
+        }
+    }
+
+
 
     this->msleep(5);
     MessagableThread::HandleEvent(ev);
@@ -1228,4 +1253,33 @@ void Annotation::SetAnnotationBetweenTimestamps(unsigned long long startTime,
     reqEv->data = data.toLocal8Bit().constData();
 
     eventLoop->SendEvent(reqEv);
+}
+
+unsigned long long Annotation::GetPredictionEnd(QUuid annotUuid,
+                                class EventLoop *eventLoop,
+                                class EventReceiver *eventReceiver)
+{
+    //Get algorithm Uuid for this annotation track
+    std::tr1::shared_ptr<class Event> getAlgUuidEv(new Event("GET_PREDICTION_END"));
+    getAlgUuidEv->toUuid = annotUuid;
+    getAlgUuidEv->id = eventLoop->GetId();
+    eventLoop->SendEvent(getAlgUuidEv);
+
+    std::tr1::shared_ptr<class Event> responseEV = eventReceiver->WaitForEventId(getAlgUuidEv->id);
+    assert(responseEV->type=="PREDICTION_END");
+    return responseEV->data.toULongLong();
+}
+
+void Annotation::UpdateAnnotationThreadProgress(unsigned long long progress,
+                                    QUuid srcUuid,
+                                    QUuid annotUuid,
+                                    class EventLoop *eventLoop)
+{
+    //Estimate progress and generate an event
+    std::tr1::shared_ptr<class Event> requestEv(new Event("ANNOTATION_THREAD_PROGRESS"));
+    QString progressStr = QString("%0").arg(progress);
+    requestEv->fromUuid = srcUuid;
+    requestEv->data = progressStr;
+    requestEv->buffer = annotUuid.toByteArray();
+    eventLoop->SendEvent(requestEv);
 }
