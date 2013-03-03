@@ -430,6 +430,12 @@ void ApplyModel::ImageToProcess(unsigned long long startTi,
     {
         this->currentModel = out;
         this->currentModelSet = true;
+
+        Annotation::SetAnnotationBetweenTimestamps(startTi,
+                                                   endTi,
+                                                   out,
+                                                   this->annotUuid,
+                                                   this->eventLoop);
     }
     else
     {

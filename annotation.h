@@ -182,6 +182,11 @@ public:
                                                std::vector<std::vector<float> > &frameOut,
                                                double &tiOut);
 
+    static void SetAnnotationBetweenTimestamps(unsigned long long startTime,
+                                    unsigned long long endTime,
+                                    std::vector<std::vector<float> > annot,
+                                    QUuid annotUuid,
+                                    class EventLoop *eventLoop);
 
     std::tr1::shared_ptr<class AnnotThread> annotThread;
     class TrackingAnnotationData *track;

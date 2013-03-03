@@ -201,7 +201,11 @@ void TrackingSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEven
     {
         currentFrame[this->activePoint][0] = pos.x();
         currentFrame[this->activePoint][1] = pos.y();
-        this->SetAnnotationBetweenTimestamps(this->frameStartTime, this->frameEndTime, currentFrame);
+        Annotation::SetAnnotationBetweenTimestamps(this->frameStartTime,
+                                             this->frameEndTime,
+                                             currentFrame,
+                                             this->annotationUuid,
+                                             this->eventLoop);
         this->Redraw();
     }
 
@@ -212,7 +216,11 @@ void TrackingSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEven
             currentFrame[i][0] += pos.x()-this->mousex;
             currentFrame[i][1] += pos.y()-this->mousey;
         }
-        this->SetAnnotationBetweenTimestamps(this->frameStartTime, this->frameEndTime, currentFrame);
+        Annotation::SetAnnotationBetweenTimestamps(this->frameStartTime,
+                                                   this->frameEndTime,
+                                                   currentFrame,
+                                                   this->annotationUuid,
+                                                   this->eventLoop);
         this->Redraw();
     }
 
@@ -659,7 +667,11 @@ void TrackingSceneController::ResetCurentFrameShape()
 
     //Set current frame to canonical shape
     this->currentShape = this->defaultShape;
-    this->SetAnnotationBetweenTimestamps(this->frameStartTime, this->frameEndTime, this->currentShape);
+    Annotation::SetAnnotationBetweenTimestamps(this->frameStartTime,
+                                               this->frameEndTime,
+                                               this->currentShape,
+                                               this->annotationUuid,
+                                               this->eventLoop);
 
     this->RefreshCurrentPos();
     this->Redraw();
@@ -710,7 +722,7 @@ int TrackingSceneController::GetAnnotationBetweenTimestamps(unsigned long long s
     return ret;
 }
 
-void TrackingSceneController::SetAnnotationBetweenTimestamps(unsigned long long startTime,
+/*void TrackingSceneController::SetAnnotationBetweenTimestamps(unsigned long long startTime,
     unsigned long long endTime,
     std::vector<std::vector<float> > annot)
 {
@@ -727,7 +739,7 @@ void TrackingSceneController::SetAnnotationBetweenTimestamps(unsigned long long 
     reqEv->data = data.toLocal8Bit().constData();
 
     this->eventLoop->SendEvent(reqEv);
-}
+}*/
 
 void TrackingSceneController::RefreshCurrentPos()
 {

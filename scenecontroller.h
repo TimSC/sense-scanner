@@ -82,10 +82,6 @@ public slots:
     void LoadAnnotation();
     void SaveAnnotation();
 
-    void SetAnnotationBetweenTimestamps(unsigned long long startTime,
-        unsigned long long endTime,
-        std::vector<std::vector<float> > annot);
-
     void SetAnnotationTrack(QUuid srcUuid);
 
     void SetEventLoop(class EventLoop *eventLoopIn);

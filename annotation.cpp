@@ -1208,3 +1208,24 @@ int Annotation::GetAnnotationBetweenFrames(unsigned long long startTime,
         return 1;
     }
 }
+
+void Annotation::SetAnnotationBetweenTimestamps(unsigned long long startTime,
+                                unsigned long long endTime,
+                                std::vector<std::vector<float> > annot,
+                                QUuid annotUuid,
+                                class EventLoop *eventLoop)
+{
+    assert(endTime >= startTime);
+    assert(eventLoop!=NULL);
+
+    std::tr1::shared_ptr<class Event> reqEv(new Event("SET_ANNOTATION_BETWEEN_TIMES"));
+    reqEv->id = eventLoop->GetId();
+    reqEv->toUuid = annotUuid;
+    QString xml;
+    QTextStream xmlStr(&xml);
+    TrackingAnnotationData::FrameToXml(annot, 0., xmlStr);
+    QString data = QString("%1,%2,%3").arg(startTime).arg(endTime).arg(xml);
+    reqEv->data = data.toLocal8Bit().constData();
+
+    eventLoop->SendEvent(reqEv);
+}
