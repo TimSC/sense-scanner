@@ -794,6 +794,8 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type=="SET_SOURCE_FILENAME")
     {
         this->parentAnn->SetSource(ev->data);
+        std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_ANNOTATION_CHANGED"));
+        this->eventLoop->SendEvent(changeEv);
     }
 
     if(ev->type=="GET_SOURCE_FILENAME")
