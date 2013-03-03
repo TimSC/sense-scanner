@@ -155,6 +155,7 @@ int AlgorithmProcess::Stop()
     assert(this->initDone);
     this->pausing = 0;
     this->stopping = 1;
+    this->eventReceiver->Stop();
     this->SendCommand("QUIT\n");
     this->waitForFinished();
     return 1;
@@ -165,6 +166,7 @@ void AlgorithmProcess::StopNonBlocking()
     assert(this->initDone);
     this->pausing = 0;
     this->stopping = 1;
+    this->eventReceiver->Stop();
     this->SendCommand("QUIT\n");
 }
 
