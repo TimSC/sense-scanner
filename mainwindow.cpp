@@ -668,6 +668,12 @@ void MainWindow::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         this->predictionProgress[msgAnnotUuid] = ev->data.toULongLong();
         this->RegenerateSourcesList();
     }
+    if(ev->type=="STOP_THREADS")
+    {
+        //Prevent this thread from waiting for answers that will
+        //never arrive...
+        this->eventReceiver->Stop();
+    }
 }
 
 void MainWindow::Update()

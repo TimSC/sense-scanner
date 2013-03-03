@@ -1218,20 +1218,28 @@ int Annotation::GetAnnotationBetweenFrames(unsigned long long startTime,
     eventLoop->SendEvent(reqEv);
 
     assert(eventReceiver!=NULL);
-    std::tr1::shared_ptr<class Event> response = eventReceiver->WaitForEventId(reqEv->id);
-    assert(response->type=="ANNOTATION_FRAME");
-    if(response->data == "FRAME_NOT_FOUND")
+    try
     {
-        return 0;
+        std::tr1::shared_ptr<class Event> response = eventReceiver->WaitForEventId(reqEv->id);
+        assert(response->type=="ANNOTATION_FRAME");
+        if(response->data == "FRAME_NOT_FOUND")
+        {
+            return 0;
+        }
+        else
+        {
+            double ti = 0.;
+            QString xml = response->data;
+            int ret = TrackingAnnotationData::FrameFromXml(xml, frameOut, tiOut);
+            if(ret==0) return -1; //Xml error
+            return 1;
+        }
     }
-    else
+    catch(std::runtime_error &err)
     {
-        double ti = 0.;
-        QString xml = response->data;
-        int ret = TrackingAnnotationData::FrameFromXml(xml, frameOut, tiOut);
-        if(ret==0) return 0; //Xml error
-        return 1;
+        //Probably caused by aborted wait
     }
+    return -2;
 }
 
 void Annotation::SetAnnotationBetweenTimestamps(unsigned long long startTime,
