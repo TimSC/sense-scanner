@@ -56,6 +56,8 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->eventLoop->AddListener("GET_MODEL", *this->eventReceiver);
     this->eventLoop->AddListener("SET_MODEL", *this->eventReceiver);
 
+    this->eventLoop->AddListener("PAUSE_ALGORITHM", *this->eventReceiver);
+    this->eventLoop->AddListener("RUN_ALGORITHM", *this->eventReceiver);
 
     QObject::connect(&this->timer, SIGNAL(timeout()), this, SLOT(Update()));
     this->timer.start(10); //in millisec
@@ -366,6 +368,16 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         QByteArray b64bin = ev->buffer.toBase64();
         cout << "Base64 length" << b64bin.size() << endl;
         this->SendRawDataBlock("MODEL\n", b64bin);
+    }
+
+    if(ev->type == "PAUSE_ALGORITHM")
+    {
+        this->Pause();
+    }
+
+    if(ev->type == "RUN_ALGORITHM")
+    {
+        this->Unpause();
     }
 }
 
