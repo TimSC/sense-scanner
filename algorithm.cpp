@@ -10,6 +10,30 @@
 #include <QtXml/QtXml>
 using namespace std;
 
+//**************************************
+
+ProcessingRequestOrResponse::ProcessingRequestOrResponse()
+{
+
+}
+
+ProcessingRequestOrResponse::ProcessingRequestOrResponse(const ProcessingRequestOrResponse &other)
+{
+    operator=(other);
+}
+
+ProcessingRequestOrResponse& ProcessingRequestOrResponse::operator=(const ProcessingRequestOrResponse& other)
+{
+    this->img = other.img; //Smart pointer
+    this->pos = other.pos;
+    return *this;
+}
+
+ProcessingRequestOrResponse::~ProcessingRequestOrResponse()
+{
+
+}
+
 //************************************************
 
 AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent) : QProcess(parent)
@@ -601,3 +625,44 @@ int AlgorithmProcess::IsBlockingShutdown()
     return 0;
 }
 
+//******************************************************
+
+int AlgorithmProcess::PredictFrame(QSharedPointer<QImage> img,
+                    std::vector<std::vector<float> > &model,
+                    QUuid algUuid,
+                    class EventLoop *eventLoop,
+                    class EventReceiver *eventReceiver,
+                    std::vector<std::vector<float> > &out)
+{
+    out.clear();
+
+    //Ask alg process to make a prediction
+    std::tr1::shared_ptr<class Event> requestEv(new Event("PREDICT_FRAME_REQUEST"));
+    class ProcessingRequestOrResponse *req = new class ProcessingRequestOrResponse;
+    req->img = img;
+    req->pos.clear();
+    req->pos.push_back(model);
+    requestEv->raw = req;
+    requestEv->id = eventLoop->GetId();
+    requestEv->data = algUuid.toString();
+
+    eventLoop->SendEvent(requestEv);
+
+    //Wait for response
+    try
+    {
+        std::tr1::shared_ptr<class Event> ev = eventReceiver->WaitForEventId(requestEv->id);
+
+        if(ev->type!="PREDICTION_RESULT") return 0;
+        class ProcessingRequestOrResponse *response = (class ProcessingRequestOrResponse *)ev->raw;
+
+        out = response->pos[0];
+        return 1;
+
+    }
+    catch(std::runtime_error e)
+    {
+        cout << "Warning: Prediction timed out" << endl;
+    }
+    return 0;
+}

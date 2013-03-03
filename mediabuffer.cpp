@@ -94,27 +94,3 @@ void DecodedFrame::FastSwap(class DecodedFrame &other)
     SwapVals<uint8_t *>(this->buff, other.buff);
     SwapVals<unsigned int>(this->buffSize, other.buffSize);
 }
-
-//**************************************
-
-ProcessingRequestOrResponse::ProcessingRequestOrResponse()
-{
-
-}
-
-ProcessingRequestOrResponse::ProcessingRequestOrResponse(const ProcessingRequestOrResponse &other)
-{
-    operator=(other);
-}
-
-ProcessingRequestOrResponse& ProcessingRequestOrResponse::operator=(const ProcessingRequestOrResponse& other)
-{
-    this->img = other.img; //Smart pointer
-    this->pos = other.pos;
-    return *this;
-}
-
-ProcessingRequestOrResponse::~ProcessingRequestOrResponse()
-{
-
-}

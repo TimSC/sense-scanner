@@ -1,6 +1,7 @@
 #include "applymodel.h"
 #include "annotation.h"
 #include "avbinmedia.h"
+#include "algorithm.h"
 #include <assert.h>
 #include <iostream>
 using namespace std;
@@ -32,6 +33,7 @@ void ApplyModel::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("MEDIA_DURATION_RESPONSE", *this->eventReceiver);
     this->eventLoop->AddListener("MEDIA_FRAME_RESPONSE", *this->eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_FRAME", *this->eventReceiver);
+    this->eventLoop->AddListener("PREDICTION_RESULT", *this->eventReceiver);
 }
 
 void ApplyModel::SetMediaInterface(QUuid mediaInterfaceIn)
@@ -206,10 +208,10 @@ void ApplyModel::Update()
             {
 
                 //If not annotation here, make a prediction
-                /*if(this->currentModelSet == true)
+                if(this->currentModelSet == true)
                 this->ImageToProcess(this->currentStartTimestamp,
                                      this->currentEndTimestamp,
-                                     img, this->currentModel);*/
+                                     img, this->currentModel);
             }
 
 
@@ -374,10 +376,10 @@ void ApplyModel::Update()
         {
 
             //If not annotation here, make a prediction
-            /*if(this->currentModelSet != 0)
+            if(this->currentModelSet != 0)
             this->ImageToProcess(this->currentStartTimestamp,
                                  this->currentEndTimestamp,
-                                 img, this->currentModel);*/
+                                 img, this->currentModel);
         }
 
 
@@ -408,6 +410,32 @@ void ApplyModel::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
 
     MessagableThread::HandleEvent(ev);
+}
+
+void ApplyModel::ImageToProcess(unsigned long long startTi,
+                                 unsigned long long endTi,
+                                 QSharedPointer<QImage> img,
+                                 std::vector<std::vector<float> > &model)
+{
+    std::vector<std::vector<float> > out;
+
+    int ret = AlgorithmProcess::PredictFrame(img,
+                            model,
+                            this->annotUuid,
+                            this->eventLoop,
+                            this->eventReceiver,
+                            out);
+
+    if(ret == 1)
+    {
+        this->currentModel = out;
+        this->currentModelSet = true;
+    }
+    else
+    {
+        cout << "Warning: Prediction timed out" << endl;
+    }
+
 }
 
 //**********************************************************

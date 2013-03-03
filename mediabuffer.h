@@ -42,24 +42,6 @@ public:
     void FastSwap(class DecodedFrame &other);
 };
 
-class ProcessingRequestOrResponse : public Deletable
-{
-    /*!
-    * DecodedFrame contains a video frame and a tracking point model.
-    * This is used for requesting a tracking position and returning the
-    * result to the GUI.
-    */
-
-public:
-    QSharedPointer<QImage> img;
-
-    std::vector<std::vector<std::vector<float> > > pos;
-
-    ProcessingRequestOrResponse();
-    ProcessingRequestOrResponse(const ProcessingRequestOrResponse &other);
-    ProcessingRequestOrResponse& operator=(const ProcessingRequestOrResponse& other);
-    virtual ~ProcessingRequestOrResponse();
-};
 
 typedef std::tr1::function<void (const class DecodedFrame&)> FrameCallback;
 

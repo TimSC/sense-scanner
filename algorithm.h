@@ -42,6 +42,13 @@ public:
     void StopNonBlocking();
     int IsBlockingShutdown();
 
+    static int PredictFrame(QSharedPointer<QImage> img,
+                        std::vector<std::vector<float> > &model,
+                        QUuid algUuid,
+                        class EventLoop *eventLoop,
+                        class EventReceiver *eventReceiver,
+                        std::vector<std::vector<float> > &out);
+
 public slots:
     void Update();
 
@@ -73,5 +80,25 @@ protected:
     QTimer timer;
     QList<unsigned long long> saveModelRequestIds;
 };
+
+class ProcessingRequestOrResponse : public Deletable
+{
+    /*!
+    * DecodedFrame contains a video frame and a tracking point model.
+    * This is used for requesting a tracking position and returning the
+    * result to the GUI.
+    */
+
+public:
+    QSharedPointer<QImage> img;
+
+    std::vector<std::vector<std::vector<float> > > pos;
+
+    ProcessingRequestOrResponse();
+    ProcessingRequestOrResponse(const ProcessingRequestOrResponse &other);
+    ProcessingRequestOrResponse& operator=(const ProcessingRequestOrResponse& other);
+    virtual ~ProcessingRequestOrResponse();
+};
+
 
 #endif // ALGORITHM_H

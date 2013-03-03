@@ -13,6 +13,11 @@ public:
     void HandleEvent(std::tr1::shared_ptr<class Event> ev);
     void SetEventLoop(class EventLoop *eventLoopIn);
     void SetMediaInterface(QUuid mediaInterfaceIn);
+
+    void ImageToProcess(unsigned long long startTi,
+                                     unsigned long long endTi,
+                                     QSharedPointer<QImage> img,
+                                     std::vector<std::vector<float> > &model);
 protected:
     QUuid annotUuid;
     QUuid algUuid;
