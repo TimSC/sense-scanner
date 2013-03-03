@@ -1034,6 +1034,11 @@ void MainWindow::ApplyModelPressed()
     QModelIndexList srcSelList = srcSelection->selectedRows(0);
     QList<QUuid> algUuids = this->workspace.GetProcessingUuids();
     QList<QUuid> annotationUuids = this->workspace.GetAnnotationUuids();
+    if(modelSelList.size()==0)
+    {
+        cout << "No model selected" << endl;
+        return;
+    }
 
     for(unsigned int i=0;i<srcSelList.size();i++)
     {
