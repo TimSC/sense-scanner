@@ -392,7 +392,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     //Signal worker threads to stop
     cout << "Signal worker threads to stop" << endl;
     std::tr1::shared_ptr<class Event> stopEvent(new Event("STOP_THREADS"));
-    this->eventLoop->SendEvent(stopEvent);
+    this->eventLoop->SendEvent(stopEvent);    
 
     cout << "Stop timer" << endl;
     //Stop the timer and handle messages in this function

@@ -55,6 +55,7 @@ public:
     explicit AvBinMedia(class EventLoop *eventLoopIn, bool removeOldRequestsIn);
     virtual ~AvBinMedia();
 
+    void SetEventLoop(class EventLoop *eventLoopIn);
     void TerminateThread();
 
     long long unsigned RequestFrame(QString source, long long unsigned ti);

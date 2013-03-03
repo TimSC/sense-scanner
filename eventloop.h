@@ -111,12 +111,14 @@ public:
     std::tr1::shared_ptr<class Event> WaitForEventId(unsigned long long id,
                                unsigned timeOutMs = 50000);
     void SetThreadId(QUuid idIn);
+    void Stop();
 
 protected:
     std::vector<std::tr1::shared_ptr<class Event> > eventBuffer;
     Mutex mutex;
     class EventLoop *el;
     QUuid threadId;
+    bool stopping;
 };
 
 

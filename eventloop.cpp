@@ -48,6 +48,7 @@ Event::~Event()
 
 EventReceiver::EventReceiver(class EventLoop *elIn)
 {
+    this->stopping = false;
     this->el = elIn;
     this->threadId = QUuid::createUuid();
 }
@@ -117,6 +118,11 @@ std::tr1::shared_ptr<class Event> EventReceiver::GetLatestDiscardOlder(QString t
 std::tr1::shared_ptr<class Event> EventReceiver::WaitForEventId(unsigned long long idIn,
                                           unsigned timeOutMs)
 {
+    this->mutex.lock();
+    int stop = this->stopping;
+    this->mutex.unlock();
+    if(stop) throw std::runtime_error("Cannot wait in a thread that is stopping");
+
     unsigned waitingTime = 0;
     while(waitingTime < timeOutMs)
     {
@@ -143,6 +149,7 @@ std::tr1::shared_ptr<class Event> EventReceiver::WaitForEventId(unsigned long lo
             std::tr1::shared_ptr<class Event> ev = this->eventBuffer[i];
             if(ev->type == "STOP_THREADS")
             {
+                this->stopping = true;
                 this->mutex.unlock();
                 throw std::runtime_error("Stop threads encountered, wait aborted");
             }
@@ -151,6 +158,7 @@ std::tr1::shared_ptr<class Event> EventReceiver::WaitForEventId(unsigned long lo
             {
                 if(ev->toUuid == this->threadId)
                 {
+                    this->stopping = true;
                     this->mutex.unlock();
                     throw std::runtime_error("Thread shopping, wait aborted");
                 }
@@ -178,6 +186,14 @@ void EventReceiver::SetThreadId(QUuid idIn)
     assert(this!=NULL);
     this->mutex.lock();
     this->threadId = idIn;
+    this->mutex.unlock();
+}
+
+void EventReceiver::Stop()
+{
+    assert(this!=NULL);
+    this->mutex.lock();
+    this->stopping = true;
     this->mutex.unlock();
 }
 
@@ -289,7 +305,6 @@ unsigned long long EventLoop::GetId()
     return out;
 }
 
-
 //************************************
 
 MessagableThread::MessagableThread()
@@ -317,8 +332,7 @@ void MessagableThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventReceiver = new EventReceiver(eventLoopIn);
     this->eventReceiver->SetThreadId(this->threadId);
     this->eventLoop = eventLoopIn;
-    QString eventName = QString("STOP_THREADS");
-    this->eventLoop->AddListener(eventName.toLocal8Bit().constData(), *eventReceiver);
+    this->eventLoop->AddListener("STOP_THREADS", *eventReceiver);
 }
 
 void MessagableThread::run()
@@ -368,6 +382,7 @@ void MessagableThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     {
         this->mutex.lock();
         this->stopThreads = 1;
+        this->eventReceiver->Stop();
         this->mutex.unlock();
     }
 }
@@ -390,6 +405,7 @@ int MessagableThread::Stop()
 
     std::tr1::shared_ptr<class Event> stopReq(new Event("STOP_SPECIFIC_THREAD"));
     stopReq->toUuid = this->threadId;
+    this->eventReceiver->Stop();
     this->eventLoop->SendEvent(stopReq);
 
     for(int i=0;i<500;i++)

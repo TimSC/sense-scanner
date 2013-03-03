@@ -84,20 +84,7 @@ AvBinMedia::AvBinMedia(class EventLoop *eventLoopIn, bool removeOldRequestsIn) :
     this->mediaThread = NULL;
     this->removeOldRequests = removeOldRequestsIn;
     this->uuid = QUuid::createUuid();
-    MessagableThread::SetEventLoop(eventLoopIn);
-
-    if(this->eventReceiver != NULL)
-    {
-        this->eventReceiver = new class EventReceiver(eventLoopIn);
-        this->eventLoop = eventLoopIn;
-        this->eventLoop->AddListener("AVBIN_DURATION_RESPONSE", *this->eventReceiver);
-        this->eventLoop->AddListener("AVBIN_FRAME_RESPONSE", *this->eventReceiver);
-        this->eventLoop->AddListener("AVBIN_FRAME_FAILED", *this->eventReceiver);
-        this->eventLoop->AddListener("AVBIN_REQUEST_FAILED", *this->eventReceiver);
-        this->eventLoop->AddListener("AVBIN_OPEN_RESULT", *this->eventReceiver);
-        this->eventLoop->AddListener("GET_MEDIA_DURATION", *this->eventReceiver);
-        this->eventLoop->AddListener("GET_MEDIA_FRAME", *this->eventReceiver);
-    }
+    this->SetEventLoop(eventLoopIn);
 
     this->mediaThread = new AvBinThread();
     this->mediaThread->SetEventLoop(this->eventLoop);
@@ -109,11 +96,23 @@ AvBinMedia::AvBinMedia(class EventLoop *eventLoopIn, bool removeOldRequestsIn) :
 AvBinMedia::~AvBinMedia()
 {
     cout << "AvBinMedia::~AvBinMedia()" << endl;
-    if(this->eventReceiver) delete this->eventReceiver;
-    this->eventReceiver = NULL;
     if(this->mediaThread!=NULL)
         delete this->mediaThread;
     this->mediaThread = NULL;
+}
+
+void AvBinMedia::SetEventLoop(class EventLoop *eventLoopIn)
+{
+    MessagableThread::SetEventLoop(eventLoopIn);
+
+    this->eventLoop->AddListener("AVBIN_DURATION_RESPONSE", *this->eventReceiver);
+    this->eventLoop->AddListener("AVBIN_FRAME_RESPONSE", *this->eventReceiver);
+    this->eventLoop->AddListener("AVBIN_FRAME_FAILED", *this->eventReceiver);
+    this->eventLoop->AddListener("AVBIN_REQUEST_FAILED", *this->eventReceiver);
+    this->eventLoop->AddListener("AVBIN_OPEN_RESULT", *this->eventReceiver);
+    this->eventLoop->AddListener("GET_MEDIA_DURATION", *this->eventReceiver);
+    this->eventLoop->AddListener("GET_MEDIA_FRAME", *this->eventReceiver);
+    this->eventLoop->AddListener("GET_MEDIA_FRAME", *this->eventReceiver);
 }
 
 int AvBinMedia::OpenFile(QString fina)
@@ -149,6 +148,7 @@ void AvBinMedia::Update()
 
 void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
+
     //Only process events for this module
     if(ev->toUuid != this->uuid)
     {
