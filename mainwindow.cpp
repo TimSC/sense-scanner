@@ -241,6 +241,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("WORKSPACE_PROCESSING_CHANGED",*eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_THREAD_PROGRESS", *eventReceiver);
     this->eventLoop->AddListener("PREDICTION_END", *eventReceiver);
+    this->eventLoop->AddListener("STOP_THREADS", *eventReceiver);
 
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop,1);

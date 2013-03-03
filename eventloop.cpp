@@ -358,7 +358,7 @@ void MessagableThread::run()
         }
         catch(std::runtime_error e)
         {
-
+            //No message was waiting or handle event threw exception
         }
 
         //Check again if running
@@ -367,7 +367,14 @@ void MessagableThread::run()
         this->mutex.unlock();
 
         //Call child specific update function
-        if(running) this->Update();
+        try
+        {
+            if(running) this->Update();
+        }
+        catch(std::runtime_error e)
+        {
+            cout << "Error: thread update threw an exception" << endl;
+        }
     }
 
     std::tr1::shared_ptr<class Event> stopEvent(new Event("THREAD_STOPPING"));

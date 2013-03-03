@@ -689,10 +689,12 @@ void TrackingSceneController::SetEventLoop(class EventLoop *eventLoopIn)
     if(this->eventReceiver) delete this->eventReceiver;
     this->eventLoop = eventLoopIn;
     this->eventReceiver = new EventReceiver(this->eventLoop);
+
     this->eventLoop->AddListener("ANNOTATION_FRAME",*eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_SHAPE",*eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_DATA",*eventReceiver);
     this->eventLoop->AddListener("SEEK_RESULT",*eventReceiver);
+    this->eventLoop->AddListener("STOP_THREADS",*eventReceiver);
 }
 
 void TrackingSceneController::SetAnnotationTrack(QUuid srcUuid)
