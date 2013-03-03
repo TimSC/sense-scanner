@@ -25,6 +25,9 @@ protected:
     unsigned long long currentStartTimestamp, currentEndTimestamp;
 
     bool issueEnountered;
+
+    std::vector<std::vector<float> > currentModel;
+    bool currentModelSet;
 };
 
 class ApplyModelPool

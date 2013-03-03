@@ -16,6 +16,7 @@ ApplyModel::ApplyModel(QUuid annotUuidIn) : MessagableThread()
     this->currentStartTimestamp = 0;
     this->currentEndTimestamp = 0;
     this->issueEnountered = 0;
+    this->currentModelSet = 0;
 }
 
 ApplyModel::~ApplyModel()
@@ -30,6 +31,7 @@ void ApplyModel::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("ALG_UUID_FOR_ANNOTATION", *this->eventReceiver);
     this->eventLoop->AddListener("MEDIA_DURATION_RESPONSE", *this->eventReceiver);
     this->eventLoop->AddListener("MEDIA_FRAME_RESPONSE", *this->eventReceiver);
+    this->eventLoop->AddListener("ANNOTATION_FRAME", *this->eventReceiver);
 }
 
 void ApplyModel::SetMediaInterface(QUuid mediaInterfaceIn)
@@ -181,18 +183,20 @@ void ApplyModel::Update()
 
             //Update annotation with frame that has been found
             //track->FoundFrame(this->currentStartTimestamp, this->currentEndTimestamp);
-            avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5); //millisec
 
             //Check if annotation is in this frame
             std::vector<std::vector<float> > foundAnnot;
-            unsigned long long foundAnnotationTime=0;
-            /*int found = track->GetAnnotationBetweenTimestamps(0,
-                                                  this->currentEndTimestamp,
-                                                  avTi,
+            double foundAnnotationTime=0;
+            int found = Annotation::GetAnnotationBetweenFrames(0,
+                                                  0,
+                                                  0,
+                                                  this->annotUuid,
+                                                  this->eventLoop,
+                                                  this->eventReceiver,
                                                   foundAnnot,
                                                   foundAnnotationTime);
-*/
-            /*if(found)
+
+            if(found)
             {
                 //Update current model from annotation
                 this->currentModel = foundAnnot;
@@ -202,11 +206,11 @@ void ApplyModel::Update()
             {
 
                 //If not annotation here, make a prediction
-                if(this->currentModelSet == true)
+                /*if(this->currentModelSet == true)
                 this->ImageToProcess(this->currentStartTimestamp,
                                      this->currentEndTimestamp,
-                                     img, this->currentModel);
-            }*/
+                                     img, this->currentModel);*/
+            }
 
 
         }
@@ -347,14 +351,17 @@ void ApplyModel::Update()
         }
 
 
-        //Check if annotation is in this frame
-        /*std::vector<std::vector<float> > foundAnnot;
-        unsigned long long foundAnnotationTime;
-        int found = track->GetAnnotationBetweenTimestamps(this->currentStartTimestamp,
-                                              this->currentEndTimestamp,
-                                              nextTi,
-                                              foundAnnot,
-                                              foundAnnotationTime);
+        //Check if annotation is in this frame       
+        std::vector<std::vector<float> > foundAnnot;
+        double foundAnnotationTime=0;
+        int found = Annotation::GetAnnotationBetweenFrames(this->currentStartTimestamp,
+                                                          this->currentEndTimestamp,
+                                                          nextTi,
+                                                          this->annotUuid,
+                                                          this->eventLoop,
+                                                          this->eventReceiver,
+                                                          foundAnnot,
+                                                          foundAnnotationTime);
 
 
         if(found)
@@ -367,11 +374,11 @@ void ApplyModel::Update()
         {
 
             //If not annotation here, make a prediction
-            if(this->currentModelSet != 0)
+            /*if(this->currentModelSet != 0)
             this->ImageToProcess(this->currentStartTimestamp,
                                  this->currentEndTimestamp,
-                                 img, this->currentModel);
-        }*/
+                                 img, this->currentModel);*/
+        }
 
 
 
