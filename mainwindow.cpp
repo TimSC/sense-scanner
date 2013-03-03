@@ -422,7 +422,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::RegenerateSourcesList()
 {
     //Update GUI list
-    QIcon icon("icons/media-eject.png");
+    QIcon icon("icons/tool-animator.png");
     if(this->sourcesModel.columnCount()!= 2)
         this->sourcesModel.setColumnCount(2);
     QList<QUuid> annotationUuids = this->workspace.GetAnnotationUuids();
@@ -505,7 +505,7 @@ void MainWindow::RegenerateProcessingList()
 {
     QItemSelectionModel *sourceSelected = this->ui->sourcesAlgGui->ui->dataSources->selectionModel();
 
-    QIcon icon("icons/media-eject.png");
+    QIcon icon("icons/kig.png");
     if(this->processingModel.columnCount()!= 2)
         this->processingModel.setColumnCount(2);
     QList<QUuid> algUuids = this->workspace.GetProcessingUuids();
