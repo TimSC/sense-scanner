@@ -410,9 +410,9 @@ int TrackingSceneController::NearestPoint(float x, float y, std::vector<std::vec
 unsigned long long TrackingSceneController::GetSeekForewardTime()
 {
     assert(this!=NULL);
-    unsigned long long queryTime = this->annotationTime;
-    if(!this->annotationTimeSet)
-        queryTime = this->frameRequestTime;
+    unsigned long long queryTime = 0.5*(this->frameStartTime+this->frameEndTime);
+    //if(!this->annotationTimeSet)
+    //    queryTime = this->frameRequestTime;
 
     return this->GetSeekForewardTimeFromAnnot(queryTime);
 }
@@ -420,9 +420,9 @@ unsigned long long TrackingSceneController::GetSeekForewardTime()
 unsigned long long TrackingSceneController::GetSeekBackTime()
 {
     assert(this!=NULL);
-    unsigned long long queryTime = this->annotationTime;
-    if(!this->annotationTimeSet)
-        queryTime = this->frameRequestTime;
+    unsigned long long queryTime = 0.5*(this->frameStartTime+this->frameEndTime);
+    //if(!this->annotationTimeSet)
+    //    queryTime = this->frameRequestTime;
 
     return this->GetSeekBackwardTimeFromAnnot(queryTime);
 }
@@ -708,7 +708,7 @@ int TrackingSceneController::GetAnnotationBetweenTimestamps(unsigned long long s
     unsigned long long endTime,
     unsigned long long requestedTime,
     std::vector<std::vector<float> > &annot,
-    unsigned long long &annotationTime)
+    unsigned long long &annotationTimeOut)
 {
     double ti = 0.;
     int ret = Annotation::GetAnnotationBetweenFrames(startTime,
@@ -720,7 +720,7 @@ int TrackingSceneController::GetAnnotationBetweenTimestamps(unsigned long long s
                                                annot,
                                                ti);
 
-    annotationTime = (unsigned long long)(ti * 1000. + 0.5);
+    annotationTimeOut = (unsigned long long)(ti * 1000. + 0.5);
     return ret;
 }
 

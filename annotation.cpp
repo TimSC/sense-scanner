@@ -421,7 +421,6 @@ void TrackingAnnotationData::AddPoint(std::vector<float> p)
 unsigned long long TrackingAnnotationData::GetSeekForwardTime(unsigned long long queryTime)
 {
     assert(this!=NULL);
-    //cout << "Seek query time" << queryTime << endl;
 
     unsigned long long bestDiff = 0;
     unsigned long long bestFrame = 0;
