@@ -424,3 +424,8 @@ void VideoWidget::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("MEDIA_FRAME_RESPONSE", *this->eventReceiver);
     this->eventLoop->AddListener("MEDIA_DURATION_RESPONSE", *this->eventReceiver);
 }
+
+void VideoWidget::FitVideoToWindow()
+{
+    assert(0);
+}

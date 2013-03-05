@@ -84,7 +84,7 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="VideoWidget" name="widget">
+   <widget class="VideoWidget" name="videoWidget">
     <property name="cursor">
      <cursorShape>ArrowCursor</cursorShape>
     </property>
@@ -310,16 +310,16 @@
   <connection>
    <sender>actionFit_to_Window</sender>
    <signal>activated()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>FitVideoToWindow()</slot>
+   <receiver>videoDock</receiver>
+   <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>262</x>
-     <y>189</y>
+     <x>485</x>
+     <y>146</y>
     </hint>
    </hints>
   </connection>

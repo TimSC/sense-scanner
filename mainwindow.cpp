@@ -1195,11 +1195,6 @@ void MainWindow::GetKinatomicHomePage()
     QDesktopServices::openUrl(QUrl("http://www.kinatomic.com/"));
 }
 
-void MainWindow::FitVideoToWindow()
-{
-    assert(0); //TODO
-}
-
 //**********************************
 
 

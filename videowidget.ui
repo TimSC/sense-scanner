@@ -211,5 +211,6 @@
   <slot>SeekForward()</slot>
   <slot>FitToWindow()</slot>
   <slot>TimeChanged(QTime)</slot>
+  <slot>FitVideoToWindow()</slot>
  </slots>
 </ui>

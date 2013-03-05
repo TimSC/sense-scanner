@@ -202,7 +202,6 @@ public slots:
     void GetKinatomicHomePage();
     void AboutPressed();
 
-    void FitVideoToWindow();
     void ShowVideoPressed();
 };
 
