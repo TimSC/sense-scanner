@@ -418,7 +418,7 @@ void TrackingAnnotationData::AddPoint(std::vector<float> p)
 }
 
 
-unsigned long long TrackingAnnotationData::GetSeekFowardTime(unsigned long long queryTime)
+unsigned long long TrackingAnnotationData::GetSeekForwardTime(unsigned long long queryTime)
 {
     assert(this!=NULL);
 
@@ -705,7 +705,7 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("SET_ANNOTATION_BY_XML", *this->eventReceiver);
 
     this->eventLoop->AddListener("GET_SEEK_BACKWARD_TIME", *this->eventReceiver);
-    this->eventLoop->AddListener("GET_SEEK_FOWARD_TIME", *this->eventReceiver);
+    this->eventLoop->AddListener("GET_SEEK_FORWARD_TIME", *this->eventReceiver);
     this->eventLoop->AddListener("GET_MARKED_LIST", *this->eventReceiver);
 
     this->eventLoop->AddListener("MEDIA_DURATION_RESPONSE", *this->eventReceiver);
@@ -941,13 +941,13 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             this->eventLoop->SendEvent(responseEv);
         }
     }
-    if(ev->type=="GET_SEEK_FOWARD_TIME")
+    if(ev->type=="GET_SEEK_FORWARD_TIME")
     {
         unsigned long long ti = ev->data.toULongLong();
 
         try
         {
-            unsigned long long ret = this->parentAnn->track->GetSeekFowardTime(ti);
+            unsigned long long ret = this->parentAnn->track->GetSeekForwardTime(ti);
             std::tr1::shared_ptr<class Event> responseEv(new Event("SEEK_RESULT"));
             responseEv->id = ev->id;
             QString dataStr = QString("%1").arg(ret);

@@ -221,7 +221,7 @@ void VideoWidget::SeekForward()
     try
     {
         //This throws an exception if no seek point exists
-        unsigned long long ti = this->sceneControl->GetSeekFowardTime();
+        unsigned long long ti = this->sceneControl->GetSeekForwardTime();
         assert(ti < this->mediaLength);
         cout << "Requesting frame at " << ti << endl;
         this->ui->horizontalScrollBar->setValue(ti);

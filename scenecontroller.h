@@ -62,7 +62,7 @@ public:
     int GetMouseOver();
     void MouseEnterEvent();
     void MouseLeaveEvent();
-    unsigned long long GetSeekFowardTime();
+    unsigned long long GetSeekForwardTime();
     unsigned long long GetSeekBackTime();
     QSharedPointer<MouseGraphicsScene> GetScene();
 
@@ -99,7 +99,7 @@ protected:
         std::vector<std::vector<float> > &annot,
         unsigned long long &annotationTime);
 
-    unsigned long long GetSeekFowardTimeFromAnnot(unsigned long long queryTime);
+    unsigned long long GetSeekForwardTimeFromAnnot(unsigned long long queryTime);
     unsigned long long GetSeekBackwardTimeFromAnnot(unsigned long long queryTime);
 
     void RemoveAnnotationAtTime(unsigned long long time);
