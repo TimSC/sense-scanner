@@ -421,6 +421,7 @@ void TrackingAnnotationData::AddPoint(std::vector<float> p)
 unsigned long long TrackingAnnotationData::GetSeekForwardTime(unsigned long long queryTime)
 {
     assert(this!=NULL);
+    //cout << "Seek query time" << queryTime << endl;
 
     unsigned long long bestDiff = 0;
     unsigned long long bestFrame = 0;
@@ -705,7 +706,7 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("SET_ANNOTATION_BY_XML", *this->eventReceiver);
 
     this->eventLoop->AddListener("GET_SEEK_BACKWARD_TIME", *this->eventReceiver);
-    this->eventLoop->AddListener("GET_SEEK_FORWARD_TIME", *this->eventReceiver);
+    this->eventLoop->AddListener("GET_SEEK_FOREWARD_TIME", *this->eventReceiver);
     this->eventLoop->AddListener("GET_MARKED_LIST", *this->eventReceiver);
 
     this->eventLoop->AddListener("MEDIA_DURATION_RESPONSE", *this->eventReceiver);
@@ -941,7 +942,7 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             this->eventLoop->SendEvent(responseEv);
         }
     }
-    if(ev->type=="GET_SEEK_FORWARD_TIME")
+    if(ev->type=="GET_SEEK_FOREWARD_TIME")
     {
         unsigned long long ti = ev->data.toULongLong();
 
