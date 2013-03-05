@@ -13,6 +13,9 @@
 #include <QtGui/QFileDialog>
 #include <QtCore/QThread>
 #include <QtGui/QDialogButtonBox>
+#include <QtGui/QDesktopServices>
+#include <QtCore/QUrl>
+
 #include <iostream>
 #ifndef _MSC_VER
 #include <unistd.h>
@@ -1174,6 +1177,27 @@ void MainWindow::AboutPressed()
 void MainWindow::ShowVideoPressed()
 {
     this->ui->videoDock->show();
+}
+
+void MainWindow::GetKnowledgeBase()
+{
+    //openUrl seems to use xdg-open on linux (see https://wiki.archlinux.org/index.php/Xdg-open)
+    QDesktopServices::openUrl(QUrl("http://www.kinatomic.com/progurl/kb.php?version=alpha1"));
+}
+
+void MainWindow::GetSupport()
+{
+    QDesktopServices::openUrl(QUrl("http://www.kinatomic.com/progurl/support.php?version=alpha1"));
+}
+
+void MainWindow::GetKinatomicHomePage()
+{
+    QDesktopServices::openUrl(QUrl("http://www.kinatomic.com/"));
+}
+
+void MainWindow::FitVideoToWindow()
+{
+    assert(0); //TODO
 }
 
 //**********************************

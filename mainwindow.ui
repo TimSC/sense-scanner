@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>525</width>
-    <height>375</height>
+    <height>379</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,7 +33,7 @@
      <x>0</x>
      <y>0</y>
      <width>525</width>
-     <height>23</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -58,8 +58,9 @@
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionWeb_Help_Pages"/>
-    <addaction name="actionSupport_Forum"/>
+    <addaction name="actionKnowledge_Base"/>
+    <addaction name="actionGetSupport"/>
+    <addaction name="actionKinatomic_Home_Page"/>
     <addaction name="separator"/>
     <addaction name="actionAbout"/>
    </widget>
@@ -92,7 +93,7 @@
   <widget class="QDockWidget" name="aboutDock">
    <property name="minimumSize">
     <size>
-     <width>76</width>
+     <width>79</width>
      <height>100</height>
     </size>
    </property>
@@ -137,14 +138,14 @@
     <string>Fit to Window</string>
    </property>
   </action>
-  <action name="actionWeb_Help_Pages">
+  <action name="actionKnowledge_Base">
    <property name="text">
-    <string>Web Help Pages</string>
+    <string>Knowledge Base</string>
    </property>
   </action>
-  <action name="actionSupport_Forum">
+  <action name="actionGetSupport">
    <property name="text">
-    <string>Support Forum</string>
+    <string>Get Support</string>
    </property>
   </action>
   <action name="actionAbout">
@@ -160,6 +161,11 @@
   <action name="actionShow">
    <property name="text">
     <string>Show</string>
+   </property>
+  </action>
+  <action name="actionKinatomic_Home_Page">
+   <property name="text">
+    <string>Kinatomic Home Page</string>
    </property>
   </action>
  </widget>
@@ -271,7 +277,7 @@
   </connection>
   <connection>
    <sender>actionAbout</sender>
-   <signal>triggered()</signal>
+   <signal>activated()</signal>
    <receiver>MainWindow</receiver>
    <slot>AboutPressed()</slot>
    <hints>
@@ -287,7 +293,7 @@
   </connection>
   <connection>
    <sender>actionShow</sender>
-   <signal>triggered()</signal>
+   <signal>activated()</signal>
    <receiver>MainWindow</receiver>
    <slot>ShowVideoPressed()</slot>
    <hints>
@@ -298,6 +304,70 @@
     <hint type="destinationlabel">
      <x>262</x>
      <y>164</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionFit_to_Window</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>FitVideoToWindow()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>262</x>
+     <y>189</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionKnowledge_Base</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>GetKnowledgeBase()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>262</x>
+     <y>189</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionGetSupport</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>GetSupport()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>262</x>
+     <y>189</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionKinatomic_Home_Page</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>GetKinatomicHomePage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>262</x>
+     <y>189</y>
     </hint>
    </hints>
   </connection>
@@ -317,5 +387,9 @@
   <slot>RemoveProcessPressed()</slot>
   <slot>AboutPressed()</slot>
   <slot>ShowVideoPressed()</slot>
+  <slot>GetKnowledgeBase()</slot>
+  <slot>GetSupport()</slot>
+  <slot>GetKinatomicHomePage()</slot>
+  <slot>FitVideoToWindow()</slot>
  </slots>
 </ui>

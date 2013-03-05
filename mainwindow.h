@@ -197,7 +197,12 @@ public slots:
     QString CheckIfDataShouldBeDiscarded(QString discardMsg);
     void HandleEvent(std::tr1::shared_ptr<class Event> ev);
 
+    void GetKnowledgeBase();
+    void GetSupport();
+    void GetKinatomicHomePage();
     void AboutPressed();
+
+    void FitVideoToWindow();
     void ShowVideoPressed();
 };
 
