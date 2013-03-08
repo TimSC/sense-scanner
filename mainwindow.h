@@ -203,6 +203,7 @@ public slots:
     void AboutPressed();
 
     void ShowVideoPressed();
+    void FitVideoToWindow();
 };
 
 #endif // MAINWINDOW_H

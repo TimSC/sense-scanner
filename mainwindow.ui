@@ -33,7 +33,7 @@
      <x>0</x>
      <y>0</y>
      <width>525</width>
-     <height>25</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -310,16 +310,16 @@
   <connection>
    <sender>actionFit_to_Window</sender>
    <signal>activated()</signal>
-   <receiver>videoDock</receiver>
-   <slot>hide()</slot>
+   <receiver>MainWindow</receiver>
+   <slot>FitVideoToWindow()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>485</x>
-     <y>146</y>
+     <x>262</x>
+     <y>189</y>
     </hint>
    </hints>
   </connection>

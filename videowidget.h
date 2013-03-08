@@ -64,7 +64,7 @@ public slots:
     void TimeChanged(QTime time);
     void SetEventLoop(class EventLoop *eventLoopIn);
     virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);
-    void FitVideoToWindow();
+
 protected:
     void SetVisibleAtTime(long long unsigned ti);
 
