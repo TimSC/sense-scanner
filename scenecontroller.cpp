@@ -407,14 +407,14 @@ int TrackingSceneController::NearestPoint(float x, float y, std::vector<std::vec
     return best;
 }
 
-unsigned long long TrackingSceneController::GetSeekForewardTime()
+unsigned long long TrackingSceneController::GetSeekForwardTime()
 {
     assert(this!=NULL);
     unsigned long long queryTime = 0.5*(this->frameStartTime+this->frameEndTime);
     //if(!this->annotationTimeSet)
     //    queryTime = this->frameRequestTime;
 
-    return this->GetSeekForewardTimeFromAnnot(queryTime);
+    return this->GetSeekForwardTimeFromAnnot(queryTime);
 }
 
 unsigned long long TrackingSceneController::GetSeekBackTime()
@@ -810,9 +810,9 @@ void TrackingSceneController::RefreshLinks()
     return;
 }
 
-unsigned long long TrackingSceneController::GetSeekForewardTimeFromAnnot(unsigned long long queryTime)
+unsigned long long TrackingSceneController::GetSeekForwardTimeFromAnnot(unsigned long long queryTime)
 {
-    std::tr1::shared_ptr<class Event> reqEv(new Event("GET_SEEK_FOREWARD_TIME"));
+    std::tr1::shared_ptr<class Event> reqEv(new Event("GET_SEEK_FORWARD_TIME"));
     reqEv->toUuid = this->annotationUuid;
     reqEv->id = this->eventLoop->GetId();
     reqEv->data = QString("%1").arg(queryTime).toLocal8Bit().constData();
