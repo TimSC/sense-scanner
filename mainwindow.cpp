@@ -264,7 +264,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
     this->setWindowTitle("Kinatomic Sense Scanner");
-    this->ui->widget->SetSource(this->mediaInterfaceFront->GetUuid(),"");
+    this->ui->videoWidget->SetSource(this->mediaInterfaceFront->GetUuid(),"");
 
     QStringList horLabelsAnn;
     horLabelsAnn.push_back("Sources");
@@ -292,7 +292,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //this->ui->workspaceLayout->hide();
     //this->ui->webViewLayout->hide();
     this->ui->sourcesAlgGui->mainWindow = this;
-    this->ui->widget->SetEventLoop(this->eventLoop);
+    this->ui->videoWidget->SetEventLoop(this->eventLoop);
 
     this->applyModelPool.SetEventLoop(this->eventLoop);
 
@@ -391,7 +391,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     //Disconnect video widget from media source
     cout << "Disconnect video from source" << endl;
     QUuid nullSrc;
-    this->ui->widget->SetSource(nullSrc,"");
+    this->ui->videoWidget->SetSource(nullSrc,"");
 
     //Signal worker threads to stop
     cout << "Signal worker threads to stop" << endl;
@@ -841,8 +841,8 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
     //Update scene controller
     TrackingSceneController *sceneController = new TrackingSceneController(this);
     sceneController->SetEventLoop(this->eventLoop);
-    this->ui->widget->SetSceneControl(sceneController);
-    this->ui->widget->SetAnnotationTrack(annotationUuids[selectedRow]);
+    this->ui->videoWidget->SetSceneControl(sceneController);
+    this->ui->videoWidget->SetAnnotationTrack(annotationUuids[selectedRow]);
     //Update window menus
     assert(sceneController!=NULL);
     this->annotationMenu = sceneController->MenuFactory(this->menuBar());
@@ -850,7 +850,7 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
     //Set widget to use this source
     try
     {
-        this->ui->widget->SetSource(this->mediaInterfaceFront->GetUuid(), fina);
+        this->ui->videoWidget->SetSource(this->mediaInterfaceFront->GetUuid(), fina);
     }
     catch(std::runtime_error &err)
     {
@@ -873,8 +873,8 @@ void MainWindow::DeselectCurrentSource()
     }
 
     //Pause video
-    this->ui->widget->Pause();
-    this->ui->widget->SetSceneControl(NULL);
+    this->ui->videoWidget->Pause();
+    this->ui->videoWidget->SetSceneControl(NULL);
 
 }
 
