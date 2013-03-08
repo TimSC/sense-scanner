@@ -53,7 +53,8 @@ DecodedFrame& DecodedFrame::operator=(const DecodedFrame& other)
 DecodedFrame::~DecodedFrame()
 {
     //cout << "DecodedFrame::~DecodedFrame()" << endl;
-    if(this->buff != NULL) delete [] this->buff;
+    if(this->buff != NULL)
+        delete [] this->buff;
     this->buffSize = 0;
 }
 

@@ -64,6 +64,11 @@ void EventReceiver::AddMessage(std::tr1::shared_ptr<class Event> event)
 {
     this->mutex.lock();
     this->eventBuffer.push_back(event);
+    if(this->eventBuffer.size()>100)
+    {
+        cout << "Warning, event listener queue is size "<< this->eventBuffer.size() << endl;
+
+    }
     this->mutex.unlock();
 }
 

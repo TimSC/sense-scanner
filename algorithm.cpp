@@ -14,7 +14,12 @@ using namespace std;
 
 ProcessingRequestOrResponse::ProcessingRequestOrResponse()
 {
+    //cout << "ProcessingRequestOrResponse::ProcessingRequestOrResponse()";
+}
 
+ProcessingRequestOrResponse::~ProcessingRequestOrResponse()
+{
+    //cout << "ProcessingRequestOrResponse::~ProcessingRequestOrResponse()";
 }
 
 ProcessingRequestOrResponse::ProcessingRequestOrResponse(const ProcessingRequestOrResponse &other)
@@ -27,11 +32,6 @@ ProcessingRequestOrResponse& ProcessingRequestOrResponse::operator=(const Proces
     this->img = other.img; //Smart pointer
     this->pos = other.pos;
     return *this;
-}
-
-ProcessingRequestOrResponse::~ProcessingRequestOrResponse()
-{
-
 }
 
 //************************************************
