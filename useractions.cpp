@@ -220,6 +220,8 @@ void UserActions::Load(QString fina)
     //Load points and links into memory
     QDomElement rootElem = doc.documentElement();
     QDomNode n = rootElem.firstChild();
+    QMap<QUuid, QUuid> annotToAlgMap;
+
     while(!n.isNull()) {
         QDomElement e = n.toElement(); // try to convert the node to an element.
         if(!e.isNull()) {
@@ -247,7 +249,8 @@ void UserActions::Load(QString fina)
                     //Set alg Uid
                     QString algStr = sourceEle.attribute("alg");
                     QUuid alg(algStr);
-                    //ann->SetAlgUid(alg);
+                    assert(!uid.isNull());
+                    annotToAlgMap[uid] = alg;
 
                     QDomNode trackData = sourceNode.firstChild();
                     while(!trackData.isNull())
@@ -337,6 +340,16 @@ void UserActions::Load(QString fina)
             }
         }
         n = n.nextSibling();
+    }
+
+    //Set annotation to mappings
+    QMap<QUuid, QUuid>::iterator it;
+    for(it = annotToAlgMap.begin();it!=annotToAlgMap.end();it++)
+    {
+        std::tr1::shared_ptr<class Event> loadEv(new Event("ANNOT_USING_ALG"));
+        QString dataStr = QString("%0,%1").arg(it.key()).arg(it.value());
+        loadEv->data = dataStr;
+        this->eventLoop->SendEvent(loadEv);
     }
 }
 

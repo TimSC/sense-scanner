@@ -245,6 +245,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("ANNOTATION_THREAD_PROGRESS", *eventReceiver);
     this->eventLoop->AddListener("PREDICTION_END", *eventReceiver);
     this->eventLoop->AddListener("STOP_THREADS", *eventReceiver);
+    this->eventLoop->AddListener("ANNOT_USING_ALG", *eventReceiver);
 
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop,1);
@@ -678,6 +679,16 @@ void MainWindow::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         //never arrive...
         this->eventReceiver->Stop();
     }
+    if(ev->type=="ANNOT_USING_ALG")
+    {
+
+        std::vector<std::string> args = split(ev->data.toLocal8Bit().constData(),',');
+        QUuid annotUuid(args[0].c_str());
+        QUuid algUuid(args[1].c_str());
+        if(!algUuid.isNull())
+            this->applyModelPool.Add(algUuid, annotUuid, this->mediaInterfaceBack->GetUuid());
+    }
+
 }
 
 void MainWindow::Update()

@@ -42,7 +42,7 @@ public:
     virtual ~ApplyModelPool();
 
     void SetEventLoop(class EventLoop *eventLoopIn);
-    void Add(QUuid uuid, QUuid annotUuid, QUuid mediaInterface);
+    void Add(QUuid algUuid, QUuid annotUuid, QUuid mediaInterface);
     void Remove(QUuid uuid);
     void Clear();
 
