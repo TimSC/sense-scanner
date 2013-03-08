@@ -713,6 +713,8 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("ANNOTATION_THREAD_PROGRESS", *this->eventReceiver);
 
     this->eventLoop->AddListener("GET_PREDICTION_END", *this->eventReceiver);
+    this->eventLoop->AddListener("FOUND_FRAME", *this->eventReceiver);
+
 }
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
@@ -988,7 +990,20 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         responseEv->id = ev->id;
         this->eventLoop->SendEvent(responseEv);
     }
+
+    if(ev->type=="FOUND_FRAME")
+    {
+        if(this->parentAnn != NULL && this->parentAnn->track != NULL)
+        {
+            std::vector<std::string> args = split(ev->data.toLocal8Bit().constData(),',');
+            QString startStr(args[0].c_str());
+            QString endStr(args[1].c_str());
+
+            this->parentAnn->track->FoundFrame(startStr.toULongLong(), endStr.toULongLong());
+        }
     }
+    }
+
 
     //This uses a different field to filter uuids
     if(ev->type=="ANNOTATION_THREAD_PROGRESS")
@@ -999,8 +1014,6 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             this->parentAnn->track->predictionEnd = ev->data.toULongLong();
         }
     }
-
-
 
     this->msleep(5);
     MessagableThread::HandleEvent(ev);
@@ -1158,14 +1171,6 @@ void Annotation::Terminate()
     }
 }
 
-void Annotation::FoundFrame(unsigned long startTi, unsigned long endTi)
-{
-    if(this->track != NULL)
-    {
-        this->track->FoundFrame(startTi, endTi);
-    }
-}
-
 void Annotation::PreDelete()
 {
 
@@ -1291,5 +1296,19 @@ void Annotation::UpdateAnnotationThreadProgress(unsigned long long progress,
     requestEv->fromUuid = srcUuid;
     requestEv->data = progressStr;
     requestEv->buffer = annotUuid.toByteArray();
+    eventLoop->SendEvent(requestEv);
+}
+
+void Annotation::FoundFrameEvent(unsigned long long startTime,
+                                 unsigned long long endTime,
+                                    QUuid srcUuid,
+                                    QUuid annotUuid,
+                                    class EventLoop *eventLoop)
+{
+    //Estimate progress and generate an event
+    std::tr1::shared_ptr<class Event> requestEv(new Event("FOUND_FRAME"));
+    QString dataSTr = QString("%0,%1").arg(startTime).arg(endTime);
+    requestEv->toUuid = annotUuid;
+    requestEv->data = dataSTr;
     eventLoop->SendEvent(requestEv);
 }

@@ -164,8 +164,6 @@ public:
     void SetSource(QString uidIn);
     QString GetSource();
 
-    void FoundFrame(unsigned long startTi, unsigned long endTi);
-
     void Terminate();
     void PreDelete();
 
@@ -200,6 +198,12 @@ public:
                                         QUuid srcUuid,
                                         QUuid annotUuid,
                                         class EventLoop *eventLoop);
+
+    static void FoundFrameEvent(unsigned long long startTime,
+                                     unsigned long long endTime,
+                                        QUuid srcUuid,
+                                        QUuid annotUuid,
+                                     class EventLoop *eventLoop);
 
 
     std::tr1::shared_ptr<class AnnotThread> annotThread;

@@ -182,7 +182,11 @@ void ApplyModel::Update()
             this->currentEndTimestamp = processedImg.end;
 
             //Update annotation with frame that has been found
-            //track->FoundFrame(this->currentStartTimestamp, this->currentEndTimestamp);
+            Annotation::FoundFrameEvent(this->currentStartTimestamp,
+                                                    this->currentEndTimestamp,
+                                                    this->algUuid,
+                                                    this->annotUuid,
+                                                    this->eventLoop);
 
             //Check if annotation is in this frame
             std::vector<std::vector<float> > foundAnnot;
@@ -330,7 +334,11 @@ void ApplyModel::Update()
             this->currentEndTimestamp = processedImg.end;
 
             //Update annotation with frame that has been found
-            //track->FoundFrame(this->currentStartTimestamp, this->currentEndTimestamp);
+            Annotation::FoundFrameEvent(this->currentStartTimestamp,
+                                                    this->currentEndTimestamp,
+                                                    this->algUuid,
+                                                    this->annotUuid,
+                                                    this->eventLoop);
         }
         catch (std::runtime_error &err)
         {
