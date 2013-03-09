@@ -1,4 +1,4 @@
-import sys
+import sys, random
 #sys.path = ["python-lib", "site-packages", "."]
 import multiprocessing, time, pickle, bz2, base64, os, zlib
 from PIL import Image
@@ -200,8 +200,20 @@ def WorkerProcessProf(childPipeConn):
 							for pt in model:
 								modelList.append((float(pt.attrib['x']), float(pt.attrib['y'])))
 
-							pred = tracker.Predict(im, modelList)
+							try:
+								pred = tracker.Predict(im, modelList)
+							except:
+								#Tracker failed, probably went out of bounds
+								pred = modelList
 							
+							#For out of bounds points, randomly move tracker inside image
+							for pt in pred:
+								margin = 40
+								if pt[0] < 0 or pt[0] >= width:
+									pt[0] = (random.random() * width - (2*margin)) + margin
+								if pt[1] < 0 or pt[1] >= height:
+									pt[1] = (random.random() * height - (2*margin)) + margin
+
 							for pt in pred:
 								outXml += "  <pt x=\""+str(pt[0])+"\" y=\""+str(pt[1])+"\"/>\n"
 							outXml += " </model>\n"
