@@ -65,6 +65,7 @@ public:
     unsigned long long GetSeekForwardTime();
     unsigned long long GetSeekBackTime();
     QSharedPointer<MouseGraphicsScene> GetScene();
+    QTimer timer;
 
 public slots:
     void MarkFramePressed(bool val);
@@ -91,6 +92,7 @@ public slots:
     std::vector<std::vector<float> > GetShape(std::vector<std::vector<int> > &linksOut);
     void SetShape(std::vector<std::vector<float> > shape);
     void RefreshLinks();
+    void Update();
 protected:
 
     int GetAnnotationBetweenTimestamps(unsigned long long startTime,

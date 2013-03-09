@@ -55,7 +55,7 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
 {
     this->eventLoop = &eventLoopIn;
     if(this->eventReceiver!=NULL) delete this->eventReceiver;
-    this->eventReceiver = new EventReceiver(this->eventLoop);
+    this->eventReceiver = new EventReceiver(this->eventLoop, __FILE__,__LINE__);
     this->eventLoop->AddListener("NEW_ANNOTATION", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ANNOTATION_UUIDS", *this->eventReceiver);
 

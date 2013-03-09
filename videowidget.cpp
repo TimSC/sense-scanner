@@ -420,7 +420,7 @@ void VideoWidget::TimeChanged(QTime time)
 void VideoWidget::SetEventLoop(class EventLoop *eventLoopIn)
 {
     this->eventLoop = eventLoopIn;
-    this->eventReceiver = new EventReceiver(this->eventLoop);
+    this->eventReceiver = new EventReceiver(this->eventLoop,__FILE__,__LINE__);
     this->eventLoop->AddListener("MEDIA_FRAME_RESPONSE", *this->eventReceiver);
     this->eventLoop->AddListener("MEDIA_DURATION_RESPONSE", *this->eventReceiver);
 }

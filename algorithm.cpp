@@ -47,7 +47,7 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->eventLoop = eventLoopIn;
     //this->algOutLog = new QFile(fina);
     //this->algOutLog->open(QIODevice::WriteOnly);
-    this->eventReceiver = new class EventReceiver(this->eventLoop);
+    this->eventReceiver = new class EventReceiver(this->eventLoop,__FILE__,__LINE__);
     this->eventLoop->AddListener("PREDICT_FRAME_REQUEST", *this->eventReceiver);
     this->eventLoop->AddListener("TRAINING_IMG_FOUND", *this->eventReceiver);
     this->eventLoop->AddListener("TRAINING_POS_FOUND", *this->eventReceiver);

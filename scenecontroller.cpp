@@ -76,6 +76,9 @@ TrackingSceneController::TrackingSceneController(QObject *parent)
     this->annotationControls = NULL;
     this->eventLoop = NULL;
     this->eventReceiver = NULL;
+
+    QObject::connect(&this->timer, SIGNAL(timeout()), this, SLOT(Update()));
+    this->timer.start(10); //in millisec
 }
 
 TrackingSceneController::~TrackingSceneController()
@@ -688,7 +691,7 @@ void TrackingSceneController::SetEventLoop(class EventLoop *eventLoopIn)
 {
     if(this->eventReceiver) delete this->eventReceiver;
     this->eventLoop = eventLoopIn;
-    this->eventReceiver = new EventReceiver(this->eventLoop);
+    this->eventReceiver = new EventReceiver(this->eventLoop,__FILE__,__LINE__);
 
     this->eventLoop->AddListener("ANNOTATION_FRAME",*eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_SHAPE",*eventReceiver);
@@ -927,4 +930,23 @@ void TrackingSceneController::RemovePoint(int index)
     QString ind = QString("%1").arg(index);
     reqEv->data = ind.toLocal8Bit().constData();
     this->eventLoop->SendEvent(reqEv);
+}
+
+void TrackingSceneController::Update()
+{
+    //This is mainly needed to flush the event queue of unnecessary messages
+    //Process events from application
+    int flushEvents = 1;
+    while(flushEvents)
+    try
+    {
+        assert(this->eventReceiver);
+        std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
+
+        //Discard event
+    }
+    catch(std::runtime_error e)
+    {
+        flushEvents = 0;
+    }
 }

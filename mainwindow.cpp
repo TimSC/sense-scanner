@@ -227,7 +227,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->workspace.SetEventLoop(*this->eventLoop);
 
     //Create event listener
-    this->eventReceiver = new class EventReceiver(this->eventLoop);
+    this->eventReceiver = new class EventReceiver(this->eventLoop,__FILE__,__LINE__);
     this->eventLoop->AddListener("THREAD_STARTING",*eventReceiver);
     this->eventLoop->AddListener("THREAD_STOPPING",*eventReceiver);
     this->eventLoop->AddListener("AVBIN_OPEN_RESULT",*eventReceiver);

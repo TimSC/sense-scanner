@@ -101,7 +101,7 @@ class EventReceiver
     */
 
 public:
-    EventReceiver(class EventLoop *elIn);
+    EventReceiver(class EventLoop *elIn, const char *filenameIn, unsigned int lineIn);
     virtual ~EventReceiver();
     void AddMessage(std::tr1::shared_ptr<class Event> event);
     int BufferSize();
@@ -119,6 +119,8 @@ protected:
     class EventLoop *el;
     QUuid threadId;
     bool stopping;
+    QString filename;
+    unsigned int line;
 };
 
 

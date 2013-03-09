@@ -46,11 +46,15 @@ Event::~Event()
 
 //************************************************
 
-EventReceiver::EventReceiver(class EventLoop *elIn)
+EventReceiver::EventReceiver(class EventLoop *elIn,
+                             const char *filenameIn,
+                             unsigned int lineIn)
 {
     this->stopping = false;
     this->el = elIn;
     this->threadId = QUuid::createUuid();
+    this->line = lineIn;
+    this->filename = filenameIn;
 }
 
 EventReceiver::~EventReceiver()
@@ -337,7 +341,7 @@ void MessagableThread::SetEventLoop(class EventLoop *eventLoopIn)
 {
     if(this->eventReceiver!=NULL)
         delete this->eventReceiver;
-    this->eventReceiver = new EventReceiver(eventLoopIn);
+    this->eventReceiver = new EventReceiver(eventLoopIn,__FILE__,__LINE__);
     this->eventReceiver->SetThreadId(this->threadId);
     this->eventLoop = eventLoopIn;
     this->eventLoop->AddListener("STOP_THREADS", *eventReceiver);

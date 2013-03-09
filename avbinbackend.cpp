@@ -455,7 +455,7 @@ void AvBinBackend::SetEventLoop(class EventLoop *eventLoopIn)
 
     if(this->eventReceiver==NULL)
     {
-        this->eventReceiver = new class EventReceiver(eventLoopIn);
+        this->eventReceiver = new class EventReceiver(eventLoopIn,__FILE__,__LINE__);
         this->eventLoop = eventLoopIn;
         QString eventName = QString("AVBIN_OPEN_FILE");
         this->eventLoop->AddListener(eventName.toLocal8Bit().constData(), *this->eventReceiver);
