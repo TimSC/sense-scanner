@@ -66,8 +66,7 @@ void EventReceiver::AddMessage(std::tr1::shared_ptr<class Event> event)
     this->eventBuffer.push_back(event);
     if(this->eventBuffer.size()>100)
     {
-        cout << "Warning, event listener queue is size "<< this->eventBuffer.size() << endl;
-
+        cout << "Warning: event listener queue is size "<< this->eventBuffer.size() << endl;
     }
     this->mutex.unlock();
 }
@@ -87,6 +86,10 @@ std::tr1::shared_ptr<class Event> EventReceiver::PopEvent()
     {
         this->mutex.unlock();
         throw std::runtime_error("Buffer is empty");
+    }
+    if(this->eventBuffer.size() > 100)
+    {
+        cout << "Warning: event listener queue is size "<< this->eventBuffer.size() << endl;
     }
     std::tr1::shared_ptr<class Event> ev = this->eventBuffer[0]; //Get the first in buffer FIFO
     this->eventBuffer.erase(this->eventBuffer.begin());
@@ -354,6 +357,9 @@ void MessagableThread::run()
         running = !this->stopThreads;
         this->mutex.unlock();
 
+        int flush=1;
+        while(flush)
+        {
         try
         {
             assert(this->eventReceiver);
@@ -364,6 +370,8 @@ void MessagableThread::run()
         catch(std::runtime_error e)
         {
             //No message was waiting or handle event threw exception
+            flush = 0;
+        }
         }
 
         //Check again if running

@@ -45,7 +45,7 @@ void ApplyModel::Update()
 {
     if(issueEnountered)
     {
-        this->msleep(5);
+        this->msleep(1);
         return;
     }
 
@@ -56,7 +56,7 @@ void ApplyModel::Update()
                                                      this->eventLoop,
                                                      this->eventReceiver);
         this->srcFinaSet = 1;
-        this->msleep(5);
+        this->msleep(1);
         return;
     }
 
@@ -68,7 +68,7 @@ void ApplyModel::Update()
                                            this->eventReceiver);
 
         this->algUuidSet = 1;
-        this->msleep(5);
+        this->msleep(1);
         return;
     }
 
@@ -82,7 +82,7 @@ void ApplyModel::Update()
     int activeStateDesired = this->parentAnn->GetActiveStateDesired();
     if(!activeStateDesired)
     {
-        this->msleep(5);
+        this->msleep(1);
         return;
     }
 
@@ -93,14 +93,14 @@ void ApplyModel::Update()
         if(this->parentAnn->GetActive())
             this->parentAnn->SetActiveStateDesired(0);
         else
-            this->msleep(5);
+            this->msleep(1);
         return;
     }
 
     int isActive = this->parentAnn->GetActive();
     if(!isActive)
     {
-        this->msleep(5);
+        this->msleep(1);
         return;
     }
 */
@@ -112,7 +112,7 @@ void ApplyModel::Update()
                                             this->eventLoop,
                                             this->eventReceiver);
         this->srcDurationSet = 1;
-        this->msleep(5);
+        this->msleep(1);
         return;
     }
 
@@ -122,7 +122,7 @@ void ApplyModel::Update()
     {
         track->GetFramesAvailable(this->frameTimes, this->frameTimesEnd);
         this->frameTimesSet = true;
-        this->msleep(5);
+        this->msleep(1);
         return;
     }
 */
@@ -221,11 +221,11 @@ void ApplyModel::Update()
         catch (std::runtime_error &err)
         {
             cout << "Timeout getting frame 0" << endl;
-            this->msleep(5);
+            this->msleep(1);
             return;
         }
         this->currentTimeSet = true;
-        this->msleep(5);
+        this->msleep(1);
         return;
     }
 /*
@@ -300,7 +300,7 @@ void ApplyModel::Update()
                 QString progressStr = QString("%1").arg(progress);
                 requestEv->data = progressStr.toLocal8Bit().constData();
                 this->eventLoop->SendEvent(requestEv);
-                this->msleep(5);
+                this->msleep(1);
                 return;
             }
 
@@ -345,7 +345,7 @@ void ApplyModel::Update()
             this->issueEnountered = true;
 
             this->currentTimeSet = false;
-            this->msleep(5);
+            this->msleep(1);
             return;
         }
 
@@ -397,7 +397,7 @@ void ApplyModel::Update()
         frameDuration = this->currentEndTimestamp - this->currentStartTimestamp;
         avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5);
         nextTi = avTi + frameDuration;
-        this->msleep(5);
+        this->msleep(1);
         return;
     }
     else
@@ -411,6 +411,12 @@ void ApplyModel::Update()
 
 void ApplyModel::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
+    if(this->eventReceiver->BufferSize()>50)
+    {
+        int debug = this->eventReceiver->BufferSize();
+        cout << "debug" << endl;
+    }
+
 
     MessagableThread::HandleEvent(ev);
 }
