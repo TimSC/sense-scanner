@@ -209,10 +209,10 @@ def WorkerProcessProf(childPipeConn):
 							#For out of bounds points, randomly move tracker inside image
 							for pt in pred:
 								margin = 40
-								if pt[0] < 0 or pt[0] >= width:
-									pt[0] = (random.random() * width - (2*margin)) + margin
-								if pt[1] < 0 or pt[1] >= height:
-									pt[1] = (random.random() * height - (2*margin)) + margin
+								if pt[0] < margin or pt[0] >= width-margin:
+									pt[0] = random.random(margin, width - margin)
+								if pt[1] < margin or pt[1] >= height-margin:
+									pt[1] = random.random(margin, height - margin)
 
 							for pt in pred:
 								outXml += "  <pt x=\""+str(pt[0])+"\" y=\""+str(pt[1])+"\"/>\n"
