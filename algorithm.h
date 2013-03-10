@@ -28,10 +28,11 @@ public:
     {
         PAUSED = 1,
         STARTING = 2,
-        RUNNING = 3,
-        RUNNING_PAUSING = 4,
-        RUNNING_STOPPING = 5,
-        STOPPED = 6
+        RUNNING_PREPARING = 3,
+        RUNNING = 4,
+        RUNNING_PAUSING = 5,
+        RUNNING_STOPPING = 6,
+        STOPPED = 7
     };
 
     QUuid GetUid();
@@ -49,12 +50,15 @@ public:
                         class EventReceiver *eventReceiver,
                         std::vector<std::vector<float> > &out);
 
+    //This is safe for the main thread to call, but no other thread may do so
+    ProcessState GetState();
+
 public slots:
     void Update();
 
 protected:
     int IsStopFlagged();
-    ProcessState GetState();
+
     QByteArray ReadLineFromBuffer(QByteArray &buff, int popLine = 1, int skipLines = 0);
     void ProcessAlgOutput();
     void Pause();
@@ -69,6 +73,7 @@ protected:
     int stopping;
     int pausing;
     int paused;
+    int dataLoaded;
     int initDone;
     QFile *algOutLog;
     class EventLoop *eventLoop;

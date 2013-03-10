@@ -42,6 +42,7 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->paused = 1;
     this->pausing = 0;
     this->initDone = 0;
+    this->dataLoaded = 0;
 
     //QString fina = "algout.txt";
     this->eventLoop = eventLoopIn;
@@ -55,6 +56,7 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->eventLoop->AddListener("GET_PROGRESS", *this->eventReceiver);
     this->eventLoop->AddListener("GET_MODEL", *this->eventReceiver);
     this->eventLoop->AddListener("SET_MODEL", *this->eventReceiver);
+    this->eventLoop->AddListener("GET_STATE", *this->eventReceiver);
 
     this->eventLoop->AddListener("PAUSE_ALGORITHM", *this->eventReceiver);
     this->eventLoop->AddListener("RUN_ALGORITHM", *this->eventReceiver);
@@ -199,6 +201,7 @@ AlgorithmProcess::ProcessState AlgorithmProcess::GetState()
         this->paused = 1;
         return AlgorithmProcess::STOPPED;
     }
+    if(!this->dataLoaded) return AlgorithmProcess::RUNNING_PREPARING;
     if(this->paused) return AlgorithmProcess::PAUSED;
     if(this->stopping) return AlgorithmProcess::RUNNING_STOPPING;
     if(this->pausing) return AlgorithmProcess::RUNNING_PAUSING;
@@ -348,6 +351,7 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type == "TRAINING_DATA_FINISH")
     {
         this->SendCommand("TRAINING_DATA_FINISH\n");
+        this->dataLoaded = 1;
     }
 
     if(ev->type == "GET_PROGRESS")
@@ -368,6 +372,8 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         QByteArray b64bin = ev->buffer.toBase64();
         cout << "Base64 length" << b64bin.size() << endl;
         this->SendRawDataBlock("MODEL\n", b64bin);
+
+        this->dataLoaded = 1;
     }
 
     if(ev->type == "PAUSE_ALGORITHM")
@@ -378,6 +384,15 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type == "RUN_ALGORITHM")
     {
         this->Unpause();
+    }
+
+    if(ev->type == "GET_STATE")
+    {
+        std::tr1::shared_ptr<class Event> responseEv(new Event("ALG_STATE"));
+        responseEv->id = ev->id;
+        responseEv->data = QString::number((int)(this->GetState()), 'd');
+        responseEv->fromUuid = this->uid;
+        this->eventLoop->SendEvent(responseEv);
     }
 }
 
@@ -633,6 +648,8 @@ void AlgorithmProcess::SetUid(QUuid newUid)
 int AlgorithmProcess::IsBlockingShutdown()
 {
     AlgorithmProcess::ProcessState state = AlgorithmProcess::GetState();
+    if(state == AlgorithmProcess::STARTING) return 1;
+    if(state == AlgorithmProcess::RUNNING_PREPARING) return 1;
     if(state == AlgorithmProcess::RUNNING) return 1;
     if(state == AlgorithmProcess::RUNNING_PAUSING) return 1;
     if(state == AlgorithmProcess::RUNNING_STOPPING) return 1;

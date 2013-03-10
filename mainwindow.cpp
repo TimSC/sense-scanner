@@ -247,6 +247,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("STOP_THREADS", *eventReceiver);
     this->eventLoop->AddListener("ANNOT_USING_ALG", *eventReceiver);
     this->eventLoop->AddListener("MEDIA_DURATION_RESPONSE", *this->eventReceiver);
+    this->eventLoop->AddListener("ALG_STATE", *this->eventReceiver);
 
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop,1);
@@ -551,7 +552,8 @@ void MainWindow::RegenerateProcessingList()
 
             if(state!=AlgorithmProcess::STOPPED)
             {
-                if(state == AlgorithmProcess::STARTING) displayLine << "Starting " << progressCStr;
+                if(state == AlgorithmProcess::STARTING) displayLine << "Starting";
+                if(state == AlgorithmProcess::RUNNING_PREPARING) displayLine << "Preparing";
                 if(state == AlgorithmProcess::RUNNING) displayLine << "Running " << progressCStr;
                 if(state == AlgorithmProcess::RUNNING_PAUSING) displayLine << "Pausing... " << progressCStr;
                 if(state == AlgorithmProcess::RUNNING_STOPPING) displayLine << "Stopping... " << progressCStr;

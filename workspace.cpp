@@ -160,7 +160,6 @@ void Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg)
     this->processingList.push_back(alg);
     this->processingProgress.push_back(0.);
     this->processingUuids.push_back(alg->GetUid());
-    this->processingStates.push_back(AlgorithmProcess::STARTING);
 
     std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_PROCESSING_CHANGED"));
     this->eventLoop->SendEvent(changeEv);
@@ -182,7 +181,7 @@ int Workspace::RemoveProcessing(QUuid uuid)
     if(!found) return -1;
 
     //Check process is ready to be removed
-    AlgorithmProcess::ProcessState state = this->processingStates[ind];
+    AlgorithmProcess::ProcessState state = this->processingList[ind]->GetState();
     if(state!=AlgorithmProcess::STOPPED &&
             state!=AlgorithmProcess::PAUSED)
     {
@@ -191,14 +190,13 @@ int Workspace::RemoveProcessing(QUuid uuid)
     }
 
     //If paused, stop the process
-    if(this->processingStates[ind]!=AlgorithmProcess::PAUSED)
+    if(this->processingList[ind]->GetState()!=AlgorithmProcess::PAUSED)
         this->processingList[ind]->Stop();
 
-    assert(this->processingStates[ind]==AlgorithmProcess::STOPPED);
+    assert(this->processingList[ind]->GetState()==AlgorithmProcess::STOPPED);
     this->processingList.erase(this->processingList.begin()+ind);
     this->processingProgress.erase(this->processingProgress.begin()+ind);
     this->processingUuids.erase(this->processingUuids.begin()+ind);
-    this->processingStates.erase(this->processingStates.begin()+ind);
 
     this->lock.unlock();
     std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_PROCESSING_CHANGED"));
@@ -231,28 +229,13 @@ float Workspace::GetProcessingProgress(QUuid uuid)
     throw std::runtime_error ("Uuid not found");
 }
 
-void Workspace::ProcessingStateChanged(QUuid uuid, AlgorithmProcess::ProcessState state)
-{
-    for(unsigned int i=0;i<this->processingUuids.size();i++)
-    {
-        if(uuid == this->processingUuids[i])
-        {
-            this->processingStates[i] = state;
-            return;
-        }
-    }
-    throw std::runtime_error ("Uuid not found");
-}
-
 AlgorithmProcess::ProcessState Workspace::GetProcessingState(QUuid uuid)
 {
     for(unsigned int i=0;i<this->processingUuids.size();i++)
     {
         if(uuid == this->processingUuids[i])
         {
-            this->lock.lock();
-            AlgorithmProcess::ProcessState out = this->processingStates[i];
-            this->lock.unlock();
+            AlgorithmProcess::ProcessState out = this->processingList[i]->GetState();
             return out;
         }
     }
@@ -278,7 +261,6 @@ void Workspace::ClearProcessing()
     this->processingList.clear();
     this->processingProgress.clear();
     this->processingUuids.clear();
-    this->processingStates.clear();
     this->lock.unlock();
 }
 
@@ -422,7 +404,6 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         {
             if(seekUuid == this->processingUuids[i])
             {
-                this->processingStates[i] = state;
                 std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_PROCESSING_CHANGED"));
                 this->eventLoop->SendEvent(changeEv);
             }

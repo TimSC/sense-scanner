@@ -41,7 +41,6 @@ public:
     void ProcessingProgressChanged(QUuid uuid, float progress);
     float GetProcessingProgress(QUuid uuid);
 
-    void ProcessingStateChanged(QUuid uuid, AlgorithmProcess::ProcessState state);
     AlgorithmProcess::ProcessState GetProcessingState(QUuid uuid);
 
     int NumProcessesBlockingShutdown();
@@ -76,7 +75,6 @@ protected:
     std::vector<std::tr1::shared_ptr<class AlgorithmProcess> > processingList;
     std::vector<float> processingProgress;
     QList<QUuid> processingUuids;
-    QList<AlgorithmProcess::ProcessState> processingStates;
     Mutex lock;
     QUuid mediaUuid;
 };
