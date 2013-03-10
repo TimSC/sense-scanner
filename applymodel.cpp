@@ -74,36 +74,40 @@ void ApplyModel::Update()
         return;
     }
 
-    //Get algorithm progress so far
-    unsigned long long autoLabeledEnd = Annotation::GetAutoLabeledEnd(this->annotUuid,
-                                    this->eventLoop,
-                                    this->eventReceiver);
-    if(autoLabeledEnd>0)
+    //Get algorithm progress so far, in case we are resuming from a partly complete computation run
+    if(!this->currentModelSet)
     {
-        std::vector<std::vector<float> > annot;
-        double ti=0;
-
-        //Initialise current model to closest frame
-        int found = Annotation::GetAnnotationBeforeTime(autoLabeledEnd,
-                                                        this->annotUuid,
-                                                         this->eventLoop,
-                                                         this->eventReceiver,
-                                                               annot,
-                                                               ti);
-        if(found)
+        unsigned long long autoLabeledEnd = Annotation::GetAutoLabeledEnd(this->annotUuid,
+                                        this->eventLoop,
+                                        this->eventReceiver);
+        if(autoLabeledEnd>0)
         {
-            this->currentModel = annot;
-            this->currentModelSet = true;
-            MediaResponseFrame processedImg;
-            AvBinMedia::GetMediaFrame(this->srcFina,
-                                 ti * 1000.,
-                                 this->mediaInterface,
-                                 this->eventLoop,
-                                 this->eventReceiver,
-                                 processedImg);
-            this->currentStartTimestamp = processedImg.start;
-            this->currentEndTimestamp = processedImg.end;
-            this->currentTimeSet = 1;
+            std::vector<std::vector<float> > annot;
+            double ti=0;
+
+            //Initialise current model to closest frame
+            int found = Annotation::GetAnnotationBeforeTime(autoLabeledEnd,
+                                                            this->annotUuid,
+                                                             this->eventLoop,
+                                                             this->eventReceiver,
+                                                                   annot,
+                                                                   ti);
+            if(found)
+            {
+                //Get frame timings to start computation
+                this->currentModel = annot;
+                this->currentModelSet = true;
+                MediaResponseFrame processedImg;
+                AvBinMedia::GetMediaFrame(this->srcFina,
+                                     ti * 1000.,
+                                     this->mediaInterface,
+                                     this->eventLoop,
+                                     this->eventReceiver,
+                                     processedImg);
+                this->currentStartTimestamp = processedImg.start;
+                this->currentEndTimestamp = processedImg.end;
+                this->currentTimeSet = 1;
+            }
         }
     }
 
