@@ -246,6 +246,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("PREDICTION_END", *eventReceiver);
     this->eventLoop->AddListener("STOP_THREADS", *eventReceiver);
     this->eventLoop->AddListener("ANNOT_USING_ALG", *eventReceiver);
+    this->eventLoop->AddListener("MEDIA_DURATION_RESPONSE", *this->eventReceiver);
 
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop,1);
@@ -684,14 +685,18 @@ void MainWindow::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
     if(ev->type=="ANNOT_USING_ALG")
     {
-
         std::vector<std::string> args = split(ev->data.toLocal8Bit().constData(),',');
         QUuid annotUuid(args[0].c_str());
         QUuid algUuid(args[1].c_str());
         if(!algUuid.isNull())
             this->applyModelPool.Add(algUuid, annotUuid, this->mediaInterfaceBack->GetUuid());
     }
-
+    if(ev->type=="MEDIA_DURATION_RESPONSE")
+    {
+        unsigned long long duration = ev->data.toULongLong();
+        QString fina = QString::fromUtf8(ev->buffer);
+        this->sourceDuration[fina] = duration;
+    }
 }
 
 void MainWindow::Update()

@@ -159,15 +159,11 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type == "AVBIN_FRAME_RESPONSE")
     {
         std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_FRAME_RESPONSE"));
-
-        cout << "x" ;
     }
 
     if(ev->type=="AVBIN_FRAME_FAILED")
     {
         std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_DURATION_RESPONSE"));
-
-        cout << "y";
     }
 
     if(ev->type == "GET_MEDIA_DURATION")
@@ -187,6 +183,7 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             responseEv->toUuid = ev->fromUuid;
             responseEv->fromUuid = this->uuid;
             responseEv->id = ev->id;
+            responseEv->buffer = this->currentFina.toUtf8();
             responseEv->data = "FAILED";
             this->eventLoop->SendEvent(responseEv);
         }
@@ -196,6 +193,7 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             responseEv->toUuid = ev->fromUuid;
             responseEv->fromUuid = this->uuid;
             responseEv->id = ev->id;
+            responseEv->buffer = this->currentFina.toUtf8();
             responseEv->data = QString("%1").arg(response->data.toULongLong() / 1000.);
             this->eventLoop->SendEvent(responseEv);
         }
