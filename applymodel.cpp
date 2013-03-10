@@ -388,8 +388,7 @@ void ApplyModel::Update()
         }
 
         //Estimate progress and generate an event
-        Annotation::UpdateAnnotationThreadProgress(nextTi,
-                                            this->threadId,
+        Annotation::SetAutoLabelTimeRange(0, nextTi,
                                             this->annotUuid,
                                             this->eventLoop);
 

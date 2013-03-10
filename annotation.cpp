@@ -11,7 +11,7 @@ using namespace std;
 
 #define TO_MILLISEC(x) (unsigned long long)(x / 1000. + 0.5)
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
-#define DEMO_MODE
+//#define DEMO_MODE
 #define SECRET_KEY "This is a secret..."
 
 unsigned long long AbsDiff(unsigned long long a, unsigned long long b)
@@ -25,7 +25,8 @@ unsigned long long AbsDiff(unsigned long long a, unsigned long long b)
 TrackingAnnotationData::TrackingAnnotationData()
 {
     this->frameTimesEnd = 0;
-    this->predictionEnd = 0;
+    this->autoLabeledStart = 0;
+    this->autoLabeledEnd = 0;
 }
 
 TrackingAnnotationData::TrackingAnnotationData(const TrackingAnnotationData &other)
@@ -45,6 +46,8 @@ TrackingAnnotationData& TrackingAnnotationData::operator= (const TrackingAnnotat
     this->shape = other.shape;
     this->frameTimes = other.frameTimes;
     this->frameTimesEnd = other.frameTimesEnd;
+    this->autoLabeledStart = other.autoLabeledStart;
+    this->autoLabeledEnd = other.autoLabeledEnd;
     return *this;
 }
 
@@ -192,7 +195,8 @@ void TrackingAnnotationData::ReadAnnotationXml(QDomElement &elem)
     while(!n.isNull()) {
         QDomElement e = n.toElement(); // try to convert the node to an element.
         if(!e.isNull()) {
-            if(e.tagName() == "shape")
+            QString tagName = e.tagName();
+            if(tagName == "shape")
             {
                 std::vector<std::vector<float> > shapeData = this->ProcessXmlDomFrame(e,this->links);
                 this->shape = shapeData;
@@ -242,6 +246,15 @@ void TrackingAnnotationData::ReadAnnotationXml(QDomElement &elem)
 
 void TrackingAnnotationData::ReadFramesXml(QDomElement &elem)
 {
+    //Read start and end times for automatically labeled frames
+    QString autoStartStr = elem.attribute("autostart");
+    QString autoEndStr = elem.attribute("autoend");
+    this->autoLabeledStart = 0;
+    this->autoLabeledEnd = 0;
+    if(autoStartStr.length()>0) this->autoLabeledStart = autoStartStr.toULongLong();
+    if(autoEndStr.length()>0) this->autoLabeledEnd = autoEndStr.toULongLong();
+
+    //Read annotated positions for frames
     QDomElement e = elem.firstChildElement();
     while(!e.isNull())
     {
@@ -329,7 +342,8 @@ void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out)
     //Save annotated frames
     QString frameXmlStr;
     QTextStream frameXml(&frameXmlStr);
-    frameXml << "\t<frameset>" << endl;
+    frameXml << "\t<frameset autostart=\""<<this->autoLabeledStart<<"\" autoend=\""
+             << this->autoLabeledEnd <<"\">" << endl;
     for(it=this->pos.begin(); it != this->pos.end();it++)
     {
         std::vector<std::vector<float> > &frame = it->second;
@@ -339,7 +353,7 @@ void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out)
     frameXml << "\t</frameset>" << endl;
 
 #ifndef DEMO_MODE
-    out << frameXml.string();
+    out << frameXmlStr;
 #else
     out << "<demoframe>" << endl;
     QByteArray secretKey(SECRET_KEY);
@@ -712,9 +726,9 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("MEDIA_FRAME_RESPONSE", *this->eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_THREAD_PROGRESS", *this->eventReceiver);
 
-    this->eventLoop->AddListener("GET_PREDICTION_END", *this->eventReceiver);
+    this->eventLoop->AddListener("GET_AUTO_LABELED_END", *this->eventReceiver);
     this->eventLoop->AddListener("FOUND_FRAME", *this->eventReceiver);
-
+    this->eventLoop->AddListener("SET_AUTO_LABEL_RANGE", *this->eventReceiver);
 }
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
@@ -981,10 +995,10 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         this->eventLoop->SendEvent(responseEv);
     }
 
-    if(ev->type=="GET_PREDICTION_END")
+    if(ev->type=="GET_AUTO_LABELED_END")
     {
-        std::tr1::shared_ptr<class Event> responseEv(new Event("PREDICTION_END"));
-        QString dataStr = QString("%1").arg(this->parentAnn->track->predictionEnd);
+        std::tr1::shared_ptr<class Event> responseEv(new Event("AUTO_LABELED_END"));
+        QString dataStr = QString("%1").arg(this->parentAnn->track->autoLabeledEnd);
         responseEv->data = dataStr;
         responseEv->fromUuid = this->parentAnn->GetAnnotUid();
         responseEv->id = ev->id;
@@ -1002,17 +1016,19 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             this->parentAnn->track->FoundFrame(startStr.toULongLong(), endStr.toULongLong());
         }
     }
+    if(ev->type=="SET_AUTO_LABEL_RANGE")
+    {
+        if(this->parentAnn != NULL && this->parentAnn->track != NULL)
+        {
+            std::vector<std::string> args = split(ev->data.toLocal8Bit().constData(),',');
+            QString startStr(args[0].c_str());
+            QString endStr(args[1].c_str());
+
+            this->parentAnn->track->autoLabeledStart = startStr.toULongLong();
+            this->parentAnn->track->autoLabeledEnd = endStr.toULongLong();
+        }
     }
 
-
-    //This uses a different field to filter uuids
-    if(ev->type=="ANNOTATION_THREAD_PROGRESS")
-    {
-        QUuid msgAnnotUuid(ev->buffer);
-        if(algUid == msgAnnotUuid)
-        {
-            this->parentAnn->track->predictionEnd = ev->data.toULongLong();
-        }
     }
 
     this->msleep(5);
@@ -1103,6 +1119,7 @@ void Annotation::Clear()
 
 void Annotation::SetTrack(class TrackingAnnotationData *trackIn)
 {
+
     if(this->track != NULL) delete this->track;
     this->track = trackIn;
 }
@@ -1270,33 +1287,19 @@ void Annotation::SetAnnotationBetweenTimestamps(unsigned long long startTime,
     eventLoop->SendEvent(reqEv);
 }
 
-unsigned long long Annotation::GetPredictionEnd(QUuid annotUuid,
+unsigned long long Annotation::GetAutoLabeledEnd(QUuid annotUuid,
                                 class EventLoop *eventLoop,
                                 class EventReceiver *eventReceiver)
 {
     //Get algorithm Uuid for this annotation track
-    std::tr1::shared_ptr<class Event> getAlgUuidEv(new Event("GET_PREDICTION_END"));
+    std::tr1::shared_ptr<class Event> getAlgUuidEv(new Event("GET_AUTO_LABELED_END"));
     getAlgUuidEv->toUuid = annotUuid;
     getAlgUuidEv->id = eventLoop->GetId();
     eventLoop->SendEvent(getAlgUuidEv);
 
     std::tr1::shared_ptr<class Event> responseEV = eventReceiver->WaitForEventId(getAlgUuidEv->id);
-    assert(responseEV->type=="PREDICTION_END");
+    assert(responseEV->type=="AUTO_LABELED_END");
     return responseEV->data.toULongLong();
-}
-
-void Annotation::UpdateAnnotationThreadProgress(unsigned long long progress,
-                                    QUuid srcUuid,
-                                    QUuid annotUuid,
-                                    class EventLoop *eventLoop)
-{
-    //Estimate progress and generate an event
-    std::tr1::shared_ptr<class Event> requestEv(new Event("ANNOTATION_THREAD_PROGRESS"));
-    QString progressStr = QString("%0").arg(progress);
-    requestEv->fromUuid = srcUuid;
-    requestEv->data = progressStr;
-    requestEv->buffer = annotUuid.toByteArray();
-    eventLoop->SendEvent(requestEv);
 }
 
 void Annotation::FoundFrameEvent(unsigned long long startTime,
@@ -1312,3 +1315,17 @@ void Annotation::FoundFrameEvent(unsigned long long startTime,
     requestEv->data = dataSTr;
     eventLoop->SendEvent(requestEv);
 }
+
+void Annotation::SetAutoLabelTimeRange(unsigned long long startTime,
+                                 unsigned long long endTime,
+                                    QUuid annotUuid,
+                                    class EventLoop *eventLoop)
+{
+    //Estimate progress and generate an event
+    std::tr1::shared_ptr<class Event> requestEv(new Event("SET_AUTO_LABEL_RANGE"));
+    QString dataSTr = QString("%0,%1").arg(startTime).arg(endTime);
+    requestEv->toUuid = annotUuid;
+    requestEv->data = dataSTr;
+    eventLoop->SendEvent(requestEv);
+}
+

@@ -84,8 +84,9 @@ public:
     unsigned long long GetSeekForwardTime(unsigned long long queryTime);
     unsigned long long GetSeekBackTime(unsigned long long queryTime);
 
-    //Keep track of prediction progress
-    unsigned long long predictionEnd;
+    //Keep track of automatically labeled data
+    unsigned long long autoLabeledStart;
+    unsigned long long autoLabeledEnd;
 protected:
 
     void AddPoint(std::vector<float> p);
@@ -101,7 +102,6 @@ protected:
     //Keep track of frame times that are available
     std::map<unsigned long, unsigned long> frameTimes;
     unsigned long long frameTimesEnd;
-
 };
 
 //****************************************************
@@ -190,20 +190,20 @@ public:
                                     QUuid annotUuid,
                                     class EventLoop *eventLoop);
 
-    static unsigned long long GetPredictionEnd(QUuid annotUuid,
+    static unsigned long long GetAutoLabeledEnd(QUuid annotUuid,
                                     class EventLoop *eventLoop,
                                     class EventReceiver *eventReceiver);
-
-    static void UpdateAnnotationThreadProgress(unsigned long long progress,
-                                        QUuid srcUuid,
-                                        QUuid annotUuid,
-                                        class EventLoop *eventLoop);
 
     static void FoundFrameEvent(unsigned long long startTime,
                                      unsigned long long endTime,
                                         QUuid srcUuid,
                                         QUuid annotUuid,
                                      class EventLoop *eventLoop);
+
+    static void SetAutoLabelTimeRange(unsigned long long startTime,
+                                     unsigned long long endTime,
+                                        QUuid annotUuid,
+                                        class EventLoop *eventLoop);
 
 
     std::tr1::shared_ptr<class AnnotThread> annotThread;

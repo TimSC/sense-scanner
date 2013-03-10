@@ -242,7 +242,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->eventLoop->AddListener("WORKSPACE_ANNOTATION_CHANGED",*eventReceiver);
     this->eventLoop->AddListener("WORKSPACE_PROCESSING_CHANGED",*eventReceiver);
-    this->eventLoop->AddListener("ANNOTATION_THREAD_PROGRESS", *eventReceiver);
+    this->eventLoop->AddListener("SET_AUTO_LABEL_RANGE", *eventReceiver);
     this->eventLoop->AddListener("PREDICTION_END", *eventReceiver);
     this->eventLoop->AddListener("STOP_THREADS", *eventReceiver);
     this->eventLoop->AddListener("ANNOT_USING_ALG", *eventReceiver);
@@ -667,10 +667,13 @@ void MainWindow::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     {
         this->RegenerateProcessingList();
     }
-    if(ev->type=="ANNOTATION_THREAD_PROGRESS")
+    if(ev->type=="SET_AUTO_LABEL_RANGE")
     {
-        QUuid msgAnnotUuid(ev->buffer);
-        this->predictionProgress[msgAnnotUuid] = ev->data.toULongLong();
+        std::vector<std::string> args = split(ev->data.toLocal8Bit().constData(),',');
+        QString startStr(args[0].c_str());
+        QString endStr(args[1].c_str());
+
+        this->predictionProgress[ev->toUuid] = endStr.toULongLong();
         this->RegenerateSourcesList();
     }
     if(ev->type=="STOP_THREADS")
