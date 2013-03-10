@@ -436,17 +436,17 @@ void MainWindow::RegenerateSourcesList()
         this->sourcesModel.setRowCount(annotationUuids.size());
     for (int row = 0; row < annotationUuids.size(); ++row)
     {
+        std::tr1::shared_ptr<class Event> getSourceNameEv(new Event("GET_SOURCE_FILENAME"));
+        getSourceNameEv->toUuid = annotationUuids[row];
+        getSourceNameEv->id = this->eventLoop->GetId();
+        this->eventLoop->SendEvent(getSourceNameEv);
+
+        std::tr1::shared_ptr<class Event> sourceName = this->eventReceiver->WaitForEventId(getSourceNameEv->id);
+        QString fina = sourceName->data;
+        QFileInfo finaInfo(fina);
+
         for (int column = 0; column < 1; ++column)
         {
-            std::tr1::shared_ptr<class Event> getSourceNameEv(new Event("GET_SOURCE_FILENAME"));
-            getSourceNameEv->toUuid = annotationUuids[row];
-            getSourceNameEv->id = this->eventLoop->GetId();
-            this->eventLoop->SendEvent(getSourceNameEv);
-
-            std::tr1::shared_ptr<class Event> sourceName = this->eventReceiver->WaitForEventId(getSourceNameEv->id);
-            QString fina = sourceName->data;
-            QFileInfo finaInfo(fina);
-
             QStandardItem *item = this->sourcesModel.item(row, column);
             if(item!=NULL)
                 continue;
@@ -457,25 +457,32 @@ void MainWindow::RegenerateSourcesList()
 
         for (int column = 1; column < 2; ++column)
         {
-            std::ostringstream displayLine;
+            QString displayLine;
             QUuid annotId = annotationUuids[row];
 
-            unsigned long long progress = 0;
-            /*unsigned long long progress = Annotation::GetPredictionEnd(annotId,
-                                            this->eventLoop,
-                                            this->eventReceiver);*/
             QMap<QUuid, unsigned long long>::iterator it = this->predictionProgress.find(annotId);
+
             if(it != this->predictionProgress.end())
             {
-                progress = it.value();
+                unsigned long long progress = it.value();
+                displayLine.append(QString::number(progress/1000.,'f', 1));
+                displayLine.append("s");
             }
             else
             {
 
             }
 
+            QMap<QString, unsigned long long>::iterator it2 = this->sourceDuration.find(fina);
+            if(it2!=this->sourceDuration.end() && it != this->predictionProgress.end())
+            {
+                unsigned long long progress = it.value();
+                unsigned long long duration = it2.value();
+                displayLine.append(" ");
+                displayLine.append(QString::number(100.0*progress/duration,'f', 1));
+                displayLine.append("%");
+            }
 
-            displayLine << progress;
 
             //float progress = this->workspace.GetProgress(row);
 
@@ -494,12 +501,12 @@ void MainWindow::RegenerateSourcesList()
             QStandardItem *item = this->sourcesModel.item(row, column);
             if(item!=NULL)
             {
-                item->setText(displayLine.str().c_str());
+                item->setText(displayLine);
                 continue;
             }
             else
             {
-                item = new QStandardItem(displayLine.str().c_str());
+                item = new QStandardItem(displayLine);
                 this->sourcesModel.setItem(row, column, item);
             }
         }
