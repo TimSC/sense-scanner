@@ -59,6 +59,10 @@ public:
 
     void SetMediaUuid(QUuid mediaUuidIn);
 
+    static void AddProcessing(QUuid uid,
+                                  class EventLoop *eventLoop,
+                                  class EventReceiver *eventReceiver);
+
 protected:
     //Sources and annotation data
     std::vector<std::tr1::shared_ptr<class Annotation> > annotations;

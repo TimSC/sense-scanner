@@ -1,6 +1,8 @@
 #include "useractions.h"
 #include "annotation.h"
 #include "algorithm.h"
+#include "avbinmedia.h"
+#include "workspace.h"
 #include <QtCore/QtCore>
 #include <QtGui/QtGui>
 #include <QtXml/QtXml>
@@ -29,6 +31,16 @@ void UserActions::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type=="LOAD_WORKSPACE")
     {
         this->Load(ev->data);
+    }
+
+    if(ev->type=="TRAIN_MODEL")
+    {
+        std::vector<std::string> splitAnnot = split(ev->data.toLocal8Bit().constData(),',');
+        QList<QUuid> annotationUuids;
+        for(unsigned int i=0;i<splitAnnot.size();i++)
+            annotationUuids.append(QUuid(splitAnnot[i].c_str()));
+
+        this->TrainModel(annotationUuids);
     }
 
     MessagableThread::HandleEvent(ev);
@@ -69,6 +81,11 @@ void UserActions::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("ALG_UUID_FOR_ANNOTATION", *this->eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_DATA", *this->eventReceiver);
     this->eventLoop->AddListener("SAVED_MODEL_BINARY", *this->eventReceiver);
+    this->eventLoop->AddListener("TRAIN_MODEL", *this->eventReceiver);
+    this->eventLoop->AddListener("MARKED_LIST_RESPONSE", *this->eventReceiver);
+    this->eventLoop->AddListener("MEDIA_FRAME_RESPONSE", *this->eventReceiver);
+    this->eventLoop->AddListener("ANNOTATION_AT_TIME", *this->eventReceiver);
+
 
 }
 
@@ -313,15 +330,9 @@ void UserActions::Load(QString fina)
                     QUuid uid(uidStr);
                     if(uid.isNull()) uid = uid.createUuid();
 
-                    //Create processing module
-                    std::tr1::shared_ptr<class Event> newAnnEv(new Event("NEW_PROCESSING"));
-                    QString dataStr = QString("%1").arg(uid.toString());
-                    newAnnEv->data = dataStr.toLocal8Bit().constData();
-                    newAnnEv->id = this->eventLoop->GetId();
-                    this->eventLoop->SendEvent(newAnnEv);
-
-                    //Wait for workspace to register this annotation
-                    this->eventReceiver->WaitForEventId(newAnnEv->id);
+                    //Create processing module                 
+                    Workspace::AddProcessing(uid, this->eventLoop,
+                                                  this->eventReceiver);
 
                     //Send data to algorithm process
                     std::tr1::shared_ptr<class Event> foundModelEv(new Event("SET_MODEL"));
@@ -353,3 +364,138 @@ void UserActions::Load(QString fina)
     }
 }
 
+void UserActions::TrainModel(QList<QUuid> annotationUuids)
+{
+    //Count frames, because at least one is needed to train
+    int countMarkedFrames = 0;
+    QList<std::vector<std::string> > seqMarked;
+    for(unsigned int i=0;i<annotationUuids.size();i++)
+    {
+        QUuid annotUuid = annotationUuids[i];
+        //For each annotated frame
+        std::tr1::shared_ptr<class Event> getMarkedEv(new Event("GET_MARKED_LIST"));
+        getMarkedEv->toUuid = annotUuid;
+        getMarkedEv->id = this->eventLoop->GetId();
+        this->eventLoop->SendEvent(getMarkedEv);
+
+        std::tr1::shared_ptr<class Event> markedEv = this->eventReceiver->WaitForEventId(getMarkedEv->id);
+        std::vector<std::string> splitMarked = split(markedEv->data.toLocal8Bit().constData(),',');
+        seqMarked.push_back(splitMarked);
+        countMarkedFrames += splitMarked.size();
+    }
+    assert(countMarkedFrames>0);
+
+    //Create processing module and add to workspace
+    QUuid newUuid = QUuid::createUuid();
+    Workspace::AddProcessing(newUuid, this->eventLoop,
+                                  this->eventReceiver);
+
+    //Configure worker process
+    QList<QSharedPointer<QImage> > imgs;
+    for(unsigned int i=0;i<annotationUuids.size();i++)
+    {
+        //Get filename from annotation source
+        std::tr1::shared_ptr<class Event> getSourceNameEv(new Event("GET_SOURCE_FILENAME"));
+        getSourceNameEv->toUuid = annotationUuids[i];
+        getSourceNameEv->id = this->eventLoop->GetId();
+        this->eventLoop->SendEvent(getSourceNameEv);
+
+        std::tr1::shared_ptr<class Event> sourceName = this->eventReceiver->WaitForEventId(getSourceNameEv->id);
+        QString fina = sourceName->data;
+        std::vector<std::string> marked = seqMarked[i];
+
+        //For each annotated frame
+        for(unsigned int fr=0;fr<marked.size();fr++)
+        {
+            countMarkedFrames ++;
+
+            //Get image data and send to process
+            cout << marked[fr] << endl;
+            unsigned long long startTimestamp = 0, endTimestamp = 0;
+            unsigned long long annotTimestamp = STR_TO_ULL_SIMPLE(marked[fr].c_str());
+            QSharedPointer<QImage> img;
+            try
+            {
+                std::tr1::shared_ptr<class Event> reqEv(new Event("GET_MEDIA_FRAME"));
+                reqEv->toUuid = this->mediaUuid;
+                reqEv->data = fina;
+                QString tiStr = QString("%1").arg(annotTimestamp);
+                reqEv->buffer = tiStr.toLocal8Bit().constData();
+                reqEv->id = this->eventLoop->GetId();
+                this->eventLoop->SendEvent(reqEv);
+
+                std::tr1::shared_ptr<class Event> resp = this->eventReceiver->WaitForEventId(reqEv->id);
+                assert(resp->type=="MEDIA_FRAME_RESPONSE");
+
+                MediaResponseFrame processedImg(resp);
+                img = QSharedPointer<QImage>(new QImage(processedImg.img));
+                //annotTimestamp = processedImg.req;
+                startTimestamp = processedImg.start;
+                endTimestamp = processedImg.end;
+
+            }
+            catch (std::runtime_error &err)
+            {
+                cout << "Timeout getting frame " << annotTimestamp << endl;
+                continue;
+            }
+
+            if(annotTimestamp < startTimestamp || annotTimestamp > endTimestamp)
+            {
+                cout << "Warning: found a frame but it does not cover requested time" << endl;
+                cout << "Requested: " << annotTimestamp << endl;
+                cout << "Found: " << startTimestamp << " to " << endTimestamp << endl;
+                continue;
+            }
+
+            imgs.append(img);
+
+            int len = img->byteCount();
+
+            //Send image to algorithm module
+            assert(img->format() == QImage::Format_RGB888);
+            std::tr1::shared_ptr<class Event> foundImgEv(new Event("TRAINING_IMG_FOUND"));
+            QString imgPreamble2 = QString("RGB_IMAGE_DATA TIMESTAMP=%1 HEIGHT=%2 WIDTH=%3\n").
+                                arg(annotTimestamp).
+                                arg(img->height()).
+                                arg(img->width());
+            foundImgEv->data = imgPreamble2.toLocal8Bit().constData();
+            class BinaryData *imgRaw = new BinaryData();
+            imgRaw->Copy((const unsigned char *)img->bits(), len);
+            foundImgEv->raw = imgRaw;
+            foundImgEv->toUuid = newUuid;
+            this->eventLoop->SendEvent(foundImgEv);
+
+            //Get annotation data and sent it to the algorithm
+            std::tr1::shared_ptr<class Event> getAnnotEv(new Event("GET_ANNOTATION_AT_TIME"));
+            getAnnotEv->toUuid = annotationUuids[i];
+            QString reqDataStr = QString("%1").arg(annotTimestamp);
+            getAnnotEv->data = reqDataStr.toLocal8Bit().constData();
+            getAnnotEv->id = this->eventLoop->GetId();
+            this->eventLoop->SendEvent(getAnnotEv);
+
+            std::tr1::shared_ptr<class Event> annotXmlRet = this->eventReceiver->WaitForEventId(getAnnotEv->id);
+
+            QString annotXml;
+            QTextStream test(&annotXml);
+            test << qPrintable(annotXmlRet->data);
+            assert(annotXml.mid(annotXml.length()-1).toLocal8Bit().constData()[0]=='\n');
+
+            std::tr1::shared_ptr<class Event> foundPosEv(new Event("TRAINING_POS_FOUND"));
+            foundPosEv->data = annotXml.toUtf8().constData();
+            foundPosEv->toUuid = newUuid;
+            this->eventLoop->SendEvent(foundPosEv);
+        }
+    }
+
+    std::tr1::shared_ptr<class Event> trainingFinishEv(new Event("TRAINING_DATA_FINISH"));
+    trainingFinishEv->toUuid = newUuid;
+    this->eventLoop->SendEvent(trainingFinishEv);
+
+}
+
+void UserActions::SetMediaInterface(QUuid mediaUuidIn)
+{
+
+    this->mediaUuid = mediaUuidIn;
+}

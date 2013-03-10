@@ -456,3 +456,19 @@ void Workspace::SetMediaUuid(QUuid mediaUuidIn)
     this->mediaUuid = mediaUuidIn;
 
 }
+
+void Workspace::AddProcessing(QUuid uid,
+                              class EventLoop *eventLoop,
+                              class EventReceiver *eventReceiver)
+{
+    //Create processing module
+    std::tr1::shared_ptr<class Event> newAnnEv(new Event("NEW_PROCESSING"));
+    QString dataStr = QString("%1").arg(uid.toString());
+    newAnnEv->data = dataStr.toLocal8Bit().constData();
+    newAnnEv->id = eventLoop->GetId();
+    eventLoop->SendEvent(newAnnEv);
+
+    //Wait for workspace to register this annotation
+    std::tr1::shared_ptr<class Event> response = eventReceiver->WaitForEventId(newAnnEv->id);
+    assert(response->type == "PROCESSING_ADDED");
+}

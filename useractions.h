@@ -16,10 +16,12 @@ public:
 
     int SaveAs(QString fina);
     void Load(QString fina);
+    void TrainModel(QList<QUuid> annotationUuids);
 
+    void SetMediaInterface(QUuid mediaUuidIn);
 protected:
 
-
+    QUuid mediaUuid;
 };
 
 #endif // USERACTIONS_H

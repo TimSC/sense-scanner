@@ -288,6 +288,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->userActions = new UserActions();
     this->userActions->SetEventLoop(this->eventLoop);
+    this->userActions->SetMediaInterface(this->mediaInterfaceBack->GetUuid());
     this->userActions->Start();
 
     //Set visibility to show about box
@@ -435,14 +436,10 @@ void MainWindow::RegenerateSourcesList()
     if(this->sourcesModel.rowCount() != annotationUuids.size())
         this->sourcesModel.setRowCount(annotationUuids.size());
     for (int row = 0; row < annotationUuids.size(); ++row)
-    {
-        std::tr1::shared_ptr<class Event> getSourceNameEv(new Event("GET_SOURCE_FILENAME"));
-        getSourceNameEv->toUuid = annotationUuids[row];
-        getSourceNameEv->id = this->eventLoop->GetId();
-        this->eventLoop->SendEvent(getSourceNameEv);
-
-        std::tr1::shared_ptr<class Event> sourceName = this->eventReceiver->WaitForEventId(getSourceNameEv->id);
-        QString fina = sourceName->data;
+    {   
+        QString fina = Annotation::GetSourceFilename(annotationUuids[row],
+                                              this->eventLoop,
+                                              this->eventReceiver);
         QFileInfo finaInfo(fina);
 
         for (int column = 0; column < 1; ++column)
@@ -909,9 +906,51 @@ void MainWindow::TrainModelPressed()
     cout << "TrainModelPressed" << endl;
     QItemSelectionModel *selection = this->ui->sourcesAlgGui->ui->dataSources->selectionModel();
     QList<QUuid> annotationUuids = this->workspace.GetAnnotationUuids();
+    int countMarkedFrames = 0;
+    QModelIndexList selectList = selection->selectedRows(0);
+    QList<std::vector<std::string> > seqMarked;
+    QList<QUuid> selectedAnnotUuids;
+    QString annotUuidStr;
+
+    for(unsigned int i=0;i<selectList.size();i++)
+    {
+        QModelIndex &ind = selectList[i];
+        selectedAnnotUuids.append(annotationUuids[ind.row()]);
+        if(i > 0) annotUuidStr.append(",");
+        annotUuidStr.append(annotationUuids[ind.row()].toString());
+    }
+
+    for(unsigned int i=0;i<selectedAnnotUuids.size();i++)
+    {
+        QUuid annotUuid = selectedAnnotUuids[i];
+        //For each annotated frame
+        std::tr1::shared_ptr<class Event> getMarkedEv(new Event("GET_MARKED_LIST"));
+        getMarkedEv->toUuid = annotUuid;
+        getMarkedEv->id = this->eventLoop->GetId();
+        this->eventLoop->SendEvent(getMarkedEv);
+
+        std::tr1::shared_ptr<class Event> markedEv = this->eventReceiver->WaitForEventId(getMarkedEv->id);
+        std::vector<std::string> splitMarked = split(markedEv->data.toLocal8Bit().constData(),',');
+        seqMarked.push_back(splitMarked);
+        countMarkedFrames += splitMarked.size();
+    }
+
+    if(countMarkedFrames==0)
+    {
+        if(this->errMsg == NULL)
+            this->errMsg = new QMessageBox(this);
+        this->errMsg->setWindowTitle("Error: No training data");
+        this->errMsg->setText("Annotate at least one frame before trying to train a model.");
+        this->errMsg->exec();
+        return;
+    }
+
+    std::tr1::shared_ptr<class Event> trainEv(new Event("TRAIN_MODEL"));
+    trainEv->data = annotUuidStr;
+    this->eventLoop->SendEvent(trainEv);
 
     //Count frames, because at least one is needed to train
-    int countMarkedFrames = 0;
+/*    int countMarkedFrames = 0;
     QModelIndexList selectList = selection->selectedRows(0);
     QList<std::vector<std::string> > seqMarked;
     for(unsigned int i=0;i<selectList.size();i++)
@@ -1049,7 +1088,7 @@ void MainWindow::TrainModelPressed()
     std::tr1::shared_ptr<class Event> trainingFinishEv(new Event("TRAINING_DATA_FINISH"));
     trainingFinishEv->toUuid = newUuid;
     this->eventLoop->SendEvent(trainingFinishEv);
-
+*/
 }
 
 void MainWindow::ApplyModelPressed()
