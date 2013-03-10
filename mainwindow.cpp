@@ -545,24 +545,27 @@ void MainWindow::RegenerateProcessingList()
         {   
             std::ostringstream displayLine;
             float progress = this->workspace.GetProcessingProgress(algUuids[row]);
+            QString progressStr = QString::number(progress * 100., 'f', 1).toLocal8Bit().constData();
+            const char *progressCStr = progressStr.toLocal8Bit().constData();
             AlgorithmProcess::ProcessState state = this->workspace.GetProcessingState(algUuids[row]);
+
             if(state!=AlgorithmProcess::STOPPED)
             {
-                if(state == AlgorithmProcess::STARTING) displayLine << "Starting " << progress;
-                if(state == AlgorithmProcess::RUNNING) displayLine << "Running " << progress;
-                if(state == AlgorithmProcess::RUNNING_PAUSING) displayLine << "Pausing... " << progress;
-                if(state == AlgorithmProcess::RUNNING_STOPPING) displayLine << "Stopping... " << progress;
+                if(state == AlgorithmProcess::STARTING) displayLine << "Starting " << progressCStr;
+                if(state == AlgorithmProcess::RUNNING) displayLine << "Running " << progressCStr;
+                if(state == AlgorithmProcess::RUNNING_PAUSING) displayLine << "Pausing... " << progressCStr;
+                if(state == AlgorithmProcess::RUNNING_STOPPING) displayLine << "Stopping... " << progressCStr;
                 if(state == AlgorithmProcess::PAUSED)
                 {
-                    if(progress<1.f) displayLine << "Paused " << progress;
-                    else displayLine << "Done " << progress;
+                    if(progress<1.f) displayLine << "Paused " << progressCStr;
+                    else displayLine << "Done ";
                 }
             }
             else
             {
                 if(progress < 1.f)
                 {
-                    displayLine << "Stopped " <<progress;
+                    displayLine << "Stopped " << progressCStr;
                 }
                 else
                     displayLine << "Done";
