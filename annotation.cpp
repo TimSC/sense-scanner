@@ -111,6 +111,29 @@ int TrackingAnnotationData::GetAnnotationBetweenTimestamps(unsigned long long st
     return 0;
 }
 
+int TrackingAnnotationData::GetAnnotationBeforeTimestamps(unsigned long long ti,
+    std::vector<std::vector<float> > &annot,
+    unsigned long long &outAnnotationTime)
+{
+    //Try closest annotation before requested time
+    outAnnotationTime = 0;
+    annot.clear();
+    int found = 0;
+
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it = this->pos.begin(); it != this->pos.end(); it++)
+    {
+        unsigned long long t = it->first;
+        if(t > ti) continue;
+        if(t < outAnnotationTime) continue;
+
+        outAnnotationTime = it->first;
+        annot = it->second;
+        found = 1;
+    }
+    return found;
+}
+
 vector<unsigned long long> TrackingAnnotationData::GetAnnotationTimesBetweenTimestamps(unsigned long long startTime,
                                                                                       unsigned long long endTime)
 {
@@ -713,6 +736,8 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("ADD_ANNOTATION_AT_TIME", *this->eventReceiver);
     this->eventLoop->AddListener("REMOVE_ANNOTATION_AT_TIME", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ANNOTATION_AT_TIME", *this->eventReceiver);
+    this->eventLoop->AddListener("GET_ANNOTATION_BEFORE_TIME", *this->eventReceiver);
+
     this->eventLoop->AddListener("SET_ALG_UUID", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ALG_UUID", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ALL_ANNOTATION_XML", *this->eventReceiver);
@@ -761,6 +786,37 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         assert(this->parentAnn->track!=NULL);
         int found = this->parentAnn->track->GetAnnotationBetweenTimestamps(startTime,
             endTime, requestedTime,
+            annot, annotationTime);
+
+        //Return response by event
+        std::tr1::shared_ptr<class Event> responseEv(new Event("ANNOTATION_FRAME"));
+        responseEv->fromUuid = algUid;
+        if(found)
+        {
+            QString xmlStr;
+            QTextStream xml(&xmlStr);
+            TrackingAnnotationData::FrameToXml(annot, annotationTime / 1000., xml);
+            responseEv->data = xmlStr.toLocal8Bit().constData();
+        }
+        else
+        {
+            responseEv->data = "FRAME_NOT_FOUND";
+        }
+        responseEv->id = ev->id;
+        this->eventLoop->SendEvent(responseEv);
+    }
+
+    if(ev->type=="GET_ANNOTATION_BEFORE_TIME")
+    {
+        //Decode request
+        unsigned long long ti = ev->data.toULongLong();
+        std::vector<std::vector<float> > annot;
+        unsigned long long annotationTime;
+
+        //Perform request
+        assert(this->parentAnn!=NULL);
+        assert(this->parentAnn->track!=NULL);
+        int found = this->parentAnn->track->GetAnnotationBeforeTimestamps(ti,
             annot, annotationTime);
 
         //Return response by event
@@ -1237,6 +1293,47 @@ int Annotation::GetAnnotationBetweenFrames(unsigned long long startTime,
     std::tr1::shared_ptr<class Event> reqEv(new Event("GET_ANNOTATION_BETWEEN_TIMES"));
     reqEv->id = eventLoop->GetId();
     QString arg = QString("%1,%2,%3").arg(startTime).arg(endTime).arg(requestedTime);
+    reqEv->data = arg.toLocal8Bit().constData();
+    reqEv->toUuid = annotUuid;
+    eventLoop->SendEvent(reqEv);
+
+    assert(eventReceiver!=NULL);
+    try
+    {
+        std::tr1::shared_ptr<class Event> response = eventReceiver->WaitForEventId(reqEv->id);
+        assert(response->type=="ANNOTATION_FRAME");
+        if(response->data == "FRAME_NOT_FOUND")
+        {
+            return 0;
+        }
+        else
+        {
+            double ti = 0.;
+            QString xml = response->data;
+            int ret = TrackingAnnotationData::FrameFromXml(xml, frameOut, tiOut);
+            if(ret==0) return -1; //Xml error
+            return 1;
+        }
+    }
+    catch(std::runtime_error &err)
+    {
+        //Probably caused by aborted wait
+    }
+    return -2;
+}
+
+int Annotation::GetAnnotationBeforeTime(unsigned long long ti,
+                                               QUuid annotUuid,
+                                               class EventLoop *eventLoop,
+                                               class EventReceiver *eventReceiver,
+                                               std::vector<std::vector<float> > &frameOut,
+                                               double &tiOut)
+{
+    frameOut.clear();
+    tiOut = 0.;
+    std::tr1::shared_ptr<class Event> reqEv(new Event("GET_ANNOTATION_BEFORE_TIME"));
+    reqEv->id = eventLoop->GetId();
+    QString arg = QString("%1").arg(ti);
     reqEv->data = arg.toLocal8Bit().constData();
     reqEv->toUuid = annotUuid;
     eventLoop->SendEvent(reqEv);

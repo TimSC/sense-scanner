@@ -33,8 +33,14 @@ public:
         std::vector<std::vector<float> > &annot,
         unsigned long long &annotationTime);
     void DeleteAnnotationAtTimestamp(unsigned long long annotationTime);
+
     std::vector<unsigned long long> GetAnnotationTimesBetweenTimestamps(unsigned long long startTime,
         unsigned long long endTime);
+
+    int GetAnnotationBeforeTimestamps(unsigned long long ti,
+        std::vector<std::vector<float> > &annot,
+        unsigned long long &outAnnotationTime);
+
     void SetAnnotationBetweenTimestamps(unsigned long long startTime,
         unsigned long long endTime,
         std::vector<std::vector<float> > annot);
@@ -178,6 +184,13 @@ public:
     static int GetAnnotationBetweenFrames(unsigned long long startTime,
                                                unsigned long long endTime,
                                                unsigned long long requestedTime,
+                                               QUuid annotUuid,
+                                               class EventLoop *eventLoop,
+                                               class EventReceiver *eventReceiver,
+                                               std::vector<std::vector<float> > &frameOut,
+                                               double &tiOut);
+
+    static int GetAnnotationBeforeTime(unsigned long long ti,
                                                QUuid annotUuid,
                                                class EventLoop *eventLoop,
                                                class EventReceiver *eventReceiver,

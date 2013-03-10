@@ -34,6 +34,8 @@ void ApplyModel::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("MEDIA_FRAME_RESPONSE", *this->eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_FRAME", *this->eventReceiver);
     this->eventLoop->AddListener("PREDICTION_RESULT", *this->eventReceiver);
+    this->eventLoop->AddListener("AUTO_LABELED_END", *this->eventReceiver);
+
 }
 
 void ApplyModel::SetMediaInterface(QUuid mediaInterfaceIn)
@@ -70,6 +72,39 @@ void ApplyModel::Update()
         this->algUuidSet = 1;
         this->msleep(1);
         return;
+    }
+
+    //Get algorithm progress so far
+    unsigned long long autoLabeledEnd = Annotation::GetAutoLabeledEnd(this->annotUuid,
+                                    this->eventLoop,
+                                    this->eventReceiver);
+    if(autoLabeledEnd>0)
+    {
+        std::vector<std::vector<float> > annot;
+        double ti=0;
+
+        //Initialise current model to closest frame
+        int found = Annotation::GetAnnotationBeforeTime(autoLabeledEnd,
+                                                        this->annotUuid,
+                                                         this->eventLoop,
+                                                         this->eventReceiver,
+                                                               annot,
+                                                               ti);
+        if(found)
+        {
+            this->currentModel = annot;
+            this->currentModelSet = true;
+            MediaResponseFrame processedImg;
+            AvBinMedia::GetMediaFrame(this->srcFina,
+                                 ti * 1000.,
+                                 this->mediaInterface,
+                                 this->eventLoop,
+                                 this->eventReceiver,
+                                 processedImg);
+            this->currentStartTimestamp = processedImg.start;
+            this->currentEndTimestamp = processedImg.end;
+            this->currentTimeSet = 1;
+        }
     }
 
     /*
