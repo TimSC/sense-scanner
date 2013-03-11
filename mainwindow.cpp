@@ -460,6 +460,7 @@ void MainWindow::RegenerateSourcesList()
         QString fina = Annotation::GetSourceFilename(annotationUuids[row],
                                               this->eventLoop,
                                               this->eventReceiver);
+
         QFileInfo finaInfo(fina);
 
         for (int column = 0; column < 1; ++column)
@@ -468,8 +469,14 @@ void MainWindow::RegenerateSourcesList()
             if(item!=NULL)
                 continue;
 
-            item = new QStandardItem(icon, finaInfo.fileName());
-            this->sourcesModel.setItem(row, column, item);
+            //Setting this to zero length and then to a non-zero length
+            //seems to glitch. This is a work around, which ignores zero length strings.
+            if(fina.length()>0)
+            {
+                //Set the source name
+                item = new QStandardItem(icon, finaInfo.fileName());
+                this->sourcesModel.setItem(row, column, item);
+            }
         }
 
         for (int column = 1; column < 2; ++column)
