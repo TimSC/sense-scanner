@@ -43,6 +43,7 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->pausing = 0;
     this->initDone = 0;
     this->dataLoaded = 0;
+    this->progress = 0.;
 
     //QString fina = "algout.txt";
     this->eventLoop = eventLoopIn;
@@ -202,9 +203,11 @@ AlgorithmProcess::ProcessState AlgorithmProcess::GetState()
         return AlgorithmProcess::STOPPED;
     }
     if(!this->dataLoaded) return AlgorithmProcess::RUNNING_PREPARING;
-    if(this->paused) return AlgorithmProcess::PAUSED;
     if(this->stopping) return AlgorithmProcess::RUNNING_STOPPING;
+    if(this->progress >= 1.) return AlgorithmProcess::READY;
+    if(this->paused) return AlgorithmProcess::PAUSED;
     if(this->pausing) return AlgorithmProcess::RUNNING_PAUSING;
+
     return AlgorithmProcess::RUNNING;
 }
 
@@ -415,6 +418,8 @@ void AlgorithmProcess::ProcessAlgOutput()
         openEv->fromUuid = this->uid;
         el.SendEvent(openEv);
         ReadLineFromBuffer(this->algOutBuffer,1);//Pop this line
+
+        this->progress = cmd.mid(9).toDouble();
         return;
     }
 
@@ -696,4 +701,20 @@ int AlgorithmProcess::PredictFrame(QSharedPointer<QImage> img,
         cout << "Warning: Prediction timed out" << endl;
     }
     return 0;
+}
+
+AlgorithmProcess::ProcessState AlgorithmProcess::GetState(QUuid algUuid,
+                      class EventLoop *eventLoop,
+                      class EventReceiver *eventReceiver)
+{
+    //Ask alg process for state
+    std::tr1::shared_ptr<class Event> requestEv(new Event("GET_STATE"));
+    requestEv->id = eventLoop->GetId();
+    requestEv->toUuid = algUuid;
+    eventLoop->SendEvent(requestEv);
+
+    //Wait for response
+    std::tr1::shared_ptr<class Event> resp = eventReceiver->WaitForEventId(requestEv->id);
+    assert(resp->type=="ALG_STATE");
+    return (AlgorithmProcess::ProcessState)resp->data.toInt();
 }

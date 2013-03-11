@@ -300,6 +300,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->applyModelPool.SetEventLoop(this->eventLoop);
 
+    //Set splash screen size
+    this->ui->aboutDock->resize(400,400);
+
 }
 
 MainWindow::~MainWindow()
@@ -554,12 +557,13 @@ void MainWindow::RegenerateProcessingList()
             {
                 if(state == AlgorithmProcess::STARTING) displayLine << "Starting";
                 if(state == AlgorithmProcess::RUNNING_PREPARING) displayLine << "Preparing";
-                if(state == AlgorithmProcess::RUNNING) displayLine << "Running " << progressCStr;
-                if(state == AlgorithmProcess::RUNNING_PAUSING) displayLine << "Pausing... " << progressCStr;
-                if(state == AlgorithmProcess::RUNNING_STOPPING) displayLine << "Stopping... " << progressCStr;
+                if(state == AlgorithmProcess::RUNNING) displayLine << "Training Model " << progressCStr << "%";
+                if(state == AlgorithmProcess::RUNNING_PAUSING) displayLine << "Pausing... " << progressCStr << "%";
+                if(state == AlgorithmProcess::RUNNING_STOPPING) displayLine << "Stopping... " << progressCStr << "%";
+                if(state == AlgorithmProcess::READY) displayLine << "Ready";
                 if(state == AlgorithmProcess::PAUSED)
                 {
-                    if(progress<1.f) displayLine << "Paused " << progressCStr;
+                    if(progress<1.f) displayLine << "Paused " << progressCStr << "%";
                     else displayLine << "Done ";
                 }
             }
@@ -567,7 +571,7 @@ void MainWindow::RegenerateProcessingList()
             {
                 if(progress < 1.f)
                 {
-                    displayLine << "Stopped " << progressCStr;
+                    displayLine << "Stopped " << progressCStr << "%";
                 }
                 else
                     displayLine << "Done";

@@ -29,10 +29,11 @@ public:
         PAUSED = 1,
         STARTING = 2,
         RUNNING_PREPARING = 3,
-        RUNNING = 4,
+        RUNNING = 4, //Training
         RUNNING_PAUSING = 5,
         RUNNING_STOPPING = 6,
-        STOPPED = 7
+        STOPPED = 7, //Failed?
+        READY = 8 //Ready to make prediction
     };
 
     QUuid GetUid();
@@ -49,6 +50,11 @@ public:
                         class EventLoop *eventLoop,
                         class EventReceiver *eventReceiver,
                         std::vector<std::vector<float> > &out);
+
+    //This version is for all threads except the main thread
+    static ProcessState GetState(QUuid algUuid,
+                          class EventLoop *eventLoop,
+                          class EventReceiver *eventReceiver);
 
     //This is safe for the main thread to call, but no other thread may do so
     ProcessState GetState();
@@ -83,6 +89,7 @@ protected:
     QByteArray algErrBuffer;
     QUuid uid;
     QTimer timer;
+    double progress;
     QList<unsigned long long> saveModelRequestIds;
 };
 

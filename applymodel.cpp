@@ -35,6 +35,7 @@ void ApplyModel::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("ANNOTATION_FRAME", *this->eventReceiver);
     this->eventLoop->AddListener("PREDICTION_RESULT", *this->eventReceiver);
     this->eventLoop->AddListener("AUTO_LABELED_END", *this->eventReceiver);
+    this->eventLoop->AddListener("ALG_STATE", *this->eventReceiver);
 
 }
 
@@ -127,7 +128,10 @@ void ApplyModel::Update()
     unsigned long long nextTi = 0; //millisec
 
     //Check algorithm is ready to work
-    //TODO
+    AlgorithmProcess::ProcessState state = AlgorithmProcess::GetState(this->algUuid,
+                          this->eventLoop,
+                          this->eventReceiver);
+
 
     //If needed, get the first frame from the video
     if(this->currentTimeSet==false)
