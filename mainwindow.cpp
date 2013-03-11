@@ -300,8 +300,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->applyModelPool.SetEventLoop(this->eventLoop);
 
-    //Set splash screen size
+    //Set splash screen size and centre on screen
     this->ui->aboutDock->resize(400,400);
+    this->ui->aboutDock->setGeometry(
+        QStyle::alignedRect(
+            Qt::LeftToRight,
+            Qt::AlignCenter,
+            this->ui->aboutDock->size(),
+            qApp->desktop()->availableGeometry()
+        ));
 
 }
 
