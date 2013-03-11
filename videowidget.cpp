@@ -379,7 +379,7 @@ void VideoWidget::SetSceneControl(BaseSceneController *sceneControlIn)
         {
             this->ui->graphicsView->setScene(scene);
             this->sceneControl->Redraw();
-            this->FitToWindow();
+            this->SetRawScale(0.3);
         }
         else
             this->ui->graphicsView->setScene(NULL);
@@ -403,11 +403,23 @@ void VideoWidget::FitToWindow()
     if(this->sceneControl == NULL) return;
     MouseGraphicsScene *scene = this->sceneControl->GetScene();
     if(scene == NULL) return;
-    this->ui->graphicsView->fitInView(scene->itemsBoundingRect());
-    QMatrix mat = this->ui->graphicsView->matrix();
 
+    //This fits but does not lock horizontal and verticle scale factor
+    QRectF bbox = scene->itemsBoundingRect();
+    QSize ws = this->ui->graphicsView->size();
+    this->ui->graphicsView->fitInView(bbox);
+
+    //This locks the horizontal and verticle scale factor
+    QMatrix mat = this->ui->graphicsView->matrix();
     qreal scale = mat.m11();
     if(mat.m22() < scale) scale = mat.m22();
+    mat.setMatrix(scale,mat.m12(),mat.m21(),scale,mat.dx(),mat.dy());
+    this->ui->graphicsView->setMatrix(mat);
+}
+
+void VideoWidget::SetRawScale(double scale)
+{
+    QMatrix mat;
     mat.setMatrix(scale,mat.m12(),mat.m21(),scale,mat.dx(),mat.dy());
     this->ui->graphicsView->setMatrix(mat);
 }

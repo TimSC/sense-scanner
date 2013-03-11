@@ -203,7 +203,7 @@ public slots:
     void GetKinatomicHomePage();
     void AboutPressed();
 
-    void ShowVideoPressed();
+    void ShowSourcesPressed();
     void FitVideoToWindow();
 
 protected:

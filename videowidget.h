@@ -61,6 +61,7 @@ public slots:
     void SetSceneControl(BaseSceneController *sceneControlIn);
     void SetAnnotationTrack(QUuid srcUuid);
     void FitToWindow();
+    void SetRawScale(double scale);
     void TimeChanged(QTime time);
     void SetEventLoop(class EventLoop *eventLoopIn);
     virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);

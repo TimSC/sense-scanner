@@ -52,7 +52,7 @@
      <string>Video</string>
     </property>
     <addaction name="actionFit_to_Window"/>
-    <addaction name="actionShow"/>
+    <addaction name="actionShow_Sources"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -159,6 +159,11 @@
   <action name="actionKinatomic_Home_Page">
    <property name="text">
     <string>Kinatomic Home Page</string>
+   </property>
+  </action>
+  <action name="actionShow_Sources">
+   <property name="text">
+    <string>Show Sources</string>
    </property>
   </action>
   <zorder>aboutDock</zorder>
@@ -366,6 +371,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionShow_Sources</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ShowSourcesPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>349</x>
+     <y>247</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>ImportVideo()</slot>
@@ -381,7 +402,7 @@
   <slot>RunProcessPressed()</slot>
   <slot>RemoveProcessPressed()</slot>
   <slot>AboutPressed()</slot>
-  <slot>ShowVideoPressed()</slot>
+  <slot>ShowSourcesPressed()</slot>
   <slot>GetKnowledgeBase()</slot>
   <slot>GetSupport()</slot>
   <slot>GetKinatomicHomePage()</slot>

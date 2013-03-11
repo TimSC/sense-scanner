@@ -1142,9 +1142,9 @@ void MainWindow::AboutPressed()
     this->ui->aboutDock->show();
 }
 
-void MainWindow::ShowVideoPressed()
+void MainWindow::ShowSourcesPressed()
 {
-    //this->ui->videoDock->show();
+    this->ui->sourcesAlgDock->show();
 }
 
 void MainWindow::GetKnowledgeBase()
