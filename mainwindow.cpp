@@ -309,7 +309,6 @@ MainWindow::MainWindow(QWidget *parent) :
             this->ui->aboutDock->size(),
             qApp->desktop()->availableGeometry()
         ));
-
 }
 
 MainWindow::~MainWindow()

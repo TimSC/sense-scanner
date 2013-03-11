@@ -33,7 +33,7 @@
      <x>0</x>
      <y>0</y>
      <width>525</width>
-     <height>25</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -81,6 +81,9 @@
    <property name="cursor">
     <cursorShape>ArrowCursor</cursorShape>
    </property>
+   <property name="windowTitle">
+    <string>Video View</string>
+   </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
@@ -104,7 +107,7 @@
     <string>Welcome to Sense Scanner</string>
    </property>
    <attribute name="dockWidgetArea">
-    <number>8</number>
+    <number>1</number>
    </attribute>
    <widget class="AboutGui" name="aboutWidget"/>
   </widget>
@@ -168,6 +171,7 @@
     <string>Kinatomic Home Page</string>
    </property>
   </action>
+  <zorder>aboutDock</zorder>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
