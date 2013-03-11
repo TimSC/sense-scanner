@@ -102,6 +102,10 @@ int UserActions::SaveAs(QString fina)
     QFileInfo pathInfo(fina);
     QDir dir(pathInfo.absoluteDir());
 
+    //Signal that save has started
+    std::tr1::shared_ptr<class Event> saveEv(new Event("SAVE_STARTED"));
+    this->eventLoop->SendEvent(saveEv);
+
     //Save data to file
     QFile f(tmpFina);
     f.open( QIODevice::WriteOnly );
@@ -210,11 +214,19 @@ int UserActions::SaveAs(QString fina)
         QFile::remove(fina);
     QFile::rename(tmpFina, fina);
 
+    //Signal that save has finished
+    std::tr1::shared_ptr<class Event> saveDoneEv(new Event("SAVE_FINISHED"));
+    this->eventLoop->SendEvent(saveDoneEv);
+
     return 1;
 }
 
 void UserActions::Load(QString fina)
 {
+    //Signal that load has started
+    std::tr1::shared_ptr<class Event> loadEv(new Event("LOAD_STARTED"));
+    this->eventLoop->SendEvent(loadEv);
+
     //Parse XML to DOM
     QFile f(fina);
     QDomDocument doc("mydocument");
@@ -359,6 +371,11 @@ void UserActions::Load(QString fina)
         loadEv->data = dataStr;
         this->eventLoop->SendEvent(loadEv);
     }
+
+    //Signal that load has finished
+    std::tr1::shared_ptr<class Event> loadDoneEv(new Event("LOAD_FINISHED"));
+    this->eventLoop->SendEvent(loadDoneEv);
+
 }
 
 void UserActions::TrainModel(QList<QUuid> annotationUuids)

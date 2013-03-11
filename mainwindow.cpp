@@ -249,6 +249,11 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("MEDIA_DURATION_RESPONSE", *this->eventReceiver);
     this->eventLoop->AddListener("ALG_STATE", *this->eventReceiver);
 
+    this->eventLoop->AddListener("SAVE_STARTED", *this->eventReceiver);
+    this->eventLoop->AddListener("SAVE_FINISHED", *this->eventReceiver);
+    this->eventLoop->AddListener("LOAD_STARTED", *this->eventReceiver);
+    this->eventLoop->AddListener("LOAD_FINISHED", *this->eventReceiver);
+
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop,1);
     this->mediaInterfaceFront->Start();
@@ -309,6 +314,7 @@ MainWindow::MainWindow(QWidget *parent) :
             this->ui->aboutDock->size(),
             qApp->desktop()->availableGeometry()
         ));
+
 }
 
 MainWindow::~MainWindow()
@@ -715,6 +721,26 @@ void MainWindow::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         unsigned long long duration = ev->data.toULongLong();
         QString fina = QString::fromUtf8(ev->buffer);
         this->sourceDuration[fina] = duration;
+    }
+
+    if(ev->type=="SAVE_STARTED")
+    {
+        this->ui->statusBar->showMessage(tr("Saving..."));
+    }
+
+    if(ev->type=="SAVE_FINISHED")
+    {
+        this->ui->statusBar->showMessage(tr("Save Complete"),2000);
+    }
+
+    if(ev->type=="LOAD_STARTED")
+    {
+        this->ui->statusBar->showMessage(tr("Loading..."));
+    }
+
+    if(ev->type=="LOAD_FINISHED")
+    {
+        this->ui->statusBar->showMessage(tr("Load Complete"),2000);
     }
 }
 
