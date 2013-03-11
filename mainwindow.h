@@ -205,6 +205,9 @@ public slots:
 
     void ShowVideoPressed();
     void FitVideoToWindow();
+
+protected:
+    void resizeEvent(QResizeEvent * event);
 };
 
 #endif // MAINWINDOW_H

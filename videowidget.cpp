@@ -379,6 +379,7 @@ void VideoWidget::SetSceneControl(BaseSceneController *sceneControlIn)
         {
             this->ui->graphicsView->setScene(scene);
             this->sceneControl->Redraw();
+            this->FitToWindow();
         }
         else
             this->ui->graphicsView->setScene(NULL);

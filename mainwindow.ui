@@ -6,22 +6,22 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>525</width>
-    <height>379</height>
+    <width>699</width>
+    <height>496</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="SourceAlgGui" name="sourcesAlgGui" native="true">
-      <property name="minimumSize">
-       <size>
-        <width>200</width>
-        <height>200</height>
-       </size>
+     <widget class="VideoWidget" name="videoWidget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
      </widget>
     </item>
@@ -32,7 +32,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>525</width>
+     <width>699</width>
      <height>23</height>
     </rect>
    </property>
@@ -77,22 +77,6 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QDockWidget" name="videoDock">
-   <property name="cursor">
-    <cursorShape>ArrowCursor</cursorShape>
-   </property>
-   <property name="windowTitle">
-    <string>Video View</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>2</number>
-   </attribute>
-   <widget class="VideoWidget" name="videoWidget">
-    <property name="cursor">
-     <cursorShape>ArrowCursor</cursorShape>
-    </property>
-   </widget>
-  </widget>
   <widget class="QDockWidget" name="aboutDock">
    <property name="minimumSize">
     <size>
@@ -110,6 +94,12 @@
     <number>1</number>
    </attribute>
    <widget class="AboutGui" name="aboutWidget"/>
+  </widget>
+  <widget class="QDockWidget" name="sourcesAlgDock">
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="SourceAlgGui" name="sourcesAlgGui"/>
   </widget>
   <action name="actionNew_Workspace">
    <property name="text">
@@ -172,6 +162,7 @@
    </property>
   </action>
   <zorder>aboutDock</zorder>
+  <zorder>sourcesAlgDock</zorder>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

@@ -315,6 +315,10 @@ MainWindow::MainWindow(QWidget *parent) :
             qApp->desktop()->availableGeometry()
         ));
 
+    //Set initial window size
+    //this->resize(800,700);
+    //this->ui->sourcesAlgGui->setMaximumSize(300,16777215);
+    //this->ui->videoDock->resize(1000,1000);
 }
 
 MainWindow::~MainWindow()
@@ -1140,7 +1144,7 @@ void MainWindow::AboutPressed()
 
 void MainWindow::ShowVideoPressed()
 {
-    this->ui->videoDock->show();
+    //this->ui->videoDock->show();
 }
 
 void MainWindow::GetKnowledgeBase()
@@ -1162,6 +1166,17 @@ void MainWindow::GetKinatomicHomePage()
 void MainWindow::FitVideoToWindow()
 {
     this->ui->videoWidget->FitToWindow();
+}
+
+void MainWindow::resizeEvent(QResizeEvent * event)
+{
+    //cout << event->size().width() << "," << event->size().height() << endl;
+    //cout << event->oldSize().width() << "," << event->oldSize().height() << endl;
+    int dx = event->size().width() - event->oldSize().width();
+    int dy = event->size().height() - event->oldSize().height();
+    QSize old = this->ui->videoWidget->size();
+    //this->ui->videoWidget->setMinimumSize(old.width() + dx, old.height() + dy);
+   // this->ui->videoWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 }
 
 
