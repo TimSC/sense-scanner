@@ -143,7 +143,6 @@ void BaseSceneController::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEven
 void BaseSceneController::Redraw()
 {
 
-
 }
 
 //********************************************************************
@@ -1011,22 +1010,10 @@ LogoSceneController::~LogoSceneController()
 
 }
 
-QWidget *LogoSceneController::ControlsFactory(QWidget *parent)
+void LogoSceneController::Redraw()
 {
-    return NULL;
-
+    this->scene->clear();
+    QPixmap pixmap("Kinatomic-Logo.jpg");
+    this->scene->addPixmap(pixmap);
 }
-
-QMenu *LogoSceneController::MenuFactory(QMenuBar *menuBar)
-{
-    return NULL;
-
-}
-
-MouseGraphicsScene *LogoSceneController::GetScene()
-{
-    return this->scene;
-}
-
-
 

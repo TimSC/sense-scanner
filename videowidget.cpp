@@ -67,7 +67,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->timer->start(10);
     this->ui->timeEdit->setDisplayFormat("hh:mm:ss:zzz");
 
-    //this->SetSceneControl(new class LogoSceneController(this));
+    this->SetSceneControl(new class LogoSceneController(this));
 }
 
 VideoWidget::~VideoWidget()
@@ -376,7 +376,10 @@ void VideoWidget::SetSceneControl(BaseSceneController *sceneControlIn)
     {
         MouseGraphicsScene *scene = this->sceneControl->GetScene();
         if(scene != NULL)
+        {
             this->ui->graphicsView->setScene(scene);
+            this->sceneControl->Redraw();
+        }
         else
             this->ui->graphicsView->setScene(NULL);
         this->ui->annotationTools->addWidget(this->sceneControl->ControlsFactory(this));

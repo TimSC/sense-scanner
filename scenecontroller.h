@@ -176,10 +176,7 @@ public:
     LogoSceneController(QObject *parent);
     virtual ~LogoSceneController();
 
-    QWidget *ControlsFactory(QWidget *parent);
-    QMenu *MenuFactory(QMenuBar *menuBar);
-    MouseGraphicsScene *GetScene();
-
+    virtual void Redraw();
 protected:
 
 };
