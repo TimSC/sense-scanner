@@ -64,7 +64,7 @@ public:
     void MouseLeaveEvent();
     unsigned long long GetSeekForwardTime();
     unsigned long long GetSeekBackTime();
-    QSharedPointer<MouseGraphicsScene> GetScene();
+    MouseGraphicsScene *GetScene();
     QTimer timer;
 
 public slots:
@@ -111,7 +111,7 @@ protected:
     class EventLoop *eventLoop;
     class EventReceiver *eventReceiver;
 
-    QSharedPointer<MouseGraphicsScene> scene;
+    MouseGraphicsScene *scene;
     int activePoint; //which point is selected
     unsigned int imgHeight, imgWidth;
     float markerSize;
@@ -137,5 +137,14 @@ protected:
     QUuid annotationUuid;
 };
 
+
+class LogoSceneController : public QObject
+{
+    Q_OBJECT
+public:
+    //TrackingSceneController(QObject *parent);
+    //virtual ~TrackingSceneController();
+
+};
 
 #endif // SCENECONTROLLER_H

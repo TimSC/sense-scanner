@@ -61,7 +61,7 @@ TrackingSceneController::TrackingSceneController(QObject *parent)
     this->frameRequestTime = 0;
     this->annotationTime = 0;
     this->annotationTimeSet = false;
-    this->scene = QSharedPointer<MouseGraphicsScene>(new MouseGraphicsScene(parent));
+    this->scene = new MouseGraphicsScene(parent);
     this->scene->SetSceneControl(this);
     this->activePoint = -1;
     this->imgWidth = 0;
@@ -85,12 +85,12 @@ TrackingSceneController::~TrackingSceneController()
 {
     cout << "TrackingAnnotation::~TrackingAnnotation()" << endl;
     this->item = QSharedPointer<QGraphicsPixmapItem>(NULL);
-    if(!this->scene.isNull())
+    if(this->scene != NULL)
     {
         this->scene->clear();
         this->scene->SetSceneControl(NULL);
+        delete this->scene;
     }
-    this->scene = QSharedPointer<MouseGraphicsScene>(NULL);
 
     if(this->annotationControls != NULL)
         delete annotationControls;
@@ -680,7 +680,7 @@ void TrackingSceneController::ResetCurentFrameShape()
     this->Redraw();
 }
 
-QSharedPointer<MouseGraphicsScene> TrackingSceneController::GetScene()
+MouseGraphicsScene *TrackingSceneController::GetScene()
 {
     return this->scene;
 }

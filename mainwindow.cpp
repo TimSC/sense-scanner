@@ -926,7 +926,6 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
         this->errMsg->setText(errMsgStr);
         this->errMsg->exec();
     }
-
 }
 
 void MainWindow::DeselectCurrentSource()

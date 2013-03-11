@@ -373,9 +373,9 @@ void VideoWidget::SetSceneControl(TrackingSceneController *sceneControlIn)
     this->sceneControl = sceneControlIn;
     if(this->sceneControl!=NULL)
     {
-        QSharedPointer<MouseGraphicsScene> scene = this->sceneControl->GetScene();
-        if(!scene.isNull())
-            this->ui->graphicsView->setScene(&*scene);
+        MouseGraphicsScene *scene = this->sceneControl->GetScene();
+        if(scene != NULL)
+            this->ui->graphicsView->setScene(scene);
         else
             this->ui->graphicsView->setScene(NULL);
         this->ui->annotationTools->addWidget(this->sceneControl->ControlsFactory(this));
@@ -396,8 +396,8 @@ void VideoWidget::SetAnnotationTrack(QUuid srcUuid)
 void VideoWidget::FitToWindow()
 {
     if(this->sceneControl == NULL) return;
-    QSharedPointer<MouseGraphicsScene> scene = this->sceneControl->GetScene();
-    if(scene.isNull()) return;
+    MouseGraphicsScene *scene = this->sceneControl->GetScene();
+    if(scene == NULL) return;
     this->ui->graphicsView->fitInView(scene->itemsBoundingRect());
     QMatrix mat = this->ui->graphicsView->matrix();
 
