@@ -893,20 +893,15 @@ void TrackingSceneController::SaveAnnotation()
         fileName.append(".annot");
     }
 
-    //Request data
-    std::tr1::shared_ptr<class Event> reqEv(new Event("GET_ANNOTATION_BY_XML"));
-    reqEv->toUuid = this->annotationUuid;
-    reqEv->id = this->eventLoop->GetId();
-    this->eventLoop->SendEvent(reqEv);
-
-    //Wait for response
-    std::tr1::shared_ptr<class Event> resp = this->eventReceiver->WaitForEventId(reqEv->id);
+    QString xml = Annotation::GetAllAnnotationByXml(this->annotationUuid,
+                                           this->eventLoop,
+                                           this->eventReceiver);
 
     //Write to file
     QFile outFile(fileName);
     outFile.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream fileStream(&outFile);
-    fileStream << resp->data.toUtf8().constData();
+    fileStream << xml.toUtf8().constData();
     fileStream.flush();
 }
 

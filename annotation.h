@@ -218,6 +218,9 @@ public:
                                         QUuid annotUuid,
                                         class EventLoop *eventLoop);
 
+    static QString GetAllAnnotationByXml(QUuid annotUuid,
+                                           class EventLoop *eventLoop,
+                                           class EventReceiver *eventReceiver);
 
     std::tr1::shared_ptr<class AnnotThread> annotThread;
     class TrackingAnnotationData *track;

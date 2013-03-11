@@ -1426,3 +1426,18 @@ void Annotation::SetAutoLabelTimeRange(unsigned long long startTime,
     eventLoop->SendEvent(requestEv);
 }
 
+QString Annotation::GetAllAnnotationByXml(QUuid annotUuid,
+                                       class EventLoop *eventLoop,
+                                       class EventReceiver *eventReceiver)
+{
+    //Request data
+    std::tr1::shared_ptr<class Event> reqEv(new Event("GET_ALL_ANNOTATION_XML"));
+    reqEv->toUuid = annotUuid;
+    reqEv->id = eventLoop->GetId();
+    eventLoop->SendEvent(reqEv);
+
+    //Wait for response
+    std::tr1::shared_ptr<class Event> resp = eventReceiver->WaitForEventId(reqEv->id);
+    assert(resp->type == "ANNOTATION_DATA");
+    return resp->data;
+}

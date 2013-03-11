@@ -138,12 +138,9 @@ int UserActions::SaveAs(QString fina)
                                                    this->eventReceiver);
 
             //Get annotation data
-            std::tr1::shared_ptr<class Event> getAnnotEv(new Event("GET_ALL_ANNOTATION_XML"));
-            getAnnotEv->toUuid = annotationUuids[i];
-            getAnnotEv->id = this->eventLoop->GetId();
-            this->eventLoop->SendEvent(getAnnotEv);
-
-            std::tr1::shared_ptr<class Event> annotXmlRet = this->eventReceiver->WaitForEventId(getAnnotEv->id);
+            QString xml = Annotation::GetAllAnnotationByXml(annotationUuids[i],
+                                                   this->eventLoop,
+                                                   this->eventReceiver);
 
             //Format as XML
             out << "\t<source id=\""<<i<<"\" uid=\""<<Qt::escape(annotationUuids[i].toString())<<"\" file=\""<<
@@ -153,7 +150,7 @@ int UserActions::SaveAs(QString fina)
                 out << " alg=\"" << algUuid.toString().toLocal8Bit().constData() << "\"";;
 
             out << ">" << endl;
-            out << annotXmlRet->data;
+            out << xml;
             out << "\t</source>" << endl;
         }
         catch(std::runtime_error err)
