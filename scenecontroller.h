@@ -28,13 +28,49 @@ public:
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent);
 
-    void SetSceneControl(class TrackingSceneController *sceneControlIn);
+    void SetSceneControl(class BaseSceneController *sceneControlIn);
 
 protected:
-    class TrackingSceneController *sceneControl;
+    class BaseSceneController *sceneControl;
 };
 
-class TrackingSceneController : public QObject
+//**************************************************
+
+class BaseSceneController : public QObject
+{
+    Q_OBJECT
+public:
+    BaseSceneController(QObject *parent);
+    virtual ~BaseSceneController();
+
+    virtual QWidget *ControlsFactory(QWidget *parent);
+    virtual QMenu *MenuFactory(QMenuBar *menuBar);
+    virtual MouseGraphicsScene *GetScene();
+
+    virtual int GetMouseOver();
+    virtual void MouseEnterEvent();
+    virtual void MouseLeaveEvent();
+    virtual unsigned long long GetSeekForwardTime();
+    virtual unsigned long long GetSeekBackTime();
+
+    virtual void VideoImageChanged(QImage &fr, unsigned long long startTime,
+                           unsigned long long endTime,
+                           unsigned long long requestedTime);
+    virtual void SetAnnotationTrack(QUuid srcUuid);
+
+    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
+    virtual void mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent);
+    virtual void Redraw();
+
+protected:
+    MouseGraphicsScene *scene;
+    int mouseOver;
+};
+
+//*******************************************************
+
+class TrackingSceneController : public BaseSceneController
 {
     /*!
     * TrackingAnnotation contains the handles the GUI for tracking data.
@@ -59,9 +95,6 @@ public:
     QWidget *ControlsFactory(QWidget *parent);
     QMenu *MenuFactory(QMenuBar *menuBar);
 
-    int GetMouseOver();
-    void MouseEnterEvent();
-    void MouseLeaveEvent();
     unsigned long long GetSeekForwardTime();
     unsigned long long GetSeekBackTime();
     MouseGraphicsScene *GetScene();
@@ -111,7 +144,6 @@ protected:
     class EventLoop *eventLoop;
     class EventReceiver *eventReceiver;
 
-    MouseGraphicsScene *scene;
     int activePoint; //which point is selected
     unsigned int imgHeight, imgWidth;
     float markerSize;
@@ -125,7 +157,6 @@ protected:
     unsigned long long frameStartTime, frameEndTime, frameRequestTime;
     unsigned long long annotationTime;
     int annotationTimeSet;
-    int mouseOver;
     //QPushButton *markFrameButton;
     std::vector<std::vector<float> > currentShape; //contains the default shape
     std::vector<std::vector<float> > defaultShape; //contains the default shape
@@ -138,12 +169,18 @@ protected:
 };
 
 
-class LogoSceneController : public QObject
+class LogoSceneController : public BaseSceneController
 {
     Q_OBJECT
 public:
-    //TrackingSceneController(QObject *parent);
-    //virtual ~TrackingSceneController();
+    LogoSceneController(QObject *parent);
+    virtual ~LogoSceneController();
+
+    QWidget *ControlsFactory(QWidget *parent);
+    QMenu *MenuFactory(QMenuBar *menuBar);
+    MouseGraphicsScene *GetScene();
+
+protected:
 
 };
 

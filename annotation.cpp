@@ -1290,6 +1290,8 @@ int Annotation::GetAnnotationBetweenFrames(unsigned long long startTime,
 {
     frameOut.clear();
     tiOut = 0.;
+    if(annotUuid.isNull()) return -1;
+
     std::tr1::shared_ptr<class Event> reqEv(new Event("GET_ANNOTATION_BETWEEN_TIMES"));
     reqEv->id = eventLoop->GetId();
     QString arg = QString("%1,%2,%3").arg(startTime).arg(endTime).arg(requestedTime);

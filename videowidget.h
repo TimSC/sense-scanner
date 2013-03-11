@@ -58,7 +58,7 @@ public slots:
     void AsyncFrameReceived(QImage& fr, unsigned long long startTimestamp,
                             unsigned long long endTimestamp,
                             unsigned long long requestTimestamp);
-    void SetSceneControl(TrackingSceneController *sceneControlIn);
+    void SetSceneControl(BaseSceneController *sceneControlIn);
     void SetAnnotationTrack(QUuid srcUuid);
     void FitToWindow();
     void TimeChanged(QTime time);
@@ -68,7 +68,7 @@ public slots:
 protected:
     void SetVisibleAtTime(long long unsigned ti);
 
-    TrackingSceneController *sceneControl;
+    BaseSceneController *sceneControl;
     QUuid seq;
     QSharedPointer<QTimer> timer;
 

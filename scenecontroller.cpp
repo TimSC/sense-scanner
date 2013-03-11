@@ -45,14 +45,110 @@ void MouseGraphicsScene::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent
         this->sceneControl->mouseReleaseEvent(mouseEvent);
 }
 
-void MouseGraphicsScene::SetSceneControl(TrackingSceneController *sceneControlIn)
+void MouseGraphicsScene::SetSceneControl(BaseSceneController *sceneControlIn)
 {
+    assert(this!=NULL);
     this->sceneControl = sceneControlIn;
+}
+
+//****************************************************************************
+
+BaseSceneController::BaseSceneController(QObject *parent) : QObject(parent)
+{
+    this->scene = new MouseGraphicsScene(parent);
+    //this->scene->SetSceneControl(this);
+}
+
+BaseSceneController::~BaseSceneController()
+{
+    if(this->scene != NULL)
+    {
+        this->scene->clear();
+        this->scene->SetSceneControl(NULL);
+        delete this->scene;
+    }
+}
+
+QWidget *BaseSceneController::ControlsFactory(QWidget *parent)
+{
+    return NULL;
+
+}
+
+QMenu *BaseSceneController::MenuFactory(QMenuBar *menuBar)
+{
+    return NULL;
+
+}
+
+MouseGraphicsScene *BaseSceneController::GetScene()
+{
+    return this->scene;
+}
+
+int BaseSceneController::GetMouseOver()
+{
+    return this->mouseOver;
+}
+
+void BaseSceneController::MouseEnterEvent()
+{
+    this->mouseOver = true;
+    this->Redraw();
+}
+
+void BaseSceneController::MouseLeaveEvent()
+{
+    this->mouseOver = false;
+    this->Redraw();
+}
+
+unsigned long long BaseSceneController::GetSeekForwardTime()
+{
+    return 0;
+}
+
+unsigned long long BaseSceneController::GetSeekBackTime()
+{
+    return 0;
+}
+
+void BaseSceneController::VideoImageChanged(QImage &fr, unsigned long long startTime,
+                       unsigned long long endTime,
+                       unsigned long long requestedTime)
+{
+
+}
+
+void BaseSceneController::SetAnnotationTrack(QUuid srcUuid)
+{
+
+}
+
+void BaseSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
+{
+
+}
+
+void BaseSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
+{
+
+}
+
+void BaseSceneController::mouseReleaseEvent (QGraphicsSceneMouseEvent *mouseEvent)
+{
+
+}
+
+void BaseSceneController::Redraw()
+{
+
+
 }
 
 //********************************************************************
 
-TrackingSceneController::TrackingSceneController(QObject *parent)
+TrackingSceneController::TrackingSceneController(QObject *parent) : BaseSceneController(parent)
 {
     this->mode = "MOVE";
     this->mouseOver = false;
@@ -61,7 +157,6 @@ TrackingSceneController::TrackingSceneController(QObject *parent)
     this->frameRequestTime = 0;
     this->annotationTime = 0;
     this->annotationTimeSet = false;
-    this->scene = new MouseGraphicsScene(parent);
     this->scene->SetSceneControl(this);
     this->activePoint = -1;
     this->imgWidth = 0;
@@ -85,12 +180,6 @@ TrackingSceneController::~TrackingSceneController()
 {
     cout << "TrackingAnnotation::~TrackingAnnotation()" << endl;
     this->item = QSharedPointer<QGraphicsPixmapItem>(NULL);
-    if(this->scene != NULL)
-    {
-        this->scene->clear();
-        this->scene->SetSceneControl(NULL);
-        delete this->scene;
-    }
 
     if(this->annotationControls != NULL)
         delete annotationControls;
@@ -554,23 +643,6 @@ void TrackingSceneController::RemoveLinkPressed()
     this->mode = "REMOVE_LINK";
 }
 
-int TrackingSceneController::GetMouseOver()
-{
-    return this->mouseOver;
-}
-
-void TrackingSceneController::MouseEnterEvent()
-{
-    this->mouseOver = true;
-    this->Redraw();
-}
-
-void TrackingSceneController::MouseLeaveEvent()
-{
-    this->mouseOver = false;
-    this->Redraw();
-}
-
 //************************************************************
 
 QMenu *TrackingSceneController::MenuFactory(QMenuBar *menuBar)
@@ -726,25 +798,6 @@ int TrackingSceneController::GetAnnotationBetweenTimestamps(unsigned long long s
     annotationTimeOut = (unsigned long long)(ti * 1000. + 0.5);
     return ret;
 }
-
-/*void TrackingSceneController::SetAnnotationBetweenTimestamps(unsigned long long startTime,
-    unsigned long long endTime,
-    std::vector<std::vector<float> > annot)
-{
-    assert(endTime >= startTime);
-    assert(this->eventLoop!=NULL);
-
-    std::tr1::shared_ptr<class Event> reqEv(new Event("SET_ANNOTATION_BETWEEN_TIMES"));
-    reqEv->id = this->eventLoop->GetId();
-    reqEv->toUuid = this->annotationUuid;
-    QString xml;
-    QTextStream xmlStr(&xml);
-    TrackingAnnotationData::FrameToXml(annot, 0., xmlStr);
-    QString data = QString("%1,%2,%3").arg(startTime).arg(endTime).arg(xml);
-    reqEv->data = data.toLocal8Bit().constData();
-
-    this->eventLoop->SendEvent(reqEv);
-}*/
 
 void TrackingSceneController::RefreshCurrentPos()
 {
@@ -945,3 +998,35 @@ void TrackingSceneController::Update()
         flushEvents = 0;
     }
 }
+
+//*****************************************************************************
+
+LogoSceneController::LogoSceneController(QObject *parent) : BaseSceneController(parent)
+{
+
+}
+
+LogoSceneController::~LogoSceneController()
+{
+
+}
+
+QWidget *LogoSceneController::ControlsFactory(QWidget *parent)
+{
+    return NULL;
+
+}
+
+QMenu *LogoSceneController::MenuFactory(QMenuBar *menuBar)
+{
+    return NULL;
+
+}
+
+MouseGraphicsScene *LogoSceneController::GetScene()
+{
+    return this->scene;
+}
+
+
+

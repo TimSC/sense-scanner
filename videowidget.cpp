@@ -67,6 +67,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->timer->start(10);
     this->ui->timeEdit->setDisplayFormat("hh:mm:ss:zzz");
 
+    //this->SetSceneControl(new class LogoSceneController(this));
 }
 
 VideoWidget::~VideoWidget()
@@ -333,7 +334,7 @@ void VideoWidget::AsyncFrameReceived(QImage& fr, unsigned long long startTimesta
 
 }
 
-void VideoWidget::SetSceneControl(TrackingSceneController *sceneControlIn)
+void VideoWidget::SetSceneControl(BaseSceneController *sceneControlIn)
 {
     //Remove previous scene button controls
     while(this->ui->annotationTools->count()>0)
