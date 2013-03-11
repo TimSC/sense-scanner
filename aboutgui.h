@@ -2,6 +2,7 @@
 #define ABOUTGUI_H
 
 #include <QtGui/QWidget>
+#include <QtWebKit/QtWebKit>
 
 namespace Ui {
 class AboutGui;
@@ -18,5 +19,18 @@ public:
 private:
     Ui::AboutGui *ui;
 };
+
+class WebViewErrCheck : public QWebView
+{
+    Q_OBJECT;
+
+public:
+    WebViewErrCheck(QWidget * parent = 0);
+    virtual ~WebViewErrCheck();
+
+public slots:
+    void LoadingResult(bool ok);
+};
+
 
 #endif // ABOUTGUI_H

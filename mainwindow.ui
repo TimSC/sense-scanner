@@ -196,6 +196,12 @@
    <header>aboutgui.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+  <class>WebViewErrCheck</class>
+  <extends>QWebView</extends>
+  <header>aboutgui.h</header>
+     <container>1</container>
+  </customwidget>
  </customwidgets>
  <resources/>
  <connections>

@@ -1139,6 +1139,7 @@ void MainWindow::FitVideoToWindow()
     this->ui->videoWidget->FitToWindow();
 }
 
+
 //**********************************
 
 

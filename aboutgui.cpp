@@ -12,3 +12,20 @@ AboutGui::~AboutGui()
 {
     delete ui;
 }
+
+//***********************************
+
+WebViewErrCheck::WebViewErrCheck(QWidget * parent) : QWebView(parent)
+{
+
+}
+
+WebViewErrCheck::~WebViewErrCheck()
+{
+
+}
+
+void WebViewErrCheck::LoadingResult(bool ok)
+{
+    if(!ok) this->load(QUrl("about.html"));
+}
