@@ -175,17 +175,23 @@ int Workspace::RemoveProcessing(QUuid uuid)
         if(uuid == this->processingUuids[i])
         {
             ind = i;
-            found = 0;
+            found = 1;
         }
     }
-    if(!found) return -1;
+    if(!found)
+    {
+        this->lock.unlock();
+        return -1;
+    }
 
     //Check process is ready to be removed
     AlgorithmProcess::ProcessState state = this->processingList[ind]->GetState();
     if(state!=AlgorithmProcess::STOPPED &&
-            state!=AlgorithmProcess::PAUSED)
+            state!=AlgorithmProcess::PAUSED &&
+            state!=AlgorithmProcess::READY)
     {
         cout << "Process cannot be removed while it is running" << endl;
+        this->lock.unlock();
         return 0;
     }
 

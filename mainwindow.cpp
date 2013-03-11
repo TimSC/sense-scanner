@@ -1128,7 +1128,9 @@ void MainWindow::RemoveProcessPressed()
         AlgorithmProcess::ProcessState state = this->workspace.GetProcessingState(algUuids[ind.row()]);
 
         //Check if alg state is ready for removal
-        if(state!= AlgorithmProcess::PAUSED && state!=AlgorithmProcess::STOPPED)
+        if(state!= AlgorithmProcess::PAUSED
+                && state!=AlgorithmProcess::STOPPED
+                && state!=AlgorithmProcess::READY)
         {
             if(this->errMsg == NULL)
                 this->errMsg = new QMessageBox(this);
