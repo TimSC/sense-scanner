@@ -383,7 +383,10 @@ void VideoWidget::SetSceneControl(BaseSceneController *sceneControlIn)
         }
         else
             this->ui->graphicsView->setScene(NULL);
-        this->ui->annotationTools->addWidget(this->sceneControl->ControlsFactory(this));
+
+        QWidget *controls = this->sceneControl->ControlsFactory(this);
+        if(controls!=NULL)
+            this->ui->annotationTools->addWidget(controls);
     }
     else
     {

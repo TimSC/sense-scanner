@@ -494,7 +494,7 @@ void MainWindow::RegenerateSourcesList()
             }
             else
             {
-
+                displayLine.append("Static Annotation");
             }
 
             QMap<QString, unsigned long long>::iterator it2 = this->sourceDuration.find(fina);
