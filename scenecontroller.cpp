@@ -7,7 +7,8 @@
 #include <QtGui/QFileDialog>
 #include <QtCore/QTextStream>
 #include <QtXml/QtXml>
-#include "assert.h"
+#include <assert.h>
+#include <stdexcept>
 #include "vectors.h"
 #include "eventloop.h"
 #include "annotation.h"
@@ -703,6 +704,8 @@ void TrackingSceneController::LoadShape()
 void TrackingSceneController::LoadShape(QString fileName)
 {
     QFile shapeFile(fileName);
+    if(!shapeFile.exists())
+        throw std::runtime_error("Shape file does not exist");
     shapeFile.open(QIODevice::ReadOnly | QIODevice::Text);
     QTextStream shapeStream(&shapeFile);
 

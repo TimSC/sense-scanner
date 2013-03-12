@@ -86,5 +86,7 @@ void ShapeGui::LoadShapePressed()
 
 QString ShapeGui::GetCustomFilename()
 {
-    return this->ui->shapePresets->selectedValue;
+    QString out("shapes/");
+    out.append(this->ui->shapePresets->selectedValue);
+    return out;
 }
