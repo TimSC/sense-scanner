@@ -81,7 +81,7 @@ public:
         std::vector<std::vector<float> > &shape);
 
     static std::vector<std::vector<float> > ProcessXmlDomFrame(QDomElement &rootElem,
-        std::vector<std::vector<int> > linksOut);
+        std::vector<std::vector<int> > &linksOut);
 
     void AddAnnotationAtTime(unsigned long long ti);
     void RemoveAnnotationAtTime(unsigned long long ti);

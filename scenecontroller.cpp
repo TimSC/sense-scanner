@@ -699,7 +699,6 @@ QMenu *TrackingSceneController::MenuFactory(QMenuBar *menuBar)
 
 void TrackingSceneController::LoadShape()
 {
-
     //Get input filename from user
     QString fileName = QFileDialog::getOpenFileName(0,
         tr("Load Shape"), "", tr("Shapes (*.shape)"));
@@ -707,6 +706,8 @@ void TrackingSceneController::LoadShape()
         return;
 
     this->LoadShape(fileName);
+
+
 }
 
 void TrackingSceneController::LoadShape(QString fileName)
@@ -750,11 +751,9 @@ void TrackingSceneController::SetShapeFromCurentFrame()
 void TrackingSceneController::ResetCurentFrameShape()
 {
     //Get default shape
-    if(this->defaultShape.size()==0)
-    {
-        this->defaultShape = Annotation::GetShape(this->annotationUuid, this->eventLoop,
+    this->defaultShape = Annotation::GetShape(this->annotationUuid, this->eventLoop,
                                                   this->eventReceiver, this->links);
-    }
+
 
     //Get current frame
     std::vector<std::vector<float> > currentFrame;

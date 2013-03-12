@@ -607,7 +607,7 @@ int TrackingAnnotationData::XmlToShape(QString xml,
 }
 
 std::vector<std::vector<float> > TrackingAnnotationData::ProcessXmlDomFrame(QDomElement &rootElem,
-    std::vector<std::vector<int> > linksOut)
+    std::vector<std::vector<int> > &linksOut)
 {
     linksOut.clear();
     std::vector<std::vector<float> > out;
