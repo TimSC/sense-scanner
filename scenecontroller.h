@@ -161,7 +161,6 @@ protected:
     //QWidget *annotationControls;
     QPushButton *markFrameButton;
     QWidget *annotationControls;
-    int isShapeSet;
 
     QUuid annotationUuid;
 };

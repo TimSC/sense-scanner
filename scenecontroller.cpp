@@ -165,7 +165,6 @@ TrackingSceneController::TrackingSceneController(QObject *parent) : BaseSceneCon
     this->mousex = 0.f;
     this->mousey = 0.f;
     this->markFrameButton = NULL;
-    this->isShapeSet = 0;
 
     this->annotationControls = NULL;
     this->eventLoop = NULL;
@@ -595,7 +594,7 @@ void TrackingSceneController::MarkFramePressed(bool val)
 
     if(val==1 && !isUsed) //Enable frame annotation
     {
-        if(!isShapeSet)
+        if(this->defaultShape.size()==0)
         {
             this->LoadShape();
         }
@@ -702,7 +701,6 @@ void TrackingSceneController::LoadShape()
     reqEv->data = xml.toLocal8Bit().constData();
     this->eventLoop->SendEvent(reqEv);
 
-    this->isShapeSet = true;
 }
 
 void TrackingSceneController::SetShapeFromCurentFrame()
