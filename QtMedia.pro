@@ -28,7 +28,8 @@ SOURCES += main.cpp\
     sourcealggui.cpp \
     aboutgui.cpp \
     useractions.cpp \
-    applymodel.cpp
+    applymodel.cpp \
+    shapegui.cpp
 
 HEADERS  += mainwindow.h \
     videowidget.h \
@@ -48,12 +49,14 @@ HEADERS  += mainwindow.h \
     sourcealggui.h \
     aboutgui.h \
     useractions.h \
-    applymodel.h
+    applymodel.h \
+    shapegui.h
 
 FORMS    += mainwindow.ui \
     videowidget.ui \
     sourcealggui.ui \
-    aboutgui.ui
+    aboutgui.ui \
+    shapegui.ui
 
 OTHER_FILES +=
 

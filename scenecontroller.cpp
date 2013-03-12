@@ -11,6 +11,7 @@
 #include "vectors.h"
 #include "eventloop.h"
 #include "annotation.h"
+#include "shapegui.h"
 using namespace::std;
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
 
@@ -596,7 +597,9 @@ void TrackingSceneController::MarkFramePressed(bool val)
     {
         if(this->defaultShape.size()==0)
         {
-            this->LoadShape();
+            //this->LoadShape();
+            class ShapeGui shapeGui;
+            shapeGui.exec();
         }
 
         assert(this->frameEndTime >= this->frameStartTime);
