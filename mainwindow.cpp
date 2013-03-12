@@ -24,65 +24,6 @@ using namespace std;
 
 //*********************************************
 
-WaitPopUpDialog::WaitPopUpDialog(QWidget *parent)
-{
-    this->workerTaskDone = 0;
-    this->resultCode = 0;
-    this->count = 0;
-
-    this->dialog = new QDialog(parent);
-    QVBoxLayout topLayout(this->dialog);
-    QLabel txt("Waiting for complete");
-    this->dialog->setLayout(&topLayout);
-    topLayout.addWidget(&txt);
-
-    //Start event buffer timer
-    this->timer = new QTimer();
-    QObject::connect(this->timer, SIGNAL(timeout()), this, SLOT(Update()));
-    this->timer->start(10); //in millisec
-}
-
-WaitPopUpDialog::~WaitPopUpDialog()
-{
-
-}
-
-void WaitPopUpDialog::Exec()
-{
-    //Run the dialog
-    this->dialog->exec();
-}
-
-void WaitPopUpDialog::WorkerTaskDone(int resultCode)
-{
-    this->lock.lock();
-    this->workerTaskDone = 1;
-    this->resultCode = resultCode;
-    this->lock.unlock();
-}
-
-void WaitPopUpDialog::Update()
-{
-    this->lock.lock();
-    int done = this->workerTaskDone;
-    this->lock.unlock();
-
-    this->count += 1;
-    //cout << "test " << count << endl;
-
-    if(done) this->dialog->close();
-}
-
-int WaitPopUpDialog::GetResultCode()
-{
-    this->lock.lock();
-    int out = this->resultCode;
-    this->lock.unlock();
-    return out;
-}
-
-//*********************************************
-
 CheckDiscardDataDialog::CheckDiscardDataDialog(QWidget *parent, QString discardMsg) : QObject(parent)
 {
     this->shutdownDialog = new QDialog(parent);

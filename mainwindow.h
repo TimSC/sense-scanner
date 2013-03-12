@@ -17,32 +17,6 @@ namespace Ui {
 class MainWindow;
 }
 
-//***********************************************
-
-class BackgroundActionThread : public MessagableThread
-{
-    /*!
-    * Does processing that would otherwise freeze the GUI such
-    * as loading and saving.
-    */
-
-public:
-    BackgroundActionThread(class MainWindow *mainWindowIn);
-    virtual ~BackgroundActionThread();
-
-    void Update();
-    void Finished();
-
-    void Save(class WaitPopUpDialog *dialog);
-    void SaveAs(class WaitPopUpDialog *dialog, QString filename);
-protected:
-    class MainWindow *mainWindow;
-    QList<QString> cmds;
-    QList<QString> args;
-    QList<class WaitPopUpDialog *> dialogs;
-    Mutex lock;
-};
-
 //**************************************************
 
 class WaitPopUpDialog : public QObject
