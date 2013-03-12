@@ -598,8 +598,9 @@ void TrackingSceneController::MarkFramePressed(bool val)
         if(this->defaultShape.size()==0)
         {
             //this->LoadShape();
-            class ShapeGui shapeGui;
-            shapeGui.exec();
+            class ShapeGui *shapeGui = new class ShapeGui();
+            shapeGui->exec();
+            delete shapeGui;
         }
 
         assert(this->frameEndTime >= this->frameStartTime);

@@ -17,6 +17,14 @@ public:
     
 private:
     Ui::ShapeGui *ui;
+    int usePresetSelected;
+    int useCustomShapeSelected;
+    int loadShapeSelected;
+
+public slots:
+    void UsePresetPressed();
+    void UseCustomPressed();
+    void LoadShapePressed();
 };
 
 #endif // SHAPEGUI_H
