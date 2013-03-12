@@ -5,7 +5,6 @@
 #include "ui_mainwindow.h"
 #include "videowidget.h"
 #include "mediabuffer.h"
-#include "imagesequence.h"
 #include "avbinmedia.h"
 #include "eventloop.h"
 #include "localsleep.h"

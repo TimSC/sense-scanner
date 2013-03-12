@@ -110,6 +110,7 @@ public slots:
     void RemoveLinkPressed();
 
     void LoadShape();
+    void LoadShape(QString fina);
     void SaveShape();
     void SetShapeFromCurentFrame();
     void ResetCurentFrameShape();

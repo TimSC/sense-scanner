@@ -600,10 +600,14 @@ void TrackingSceneController::MarkFramePressed(bool val)
             class ShapeGui *shapeGui = new class ShapeGui();
             shapeGui->exec();
 
-            if(shapeGui->loadShapeSelected) this->LoadShape();
+            if(shapeGui->loadShapeSelected)
+            {
+                this->LoadShape();
+            }
             if(shapeGui->usePresetSelected)
             {
-                assert(0);
+                QString fina = shapeGui->GetCustomFilename();
+                this->LoadShape(fina);
             }
 
             delete shapeGui;
@@ -693,14 +697,11 @@ void TrackingSceneController::LoadShape()
     if(fileName.length() == 0)
         return;
 
-    //If no file extension is set, use .shape as the extension
-    QFileInfo fi(fileName);
-    QString csuffix = fi.completeSuffix();
-    if(csuffix.size()==0)
-    {
-        fileName.append(".shape");
-    }
+    this->LoadShape(fileName);
+}
 
+void TrackingSceneController::LoadShape(QString fileName)
+{
     QFile shapeFile(fileName);
     shapeFile.open(QIODevice::ReadOnly | QIODevice::Text);
     QTextStream shapeStream(&shapeFile);
@@ -710,6 +711,10 @@ void TrackingSceneController::LoadShape()
     QString xml = shapeStream.readAll();
     reqEv->data = xml.toLocal8Bit().constData();
     this->eventLoop->SendEvent(reqEv);
+
+    //Get a local copy of shape information
+    this->defaultShape = Annotation::GetShape(this->annotationUuid, this->eventLoop,
+                                                  this->eventReceiver, this->links);
 
 }
 
@@ -933,6 +938,14 @@ void TrackingSceneController::SaveShape()
     QString fileName = QFileDialog::getSaveFileName(0,
       tr("Save Shape"), "", tr("Shapes (*.shape)"));
     if(fileName.length() == 0) return;
+
+    //If no file extension is set, use .shape as the extension
+    QFileInfo fi(fileName);
+    QString csuffix = fi.completeSuffix();
+    if(csuffix.size()==0)
+    {
+        fileName.append(".shape");
+    }
 
     std::tr1::shared_ptr<class Event> reqEv(new Event("SAVE_SHAPE"));
     reqEv->toUuid = this->annotationUuid;
