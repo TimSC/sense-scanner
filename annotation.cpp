@@ -1088,8 +1088,10 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
     if(ev->type=="REMOVE_POINT")
     {
-        int debug=1;
-
+        int index = ev->data.toInt();
+        assert(this->parentAnn!=NULL);
+        assert(this->parentAnn->track!=NULL);
+        this->parentAnn->track->RemovePoint(index);
     }
 
     }

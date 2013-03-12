@@ -89,6 +89,7 @@ public:
 
     unsigned long long GetSeekForwardTime(unsigned long long queryTime);
     unsigned long long GetSeekBackTime(unsigned long long queryTime);
+    void RemovePoint(int index);
 
     //Keep track of automatically labeled data
     unsigned long long autoLabeledStart;
@@ -96,7 +97,6 @@ public:
 protected:
 
     void AddPoint(std::vector<float> p);
-    void RemovePoint(int index);
     void SaveShape(QString fileName);
     void LoadAnnotation(QString fileName);
     void SaveAnnotation(QString fileName);
