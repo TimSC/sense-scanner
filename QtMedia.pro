@@ -15,7 +15,6 @@ QMAKE_CXXFLAGS += -std=c++0x
 SOURCES += main.cpp\
         mainwindow.cpp \
     videowidget.cpp \
-    imagesequence.cpp \
     mediabuffer.cpp \
     avbinbackend.cpp \
     avbinmedia.cpp \
@@ -33,7 +32,6 @@ SOURCES += main.cpp\
 
 HEADERS  += mainwindow.h \
     videowidget.h \
-    imagesequence.h \
     mediabuffer.h \
     avbinbackend.h \
     avbinmedia.h \
