@@ -17,32 +17,6 @@ namespace Ui {
 class MainWindow;
 }
 
-//**************************************************
-
-class WaitPopUpDialog : public QObject
-{
-    /*!
-    * QT Dialog pop up while GUI is busy doing something else
-    */
-
-    Q_OBJECT
-public:
-    WaitPopUpDialog(QWidget *parent);
-    virtual ~WaitPopUpDialog();
-    void Exec();
-    void WorkerTaskDone(int resultCode);
-    int GetResultCode();
-public slots:
-    void Update();
-protected:
-    QDialog *dialog;
-    QTimer *timer;
-    int workerTaskDone;
-    Mutex lock;
-    int resultCode;
-    int count;
-};
-
 //*************************************************
 
 class CheckDiscardDataDialog : public QObject
