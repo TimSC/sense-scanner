@@ -733,6 +733,8 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("GET_SOURCE_FILENAME", *this->eventReceiver);
     this->eventLoop->AddListener("GET_SHAPE", *this->eventReceiver);
     this->eventLoop->AddListener("SET_SHAPE", *this->eventReceiver);
+    this->eventLoop->AddListener("REMOVE_POINT", *this->eventReceiver);
+
     this->eventLoop->AddListener("ADD_ANNOTATION_AT_TIME", *this->eventReceiver);
     this->eventLoop->AddListener("REMOVE_ANNOTATION_AT_TIME", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ANNOTATION_AT_TIME", *this->eventReceiver);
@@ -1083,6 +1085,11 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             this->parentAnn->track->autoLabeledStart = startStr.toULongLong();
             this->parentAnn->track->autoLabeledEnd = endStr.toULongLong();
         }
+    }
+    if(ev->type=="REMOVE_POINT")
+    {
+        int debug=1;
+
     }
 
     }

@@ -958,10 +958,12 @@ void TrackingSceneController::SaveShape()
 
 void TrackingSceneController::RemovePoint(int index)
 {
+    assert(this->eventLoop!=NULL);
+
+    //Remove specified point
     std::tr1::shared_ptr<class Event> reqEv(new Event("REMOVE_POINT"));
     reqEv->toUuid = this->annotationUuid;
-    QString ind = QString("%1").arg(index);
-    reqEv->data = ind.toLocal8Bit().constData();
+    reqEv->data = QString::number(index,'d');
     this->eventLoop->SendEvent(reqEv);
 }
 
