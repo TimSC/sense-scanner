@@ -409,6 +409,9 @@ void TrackingSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEve
         reqEv->data = xml.toLocal8Bit().constData();
         this->eventLoop->SendEvent(reqEv);
 
+        //Get a local copy of shape information
+        this->defaultShape = Annotation::GetShape(this->annotationUuid, this->eventLoop,
+                                                      this->eventReceiver, this->links);
         this->RefreshCurrentPos();
 
         this->Redraw();
@@ -418,6 +421,11 @@ void TrackingSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEve
     {
         int nearestPoint = this->NearestPoint(pos.x(), pos.y(), currentFrame);
         if(nearestPoint>=0) this->RemovePoint(nearestPoint);
+
+        //Get a local copy of shape information
+        this->defaultShape = Annotation::GetShape(this->annotationUuid, this->eventLoop,
+                                                      this->eventReceiver, this->links);
+
         this->RefreshCurrentPos();
         this->activePoint = -1;
         this->Redraw();
