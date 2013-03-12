@@ -1443,3 +1443,51 @@ QString Annotation::GetAllAnnotationByXml(QUuid annotUuid,
     assert(resp->type == "ANNOTATION_DATA");
     return resp->data;
 }
+
+std::vector<std::vector<float> > Annotation::GetShape(QUuid annotUuid,
+                                                      class EventLoop *eventLoop,
+                                                      class EventReceiver *eventReceiver,
+                                                      std::vector<std::vector<int> > &linksOut)
+{
+    std::tr1::shared_ptr<class Event> reqEv(new Event("GET_SHAPE"));
+    reqEv->id = eventLoop->GetId();
+    reqEv->toUuid = annotUuid;
+    eventLoop->SendEvent(reqEv);
+
+    assert(eventReceiver!=NULL);
+    std::tr1::shared_ptr<class Event> response = eventReceiver->WaitForEventId(reqEv->id);
+
+    QDomDocument doc("mydocument");
+    QString errorMsg;
+    QString xmlStr(response->data);
+    std::vector<std::vector<float> > shape;
+    if (!doc.setContent(xmlStr, &errorMsg))
+    {
+        cout << "Xml Error: "<< errorMsg.toLocal8Bit().constData() << endl;
+        throw std::runtime_error("Xml Error");
+        return shape;
+    }
+
+    //Load points and links into memory
+    QDomElement rootElem = doc.documentElement();
+    shape = TrackingAnnotationData::ProcessXmlDomFrame(rootElem, linksOut);
+    return shape;
+}
+
+void Annotation::SetShape(QUuid annotUuid,
+                          std::vector<std::vector<float> > shape,
+                          std::vector<std::vector<int> > links,
+                          class EventLoop *eventLoop,
+                          class EventReceiver *eventReceiver)
+{
+    //Encode shape as xml
+    QString xml;
+    QTextStream xmlStr(&xml);
+    TrackingAnnotationData::WriteShapeToStream(links, shape, xmlStr);
+
+    //Send event to annotation module
+    std::tr1::shared_ptr<class Event> reqEv(new Event("SET_SHAPE"));
+    reqEv->toUuid = annotUuid;
+    reqEv->data = xml.toLocal8Bit().constData();
+    eventLoop->SendEvent(reqEv);
+}

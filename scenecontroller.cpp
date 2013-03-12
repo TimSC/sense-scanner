@@ -718,7 +718,9 @@ void TrackingSceneController::SetShapeFromCurentFrame()
     if(!found) return;
 
     //Set shape from current frame
-    this->SetShape(annotShape);
+    this->defaultShape = annotShape;
+    Annotation::SetShape(this->annotationUuid, annotShape, this->links,
+                         this->eventLoop, this->eventReceiver);
 }
 
 void TrackingSceneController::ResetCurentFrameShape()
@@ -726,7 +728,8 @@ void TrackingSceneController::ResetCurentFrameShape()
     //Get default shape
     if(this->defaultShape.size()==0)
     {
-        this->defaultShape = this->GetShape(this->links);
+        this->defaultShape = Annotation::GetShape(this->annotationUuid, this->eventLoop,
+                                                  this->eventReceiver, this->links);
     }
 
     //Get current frame
@@ -816,52 +819,11 @@ void TrackingSceneController::RefreshCurrentPos()
     }
 }
 
-std::vector<std::vector<float> > TrackingSceneController::GetShape(std::vector<std::vector<int> > &linksOut)
-{
-    std::tr1::shared_ptr<class Event> reqEv(new Event("GET_SHAPE"));
-    reqEv->id = this->eventLoop->GetId();
-    reqEv->toUuid = this->annotationUuid;
-    this->eventLoop->SendEvent(reqEv);
-
-    assert(this->eventReceiver!=NULL);
-    std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(reqEv->id);
-
-    QDomDocument doc("mydocument");
-    QString errorMsg;
-    QString xmlStr(response->data);
-    std::vector<std::vector<float> > shape;
-    if (!doc.setContent(xmlStr, &errorMsg))
-    {
-        cout << "Xml Error: "<< errorMsg.toLocal8Bit().constData() << endl;
-        throw std::runtime_error("Xml Error");
-        return shape;
-    }
-
-    //Load points and links into memory
-    QDomElement rootElem = doc.documentElement();
-    shape = TrackingAnnotationData::ProcessXmlDomFrame(rootElem, linksOut);
-    return shape;
-}
-
-void TrackingSceneController::SetShape(std::vector<std::vector<float> > shape)
-{
-    //Encode shape as xml
-    this->defaultShape = shape;
-    QString xml;
-    QTextStream xmlStr(&xml);
-    TrackingAnnotationData::WriteShapeToStream(this->links, this->defaultShape, xmlStr);
-
-    //Send event to annotation module
-    std::tr1::shared_ptr<class Event> reqEv(new Event("SET_SHAPE"));
-    reqEv->toUuid = this->annotationUuid;
-    reqEv->data = xml.toLocal8Bit().constData();
-    this->eventLoop->SendEvent(reqEv);
-}
-
 void TrackingSceneController::RefreshLinks()
 {
     assert(this->eventLoop!=NULL);
-    this->defaultShape = this->GetShape(this->links);
+    this->defaultShape = Annotation::GetShape(this->annotationUuid, this->eventLoop,
+                                              this->eventReceiver, this->links);
     return;
 }
 

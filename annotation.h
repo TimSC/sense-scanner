@@ -222,6 +222,17 @@ public:
                                            class EventLoop *eventLoop,
                                            class EventReceiver *eventReceiver);
 
+    static std::vector<std::vector<float> > GetShape(QUuid annotUuid,
+                                                          class EventLoop *eventLoop,
+                                                          class EventReceiver *eventReceiver,
+                                                          std::vector<std::vector<int> > &linksOut);
+
+    static void SetShape(QUuid annotUuid,
+                              std::vector<std::vector<float> > shape,
+                              std::vector<std::vector<int> > links,
+                              class EventLoop *eventLoop,
+                              class EventReceiver *eventReceiver);
+
     std::tr1::shared_ptr<class AnnotThread> annotThread;
     class TrackingAnnotationData *track;
 
