@@ -597,9 +597,15 @@ void TrackingSceneController::MarkFramePressed(bool val)
     {
         if(this->defaultShape.size()==0)
         {
-            //this->LoadShape();
             class ShapeGui *shapeGui = new class ShapeGui();
             shapeGui->exec();
+
+            if(shapeGui->loadShapeSelected) this->LoadShape();
+            if(shapeGui->usePresetSelected)
+            {
+                assert(0);
+            }
+
             delete shapeGui;
         }
 

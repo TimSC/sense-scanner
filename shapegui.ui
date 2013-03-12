@@ -57,5 +57,59 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>useCustomShape</sender>
+   <signal>pressed()</signal>
+   <receiver>ShapeGui</receiver>
+   <slot>UseCustomPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>172</x>
+     <y>362</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>172</x>
+     <y>192</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>usePresetButton</sender>
+   <signal>pressed()</signal>
+   <receiver>ShapeGui</receiver>
+   <slot>UsePresetPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>172</x>
+     <y>287</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>172</x>
+     <y>192</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>useSavedShape</sender>
+   <signal>pressed()</signal>
+   <receiver>ShapeGui</receiver>
+   <slot>LoadShapePressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>172</x>
+     <y>330</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>172</x>
+     <y>192</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>UsePresetPressed()</slot>
+  <slot>UseCustomPressed()</slot>
+  <slot>LoadShapePressed()</slot>
+ </slots>
 </ui>

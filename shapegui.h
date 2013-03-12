@@ -15,11 +15,11 @@ public:
     explicit ShapeGui(QWidget *parent = 0);
     ~ShapeGui();
     
-private:
-    Ui::ShapeGui *ui;
     int usePresetSelected;
     int useCustomShapeSelected;
     int loadShapeSelected;
+private:
+    Ui::ShapeGui *ui;
 
 public slots:
     void UsePresetPressed();
