@@ -242,7 +242,7 @@ void VideoWidget::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     {
         //Ignore frames not directed at widget
         if(ev->fromUuid != this->seq) return;
-        if(ev->data!="FAILED")
+        if(ev->data.left(13)!="AVBIN_ERROR: ")
         {
         MediaResponseFrame processedImg(ev);
         this->AsyncFrameReceived(processedImg.img, processedImg.start,
