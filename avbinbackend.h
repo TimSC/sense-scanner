@@ -35,7 +35,7 @@ public:
     int64_t Length();
 
     //Frame based retrieval
-    int GetFrame(uint64_t time, class DecodedFrame &out);
+    int GetFrame(uint64_t time, class DecodedFrame &out, int &readPacketFailedOut);
 
     //Replay retrieval
     int PlayUpdate(); //Returns true if playing is active

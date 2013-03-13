@@ -34,6 +34,7 @@ protected:
 
     std::vector<std::vector<float> > currentModel;
     bool currentModelSet;
+    bool atMediaEnd;
 };
 
 class ApplyModelPool

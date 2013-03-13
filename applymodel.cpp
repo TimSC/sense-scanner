@@ -18,6 +18,7 @@ ApplyModel::ApplyModel(QUuid annotUuidIn) : MessagableThread()
     this->currentEndTimestamp = 0;
     this->issueEnountered = 0;
     this->currentModelSet = 0;
+    this->atMediaEnd = false;
 }
 
 ApplyModel::~ApplyModel()
@@ -132,11 +133,11 @@ void ApplyModel::Update()
                           this->eventLoop,
                           this->eventReceiver);
 
-
     //If needed, get the first frame from the video
     if(this->currentTimeSet==false)
     {
         //Get first frame
+        this->atMediaEnd = false;
         QSharedPointer<QImage> img;
         try
         {
@@ -244,62 +245,88 @@ void ApplyModel::Update()
         }
         catch (std::runtime_error &err)
         {
+            QString errStr = err.what();
             this->issueEnountered = true;
-            this->issueDescription = "Error in GetMediaFrame(2)";
-
-            this->currentTimeSet = false;
-            this->msleep(1);
-            return;
+            this->issueDescription = errStr;
+            if(errStr=="AVBIN_ERROR: READ_PACKET_FAILED")
+            {
+                //Most likely, the end of the video has been reached
+                this->issueDescription = "MEDIA_END";
+                this->atMediaEnd = true;
+            }
+            else
+            {
+                //Another error has occured
+                cout << qPrintable(errStr) << endl;
+                this->currentTimeSet = false;
+                this->msleep(1);
+                return;
+            }
         }
 
-        if(this->currentEndTimestamp < nextTi)
+        if(!this->atMediaEnd)
         {
-            this->issueEnountered = true;
-            this->issueDescription = "Error in GetMediaFrame(2) Timing";
+            if(this->currentEndTimestamp < nextTi)
+            {
+                this->issueEnountered = true;
+                this->issueDescription = "Error in GetMediaFrame(2) Timing";
 
-            this->currentTimeSet = false;
-            throw runtime_error("Earlier frame found than was requested");
-        }
-
-
-        //Check if annotation is in this frame       
-        std::vector<std::vector<float> > foundAnnot;
-        double foundAnnotationTime=0;
-        int found = Annotation::GetAnnotationBetweenFrames(this->currentStartTimestamp,
-                                                          this->currentEndTimestamp,
-                                                          nextTi,
-                                                          this->annotUuid,
-                                                          this->eventLoop,
-                                                          this->eventReceiver,
-                                                          foundAnnot,
-                                                          foundAnnotationTime);
+                this->currentTimeSet = false;
+                throw runtime_error("Earlier frame found than was requested");
+            }
 
 
-        if(found)
-        {
-            //Update current model from annotation
-            this->currentModel = foundAnnot;
-            this->currentModelSet = 1;
-        }
-        else
-        {
+            //Check if annotation is in this frame
+            std::vector<std::vector<float> > foundAnnot;
+            double foundAnnotationTime=0;
+            int found = Annotation::GetAnnotationBetweenFrames(this->currentStartTimestamp,
+                                                              this->currentEndTimestamp,
+                                                              nextTi,
+                                                              this->annotUuid,
+                                                              this->eventLoop,
+                                                              this->eventReceiver,
+                                                              foundAnnot,
+                                                              foundAnnotationTime);
 
-            //If not annotation here, make a prediction
-            if(this->currentModelSet != 0)
-            this->ImageToProcess(this->currentStartTimestamp,
-                                 this->currentEndTimestamp,
-                                 img, this->currentModel);
+
+            if(found)
+            {
+                //Update current model from annotation
+                this->currentModel = foundAnnot;
+                this->currentModelSet = 1;
+            }
+            else
+            {
+
+                //If not annotation here, make a prediction
+                if(this->currentModelSet != 0)
+                this->ImageToProcess(this->currentStartTimestamp,
+                                     this->currentEndTimestamp,
+                                     img, this->currentModel);
+            }
         }
 
         //Estimate progress and generate an event
-        Annotation::SetAutoLabelTimeRange(0, nextTi,
+        if(!this->atMediaEnd)
+        {
+            Annotation::SetAutoLabelTimeRange(0, nextTi,
                                             this->annotUuid,
                                             this->eventLoop);
+        }
+        else
+        {
+            Annotation::SetAutoLabelTimeRange(0, this->srcDuration,
+                                            this->annotUuid,
+                                            this->eventLoop);
+        }
 
-        //Estimate mid time of next frame
-        frameDuration = this->currentEndTimestamp - this->currentStartTimestamp;
-        avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5);
-        nextTi = avTi + frameDuration;
+        if(!this->atMediaEnd)
+        {
+            //Estimate mid time of next frame
+            frameDuration = this->currentEndTimestamp - this->currentStartTimestamp;
+            avTi = (unsigned long long)(0.5 * (this->currentStartTimestamp + this->currentEndTimestamp) + 0.5);
+            nextTi = avTi + frameDuration;
+        }
         this->msleep(1);
         return;
     }
@@ -310,7 +337,7 @@ void ApplyModel::Update()
         this->issueDescription = "Next frame time after end of media";
     }
 
-    this->msleep(1000);
+    this->msleep(100);
 }
 
 void ApplyModel::HandleEvent(std::tr1::shared_ptr<class Event> ev)

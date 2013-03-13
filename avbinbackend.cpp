@@ -240,8 +240,9 @@ void AvBinBackend::DoOpenFile(int requestId)
     assert(res == AVBIN_RESULT_OK);
 }
 
-int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
+int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out, int &readPacketFailed)
 {
+    readPacketFailed = 0;
     if(this->fi == NULL)
         return 0;
 
@@ -322,6 +323,7 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out)
         if(readRet == -1)
         {
             processing = 0;
+            readPacketFailed = 1;
             continue;
         }
 
@@ -541,7 +543,8 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         response->toUuid = this->uuid;
         class DecodedFrame* decodedFrame = new DecodedFrame();
         response->raw = decodedFrame;
-        int found = this->GetFrame(ti, *decodedFrame);
+        int readPacketFailed = 0;
+        int found = this->GetFrame(ti, *decodedFrame, readPacketFailed);
         if(found)
         {
             //Send decoded image as event
@@ -553,11 +556,24 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         }
         else
         {
-            //Something went wrong, so a failure event is generated
-            QString eventName = QString("AVBIN_FRAME_FAILED");
-            std::tr1::shared_ptr<class Event> fail(new Event(eventName.toLocal8Bit().constData(), ev->id));
-            fail->toUuid = this->uuid;
-            this->eventLoop->SendEvent(fail);
+            if(readPacketFailed)
+            {
+                //Read packet failed, possibly due to the end of media
+                QString eventName = QString("AVBIN_FRAME_FAILED");
+                std::tr1::shared_ptr<class Event> fail(new Event(eventName.toLocal8Bit().constData(), ev->id));
+                fail->toUuid = this->uuid;
+                fail->data = "READ_PACKET_FAILED";
+                this->eventLoop->SendEvent(fail);
+            }
+            else
+            {
+                //Something else went wrong, so a failure event is generated
+                QString eventName = QString("AVBIN_FRAME_FAILED");
+                std::tr1::shared_ptr<class Event> fail(new Event(eventName.toLocal8Bit().constData(), ev->id));
+                fail->toUuid = this->uuid;
+                fail->data = "UNKNOWN_ERROR";
+                this->eventLoop->SendEvent(fail);
+            }
         }
     }
 }

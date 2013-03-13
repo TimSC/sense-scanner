@@ -43,8 +43,10 @@ MediaResponseFrame::MediaResponseFrame(std::tr1::shared_ptr<class Event> ev)
 void MediaResponseFrame::Process(std::tr1::shared_ptr<class Event> ev)
 {
     assert(ev->type=="MEDIA_FRAME_RESPONSE");
-    if(ev->data=="FAILED")
-        throw std::runtime_error("Failed to get frame.");
+    if(ev->data.left(13)=="AVBIN_ERROR: ")
+    {
+        throw std::runtime_error(ev->data.toLocal8Bit().constData());
+    }
 
     std::string tmp(ev->data.toLocal8Bit().constData());
     std::vector<std::string> args = split(tmp,',');
@@ -158,12 +160,12 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
     if(ev->type == "AVBIN_FRAME_RESPONSE")
     {
-        std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_FRAME_RESPONSE"));
+        //Ignore this event
     }
 
     if(ev->type=="AVBIN_FRAME_FAILED")
     {
-        std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_DURATION_RESPONSE"));
+        //Ignore this event
     }
 
     if(ev->type == "GET_MEDIA_DURATION")
@@ -235,7 +237,8 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             responseEv->toUuid = ev->fromUuid;
             responseEv->fromUuid = this->uuid;
             responseEv->id = ev->id;
-            responseEv->data = "FAILED";
+            responseEv->data = "AVBIN_ERROR: ";
+            responseEv->data.append(response->data);        //Pass along the type of error
             this->eventLoop->SendEvent(responseEv);
         }
         else
