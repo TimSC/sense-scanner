@@ -30,6 +30,7 @@ protected:
     unsigned long long currentStartTimestamp, currentEndTimestamp;
 
     bool issueEnountered;
+    QString issueDescription;
 
     std::vector<std::vector<float> > currentModel;
     bool currentModelSet;

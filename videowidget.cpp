@@ -210,9 +210,11 @@ void VideoWidget::SeekBack()
     {
         //This throws an exception if no seek point exists
         unsigned long long ti = this->sceneControl->GetSeekBackTime();
-        assert(ti < this->mediaLength);
-        cout << "Requesting frame at " << ti << endl;
-        this->ui->horizontalScrollBar->setValue(ti);
+        if(ti <= this->mediaLength)
+        {
+            cout << "Requesting frame at " << ti << endl;
+            this->ui->horizontalScrollBar->setValue(ti);
+        }
     }
     catch(exception &err) {}
 }
@@ -225,9 +227,11 @@ void VideoWidget::SeekForward()
     {
         //This throws an exception if no seek point exists
         unsigned long long ti = this->sceneControl->GetSeekForwardTime();
-        assert(ti < this->mediaLength);
-        cout << "Requesting frame at " << ti << endl;
-        this->ui->horizontalScrollBar->setValue(ti);
+        if(ti <= this->mediaLength)
+        {
+            cout << "Requesting frame at " << ti << endl;
+            this->ui->horizontalScrollBar->setValue(ti);
+        }
     }
     catch(exception &err) {}
 }

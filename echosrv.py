@@ -27,7 +27,7 @@ def WorkerProcessProf(childPipeConn):
 	tracker = None
 	getProgress = False
 	aliveClock = time.time()
-	aliveMsgEnabled = False
+	aliveMsgEnabled = True
 	savedTracker = False
 
 	while running:
@@ -210,9 +210,9 @@ def WorkerProcessProf(childPipeConn):
 							for pt in pred:
 								margin = 40
 								if pt[0] < margin or pt[0] >= width-margin:
-									pt[0] = random.random(margin, width - margin)
+									pt[0] = random.uniform(margin, width - margin)
 								if pt[1] < margin or pt[1] >= height-margin:
-									pt[1] = random.random(margin, height - margin)
+									pt[1] = random.uniform(margin, height - margin)
 
 							for pt in pred:
 								outXml += "  <pt x=\""+str(pt[0])+"\" y=\""+str(pt[1])+"\"/>\n"

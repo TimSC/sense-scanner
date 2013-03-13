@@ -46,7 +46,7 @@ void ApplyModel::SetMediaInterface(QUuid mediaInterfaceIn)
 
 void ApplyModel::Update()
 {
-    if(issueEnountered)
+    if(this->issueEnountered)
     {
         this->msleep(1);
         return;
@@ -196,6 +196,8 @@ void ApplyModel::Update()
         {
             cout << "Timeout getting frame 0" << endl;
             this->msleep(1);
+            this->issueEnountered = true;
+            this->issueDescription = "Error in GetMediaFrame(1)";
             return;
         }
         this->currentTimeSet = true;
@@ -243,6 +245,7 @@ void ApplyModel::Update()
         catch (std::runtime_error &err)
         {
             this->issueEnountered = true;
+            this->issueDescription = "Error in GetMediaFrame(2)";
 
             this->currentTimeSet = false;
             this->msleep(1);
@@ -252,6 +255,7 @@ void ApplyModel::Update()
         if(this->currentEndTimestamp < nextTi)
         {
             this->issueEnountered = true;
+            this->issueDescription = "Error in GetMediaFrame(2) Timing";
 
             this->currentTimeSet = false;
             throw runtime_error("Earlier frame found than was requested");
@@ -303,6 +307,7 @@ void ApplyModel::Update()
     {
         //All done, stop work
         this->issueEnountered = true;
+        this->issueDescription = "Next frame time after end of media";
     }
 
     this->msleep(1000);
