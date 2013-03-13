@@ -27,7 +27,7 @@ def WorkerProcessProf(childPipeConn):
 	tracker = None
 	getProgress = False
 	aliveClock = time.time()
-	aliveMsgEnabled = True
+	aliveMsgEnabled = False
 	savedTracker = False
 
 	while running:
