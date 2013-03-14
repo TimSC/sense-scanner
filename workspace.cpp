@@ -1,4 +1,5 @@
 #include "workspace.h"
+#include "localsleep.h"
 #include <assert.h>
 #include <QtCore/QFile>
 #include <QtGui/QtGui>
@@ -203,7 +204,14 @@ int Workspace::RemoveProcessing(QUuid uuid)
     if(this->processingList[ind]->GetState()!=AlgorithmProcess::PAUSED)
         this->processingList[ind]->Stop();
 
+	//Confirm processing has stopped
+	for(unsigned int count = 0; count < 10; count)
+	if(this->processingList[ind]->GetState()!=AlgorithmProcess::STOPPED)
+	{
+		LocalSleep::msleep(100);
+	}
     assert(this->processingList[ind]->GetState()==AlgorithmProcess::STOPPED);
+
     this->processingList.erase(this->processingList.begin()+ind);
     this->processingProgress.erase(this->processingProgress.begin()+ind);
     this->processingUuids.erase(this->processingUuids.begin()+ind);
