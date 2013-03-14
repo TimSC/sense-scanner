@@ -970,7 +970,7 @@ void TrackingSceneController::RemovePoint(int index)
     //Remove specified point
     std::tr1::shared_ptr<class Event> reqEv(new Event("REMOVE_POINT"));
     reqEv->toUuid = this->annotationUuid;
-    reqEv->data = QString::number(index,'d');
+    reqEv->data = QString::number(index,'d',0);
     this->eventLoop->SendEvent(reqEv);
 }
 

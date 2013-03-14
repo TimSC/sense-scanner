@@ -396,7 +396,7 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     {
         std::tr1::shared_ptr<class Event> responseEv(new Event("ALG_STATE"));
         responseEv->id = ev->id;
-        responseEv->data = QString::number((int)(this->GetState()), 'd');
+        responseEv->data = QString::number((int)(this->GetState()), 'd', 0);
         responseEv->fromUuid = this->uid;
         this->eventLoop->SendEvent(responseEv);
     }
