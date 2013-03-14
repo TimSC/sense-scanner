@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'workspace.h'
 **
-** Created: Wed Jan 30 21:02:27 2013
+** Created: Thu Mar 14 11:19:57 2013
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.3)
 **
 ** WARNING! All changes made in this file will be lost!

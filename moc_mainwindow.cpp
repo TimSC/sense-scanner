@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'mainwindow.h'
 **
-** Created: Wed Jan 30 21:51:58 2013
+** Created: Thu Mar 14 11:19:54 2013
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.3)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -260,7 +260,7 @@ static const uint qt_meta_data_MainWindow[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-      21,   14, // methods
+      26,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -287,8 +287,13 @@ static const uint qt_meta_data_MainWindow[] = {
      356,  344,   11,   11, 0x0a,
      383,   11,   11,   11, 0x0a,
      426,  415,  407,   11, 0x0a,
-     464,   11,   11,   11, 0x0a,
-     479,   11,   11,   11, 0x0a,
+     467,  464,   11,   11, 0x0a,
+     508,   11,   11,   11, 0x0a,
+     527,   11,   11,   11, 0x0a,
+     540,   11,   11,   11, 0x0a,
+     563,   11,   11,   11, 0x0a,
+     578,   11,   11,   11, 0x0a,
+     599,   11,   11,   11, 0x0a,
 
        0        // eod
 };
@@ -307,7 +312,10 @@ static const char qt_meta_stringdata_MainWindow[] = {
     "selectedRow\0SelectedSourceChanged(int)\0"
     "DeselectCurrentSource()\0QString\0"
     "discardMsg\0CheckIfDataShouldBeDiscarded(QString)\0"
-    "AboutPressed()\0ShowVideoPressed()\0"
+    "ev\0HandleEvent(std::tr1::shared_ptr<Event>)\0"
+    "GetKnowledgeBase()\0GetSupport()\0"
+    "GetKinatomicHomePage()\0AboutPressed()\0"
+    "ShowSourcesPressed()\0FitVideoToWindow()\0"
 };
 
 void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -336,8 +344,13 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 17: _t->DeselectCurrentSource(); break;
         case 18: { QString _r = _t->CheckIfDataShouldBeDiscarded((*reinterpret_cast< QString(*)>(_a[1])));
             if (_a[0]) *reinterpret_cast< QString*>(_a[0]) = _r; }  break;
-        case 19: _t->AboutPressed(); break;
-        case 20: _t->ShowVideoPressed(); break;
+        case 19: _t->HandleEvent((*reinterpret_cast< std::tr1::shared_ptr<Event>(*)>(_a[1]))); break;
+        case 20: _t->GetKnowledgeBase(); break;
+        case 21: _t->GetSupport(); break;
+        case 22: _t->GetKinatomicHomePage(); break;
+        case 23: _t->AboutPressed(); break;
+        case 24: _t->ShowSourcesPressed(); break;
+        case 25: _t->FitVideoToWindow(); break;
         default: ;
         }
     }
@@ -375,9 +388,9 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 21)
+        if (_id < 26)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 21;
+        _id -= 26;
     }
     return _id;
 }

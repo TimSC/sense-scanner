@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'videowidget.ui'
 **
-** Created: Wed Jan 30 22:18:13 2013
+** Created: Thu Mar 14 00:11:38 2013
 **      by: Qt User Interface Compiler version 4.8.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -43,7 +43,8 @@ public:
     {
         if (VideoWidget->objectName().isEmpty())
             VideoWidget->setObjectName(QString::fromUtf8("VideoWidget"));
-        VideoWidget->resize(400, 300);
+        VideoWidget->resize(507, 417);
+        VideoWidget->setMinimumSize(QSize(400, 400));
         verticalLayout_2 = new QVBoxLayout(VideoWidget);
         verticalLayout_2->setContentsMargins(0, 0, 0, 0);
         verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));

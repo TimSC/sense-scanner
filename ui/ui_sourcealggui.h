@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'sourcealggui.ui'
 **
-** Created: Wed Jan 30 21:51:47 2013
+** Created: Thu Mar 14 11:19:21 2013
 **      by: Qt User Interface Compiler version 4.8.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'aboutgui.ui'
 **
-** Created: Wed Jan 30 22:14:38 2013
+** Created: Thu Mar 14 11:04:54 2013
 **      by: Qt User Interface Compiler version 4.8.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -18,6 +18,7 @@
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QWidget>
 #include <QtWebKit/QWebView>
+#include "aboutgui.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -25,7 +26,7 @@ class Ui_AboutGui
 {
 public:
     QVBoxLayout *verticalLayout;
-    QWebView *webView;
+    WebViewErrCheck *webView;
 
     void setupUi(QWidget *AboutGui)
     {
@@ -34,14 +35,15 @@ public:
         AboutGui->resize(400, 300);
         verticalLayout = new QVBoxLayout(AboutGui);
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-        webView = new QWebView(AboutGui);
+        webView = new WebViewErrCheck(AboutGui);
         webView->setObjectName(QString::fromUtf8("webView"));
-        webView->setUrl(QUrl(QString::fromUtf8("http://www.sheerman-chase.org.uk/vcs/about.html?version=alpha1")));
+        webView->setUrl(QUrl(QString::fromUtf8("about:blank")));
 
         verticalLayout->addWidget(webView);
 
 
         retranslateUi(AboutGui);
+        QObject::connect(webView, SIGNAL(loadFinished(bool)), webView, SLOT(LoadingResult(bool)));
 
         QMetaObject::connectSlotsByName(AboutGui);
     } // setupUi

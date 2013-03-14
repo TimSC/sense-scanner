@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'videowidget.h'
 **
-** Created: Tue Jan 29 20:52:15 2013
+** Created: Thu Mar 14 00:12:13 2013
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.3)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -97,7 +97,7 @@ static const uint qt_meta_data_VideoWidget[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-      11,   14, // methods
+      15,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -106,31 +106,38 @@ static const uint qt_meta_data_VideoWidget[] = {
 
  // slots: signature, parameters, type, tag, flags
       24,   13,   12,   12, 0x0a,
-      67,   58,   12,   12, 0x0a,
-      84,   12,   12,   12, 0x0a,
-      92,   12,   12,   12, 0x0a,
-      99,   12,   12,   12, 0x0a,
-     110,   12,   12,   12, 0x0a,
-     124,   12,   12,   12, 0x0a,
-     186,  138,   12,   12, 0x0a,
-     279,  271,   12,   12, 0x0a,
-     316,   12,   12,   12, 0x0a,
-     335,  330,   12,   12, 0x0a,
+      58,   49,   12,   12, 0x0a,
+      75,   12,   12,   12, 0x0a,
+      83,   12,   12,   12, 0x0a,
+      90,   12,   12,   12, 0x0a,
+     101,   12,   12,   12, 0x0a,
+     115,   12,   12,   12, 0x0a,
+     177,  129,   12,   12, 0x0a,
+     277,  262,   12,   12, 0x0a,
+     323,  315,   12,   12, 0x0a,
+     349,   12,   12,   12, 0x0a,
+     369,  363,   12,   12, 0x0a,
+     394,  389,   12,   12, 0x0a,
+     425,  413,   12,   12, 0x0a,
+     453,  450,   12,   12, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_VideoWidget[] = {
     "VideoWidget\0\0src,finaIn\0"
-    "SetSource(AbstractMedia*,QString)\0"
-    "newValue\0SliderMoved(int)\0Pause()\0"
-    "Play()\0SeekBack()\0SeekForward()\0"
-    "TimerUpdate()\0"
+    "SetSource(QUuid,QString)\0newValue\0"
+    "SliderMoved(int)\0Pause()\0Play()\0"
+    "SeekBack()\0SeekForward()\0TimerUpdate()\0"
     "fr,startTimestamp,endTimestamp,requestTimestamp\0"
     "AsyncFrameReceived(QImage&,unsigned long long,unsigned long long,unsig"
     "ned long long)\0"
-    "sceneIn\0SetSceneControl(TrackingAnnotation*)\0"
-    "FitToWindow()\0time\0TimeChanged(QTime)\0"
+    "sceneControlIn\0SetSceneControl(BaseSceneController*)\0"
+    "srcUuid\0SetAnnotationTrack(QUuid)\0"
+    "FitToWindow()\0scale\0SetRawScale(double)\0"
+    "time\0TimeChanged(QTime)\0eventLoopIn\0"
+    "SetEventLoop(EventLoop*)\0ev\0"
+    "HandleEvent(std::tr1::shared_ptr<Event>)\0"
 };
 
 void VideoWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -139,7 +146,7 @@ void VideoWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         Q_ASSERT(staticMetaObject.cast(_o));
         VideoWidget *_t = static_cast<VideoWidget *>(_o);
         switch (_id) {
-        case 0: _t->SetSource((*reinterpret_cast< AbstractMedia*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
+        case 0: _t->SetSource((*reinterpret_cast< QUuid(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
         case 1: _t->SliderMoved((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 2: _t->Pause(); break;
         case 3: _t->Play(); break;
@@ -147,9 +154,13 @@ void VideoWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         case 5: _t->SeekForward(); break;
         case 6: _t->TimerUpdate(); break;
         case 7: _t->AsyncFrameReceived((*reinterpret_cast< QImage(*)>(_a[1])),(*reinterpret_cast< unsigned long long(*)>(_a[2])),(*reinterpret_cast< unsigned long long(*)>(_a[3])),(*reinterpret_cast< unsigned long long(*)>(_a[4]))); break;
-        case 8: _t->SetSceneControl((*reinterpret_cast< TrackingAnnotation*(*)>(_a[1]))); break;
-        case 9: _t->FitToWindow(); break;
-        case 10: _t->TimeChanged((*reinterpret_cast< QTime(*)>(_a[1]))); break;
+        case 8: _t->SetSceneControl((*reinterpret_cast< BaseSceneController*(*)>(_a[1]))); break;
+        case 9: _t->SetAnnotationTrack((*reinterpret_cast< QUuid(*)>(_a[1]))); break;
+        case 10: _t->FitToWindow(); break;
+        case 11: _t->SetRawScale((*reinterpret_cast< double(*)>(_a[1]))); break;
+        case 12: _t->TimeChanged((*reinterpret_cast< QTime(*)>(_a[1]))); break;
+        case 13: _t->SetEventLoop((*reinterpret_cast< EventLoop*(*)>(_a[1]))); break;
+        case 14: _t->HandleEvent((*reinterpret_cast< std::tr1::shared_ptr<Event>(*)>(_a[1]))); break;
         default: ;
         }
     }
@@ -187,9 +198,9 @@ int VideoWidget::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 11)
+        if (_id < 15)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 11;
+        _id -= 15;
     }
     return _id;
 }
