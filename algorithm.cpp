@@ -1,6 +1,7 @@
 #include "algorithm.h"
 #include "localsleep.h"
 #include "mediabuffer.h"
+#include "version.h"
 #include <iostream>
 #include <sstream>
 #include <assert.h>
@@ -82,9 +83,10 @@ void AlgorithmProcess::Init()
     //Determine which python executable to run
     QList<QString> programCandidates;
     programCandidates.append("python.exe");
-    programCandidates.append("python.exe");
+#ifndef RELEASE_MODE
     programCandidates.append("/usr/bin/python");
     programCandidates.append("c:\\dev\\Python27\\python.exe");
+#endif
 
     QString program = "";
     for(unsigned i=0;i<programCandidates.size();i++)
@@ -103,9 +105,11 @@ void AlgorithmProcess::Init()
 
     //Find the main python script
     QList<QString> scriptCandidates;
-    scriptCandidates.append("../QtMedia/echosrv.py");
     scriptCandidates.append("echosrv.py");
+#ifndef RELEASE_MODE
     scriptCandidates.append("../echosrv.py");
+	scriptCandidates.append("../QtMedia/echosrv.py");
+#endif
     QString mainScript = "";
     for(unsigned i=0;i<scriptCandidates.size();i++)
     {
