@@ -1,18 +1,18 @@
-; qtmedia.nsi
+; sensescanner.nsi
 ;
 ;--------------------------------
 
 ; The name of the installer
-Name "QtMedia"
+Name "Kinatomic Sense Scanner"
 
 ; The file to write
-OutFile "QtMediaInstaller.exe"
+OutFile "SenseScannerInstaller.exe"
 
 ; The default installation directory
-InstallDir $PROGRAMFILES\QtMedia
+InstallDir $PROGRAMFILES\SenseScanner
 
 ; The text to prompt the user to enter a directory
-DirText "This will install QtMedia on your computer. Choose a directory"
+DirText "This will install Sense Scanner on your computer. Choose a directory"
 
 ;--------------------------------
 
@@ -23,9 +23,10 @@ Section "" ;No components page, name is not important
 SetOutPath $INSTDIR
 
 ; Put file there
-File QtMedia.exe
-File licensing.txt
+File sensescanner.exe
+File about.html
 File lgpl-info.txt
+File Kinatomic-Logo.jpg
 File *.dll
 File *.py
 File python.exe
@@ -38,9 +39,9 @@ File /r site-packages
 ; Tell the compiler to write an uninstaller and to look for a "Uninstall" section
 WriteUninstaller $INSTDIR\Uninstall.exe
 
-CreateDirectory "$SMPROGRAMS\QtMedia"
-CreateShortCut "$SMPROGRAMS\QtMedia\QtMedia.lnk" "$INSTDIR\QtMedia.exe"
-CreateShortCut "$SMPROGRAMS\QtMedia\Uninstall QtMedia.lnk" "$INSTDIR\Uninstall.exe"
+CreateDirectory "$SMPROGRAMS\Kinatomic"
+CreateShortCut "$SMPROGRAMS\Kinatomic\Sense Scanner.lnk" "$INSTDIR\sensescanner.exe"
+CreateShortCut "$SMPROGRAMS\Kinatomic\Uninstall Sense Scanner.lnk" "$INSTDIR\Uninstall.exe"
 SectionEnd ; end the section
 
 ;----------------------------------
@@ -62,7 +63,8 @@ RMDir $INSTDIR\reltracker
 RMDir $INSTDIR\site-packages
 RMDir $INSTDIR
 
-Delete "$SMPROGRAMS\QtMedia\QtMedia.lnk"
-RMDIR "$SMPROGRAMS\QtMedia."
+Delete "$SMPROGRAMS\Kinatomic\Sense Scanner.lnk"
+Delete "$SMPROGRAMS\Kinatomic\Uninstall Sense Scanner.lnk"
+RMDIR "$SMPROGRAMS\Kinatomic."
 
 SectionEnd 
