@@ -515,20 +515,19 @@ void MainWindow::RegenerateProcessingList()
             std::ostringstream displayLine;
             float progress = this->workspace.GetProcessingProgress(algUuids[row]);
             QString progressStr = QString::number(progress * 100., 'f', 1).toLocal8Bit().constData();
-            const char *progressCStr = progressStr.toLocal8Bit().constData();
             AlgorithmProcess::ProcessState state = this->workspace.GetProcessingState(algUuids[row]);
 
             if(state!=AlgorithmProcess::STOPPED)
             {
                 if(state == AlgorithmProcess::STARTING) displayLine << "Starting";
                 if(state == AlgorithmProcess::RUNNING_PREPARING) displayLine << "Preparing";
-                if(state == AlgorithmProcess::RUNNING) displayLine << "Training Model " << progressCStr << "%";
-                if(state == AlgorithmProcess::RUNNING_PAUSING) displayLine << "Pausing... " << progressCStr << "%";
-                if(state == AlgorithmProcess::RUNNING_STOPPING) displayLine << "Stopping... " << progressCStr << "%";
+                if(state == AlgorithmProcess::RUNNING) displayLine << "Training Model " << progressStr.toLocal8Bit().constData() << "%";
+                if(state == AlgorithmProcess::RUNNING_PAUSING) displayLine << "Pausing... " << progressStr.toLocal8Bit().constData() << "%";
+                if(state == AlgorithmProcess::RUNNING_STOPPING) displayLine << "Stopping... " << progressStr.toLocal8Bit().constData() << "%";
                 if(state == AlgorithmProcess::READY) displayLine << "Ready";
                 if(state == AlgorithmProcess::PAUSED)
                 {
-                    if(progress<1.f) displayLine << "Paused " << progressCStr << "%";
+                    if(progress<1.f) displayLine << "Paused " << progressStr.toLocal8Bit().constData() << "%";
                     else displayLine << "Done ";
                 }
             }
@@ -536,7 +535,7 @@ void MainWindow::RegenerateProcessingList()
             {
                 if(progress < 1.f)
                 {
-                    displayLine << "Stopped " << progressCStr << "%";
+                    displayLine << "Stopped " << progressStr.toLocal8Bit().constData() << "%";
                 }
                 else
                     displayLine << "Done";
