@@ -953,9 +953,24 @@ void MainWindow::ApplyModelPressed()
     QModelIndexList srcSelList = srcSelection->selectedRows(0);
     QList<QUuid> algUuids = this->workspace.GetProcessingUuids();
     QList<QUuid> annotationUuids = this->workspace.GetAnnotationUuids();
+
+    if(srcSelList.size()==0)
+    {
+        if(this->errMsg == NULL)
+            this->errMsg = new QMessageBox(this);
+        this->errMsg->setWindowTitle("Error: No videos selected to process.");
+        this->errMsg->setText("Please select one or more videos before trying to apply a model.");
+        this->errMsg->exec();
+        return;
+    }
+
     if(modelSelList.size()==0)
     {
-        cout << "No model selected" << endl;
+        if(this->errMsg == NULL)
+            this->errMsg = new QMessageBox(this);
+        this->errMsg->setWindowTitle("Error: No model selected");
+        this->errMsg->setText("Please select a model before trying to apply it.");
+        this->errMsg->exec();
         return;
     }
 

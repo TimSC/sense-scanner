@@ -164,6 +164,8 @@ void AvBinBackend::DoOpenFile(int requestId)
         done = true;
         for(unsigned int chanNum=0;chanNum<this->timestampOfChannel.size();chanNum++)
         {
+            if(this->streams[chanNum]==NULL) //Ignore unopened streams
+                continue;
             if(this->timestampOfChannel[chanNum] == 0) done = false;
             if(this->timestampOfChannel[chanNum] < DECODE_INITIAL_DURATION) done = false;
             if(this->firstFrames[chanNum] &&
