@@ -113,6 +113,7 @@
     <ClInclude Include="..\scenecontroller.h" />
     <ClInclude Include="..\shapegui.h" />
     <ClInclude Include="..\useractions.h" />
+    <ClInclude Include="..\version.h" />
     <ClInclude Include="..\videoarea.h" />
     <ClInclude Include="..\videowidget.h" />
     <ClInclude Include="..\workspace.h" />
