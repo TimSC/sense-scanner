@@ -144,17 +144,16 @@ int32_t mod_avbin_get_version()
 {
     avbinOpenMutex.lock();
 	assert(ghinst != NULL);
-    if(!gavBinInitCompleted)
-    {
-        FARPROC init = GetProcAddress ( ghinst , "avbin_get_version" );
-        assert(init != (FARPROC)NULL);
 
-        int (*func)()=0;
-        func = (int (*)()) init;
-        int ver = (*func)();
-        avbinOpenMutex.unlock();
-        return ver;
-    }
+    FARPROC init = GetProcAddress ( ghinst , "avbin_get_version" );
+    assert(init != (FARPROC)NULL);
+
+    int (*func)()=0;
+    func = (int (*)()) init;
+    int ver = (*func)();
+    avbinOpenMutex.unlock();
+    return ver;
+
     avbinOpenMutex.unlock();
     return 0;
 }
