@@ -3,6 +3,7 @@
 
 #include <QtGui/QWidget>
 #include <QtWebKit/QtWebKit>
+#include <QtCore/QTimer>
 
 namespace Ui {
 class AboutGui;
@@ -30,6 +31,9 @@ public:
 
 public slots:
     void LoadingResult(bool ok);
+    void LoadInitialPage();
+protected:
+
 };
 
 

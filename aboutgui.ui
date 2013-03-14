@@ -18,7 +18,7 @@
     <widget class="WebViewErrCheck" name="webView">
      <property name="url">
       <url>
-       <string>http://www.kinatomic.com/progurl/about.php?version=alpha1</string>
+       <string>about:blank</string>
       </url>
      </property>
     </widget>

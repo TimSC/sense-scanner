@@ -9,6 +9,7 @@
 #include "eventloop.h"
 #include "localsleep.h"
 #include "scenecontroller.h"
+#include "version.h"
 #include <QtGui/QFileDialog>
 #include <QtCore/QThread>
 #include <QtGui/QDialogButtonBox>
@@ -211,7 +212,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->timer->start(10); //in millisec
 
     ui->setupUi(this);
-    this->setWindowTitle("Kinatomic Sense Scanner");
+    QString titleStr = QString("Kinatomic Sense Scanner %1").arg(VERSION_STR);
+    this->setWindowTitle(titleStr);
     this->ui->videoWidget->SetSource(this->mediaInterfaceFront->GetUuid(),"");
 
     QStringList horLabelsAnn;

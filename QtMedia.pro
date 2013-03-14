@@ -50,7 +50,8 @@ HEADERS  += mainwindow.h \
     aboutgui.h \
     useractions.h \
     applymodel.h \
-    shapegui.h
+    shapegui.h \
+    version.h
 
 FORMS    += mainwindow.ui \
     videowidget.ui \
