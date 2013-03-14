@@ -33,6 +33,6 @@ void WebViewErrCheck::LoadingResult(bool ok)
 
 void WebViewErrCheck::LoadInitialPage()
 {
-    QString urlStr = QString("http://www.kinatomic.com/progurl/about.php?version=").arg(VERSION_URL);
+    QString urlStr = QString("http://www.kinatomic.com/progurl/about.php?version=%1").arg(VERSION_URL);
     this->load(QUrl(urlStr));
 }
