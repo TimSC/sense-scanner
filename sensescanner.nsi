@@ -14,6 +14,8 @@ InstallDir $PROGRAMFILES\SenseScanner
 ; The text to prompt the user to enter a directory
 DirText "This will install Sense Scanner on your computer. Choose a directory"
 
+RequestExecutionLevel admin #NOTE: You still need to check user rights with UserInfo!
+
 ;--------------------------------
 
 ; The stuff to install
@@ -21,6 +23,8 @@ Section "" ;No components page, name is not important
 
 ; Set output path to the installation directory.
 SetOutPath $INSTDIR
+
+SetShellVarContext all
 
 ; Put file there
 File sensescanner.exe
@@ -48,6 +52,8 @@ SectionEnd ; end the section
 
 ; The uninstall section
 Section "Uninstall"
+
+SetShellVarContext all
 
 Delete $INSTDIR\Uninstall.exe
 Delete $INSTDIR\*.*
