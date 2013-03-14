@@ -729,9 +729,10 @@ void MainWindow::NewWorkspace()
         return;
     }
 
+    //Free memory of old objects
+    this->applyModelPool.Clear(); //Clear this first to stop interconnected behaviour
     this->workspace.ClearAnnotation();
     this->workspace.ClearProcessing();
-    this->applyModelPool.Clear();
     this->workspaceAsStored = this->workspace;
     this->RegenerateSourcesList();
     this->RegenerateProcessingList();
