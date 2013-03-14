@@ -1,0 +1,17 @@
+
+AVBin build instructions
+========================
+
+mkdir avbin
+cd avbin
+git init
+git remote add origin https://github.com/TimSC/AVbin
+git pull origin master
+git checkout fc1fdf715e3f721aa8e6ec419aa730f469a9646e
+git submodule init
+git submodule update
+cd libav
+git checkout 4abf6fa095f8082499d5a24cdfb18eb4c1fec60e
+cd ..
+./build.sh linux-x86-64
+./build.sh win32
