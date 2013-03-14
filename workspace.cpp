@@ -459,3 +459,23 @@ void Workspace::AddProcessing(QUuid uid,
     std::tr1::shared_ptr<class Event> response = eventReceiver->WaitForEventId(newAnnEv->id);
     assert(response->type == "PROCESSING_ADDED");
 }
+
+int Workspace::IsReadyForSave()
+{
+    this->lock.lock();
+    //Check process is ready to be removed
+    for(unsigned int i=0;i<this->processingList.size();i++)
+    {
+        AlgorithmProcess::ProcessState state = this->processingList[i]->GetState();
+        if(state!=AlgorithmProcess::STOPPED &&
+                state!=AlgorithmProcess::PAUSED &&
+                state!=AlgorithmProcess::READY)
+        {
+            cout << "Process cannot be saved while it is running" << endl;
+            this->lock.unlock();
+            return 0;
+        }
+    }
+    this->lock.unlock();
+    return 1;
+}

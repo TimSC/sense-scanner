@@ -62,6 +62,8 @@ public:
                                   class EventLoop *eventLoop,
                                   class EventReceiver *eventReceiver);
 
+    int IsReadyForSave();
+
 protected:
     //Sources and annotation data
     std::vector<std::tr1::shared_ptr<class Annotation> > annotations;

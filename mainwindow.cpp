@@ -760,6 +760,7 @@ void MainWindow::LoadWorkspace()
       tr("Load Workspace"), "", tr("Workspaces (*.work)"));
     if(fileName.length() == 0) return;
 
+    this->applyModelPool.Clear();
     this->workspace.ClearAnnotation();
     this->workspace.ClearProcessing();
     this->RegenerateSourcesList();
@@ -789,17 +790,23 @@ void MainWindow::SaveWorkspace()
         return;
     }
 
-    //waitDlg->Exec();
-    //int ret = waitDlg->GetResultCode();
-    //delete waitDlg;
-    //waitDlg = NULL;
-
     this->SaveAsWorkspace();
 
 }
 
 void MainWindow::SaveAsWorkspace()
 {
+    //Check if algs are paused before saving
+    if(!this->workspace.IsReadyForSave())
+    {
+        if(this->errMsg == NULL)
+            this->errMsg = new QMessageBox(this);
+        this->errMsg->setWindowTitle("Error: Training is running");
+        this->errMsg->setText("Pause training of models before attempting to save.");
+        this->errMsg->exec();
+        return;
+    }
+
     //Get output filename from user
     QString fileName = QFileDialog::getSaveFileName(0,
       tr("Save Workspace"), "", tr("Workspaces (*.work)"));
