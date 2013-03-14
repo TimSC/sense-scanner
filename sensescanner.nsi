@@ -58,9 +58,9 @@ Delete $INSTDIR\reltracker\*.*
 Delete $INSTDIR\site-packages\*.*
 RMDir $INSTDIR\icons
 RMDir $INSTDIR\shapes
-RMDir $INSTDIR\python-lib
-RMDir $INSTDIR\reltracker
-RMDir $INSTDIR\site-packages
+RMDir /r $INSTDIR\python-lib
+RMDir /r $INSTDIR\reltracker
+RMDir /r $INSTDIR\site-packages
 RMDir $INSTDIR
 
 Delete "$SMPROGRAMS\Kinatomic\Sense Scanner.lnk"
