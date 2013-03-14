@@ -116,6 +116,10 @@ void Workspace::RemoveSource(QUuid uuid)
     std::tr1::shared_ptr<class Annotation> ann = this->annotations[ind];
     if(ann!=NULL) ann->PreDelete();
 
+	//Stop thread
+	this->annotationThreads[ind]->Stop();
+
+	//Free memory
     this->annotations.erase(this->annotations.begin()+ind);
     this->annotationUuids.erase(this->annotationUuids.begin()+ind);
     this->annotationThreads.erase(this->annotationThreads.begin()+ind);

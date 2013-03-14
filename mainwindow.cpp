@@ -594,11 +594,17 @@ void MainWindow::RemoveVideo()
     //Disable this source UI controls
     this->DeselectCurrentSource();
 
+	//For each selected annotation source
     QModelIndexList rowList = sourceSelected->selectedRows();
     for(unsigned int i=0;i<rowList.size();i++)
     {
         QModelIndex &ind = rowList[i];
         //cout << ind.row() << endl;
+
+		//Remove helper thread for source
+		this->applyModelPool.Remove(algUuids[ind.row()]);
+
+		//Remove source
         this->workspace.RemoveSource(algUuids[ind.row()]);
     }
 
