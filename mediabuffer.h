@@ -32,6 +32,7 @@ public:
     uint64_t timestamp; //start time
     uint64_t endTimestamp; //end time
     uint64_t requestedTimestamp;
+    int threadCode;
 
     DecodedFrame();
     DecodedFrame(const DecodedFrame &other);

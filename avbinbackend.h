@@ -35,7 +35,8 @@ public:
     int64_t Length();
 
     //Frame based retrieval
-    int GetFrame(uint64_t time, class DecodedFrame &out, int &readPacketFailedOut);
+    int GetFrame(uint64_t time, class DecodedFrame &out,
+                 int &readPacketFailedOut);
 
     //Replay retrieval
     int PlayUpdate(); //Returns true if playing is active
@@ -72,6 +73,9 @@ protected:
     uint8_t *audioBuffer;
     unsigned audioBufferSize;
     QUuid uuid;
+
+    bool logToFile;
+    QFile *avbinLog;
 };
 
 //************************************************

@@ -82,6 +82,9 @@ protected:
     bool lastRequestedTimeSet;
     QString fina;
 
+    bool logToFile;
+    QFile *vidLog;
+
     class EventLoop *eventLoop;
     class EventReceiver *eventReceiver;
 

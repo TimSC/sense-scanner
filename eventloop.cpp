@@ -101,7 +101,7 @@ std::tr1::shared_ptr<class Event> EventReceiver::PopEvent()
     return ev;
 }
 
-std::tr1::shared_ptr<class Event> EventReceiver::GetLatestDiscardOlder(QString typeIn)
+std::tr1::shared_ptr<class Event> EventReceiver::GetLatestDiscardOlder(QString typeIn, QUuid filterUuid)
 {
     this->mutex.lock();
     std::tr1::shared_ptr<class Event> tmp;
@@ -110,12 +110,21 @@ std::tr1::shared_ptr<class Event> EventReceiver::GetLatestDiscardOlder(QString t
 
     while(i<this->eventBuffer.size())
     {
+        //Only process events of specified type
         tmp = this->eventBuffer[i];
         if(tmp->type!=typeIn)
         {
             i++;
             continue;
         }
+
+        //Only process events of specified uuid
+        if(!filterUuid.isNull() && filterUuid != tmp->toUuid)
+        {
+            i++;
+            continue;
+        }
+
         ev = tmp;
         this->eventBuffer.erase(this->eventBuffer.begin()+i);
         count++;

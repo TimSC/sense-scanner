@@ -107,7 +107,7 @@ public:
     int BufferSize();
     void MessageLoopDeleted();
     std::tr1::shared_ptr<class Event> PopEvent();
-    std::tr1::shared_ptr<class Event> GetLatestDiscardOlder(QString type);
+    std::tr1::shared_ptr<class Event> GetLatestDiscardOlder(QString type, QUuid filterUuid);
     std::tr1::shared_ptr<class Event> WaitForEventId(unsigned long long id,
                                unsigned timeOutMs = 50000);
     void SetThreadId(QUuid idIn);

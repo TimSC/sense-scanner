@@ -84,6 +84,7 @@ AvBinMedia::AvBinMedia(class EventLoop *eventLoopIn, bool removeOldRequestsIn) :
     this->eventReceiver = NULL;
     this->eventLoop = eventLoopIn;
     this->mediaThread = NULL;
+    this->logToFile = false;
     this->removeOldRequests = removeOldRequestsIn;
     this->uuid = QUuid::createUuid();
     this->SetEventLoop(eventLoopIn);
@@ -92,6 +93,14 @@ AvBinMedia::AvBinMedia(class EventLoop *eventLoopIn, bool removeOldRequestsIn) :
     this->mediaThread->SetEventLoop(this->eventLoop);
     this->mediaThread->SetUuid(this->uuid);
     this->mediaThread->Start();
+
+    this->mediaLog = NULL;
+    if(this->logToFile)
+    {
+        QString fina = QString("mediaLog%1.txt").arg(this->uuid);
+        this->mediaLog = new QFile(fina);
+        this->mediaLog->open(QIODevice::WriteOnly);
+    }
 
 }
 
@@ -120,6 +129,10 @@ void AvBinMedia::SetEventLoop(class EventLoop *eventLoopIn)
 int AvBinMedia::OpenFile(QString fina)
 {
     assert(this->eventLoop);
+    if(this->mediaLog!=NULL)
+        this->mediaLog->write(QString("AvBinMedia::OpenFile %1\n")
+                              .arg(this->uuid.toString()).toLocal8Bit().constData());
+
     unsigned long long evid = this->eventLoop->GetId();
     QString eventName = QString("AVBIN_OPEN_FILE");
     std::tr1::shared_ptr<class Event> openEv(new Event(eventName.toLocal8Bit().constData(), evid));
@@ -161,6 +174,12 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type == "AVBIN_FRAME_RESPONSE")
     {
         //Ignore this event
+        if(this->mediaLog!=NULL)
+        {
+            this->mediaLog->write(QString("GOT_ASYNC_FRAME %1\n").arg(this->uuid.toString())
+                              .toLocal8Bit().constData());
+            this->mediaLog->flush();
+        }
     }
 
     if(ev->type=="AVBIN_FRAME_FAILED")
@@ -203,13 +222,20 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
     if(ev->type == "GET_MEDIA_FRAME")
     {
+        if(this->mediaLog!=NULL)
+        {
+            this->mediaLog->write(QString("GET_MEDIA_FRAME %1 %2\n").arg(this->uuid.toString())
+                              .arg(ev->buffer.toULongLong()).toLocal8Bit().constData());
+            this->mediaLog->flush();
+        }
+
         if(this->removeOldRequests)
         {
             //To prevent a backlog of frame requests developing, old requests
             //may be discarded from the queue at this stage
             try
             {
-                ev = this->eventReceiver->GetLatestDiscardOlder("GET_MEDIA_FRAME");
+                ev = this->eventReceiver->GetLatestDiscardOlder("GET_MEDIA_FRAME", this->uuid);
             }
             catch(std::runtime_error &err)
             {
@@ -233,6 +259,13 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(requestEv->id);
         if(response->type=="AVBIN_FRAME_FAILED")
         {
+            if(this->mediaLog!=NULL)
+            {
+                this->mediaLog->write(QString("AVBIN_FRAME_FAILED %1\n").arg(this->uuid.toString())
+                                  .toLocal8Bit().constData());
+                this->mediaLog->flush();
+            }
+
             std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_FRAME_RESPONSE"));
             responseEv->toUuid = ev->fromUuid;
             responseEv->fromUuid = this->uuid;
@@ -242,7 +275,7 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             this->eventLoop->SendEvent(responseEv);
         }
         else
-        {
+        {        
             QString test = response->type;
             MediaResponseFrameBasic fd(response);
             std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_FRAME_RESPONSE"));
@@ -253,6 +286,15 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             responseEv->data = datastr;
             responseEv->buffer = fd.img;
             this->eventLoop->SendEvent(responseEv);
+
+            if(this->mediaLog!=NULL)
+            {
+                this->mediaLog->write(QString("GOT_REQ_FRAME %1 %2 %3\n").arg(this->uuid.toString())
+                                  .arg(fd.start)
+                                  .arg(fd.end)
+                                  .toLocal8Bit().constData());
+                this->mediaLog->flush();
+            }
         }
         }
     }

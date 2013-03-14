@@ -68,6 +68,14 @@ VideoWidget::VideoWidget(QWidget *parent) :
     this->ui->timeEdit->setDisplayFormat("hh:mm:ss:zzz");
 
     this->SetSceneControl(new class LogoSceneController(this));
+
+    this->logToFile = false;
+    this->vidLog = NULL;
+    if(this->logToFile)
+    {
+        this->vidLog = new QFile("vidLog.txt");
+        this->vidLog->open(QIODevice::WriteOnly);
+    }
 }
 
 VideoWidget::~VideoWidget()
@@ -240,20 +248,38 @@ void VideoWidget::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
     if(ev->type=="MEDIA_FRAME_RESPONSE")
     {
+        cout << qPrintable(ev->fromUuid) << endl;
+        cout << qPrintable(this->seq) << endl;
+        cout << "Match" << (ev->fromUuid == this->seq) << endl;
+        cout.flush();
+
         //Ignore frames not directed at widget
-        if(ev->fromUuid != this->seq) return;
+        if(ev->fromUuid != this->seq)
+        {
+            return;
+        }
         if(ev->data.left(13)!="AVBIN_ERROR: ")
         {
         MediaResponseFrame processedImg(ev);
         this->AsyncFrameReceived(processedImg.img, processedImg.start,
                                  processedImg.end, processedImg.req);
+
+        if(this->vidLog!=NULL)
+        {
+            vidLog->write(QString("%1,%2,%3\n")
+                          .arg(processedImg.start)
+                          .arg(processedImg.end)
+                          .arg(ev->fromUuid)
+                          .toLocal8Bit().constData());
+            vidLog->flush();
+        }
         }
         else
         {
             cout << "Warning: frame request failed in VideoWidget::HandleEvent" << endl;
         }
     }
-
+    return;
 }
 
 void VideoWidget::TimerUpdate()

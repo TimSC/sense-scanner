@@ -84,6 +84,8 @@ protected:
     QUuid uuid;
     bool removeOldRequests;
 
+    QFile *mediaLog;
+    bool logToFile;
 };
 
 #endif // AVBINMEDIA_H

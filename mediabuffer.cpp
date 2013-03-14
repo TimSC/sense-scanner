@@ -18,6 +18,7 @@ DecodedFrame::DecodedFrame() : Deletable()
 
     buff = NULL;
     buffSize = 0;
+    threadCode = 0;
 }
 
 DecodedFrame::DecodedFrame(const DecodedFrame &other)
@@ -39,6 +40,7 @@ DecodedFrame& DecodedFrame::operator=(const DecodedFrame& other)
     timestamp = other.timestamp;
     endTimestamp = other.endTimestamp;
     requestedTimestamp = other.requestedTimestamp;
+    threadCode = other.threadCode;
 
     if(this->buffSize != other.buffSize)
         this->AllocateSize(other.buffSize);
@@ -92,6 +94,7 @@ void DecodedFrame::FastSwap(class DecodedFrame &other)
     SwapVals<uint64_t>(timestamp, other.timestamp);
     SwapVals<uint64_t>(endTimestamp, other.endTimestamp);
     SwapVals<uint64_t>(requestedTimestamp, other.requestedTimestamp);
+    SwapVals<int>(threadCode, other.threadCode);
     SwapVals<uint8_t *>(this->buff, other.buff);
     SwapVals<unsigned int>(this->buffSize, other.buffSize);
 }

@@ -25,6 +25,8 @@ AvBinBackend::AvBinBackend()
     this->eventLoop = NULL;
     this->audioBuffer = NULL;
     this->audioBufferSize = 0;
+    this->avbinLog = NULL;
+    this->logToFile = false;
 }
 
 AvBinBackend::AvBinBackend(const AvBinBackend &other)
@@ -242,6 +244,12 @@ void AvBinBackend::DoOpenFile(int requestId)
 
 int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out, int &readPacketFailed)
 {
+    if(this->avbinLog!=NULL)
+    {
+        QString logs = QString("GET_FRAME %1\n").arg(time);
+        this->avbinLog->write(logs.toLocal8Bit().constData());
+    }
+
     readPacketFailed = 0;
     if(this->fi == NULL)
         return 0;
@@ -302,7 +310,7 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out, int &readPack
         this->currentFrame.width = 0;
         this->currentFrame.height = 0;
         this->currentFrame.timestamp = 0;
-        this->prevFrame.endTimestamp = 0;
+        this->currentFrame.endTimestamp = 0;
         this->prevFrame.width = 0;
         this->prevFrame.height = 0;
         this->prevFrame.timestamp = 0;
@@ -344,6 +352,7 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out, int &readPack
         //if(sinfo->type == AVBIN_STREAM_TYPE_AUDIO) cout << " audio";
         //cout << endl;
 
+
         this->timestampOfChannel[packet.stream_index] = timestamp;
 
         //Decode video packet
@@ -357,6 +366,12 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out, int &readPack
             int32_t ret = mod_avbin_decode_video(stream, packet.data, packet.size, this->currentFrame.buff);
             int error = (ret == -1);
             //cout << "z" << (timestamp > time && this->currentFrame.width > 0) << error<<endl;
+
+            if(this->avbinLog!=NULL)
+            {
+                QString logs = QString("FOUND_FRAME %1\n").arg(timestamp);
+                this->avbinLog->write(logs.toLocal8Bit().constData());
+            }
 
             //Check if this frame is after the requested time and stop
             //processing frames if that is the case
@@ -381,6 +396,14 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out, int &readPack
                 //cout << "prev timestamp" << this->prevFrame.timestamp << endl;
 
                 done = 1;
+
+                if(this->avbinLog!=NULL)
+                {
+                    QString logs = QString("MATCH %1\n").arg(timestamp);
+                    this->avbinLog->write(logs.toLocal8Bit().constData());
+                    this->avbinLog->flush();
+                }
+
             }
 
             if(!error)
@@ -471,6 +494,15 @@ void AvBinBackend::SetEventLoop(class EventLoop *eventLoopIn)
 void AvBinBackend::SetUuid(QUuid idIn)
 {
     this->uuid = idIn;
+
+    if(this->logToFile)
+    {
+        QString fina = QString("avbinlog%1").arg(idIn);
+        if(this->avbinLog!=NULL)
+            delete this->avbinLog;
+        this->avbinLog = new QFile(fina);
+        this->avbinLog->open(QIODevice::WriteOnly);
+    }
 }
 
 int AvBinBackend::PlayUpdate()
