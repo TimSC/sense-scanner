@@ -198,6 +198,7 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         this->eventLoop->SendEvent(requestEv);
 
         std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(requestEv->id);
+
         if(response->type=="AVBIN_REQUEST_FAILED")
         {
             std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_DURATION_RESPONSE"));
@@ -210,12 +211,14 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         }
         else
         {
+            assert(response->type=="AVBIN_DURATION_RESPONSE");
             std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_DURATION_RESPONSE"));
             responseEv->toUuid = ev->fromUuid;
             responseEv->fromUuid = this->uuid;
             responseEv->id = ev->id;
             responseEv->buffer = this->currentFina.toUtf8();
-            responseEv->data = QString("%1").arg(response->data.toULongLong() / 1000.);
+            unsigned long long len = (unsigned long long)(0.5 + (response->data.toULongLong() / 1000.));
+            responseEv->data = QString("%1").arg(len);
             this->eventLoop->SendEvent(responseEv);
         }
     }
@@ -349,7 +352,8 @@ unsigned long long AvBinMedia::GetMediaDuration(QString fina,
 
     std::tr1::shared_ptr<class Event> response = eventReceiver->WaitForEventId(requestEv->id);
     assert(response->type == "MEDIA_DURATION_RESPONSE");
-    return response->data.toULongLong();
+    unsigned long long out = response->data.toULongLong();
+    return out;
 
 }
 

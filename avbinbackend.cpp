@@ -548,9 +548,10 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             QString eventName = QString("AVBIN_DURATION_RESPONSE");
             std::tr1::shared_ptr<class Event> response(
                         new Event(eventName.toLocal8Bit().constData(), ev->id));
-            std::ostringstream tmp;
-            tmp << this->Length();
-            response->data = tmp.str().c_str();
+
+            int64_t len = this->Length();
+            QString tmp = QString("%1").arg(len);
+            response->data = tmp;
             response->id = ev->id;
             response->toUuid = ev->toUuid;
             this->eventLoop->SendEvent(response);
