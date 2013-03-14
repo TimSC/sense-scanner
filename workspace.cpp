@@ -200,16 +200,10 @@ int Workspace::RemoveProcessing(QUuid uuid)
         return 0;
     }
 
-    //If paused, stop the process
-    if(this->processingList[ind]->GetState()!=AlgorithmProcess::PAUSED)
-        this->processingList[ind]->Stop();
+    //Stop the process
+    this->processingList[ind]->Stop();
 
 	//Confirm processing has stopped
-	for(unsigned int count = 0; count < 10; count)
-	if(this->processingList[ind]->GetState()!=AlgorithmProcess::STOPPED)
-	{
-		LocalSleep::msleep(100);
-	}
     assert(this->processingList[ind]->GetState()==AlgorithmProcess::STOPPED);
 
     this->processingList.erase(this->processingList.begin()+ind);
