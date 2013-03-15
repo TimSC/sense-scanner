@@ -210,8 +210,10 @@ def WorkerProcessProf(childPipeConn):
 							for pt in pred:
 								margin = 40
 								if pt[0] < margin or pt[0] >= width-margin:
+									pt = list(pt) #Ensure this is not a tuple
 									pt[0] = random.uniform(margin, width - margin)
 								if pt[1] < margin or pt[1] >= height-margin:
+									pt = list(pt) #Ensure this is not a tuple
 									pt[1] = random.uniform(margin, height - margin)
 
 							for pt in pred:
