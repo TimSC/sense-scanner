@@ -207,14 +207,14 @@ def WorkerProcessProf(childPipeConn):
 								pred = modelList
 							
 							#For out of bounds points, randomly move tracker inside image
-							for pt in pred:
+							for pi, pt in enumerate(pred):
 								margin = 40
-								if pt[0] < margin or pt[0] >= width-margin:
-									pt = list(pt) #Ensure this is not a tuple
-									pt[0] = random.uniform(margin, width - margin)
-								if pt[1] < margin or pt[1] >= height-margin:
-									pt = list(pt) #Ensure this is not a tuple
-									pt[1] = random.uniform(margin, height - margin)
+								ptl = list(pt) #Ensure this is not a tuple
+								if ptl[0] < margin or ptl[0] >= width-margin:
+									ptl[0] = random.uniform(margin, width - margin)
+								if ptl[1] < margin or ptl[1] >= height-margin:
+									ptl[1] = random.uniform(margin, height - margin)
+								pred[pi] = ptl
 
 							for pt in pred:
 								outXml += "  <pt x=\""+str(pt[0])+"\" y=\""+str(pt[1])+"\"/>\n"
