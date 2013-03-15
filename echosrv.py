@@ -348,10 +348,7 @@ if __name__=="__main__":
 
 		if li == "KEEPALIVE":
 			if not p.is_alive():
-				time.sleep(1)
-				sys.stdout.flush()
-				sys.stderr.flush()
-				print "\n\n\n\nINTERNAL_ERROR\n\n\n"
+				print "INTERNAL_ERROR"
 				sys.stdout.flush()
 			else:
 				parentPipeConn.send(["KEEPALIVE"])
