@@ -63,8 +63,13 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->eventLoop->AddListener("PAUSE_ALGORITHM", *this->eventReceiver);
     this->eventLoop->AddListener("RUN_ALGORITHM", *this->eventReceiver);
 
+    QObject::connect(this, SIGNAL(readyReadStandardOutput()), this, SLOT(StdOutReady()));
+    QObject::connect(this, SIGNAL(readyReadStandardError()), this, SLOT(StdErrReady()));
+    QObject::connect(this, SIGNAL(stateChanged(newState)), this, SLOT(ProcessStateChanged(newState)));
+
     QObject::connect(&this->timer, SIGNAL(timeout()), this, SLOT(Update()));
     this->timer.start(10); //in millisec
+    this->keepAliveTimer.start();
 }
 
 AlgorithmProcess::~AlgorithmProcess()
@@ -197,15 +202,17 @@ int AlgorithmProcess::IsStopFlagged()
 
 AlgorithmProcess::ProcessState AlgorithmProcess::GetState()
 {
-    if(this->state() == QProcess::Starting)
+    QProcess::ProcessState qstate = this->state();
+
+    if(qstate == QProcess::Starting)
         return AlgorithmProcess::STARTING;
-    int running = (this->state() == QProcess::Running);
-    if(!running)
+    if(qstate == QProcess::NotRunning)
     {
         this->stopping = 0;
         this->paused = 1;
         return AlgorithmProcess::STOPPED;
     }
+    assert(qstate == QProcess::Running);
     if(!this->dataLoaded) return AlgorithmProcess::RUNNING_PREPARING;
     if(this->stopping) return AlgorithmProcess::RUNNING_STOPPING;
     if(this->progress >= 1.) return AlgorithmProcess::READY;
@@ -266,6 +273,13 @@ void AlgorithmProcess::Update()
 {
     //cout << "AlgorithmProcess::Update()" << endl;
 
+    //Do periodic update of keep alive message
+    if(this->keepAliveTimer.elapsed()>1000)
+    {
+        this->keepAliveTimer.restart();
+        this->SendCommand("KEEPALIVE\n");
+    }
+
     AlgorithmProcess::ProcessState state = this->GetState();
 
     //Process events from application
@@ -285,13 +299,24 @@ void AlgorithmProcess::Update()
         flushEvents = 0;
     }
 
-    //Get standard output from algorithm process
     QByteArray ret = this->readAllStandardOutput();
     this->algOutBuffer.append(ret);
     this->ProcessAlgOutput();
 
+}
+
+void AlgorithmProcess::StdOutReady()
+{
+    //Get standard output from algorithm process
+    QByteArray ret = this->readAllStandardOutput();
+    this->algOutBuffer.append(ret);
+    this->ProcessAlgOutput();
+}
+
+void AlgorithmProcess::StdErrReady()
+{
     //Get errors from console error out
-    ret = this->readAllStandardError();
+    QByteArray ret = this->readAllStandardError();
     this->algErrBuffer.append(ret);
 
     while(true)
@@ -300,7 +325,18 @@ void AlgorithmProcess::Update()
         if(err.length() == 0) break;
         cout << "Algorithm Error: " << err.toLocal8Bit().constData() << endl;
     }
+}
 
+void AlgorithmProcess::ProcessStateChanged(QProcess::ProcessState newState)
+{
+    if(newState == QProcess::NotRunning)
+    {
+        std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
+        openEv->data = "stopped";
+        openEv->fromUuid = this->uid;
+        this->eventLoop->SendEvent(openEv);
+
+    }
 
 }
 
@@ -466,6 +502,17 @@ void AlgorithmProcess::ProcessAlgOutput()
         el.SendEvent(openEv);
         ReadLineFromBuffer(this->algOutBuffer,1);//Pop this line
         return;
+    }
+
+    if(cmd=="INTERNAL_ERROR")
+    {
+
+        this->SendCommand("QUIT\n");
+        this->waitForFinished(1000);
+        if(this->state() != QProcess::NotRunning)
+        {
+            this->terminate();
+        }
     }
 
     if(cmd.left(11)=="DATA_BLOCK=")

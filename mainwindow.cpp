@@ -524,7 +524,7 @@ void MainWindow::RegenerateProcessingList()
                 if(state == AlgorithmProcess::RUNNING) displayLine << "Training Model " << progressStr.toLocal8Bit().constData() << "%";
                 if(state == AlgorithmProcess::RUNNING_PAUSING) displayLine << "Pausing... " << progressStr.toLocal8Bit().constData() << "%";
                 if(state == AlgorithmProcess::RUNNING_STOPPING) displayLine << "Stopping... " << progressStr.toLocal8Bit().constData() << "%";
-                if(state == AlgorithmProcess::READY) displayLine << "Ready";
+                if(state == AlgorithmProcess::READY) displayLine << "Ready";           
                 if(state == AlgorithmProcess::PAUSED)
                 {
                     if(progress<1.f) displayLine << "Paused " << progressStr.toLocal8Bit().constData() << "%";

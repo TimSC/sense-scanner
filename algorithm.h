@@ -62,6 +62,11 @@ public:
 public slots:
     void Update();
 
+    void StdOutReady();
+    void StdErrReady();
+
+    void ProcessStateChanged(QProcess::ProcessState newState);
+
 protected:
     int IsStopFlagged();
 
@@ -91,6 +96,7 @@ protected:
     QTimer timer;
     double progress;
     QList<unsigned long long> saveModelRequestIds;
+    QTime keepAliveTimer;
 };
 
 class ProcessingRequestOrResponse : public Deletable

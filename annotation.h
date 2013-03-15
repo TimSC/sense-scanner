@@ -94,6 +94,7 @@ public:
     //Keep track of automatically labeled data
     unsigned long long autoLabeledStart;
     unsigned long long autoLabeledEnd;
+
 protected:
 
     void AddPoint(std::vector<float> p);

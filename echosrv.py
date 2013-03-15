@@ -6,11 +6,13 @@ import xml.etree.ElementTree as ET
 from reltracker import reltracker
 
 def WorkerProcess(childPipeConn):
+
 	if 0:
 		import cProfile
 		cProfile.run('WorkerProcessProf(childPipeConn)', 'workerProf')
 	else:
 		WorkerProcessProf(childPipeConn)
+
 
 def WorkerProcessProf(childPipeConn):
 	progress = 0.
@@ -27,13 +29,16 @@ def WorkerProcessProf(childPipeConn):
 	tracker = None
 	getProgress = False
 	aliveClock = time.time()
-	aliveMsgEnabled = False
+	aliveMsgEnabled = True
 	savedTracker = False
+
+	#random.junk()
 
 	while running:
 		timeNow = time.time()
 		if timeNow > aliveClock + 1. and aliveMsgEnabled:
 			print "ALIVE"
+			sys.stdout.flush()
 			aliveClock = timeNow
 
 		if childPipeConn.poll():
@@ -50,6 +55,10 @@ def WorkerProcessProf(childPipeConn):
 				running = 0
 			if event[0]=="GET_PROGRESS":
 				getProgress = True
+			if event[0]=="KEEPALIVE":
+				print "ALIVE"
+				sys.stdout.flush()
+
 			if event[0]=="TRAINING_DATA_FINISH":
 				if len(trainImgs) == 0 and not modelReady:
 					print "Error: No images loaded in algorithm process"
@@ -335,6 +344,17 @@ if __name__=="__main__":
 
 		if li[0:11] == "DATA_BLOCK=":
 			ReadDataBlock(parentPipeConn, inputlog, fi)
+			handled = 1
+
+		if li == "KEEPALIVE":
+			if not p.is_alive():
+				time.sleep(1)
+				sys.stdout.flush()
+				sys.stderr.flush()
+				print "\n\n\n\nINTERNAL_ERROR\n\n\n"
+				sys.stdout.flush()
+			else:
+				parentPipeConn.send(["KEEPALIVE"])
 			handled = 1
 
 		#Send all misc commands to worker thread
