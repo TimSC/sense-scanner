@@ -562,7 +562,7 @@ void MainWindow::ImportVideo()
 {
     //Get filename from user
     QString fileName = QFileDialog::getOpenFileName(this,
-      tr("Import Video"), "", tr("Video Files (*.avi *.mov *.mkv *.wmf *.webm *.flv *.mp4 *.rm *.asf *.wmv *.dv)"));
+      tr("Import Video"), "", tr("Video Files (*.avi *.mov *.mkv *.wmf *.webm *.flv *.mp4 *.rm *.asf *.wmv *.dv *.ogv)"));
     if(fileName.length() == 0) return;
 
     QUuid uid = QUuid::createUuid();
