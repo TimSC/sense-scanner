@@ -835,6 +835,7 @@ void MainWindow::SaveAsWorkspace()
     //delete waitDlg;
     //waitDlg = NULL;
 
+    this->defaultFilename = fileName;
     this->workspaceAsStored = this->workspace;
 }
 
