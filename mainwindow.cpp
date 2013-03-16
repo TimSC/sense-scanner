@@ -788,6 +788,7 @@ void MainWindow::SaveWorkspace()
     //Get video file name from source
     if(this->defaultFilename.length()>0)
     {
+        //Send signal to user actions thread to handle in the background
         std::tr1::shared_ptr<class Event> loadWorkspaceEv(new Event("SAVE_WORKSPACE_AS"));
         loadWorkspaceEv->data = this->defaultFilename.toLocal8Bit().constData();
         this->eventLoop->SendEvent(loadWorkspaceEv);
@@ -827,6 +828,7 @@ void MainWindow::SaveAsWorkspace()
 
     //WaitPopUpDialog *waitDlg = new WaitPopUpDialog(this);
 
+    //Send signal to user actions thread to handle in the background
     std::tr1::shared_ptr<class Event> loadWorkspaceEv(new Event("SAVE_WORKSPACE_AS"));
     loadWorkspaceEv->data = fileName.toLocal8Bit().constData();
     this->eventLoop->SendEvent(loadWorkspaceEv);

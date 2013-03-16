@@ -145,7 +145,7 @@ std::tr1::shared_ptr<class Event> EventReceiver::WaitForEventId(unsigned long lo
     if(stop) throw std::runtime_error("Cannot wait in a thread that is stopping");
 
     unsigned waitingTime = 0;
-    while(waitingTime < timeOutMs)
+    while(waitingTime < timeOutMs || timeOutMs < 0)
     {
         //cout << "Waiting..." << (unsigned long)this << endl;
         this->mutex.lock();
