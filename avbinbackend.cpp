@@ -155,7 +155,6 @@ void AvBinBackend::DoOpenFile(int requestId)
         }
 
         AVbinTimestamp &timestamp = packet.timestamp;
-        assert(timestamp >= 0);
         AVbinStreamInfo *sinfo = this->streamInfos[packet.stream_index];
         AVbinStream *stream = this->streams[packet.stream_index];
         if(stream==NULL) continue;
@@ -343,7 +342,6 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out, int &readPack
         }
 
         AVbinTimestamp &timestamp = packet.timestamp;
-        assert(timestamp >= 0);
         AVbinStreamInfo *sinfo = this->streamInfos[packet.stream_index];
         AVbinStream *stream = this->streams[packet.stream_index];
         if(stream==NULL) continue;
