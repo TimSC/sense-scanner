@@ -29,7 +29,7 @@ def WorkerProcessProf(childPipeConn):
 	tracker = None
 	getProgress = False
 	aliveClock = time.time()
-	aliveMsgEnabled = True
+	aliveMsgEnabled = False
 	savedTracker = False
 
 	#random.junk()
@@ -56,7 +56,7 @@ def WorkerProcessProf(childPipeConn):
 			if event[0]=="GET_PROGRESS":
 				getProgress = True
 			if event[0]=="KEEPALIVE":
-				print "ALIVE"
+				#print "ALIVE"
 				sys.stdout.flush()
 
 			if event[0]=="TRAINING_DATA_FINISH":
@@ -97,6 +97,11 @@ def WorkerProcessProf(childPipeConn):
 					tracker.PrepareForPickle()
 					trackerStr = pickle.dumps(tracker, protocol=pickle.HIGHEST_PROTOCOL)
 					tracker.PostUnPickle()
+
+					#fi=open("testpickle.dat","wb")
+					#fi.write(trackerStr)
+					#fi.close()
+
 					#modelData = "bz2".encode("ascii")+bz2.compress(trackerStr)
 					modelData = "raw".encode("ascii")+trackerStr
 					modelDataB64 = base64.b64encode(modelData)
@@ -311,8 +316,8 @@ if __name__=="__main__":
 	#inputlog = open("inputlog.dat","wb")
 	
 	if fi is not None:
-                fi.write("READY\n")
-        	fi.flush()
+		fi.write("READY\n")
+        fi.flush()
 	print "READY"
 	sys.stdout.flush()
 
