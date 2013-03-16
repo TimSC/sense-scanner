@@ -9,69 +9,112 @@ def WorkerProcess(childPipeConn):
 
 	if 0:
 		import cProfile
-		cProfile.run('WorkerProcessProf(childPipeConn)', 'workerProf')
+		cProfile.run('Worker(childPipeConn)', 'workerProf')
 	else:
-		WorkerProcessProf(childPipeConn)
+		workerObj = Worker(childPipeConn)
+
+class Worker:
+	def __init__(self, childPipeConn):
+		self.progress = 0.
+		self.running = 1
+		self.paused = 1
+		self.training = 0
+		self.imgCount = 0
+		self.xmlBlocksCount = 0
+		self.xmlTrees = []
+		self.trainImgs = {}
+		self.xmlDataBlocks = []
+		self.modelReady = False
+		self.tracker = None
+		self.getProgress = False
+		self.aliveClock = time.time()
+		self.aliveMsgEnabled = False
+		self.savedTracker = False
+		self.childPipeConn = childPipeConn
+		self.Run()
+
+	def Run(self):
 
 
-def WorkerProcessProf(childPipeConn):
-	progress = 0.
-	running = 1
-	paused = 1
-	training = 0
-	imgCount = 0
-	xmlBlocksCount = 0
-	xmlTrees = []
-	trainImgs = {}
-	currentFrame = None
-	xmlDataBlocks = []
-	modelReady = False
-	tracker = None
-	getProgress = False
-	aliveClock = time.time()
-	aliveMsgEnabled = False
-	savedTracker = False
+		#random.junk()
 
-	#random.junk()
+		while self.running:
+			timeNow = time.time()
+			if timeNow > self.aliveClock + 1. and self.aliveMsgEnabled:
+				print "ALIVE"
+				sys.stdout.flush()
+				self.aliveClock = timeNow
 
-	while running:
-		timeNow = time.time()
-		if timeNow > aliveClock + 1. and aliveMsgEnabled:
-			print "ALIVE"
+			#Get all events
+			while childPipeConn.poll():
+				event = childPipeConn.recv()
+				self.HandleEvent(event)
+				time.sleep(0.001)
+
+			if (not self.paused and self.training and self.progress < 1.) or self.getProgress:
+				assert self.tracker is not None
+
+				if not self.paused and self.training and self.progress < 1.: 
+					self.tracker.Update()
+				self.progress = self.tracker.GetProgress()
+				print "PROGRESS="+str(self.progress)
+				self.getProgress = False
+
+				#Save training when training is complete
+				if not self.savedTracker and self.tracker.trainingRegressorsCompleteFlag:
+					#tracker.PrepareForPickle()
+					#pickle.dump(tracker,open("tracker.dat","wb"),protocol=-1)
+					#tracker = pickle.load(open("tracker.dat","rb"))
+					#tracker.PostUnPickle()
+					self.savedTracker = True
+
+
+			else:
+				time.sleep(0.1)
+
+			if self.progress >= 1. and not self.paused:
+				self.progress = 1.
+				self.paused = 1
+				print "PROGRESS="+str(self.progress)
+				print "NOW_PAUSED"
+
+			#print "running", self.running
 			sys.stdout.flush()
-			aliveClock = timeNow
+	
+		childPipeConn.send("FINISHED")
+		print "FINISHED"
+		sys.stdout.flush()
 
-		if childPipeConn.poll():
-			event = childPipeConn.recv()
-
+	def HandleEvent(self, event):
+		if 1:
 			#print "Rx",event[0]
 			if event[0]=="RUN":
 				print "NOW_RUNNING"
-				paused = 0
+				self.paused = 0
 			if event[0]=="PAUSE":
 				print "NOW_PAUSED"
-				paused = 1
+				self.paused = 1
 			if event[0]=="QUIT":
-				running = 0
+				self.running = 0
 			if event[0]=="GET_PROGRESS":
-				getProgress = True
+				self.getProgress = True
 			if event[0]=="KEEPALIVE":
 				#print "ALIVE"
 				sys.stdout.flush()
 
 			if event[0]=="TRAINING_DATA_FINISH":
-				if len(trainImgs) == 0 and not modelReady:
+				if len(self.trainImgs) == 0 and not self.modelReady:
 					print "Error: No images loaded in algorithm process"
-					continue
-				if len(xmlTrees) == 0 and not modelReady:
+					return
+				if len(self.xmlTrees) == 0 and not self.modelReady:
 					print "Error: No annotated positions loaded into algorithm process"
-					continue
+					return
 
-				modelReady = 1
-				training = 1
-				if tracker is None:
-					tracker = reltracker.RelTracker()
-					for tree in xmlTrees:
+				self.modelReady = 1
+				self.training = 1
+				if self.tracker is None:
+					self.tracker = reltracker.RelTracker()
+					for tree in self.xmlTrees:
 						timestamp = float(tree.attrib['time'])
 						xs, ys = [], []
 						for child in tree:
@@ -83,20 +126,20 @@ def WorkerProcessProf(childPipeConn):
 							xs[pid] = x
 							ys[pid] = y
 
-						if int(round(timestamp*1000.)) not in trainImgs:
+						if int(round(timestamp*1000.)) not in self.trainImgs:
 							print "Image for timestamp",int(round(timestamp*1000.)),"not found"
-							continue
-						im = trainImgs[int(round(timestamp*1000.))]
-						tracker.Add(im, zip(xs,ys))
+							return
+						im = self.trainImgs[int(round(timestamp*1000.))]
+						self.tracker.Add(im, zip(xs,ys))
 
-				tracker.TrainingDataComplete()
+				self.tracker.TrainingDataComplete()
 				#tracker = pickle.load(open("tracker.dat","rb"))
 
 			if event[0]=="SAVE_MODEL":
-				if paused and tracker is not None:
-					tracker.PrepareForPickle()
-					trackerStr = pickle.dumps(tracker, protocol=pickle.HIGHEST_PROTOCOL)
-					tracker.PostUnPickle()
+				if self.paused and self.tracker is not None:
+					self.tracker.PrepareForPickle()
+					trackerStr = pickle.dumps(self.tracker, protocol=pickle.HIGHEST_PROTOCOL)
+					self.tracker.PostUnPickle()
 
 					#fi=open("testpickle.dat","wb")
 					#fi.write(trackerStr)
@@ -122,33 +165,33 @@ def WorkerProcessProf(childPipeConn):
 					args.pop(0)
 					pairs = [tmp.split("=") for tmp in args]
 					argDict = dict(pairs)
-					if 'WIDTH' not in argDict: continue
-					if 'HEIGHT' not in argDict: continue
-					if 'TIMESTAMP' not in argDict: continue
+					if 'WIDTH' not in argDict: return
+					if 'HEIGHT' not in argDict: return
+					if 'TIMESTAMP' not in argDict: return
 					width = int(argDict['WIDTH'])
 					height = int(argDict['HEIGHT'])
 					timestamp = int(argDict['TIMESTAMP'])
 					imgRaw = event[2]
 					if width * height * 3 != len(imgRaw): 
 						print "#Image buffer of incorrect size",width,height,len(imgRaw)
-						continue
+						return
 
 					im = Image.frombuffer("RGB", (width, height), imgRaw, 'raw', "RGB", 0, 1)
-					if not training:
+					if not self.training:
 						#Pre-training image collection
 						print "Store image"
-						trainImgs[timestamp] = im
-					imgCount += 1
+						self.trainImgs[timestamp] = im
+					self.imgCount += 1
 
 				if args[0]=="XML_DATA":
 					#Parse XML from raw data block
-					xmlDataBlocks.append(event[2])
-					#xmlfi = open("xml"+str(xmlBlocksCount)+".xml","wt")
+					self.xmlDataBlocks.append(event[2])
+					#xmlfi = open("xml"+str(self.xmlBlocksCount)+".xml","wt")
 					#xmlfi.write(event[2])
-					xmlBlocksCount += 1
+					self.xmlBlocksCount += 1
 
 					tree = ET.fromstring(event[2])
-					xmlTrees.append(tree)
+					self.xmlTrees.append(tree)
 					#timestamp = float(tree.attrib['time'])
 					#for child in tree:
 					#	pid = int(child.attrib['id'])
@@ -171,10 +214,10 @@ def WorkerProcessProf(childPipeConn):
 							modelData = zlib.decompress(binModel[3:])
 						assert modelData is not None
 						
-						tracker = pickle.loads(modelData)
-						tracker.PostUnPickle()
-						print tracker
-						modelReady = True
+						self.tracker = pickle.loads(modelData)
+						self.tracker.PostUnPickle()
+						print self.tracker
+						self.modelReady = True
 					except Exception as exErr:
 						print "Decompression of data failed", str(exErr)
 
@@ -183,11 +226,11 @@ def WorkerProcessProf(childPipeConn):
 					args.pop(0)
 					pairs = [tmp.split("=") for tmp in args]
 					argDict = dict(pairs)
-					if 'WIDTH' not in argDict: continue
-					if 'HEIGHT' not in argDict: continue
-					if 'IMGBYTES' not in argDict: continue
-					if 'XMLBYTES' not in argDict: continue
-					if 'ID' not in argDict: continue
+					if 'WIDTH' not in argDict: return
+					if 'HEIGHT' not in argDict: return
+					if 'IMGBYTES' not in argDict: return
+					if 'XMLBYTES' not in argDict: return
+					if 'ID' not in argDict: return
 					width = int(argDict['WIDTH'])
 					height = int(argDict['HEIGHT'])
 					imgBytes = int(argDict['IMGBYTES'])
@@ -196,10 +239,10 @@ def WorkerProcessProf(childPipeConn):
 					combinedRaw = event[2];
 					#if width * height * 3 != imgBytes: 
 					#	print "#Image buffer of incorrect size",width,height,len(event[2])
-					#	continue
+					#	return
 
 					im = Image.frombuffer("RGB", (width, height), combinedRaw[:imgBytes], 'raw', "RGB", 0, 1)
-					if modelReady:
+					if self.modelReady:
 						#Post-training phase
 						#print "Store image"
 						#im.save("alg.jpg")
@@ -215,7 +258,7 @@ def WorkerProcessProf(childPipeConn):
 								modelList.append((float(pt.attrib['x']), float(pt.attrib['y'])))
 
 							try:
-								pred = tracker.Predict(im, modelList)
+								pred = self.tracker.Predict(im, modelList)
 							except:
 								#Tracker failed, probably went out of bounds
 								pred = modelList
@@ -243,44 +286,11 @@ def WorkerProcessProf(childPipeConn):
 						sys.stdout.write(outXmlEnc)
 						sys.stdout.flush()
 
-					if training and not modelReady:
+					if self.training and not self.modelReady:
 						print "ALG_NOT_READY"
 
 				print "DATA_BLOCK_PROCESSED"
 
-		if (not paused and training and progress < 1.) or getProgress:
-			assert tracker is not None
-
-			if not paused and training and progress < 1.: 
-				tracker.Update()
-			progress = tracker.GetProgress()
-			print "PROGRESS="+str(progress)
-			getProgress = False
-
-			#Save training when training is complete
-			if not savedTracker and tracker.trainingRegressorsCompleteFlag:
-				#tracker.PrepareForPickle()
-				#pickle.dump(tracker,open("tracker.dat","wb"),protocol=-1)
-				#tracker = pickle.load(open("tracker.dat","rb"))
-				#tracker.PostUnPickle()
-				savedTracker = True
-
-
-		else:
-			time.sleep(0.1)
-
-		if progress >= 1. and not paused:
-			progress = 1.
-			paused = 1
-			print "PROGRESS="+str(progress)
-			print "NOW_PAUSED"
-
-		#print "running", running
-		sys.stdout.flush()
-	
-	childPipeConn.send("FINISHED")
-	print "FINISHED"
-	sys.stdout.flush()
 
 def ReadDataBlock(parentPipeConn, inputlog, fi):
 	args = sys.stdin.readline()
