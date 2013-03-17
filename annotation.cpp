@@ -8,10 +8,10 @@
 using namespace std;
 #include "qblowfish/src/qblowfish.h"
 #include "scenecontroller.h"
+#include "version.h"
 
 #define TO_MILLISEC(x) (unsigned long long)(x / 1000. + 0.5)
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
-#define DEMO_MODE
 #define SECRET_KEY "This is a secret..."
 
 unsigned long long AbsDiff(unsigned long long a, unsigned long long b)
