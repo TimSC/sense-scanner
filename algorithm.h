@@ -45,11 +45,12 @@ public:
     int IsBlockingShutdown();
 
     static int PredictFrame(QSharedPointer<QImage> img,
-                        std::vector<std::vector<float> > &model,
-                        QUuid algUuid,
-                        class EventLoop *eventLoop,
-                        class EventReceiver *eventReceiver,
-                        std::vector<std::vector<float> > &out);
+                            std::vector<std::vector<float> > &model,
+                            QUuid algUuid,
+                            QUuid annotUuid,
+                            class EventLoop *eventLoop,
+                            class EventReceiver *eventReceiver,
+                            std::vector<std::vector<float> > &out);
 
     //This version is for all threads except the main thread
     static ProcessState GetState(QUuid algUuid,

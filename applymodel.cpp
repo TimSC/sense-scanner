@@ -361,6 +361,7 @@ void ApplyModel::ImageToProcess(unsigned long long startTi,
 
     int ret = AlgorithmProcess::PredictFrame(img,
                             model,
+                            this->algUuid,
                             this->annotUuid,
                             this->eventLoop,
                             this->eventReceiver,
@@ -404,11 +405,11 @@ void ApplyModelPool::SetEventLoop(class EventLoop *eventLoopIn)
 void ApplyModelPool::Add(QUuid algUuid, QUuid annotUuid, QUuid mediaInterface)
 {
     std::tr1::shared_ptr<class ApplyModel> am(new ApplyModel(annotUuid));
-    this->pool[uuid] = am;
-    this->pool[uuid]->SetEventLoop(this->eventLoop);
-    this->pool[uuid]->SetThreadId(algUuid); //Not sure this is a good idea to share thread IDs!
-    this->pool[uuid]->SetMediaInterface(mediaInterface);
-    this->pool[uuid]->Start();
+    this->pool[algUuid] = am;
+    this->pool[algUuid]->SetEventLoop(this->eventLoop);
+    this->pool[algUuid]->SetThreadId(algUuid); //Not sure this is a good idea to share thread IDs!
+    this->pool[algUuid]->SetMediaInterface(mediaInterface);
+    this->pool[algUuid]->Start();
 }
 
 void ApplyModelPool::Remove(QUuid uuid)

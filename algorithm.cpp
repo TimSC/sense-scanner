@@ -727,6 +727,7 @@ int AlgorithmProcess::IsBlockingShutdown()
 int AlgorithmProcess::PredictFrame(QSharedPointer<QImage> img,
                     std::vector<std::vector<float> > &model,
                     QUuid algUuid,
+                    QUuid annotUuid,
                     class EventLoop *eventLoop,
                     class EventReceiver *eventReceiver,
                     std::vector<std::vector<float> > &out)
@@ -740,8 +741,9 @@ int AlgorithmProcess::PredictFrame(QSharedPointer<QImage> img,
     req->pos.clear();
     req->pos.push_back(model);
     requestEv->raw = req;
+    requestEv->toUuid = algUuid;
     requestEv->id = eventLoop->GetId();
-    requestEv->data = algUuid.toString();
+    requestEv->data = annotUuid.toString();
 
     eventLoop->SendEvent(requestEv);
 
