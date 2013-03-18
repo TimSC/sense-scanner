@@ -1117,6 +1117,11 @@ void MainWindow::RemoveProcessPressed()
             return;
         }
 
+        //Update annotation tracks that depend on this processing
+
+
+
+        //Remove processing from workspace
         int ret = this->workspace.RemoveProcessing(algUuids[ind.row()]);
 
     }

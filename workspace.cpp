@@ -174,6 +174,8 @@ void Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg)
 int Workspace::RemoveProcessing(QUuid uuid)
 {
     this->lock.lock();
+
+    //Find index of references processing
     int ind = 0, found = 0;
     for(unsigned int i=0;i<this->processingUuids.size();i++)
     {
