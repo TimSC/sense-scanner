@@ -299,11 +299,6 @@ void AlgorithmProcess::Update()
         flushEvents = 0;
     }
 
-    //Get standard output from algorithm process
-    /*QByteArray ret = this->readAllStandardOutput();
-    this->algOutBuffer.append(ret);
-    this->ProcessAlgOutput();*/
-
     //Get errors from console error out
     QByteArray ret = this->readAllStandardError();
     this->algErrBuffer.append(ret);
