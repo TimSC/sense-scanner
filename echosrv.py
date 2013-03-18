@@ -28,9 +28,10 @@ class Worker:
 		self.tracker = None
 		self.getProgress = False
 		self.aliveClock = time.time()
-		self.aliveMsgEnabled = False
+		self.aliveMsgEnabled = True
 		self.savedTracker = False
 		self.childPipeConn = childPipeConn
+		self.workerLog = open("workerLog.txt","wt")
 		self.Run()
 
 	def Run(self):
@@ -43,6 +44,9 @@ class Worker:
 			if timeNow > self.aliveClock + 1. and self.aliveMsgEnabled:
 				print "ALIVE"
 				sys.stdout.flush()
+				if self.workerLog is not None:
+					self.workerLog.write("ALIVE\n")
+					self.workerLog.flush()
 				self.aliveClock = timeNow
 
 			#Get all events
@@ -84,9 +88,15 @@ class Worker:
 		childPipeConn.send("FINISHED")
 		print "FINISHED"
 		sys.stdout.flush()
+		self.workerLog.write("Worker thread finishing\n")
+		self.workerLog.close()
 
 	def HandleEvent(self, event):
 		if 1:
+			if self.workerLog is not None:
+				self.workerLog.write(event[0]+"\n")
+				self.workerLog.flush()
+
 			#print "Rx",event[0]
 			if event[0]=="RUN":
 				print "NOW_RUNNING"
