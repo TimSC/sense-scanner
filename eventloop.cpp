@@ -210,6 +210,15 @@ void EventReceiver::SetThreadId(QUuid idIn)
     this->mutex.unlock();
 }
 
+QUuid EventReceiver::GetThreadId()
+{
+    assert(this!=NULL);
+    this->mutex.lock();
+    QUuid out = this->threadId;
+    this->mutex.unlock();
+    return out;
+}
+
 void EventReceiver::Stop()
 {
     assert(this!=NULL);
@@ -246,7 +255,7 @@ EventLoop::~EventLoop()
     this->mutex.unlock();
 }
 
-void EventLoop::SendEvent(std::tr1::shared_ptr<class Event> event)
+unsigned int EventLoop::SendEvent(std::tr1::shared_ptr<class Event> event)
 {
     assert(this!=NULL);
     //cout << "Sent event "<< event->type << endl;
@@ -260,19 +269,28 @@ void EventLoop::SendEvent(std::tr1::shared_ptr<class Event> event)
         cout << "Warning: No listeners for event " << qPrintable(event->type) << endl;
         //No listeners found
         this->mutex.unlock();
-        return;
+        return 0;
     }
     std::vector<EventReceiver *> eventListeners = it->second;
     this->mutex.unlock();
 
     //Dispatch message to listeners
+    unsigned int countUuidMatches = 0;
     for(unsigned i=0;i<eventListeners.size();i++)
     {
-        eventListeners[i]->AddMessage(event);
+        //Add message to receiver queue
+        EventReceiver *receiver = eventListeners[i];
+        receiver->AddMessage(event);
+
+        //If a matching uuid received the message, increase count
+        if(receiver->GetThreadId() == event->toUuid)
+            countUuidMatches ++;
 
         if(event->type=="STOP_THREADS")
             cout << "Dispatch STOP_THREADS to " << (unsigned long)eventListeners[i] << endl;
     }
+
+    return countUuidMatches;
 }
 
 void EventLoop::AddListener(QString type, class EventReceiver &rx)

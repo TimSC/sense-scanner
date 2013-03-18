@@ -111,6 +111,7 @@ public:
     std::tr1::shared_ptr<class Event> WaitForEventId(unsigned long long id,
                                unsigned timeOutMs = 50000);
     void SetThreadId(QUuid idIn);
+    QUuid GetThreadId();
     void Stop();
 
 protected:
@@ -135,7 +136,7 @@ public:
     EventLoop();
     virtual ~EventLoop();
 
-    void SendEvent(std::tr1::shared_ptr<class Event> event);
+    unsigned int SendEvent(std::tr1::shared_ptr<class Event> event);
     void AddListener(QString, class EventReceiver &rx);
     void RemoveListener(class EventReceiver &rx);
 

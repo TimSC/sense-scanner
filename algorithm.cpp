@@ -708,6 +708,7 @@ QUuid AlgorithmProcess::GetUid()
 
 void AlgorithmProcess::SetUid(QUuid newUid)
 {
+    this->eventReceiver->SetThreadId(newUid);
     this->uid = newUid;
 }
 
@@ -745,7 +746,9 @@ int AlgorithmProcess::PredictFrame(QSharedPointer<QImage> img,
     requestEv->id = eventLoop->GetId();
     requestEv->data = annotUuid.toString();
 
-    eventLoop->SendEvent(requestEv);
+    unsigned int rxCount = eventLoop->SendEvent(requestEv);
+    if(rxCount==0)
+        throw std::runtime_error("Cannot request prediction from non-existent uuid");
 
     //Wait for response
     try
@@ -774,7 +777,10 @@ AlgorithmProcess::ProcessState AlgorithmProcess::GetState(QUuid algUuid,
     std::tr1::shared_ptr<class Event> requestEv(new Event("GET_STATE"));
     requestEv->id = eventLoop->GetId();
     requestEv->toUuid = algUuid;
-    eventLoop->SendEvent(requestEv);
+    unsigned int rxCount = eventLoop->SendEvent(requestEv);
+
+    if(rxCount==0)
+        throw std::runtime_error("Cannot request prediction from non-existent uuid");
 
     //Wait for response
     std::tr1::shared_ptr<class Event> resp = eventReceiver->WaitForEventId(requestEv->id);
