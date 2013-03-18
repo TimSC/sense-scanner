@@ -37,7 +37,7 @@ void ApplyModel::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("PREDICTION_RESULT", *this->eventReceiver);
     this->eventLoop->AddListener("AUTO_LABELED_END", *this->eventReceiver);
     this->eventLoop->AddListener("ALG_STATE", *this->eventReceiver);
-
+    this->eventLoop->AddListener("RECEIVER_DELETED", *this->eventReceiver);
 }
 
 void ApplyModel::SetMediaInterface(QUuid mediaInterfaceIn)

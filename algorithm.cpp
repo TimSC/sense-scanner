@@ -755,6 +755,9 @@ int AlgorithmProcess::PredictFrame(QSharedPointer<QImage> img,
     {
         std::tr1::shared_ptr<class Event> ev = eventReceiver->WaitForEventId(requestEv->id);
 
+        if(ev->type=="RECEIVER_DELETED")
+            throw std::runtime_error("Receiver deleted");
+
         if(ev->type!="PREDICTION_RESULT") return 0;
         class ProcessingRequestOrResponse *response = (class ProcessingRequestOrResponse *)ev->raw;
 
@@ -784,6 +787,9 @@ AlgorithmProcess::ProcessState AlgorithmProcess::GetState(QUuid algUuid,
 
     //Wait for response
     std::tr1::shared_ptr<class Event> resp = eventReceiver->WaitForEventId(requestEv->id);
+    if(resp->type=="RECEIVER_DELETED")
+        throw std::runtime_error("Receiver deleted");
+
     assert(resp->type=="ALG_STATE");
     return (AlgorithmProcess::ProcessState)resp->data.toInt();
 }

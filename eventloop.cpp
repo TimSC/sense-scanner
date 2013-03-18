@@ -61,6 +61,11 @@ EventReceiver::~EventReceiver()
 {
     cout << "EventReceiver::~EventReceiver()" << endl;
 
+    this->mutex.lock();
+    this->RespondToBufferedRequests();
+    this->stopping = 1;
+    this->mutex.unlock();
+
     if(this->el) this->el->RemoveListener(*this);
 }
 
@@ -72,6 +77,7 @@ void EventReceiver::AddMessage(std::tr1::shared_ptr<class Event> event)
     {
         cout << "Warning: event listener queue is size "<< this->eventBuffer.size() << endl;
     }
+
     this->mutex.unlock();
 }
 
@@ -225,6 +231,21 @@ void EventReceiver::Stop()
     this->mutex.lock();
     this->stopping = true;
     this->mutex.unlock();
+}
+
+void EventReceiver::RespondToBufferedRequests()
+{
+    //For pending messages, response with errors to those waiting for a response
+    for(unsigned int i=0;i<this->eventBuffer.size();i++)
+    {
+        std::tr1::shared_ptr<class Event> ev = this->eventBuffer[i];
+        if(ev->id==0) continue; //This don't need a specific response
+
+        std::tr1::shared_ptr<class Event> err(new Event("RECEIVER_DELETED"));
+        err->id = ev->id;
+        this->el->SendEvent(err);
+    }
+    this->eventBuffer.clear();
 }
 
 //*****************************************************

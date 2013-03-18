@@ -115,6 +115,8 @@ public:
     void Stop();
 
 protected:
+    void RespondToBufferedRequests(); //Used to clear buffer before shut down
+
     std::vector<std::tr1::shared_ptr<class Event> > eventBuffer;
     Mutex mutex;
     class EventLoop *el;
