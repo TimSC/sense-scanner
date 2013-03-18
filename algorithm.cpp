@@ -303,6 +303,16 @@ void AlgorithmProcess::Update()
     this->algOutBuffer.append(ret);
     this->ProcessAlgOutput();
 
+    //Get errors from console error out
+    ret = this->readAllStandardError();
+    this->algErrBuffer.append(ret);
+
+    while(true)
+    {
+        QString err = ReadLineFromBuffer(this->algErrBuffer);
+        if(err.length() == 0) break;
+        cout << "Algorithm Error: " << err.toLocal8Bit().constData() << endl;
+    }
 }
 
 void AlgorithmProcess::StdOutReady()
