@@ -439,6 +439,7 @@ void MessagableThread::run()
         catch(std::runtime_error e)
         {
             cout << "Error: thread update threw an exception" << endl;
+            cout << e.what() << endl;
         }
     }
 

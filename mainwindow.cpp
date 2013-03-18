@@ -589,7 +589,7 @@ void MainWindow::ImportVideo()
 void MainWindow::RemoveVideo()
 {
     cout << "remove" << endl;
-    QList<QUuid> algUuids = this->workspace.GetAnnotationUuids();
+    QList<QUuid> annotUuids = this->workspace.GetAnnotationUuids();
     QItemSelectionModel *sourceSelected = this->ui->sourcesAlgGui->ui->dataSources->selectionModel();
     assert(sourceSelected!=NULL);
 
@@ -604,10 +604,10 @@ void MainWindow::RemoveVideo()
         //cout << ind.row() << endl;
 
 		//Remove helper thread for source
-		this->applyModelPool.Remove(algUuids[ind.row()]);
+        this->applyModelPool.Remove(annotUuids[ind.row()]);
 
 		//Remove source
-        this->workspace.RemoveSource(algUuids[ind.row()]);
+        this->workspace.RemoveSource(annotUuids[ind.row()]);
     }
 
 }
