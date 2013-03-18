@@ -299,12 +299,13 @@ void AlgorithmProcess::Update()
         flushEvents = 0;
     }
 
-    QByteArray ret = this->readAllStandardOutput();
+    //Get standard output from algorithm process
+    /*QByteArray ret = this->readAllStandardOutput();
     this->algOutBuffer.append(ret);
-    this->ProcessAlgOutput();
+    this->ProcessAlgOutput();*/
 
     //Get errors from console error out
-    ret = this->readAllStandardError();
+    QByteArray ret = this->readAllStandardError();
     this->algErrBuffer.append(ret);
 
     while(true)
@@ -313,6 +314,7 @@ void AlgorithmProcess::Update()
         if(err.length() == 0) break;
         cout << "Algorithm Error: " << err.toLocal8Bit().constData() << endl;
     }
+
 }
 
 void AlgorithmProcess::StdOutReady()
