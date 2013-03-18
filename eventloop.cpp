@@ -70,9 +70,15 @@ EventReceiver::~EventReceiver()
     if(this->el) this->el->RemoveListener(*this);
 }
 
-void EventReceiver::AddMessage(std::tr1::shared_ptr<class Event> event)
+int EventReceiver::AddMessage(std::tr1::shared_ptr<class Event> event)
 {
-    this->mutex.lock();
+    this->mutex.lock(); 
+    if(this->stopping)
+    {
+        this->mutex.unlock();
+        return 0; //Cannot add event to receiver that is stopping
+    }
+
     this->eventBuffer.push_back(event);
     if(this->eventBuffer.size()>100)
     {
@@ -80,6 +86,7 @@ void EventReceiver::AddMessage(std::tr1::shared_ptr<class Event> event)
     }
 
     this->mutex.unlock();
+    return 1;
 }
 
 int EventReceiver::BufferSize()
@@ -309,7 +316,13 @@ unsigned int EventLoop::SendEvent(std::tr1::shared_ptr<class Event> event)
     {
         //Add message to receiver queue
         EventReceiver *receiver = eventListeners[i];
-        receiver->AddMessage(event);
+        int addRet = receiver->AddMessage(event);
+        if(addRet==0)
+        {
+            //Add event failed for this receiver
+            //It may be stopping
+            continue;
+        }
 
         //If a matching uuid received the message, increase count
         if(receiver->GetThreadId() == event->toUuid)
