@@ -14,7 +14,7 @@ public:
     void SetEventLoop(class EventLoop *eventLoopIn);
     void SetMediaInterface(QUuid mediaInterfaceIn);
 
-    void ImageToProcess(unsigned long long startTi,
+    int ImageToProcess(unsigned long long startTi,
                                      unsigned long long endTi,
                                      QSharedPointer<QImage> img,
                                      std::vector<std::vector<float> > &model);

@@ -129,9 +129,19 @@ void ApplyModel::Update()
     unsigned long long nextTi = 0; //millisec
 
     //Check algorithm is ready to work
+    AlgorithmProcess::ProcessState state = AlgorithmProcess::STOPPED;
+    try
+    {
     AlgorithmProcess::ProcessState state = AlgorithmProcess::GetState(this->algUuid,
                           this->eventLoop,
                           this->eventReceiver);
+    }
+    catch(std::runtime_error err)
+    {
+        //Could not determine state, probably because this uuid does not exist
+        this->issueEnountered = 1;
+        this->issueDescription = "Alg uuid does not exist";
+    }
 
     //If needed, get the first frame from the video
     if(this->currentTimeSet==false)
@@ -186,9 +196,17 @@ void ApplyModel::Update()
 
                 //If not annotation here, make a prediction
                 if(this->currentModelSet == true)
-                this->ImageToProcess(this->currentStartTimestamp,
+                {
+                int predRet = this->ImageToProcess(this->currentStartTimestamp,
                                      this->currentEndTimestamp,
                                      img, this->currentModel);
+                if(predRet<0)
+                {
+                    this->issueDescription = "Unrecoverable prediction error";
+                    this->issueEnountered = 1;
+                    return;
+                }
+                }
             }
 
 
@@ -300,9 +318,17 @@ void ApplyModel::Update()
 
                 //If not annotation here, make a prediction
                 if(this->currentModelSet != 0)
-                this->ImageToProcess(this->currentStartTimestamp,
+                {
+                    int predRet = this->ImageToProcess(this->currentStartTimestamp,
                                      this->currentEndTimestamp,
                                      img, this->currentModel);
+                    if(predRet<0)
+                    {
+                        this->issueDescription = "Unrecoverable prediction error";
+                        this->issueEnountered = 1;
+                        return;
+                    }
+                }
             }
         }
 
@@ -352,20 +378,32 @@ void ApplyModel::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     MessagableThread::HandleEvent(ev);
 }
 
-void ApplyModel::ImageToProcess(unsigned long long startTi,
+int ApplyModel::ImageToProcess(unsigned long long startTi,
                                  unsigned long long endTi,
                                  QSharedPointer<QImage> img,
                                  std::vector<std::vector<float> > &model)
 {
     std::vector<std::vector<float> > out;
+    int ret = 0;
 
-    int ret = AlgorithmProcess::PredictFrame(img,
+    try
+    {
+    ret = AlgorithmProcess::PredictFrame(img,
                             model,
                             this->algUuid,
                             this->annotUuid,
                             this->eventLoop,
                             this->eventReceiver,
                             out);
+
+    }
+    catch(std::runtime_error err)
+    {
+        //Could not determine state, probably because this uuid does not exist
+        this->issueEnountered = 1;
+        this->issueDescription = "Alg uuid does not exist";
+        return -1;
+    }
 
     if(ret == 1)
     {
@@ -377,12 +415,13 @@ void ApplyModel::ImageToProcess(unsigned long long startTi,
                                                    out,
                                                    this->annotUuid,
                                                    this->eventLoop);
+        return 1;
     }
     else
     {
         cout << "Warning: Prediction timed out" << endl;
     }
-
+    return 0;
 }
 
 //**********************************************************
