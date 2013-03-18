@@ -441,7 +441,22 @@ void TrackingSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEve
             std::vector<int> link;
             link.push_back(this->activePoint);
             link.push_back(nearestPoint);
+
+            //Update annotation track with new link
+            static std::vector<std::vector<float> > shape = Annotation::GetShape(this->annotationUuid,
+                this->eventLoop,
+                this->eventReceiver,
+                this->links);
             this->links.push_back(link);
+
+            Annotation::SetShape(this->annotationUuid,
+                                 shape,
+                                 this->links,
+                                 this->eventLoop,
+                                 this->eventReceiver);
+
+
+
             this->activePoint = nearestPoint;
             this->Redraw();
         }

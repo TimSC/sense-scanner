@@ -228,7 +228,8 @@ void TrackingAnnotationData::ReadAnnotationXml(QDomElement &elem)
             //Obsolete format loading code here
             if(e.tagName() == "frame")
             {
-                std::vector<std::vector<float> > frame = this->ProcessXmlDomFrame(e,this->links);
+                std::vector<std::vector<int> > tmpLinks;
+                std::vector<std::vector<float> > frame = this->ProcessXmlDomFrame(e, tmpLinks);
                 //cout << e.attribute("time").toFloat() << endl;
                 float timeSec = e.attribute("time").toFloat();
                 assert(timeSec > 0.f);
@@ -283,7 +284,8 @@ void TrackingAnnotationData::ReadFramesXml(QDomElement &elem)
     {
         if(e.tagName() != "frame") continue;
 
-        std::vector<std::vector<float> > frame = this->ProcessXmlDomFrame(e,this->links);
+        std::vector<std::vector<int> > tmpLinks;
+        std::vector<std::vector<float> > frame = this->ProcessXmlDomFrame(e,tmpLinks);
         //cout << e.attribute("time").toFloat() << endl;
         float timeSec = e.attribute("time").toFloat();
         assert(frame.size() == this->shape.size());
@@ -1465,6 +1467,7 @@ std::vector<std::vector<float> > Annotation::GetShape(QUuid annotUuid,
 
     assert(eventReceiver!=NULL);
     std::tr1::shared_ptr<class Event> response = eventReceiver->WaitForEventId(reqEv->id);
+    assert(response->type=="ANNOTATION_SHAPE");
 
     QDomDocument doc("mydocument");
     QString errorMsg;

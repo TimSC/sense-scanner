@@ -195,6 +195,9 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("LOAD_STARTED", *this->eventReceiver);
     this->eventLoop->AddListener("LOAD_FINISHED", *this->eventReceiver);
 
+    this->eventLoop->AddListener("ANNOTATION_SHAPE", *this->eventReceiver);
+
+
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop,1);
     this->mediaInterfaceFront->Start();
