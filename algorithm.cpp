@@ -749,6 +749,7 @@ int AlgorithmProcess::PredictFrame(QSharedPointer<QImage> img,
     unsigned int rxCount = eventLoop->SendEvent(requestEv);
     if(rxCount==0)
         throw std::runtime_error("Cannot request prediction from non-existent uuid");
+    cout << "PREDICT_FRAME_REQUEST rx count " << rxCount << endl;
 
     //Wait for response
     try
