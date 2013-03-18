@@ -5,6 +5,7 @@
 #include <iostream>
 #include "localsleep.h"
 #include "mediabuffer.h"
+#include <QtCore/QTime>
 using namespace std;
 
 //***********************************************
@@ -145,13 +146,15 @@ std::tr1::shared_ptr<class Event> EventReceiver::GetLatestDiscardOlder(QString t
 std::tr1::shared_ptr<class Event> EventReceiver::WaitForEventId(unsigned long long idIn,
                                           unsigned timeOutMs)
 {
+    QTime elapse, warningTime;
+    elapse.start();
+    warningTime.start();
     this->mutex.lock();
     int stop = this->stopping;
     this->mutex.unlock();
     if(stop) throw std::runtime_error("Cannot wait in a thread that is stopping");
 
-    unsigned waitingTime = 0;
-    while(waitingTime < timeOutMs || timeOutMs < 0)
+    while(elapse.elapsed() < timeOutMs || timeOutMs < 0)
     {
         //cout << "Waiting..." << (unsigned long)this << endl;
         this->mutex.lock();
@@ -168,6 +171,12 @@ std::tr1::shared_ptr<class Event> EventReceiver::WaitForEventId(unsigned long lo
                 return out;
 
             }
+        }
+
+        if(elapse.elapsed()>30000 && warningTime.elapsed() > 1000)
+        {
+            warningTime.restart();
+            cout << "Warning: thread waiting for a long time" << endl;
         }
 
         //Check if threads are stopping
@@ -195,7 +204,6 @@ std::tr1::shared_ptr<class Event> EventReceiver::WaitForEventId(unsigned long lo
         this->mutex.unlock();
 
         LocalSleep::msleep(10);
-        waitingTime += 10;
     }
 
     throw std::runtime_error("Wait for message has timed out");
