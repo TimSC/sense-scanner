@@ -26,8 +26,7 @@ Workspace::Workspace(int activeIn, QObject *parentIn, const Workspace &other) : 
 
 Workspace::~Workspace()
 {
-    if(this->eventReceiver!=NULL) delete this->eventReceiver;
-    this->eventReceiver = NULL;
+
 }
 
 Workspace& Workspace::operator= (const Workspace &other)
