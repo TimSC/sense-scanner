@@ -145,9 +145,14 @@ class Worker:
 
 			if event[0]=="SAVE_MODEL":
 				if self.paused and self.tracker is not None:
-					self.tracker.PrepareForPickle()
-					trackerStr = pickle.dumps(self.tracker, protocol=pickle.HIGHEST_PROTOCOL)
-					self.tracker.PostUnPickle()
+					trackerMinimal = self.tracker.ShallowClone()
+					print "x",id(self.tracker)
+					print "y",id(trackerMinimal)
+					trackerMinimal.ClearTrainingIntensities()
+
+					trackerMinimal.PrepareForPickle()
+					trackerStr = pickle.dumps(trackerMinimal, protocol=pickle.HIGHEST_PROTOCOL)
+					trackerMinimal.PostUnPickle()
 
 					#fi=open("testpickle.dat","wb")
 					#fi.write(trackerStr)
