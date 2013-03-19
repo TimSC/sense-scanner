@@ -173,6 +173,19 @@ int AlgorithmProcess::Stop()
     this->stopping = 1;
     this->eventReceiver->Stop();
     this->SendCommand("QUIT\n");
+
+    //Send error response to requests that were not answered
+    if(this->requestsPending.size()>0)
+    {
+        std::map<unsigned long long, std::tr1::shared_ptr<class Event> >::iterator it;
+        for(it = this->requestsPending.begin(); it != this->requestsPending.end(); it++)
+        {
+            std::tr1::shared_ptr<class Event> errEv(new Event("REQUEST_ABORTED"));
+            errEv->id = it->first;
+            this->eventLoop->SendEvent(errEv);
+        }
+    }
+
     this->waitForFinished();
     return 1;
 }
@@ -654,7 +667,7 @@ void AlgorithmProcess::ProcessAlgOutput()
             it = this->requestsPending.find(responseId);
             if(it!=this->requestsPending.end())
             {
-                //Found a previously requested prediction
+                //Found a previously requested computation
                 this->requestsPending.erase(it);
             }
         }
@@ -776,6 +789,8 @@ int AlgorithmProcess::PredictFrame(QSharedPointer<QImage> img,
 
         if(ev->type=="RECEIVER_DELETED")
             throw std::runtime_error("Receiver deleted");
+        if(ev->type=="REQUEST_ABORTED")
+            throw std::runtime_error("Request aborted");
 
         if(ev->type!="PREDICTION_RESULT") return 0;
         class ProcessingRequestOrResponse *response = (class ProcessingRequestOrResponse *)ev->raw;
@@ -808,6 +823,8 @@ AlgorithmProcess::ProcessState AlgorithmProcess::GetState(QUuid algUuid,
     std::tr1::shared_ptr<class Event> resp = eventReceiver->WaitForEventId(requestEv->id);
     if(resp->type=="RECEIVER_DELETED")
         throw std::runtime_error("Receiver deleted");
+    if(resp->type=="REQUEST_ABORTED")
+        throw std::runtime_error("Request aborted");
 
     assert(resp->type=="ALG_STATE");
     return (AlgorithmProcess::ProcessState)resp->data.toInt();
