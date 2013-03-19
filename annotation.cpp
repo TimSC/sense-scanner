@@ -711,7 +711,7 @@ std::vector<std::vector<float> > TrackingAnnotationData::GetAnnotationAtTime(uns
 
 //****************************************************
 
-AnnotThread::AnnotThread(class Annotation *annIn)
+AnnotThread::AnnotThread(class Annotation *annIn) : MessagableThread()
 {
     this->parentAnn = annIn;
     this->frameTimesEnd = 0;
@@ -1268,7 +1268,9 @@ QString Annotation::GetSourceFilename(QUuid annotUuid,
     std::tr1::shared_ptr<class Event> getSourceNameEv(new Event("GET_SOURCE_FILENAME"));
     getSourceNameEv->toUuid = annotUuid;
     getSourceNameEv->id = eventLoop->GetId();
-    eventLoop->SendEvent(getSourceNameEv);
+    unsigned int rx = eventLoop->SendEvent(getSourceNameEv);
+    if(rx==0)
+        throw std::runtime_error("No uuid receiver found for message");
 
     std::tr1::shared_ptr<class Event> sourceName = eventReceiver->WaitForEventId(getSourceNameEv->id);
     assert(sourceName->type=="SOURCE_FILENAME");
@@ -1283,7 +1285,9 @@ QUuid Annotation::GetAlgUuid(QUuid annotUuid,
     std::tr1::shared_ptr<class Event> getAlgUuidEv(new Event("GET_ALG_UUID"));
     getAlgUuidEv->toUuid = annotUuid;
     getAlgUuidEv->id = eventLoop->GetId();
-    eventLoop->SendEvent(getAlgUuidEv);
+    unsigned int rx = eventLoop->SendEvent(getAlgUuidEv);
+    if(rx==0)
+        throw std::runtime_error("No uuid receiver found for message");
 
     std::tr1::shared_ptr<class Event> algUuidEv = eventReceiver->WaitForEventId(getAlgUuidEv->id);
     assert(algUuidEv->type=="ALG_UUID_FOR_ANNOTATION");
@@ -1308,7 +1312,9 @@ int Annotation::GetAnnotationBetweenFrames(unsigned long long startTime,
     QString arg = QString("%1,%2,%3").arg(startTime).arg(endTime).arg(requestedTime);
     reqEv->data = arg.toLocal8Bit().constData();
     reqEv->toUuid = annotUuid;
-    eventLoop->SendEvent(reqEv);
+    unsigned int rx = eventLoop->SendEvent(reqEv);
+    if(rx==0)
+        throw std::runtime_error("No uuid receiver found for message");
 
     assert(eventReceiver!=NULL);
     try
@@ -1349,7 +1355,9 @@ int Annotation::GetAnnotationBeforeTime(unsigned long long ti,
     QString arg = QString("%1").arg(ti);
     reqEv->data = arg.toLocal8Bit().constData();
     reqEv->toUuid = annotUuid;
-    eventLoop->SendEvent(reqEv);
+    unsigned int rx = eventLoop->SendEvent(reqEv);
+    if(rx==0)
+        throw std::runtime_error("No uuid receiver found for message");
 
     assert(eventReceiver!=NULL);
     try
@@ -1394,7 +1402,9 @@ void Annotation::SetAnnotationBetweenTimestamps(unsigned long long startTime,
     QString data = QString("%1,%2,%3").arg(startTime).arg(endTime).arg(xml);
     reqEv->data = data.toLocal8Bit().constData();
 
-    eventLoop->SendEvent(reqEv);
+    unsigned int rx = eventLoop->SendEvent(reqEv);
+    if(rx==0)
+        throw std::runtime_error("No uuid receiver found for message");
 }
 
 unsigned long long Annotation::GetAutoLabeledEnd(QUuid annotUuid,
@@ -1405,7 +1415,9 @@ unsigned long long Annotation::GetAutoLabeledEnd(QUuid annotUuid,
     std::tr1::shared_ptr<class Event> getAlgUuidEv(new Event("GET_AUTO_LABELED_END"));
     getAlgUuidEv->toUuid = annotUuid;
     getAlgUuidEv->id = eventLoop->GetId();
-    eventLoop->SendEvent(getAlgUuidEv);
+    unsigned int rx = eventLoop->SendEvent(getAlgUuidEv);
+    if(rx==0)
+        throw std::runtime_error("No uuid receiver found for message");
 
     std::tr1::shared_ptr<class Event> responseEV = eventReceiver->WaitForEventId(getAlgUuidEv->id);
     assert(responseEV->type=="AUTO_LABELED_END");
@@ -1423,7 +1435,9 @@ void Annotation::FoundFrameEvent(unsigned long long startTime,
     QString dataSTr = QString("%0,%1").arg(startTime).arg(endTime);
     requestEv->toUuid = annotUuid;
     requestEv->data = dataSTr;
-    eventLoop->SendEvent(requestEv);
+    unsigned int rx = eventLoop->SendEvent(requestEv);
+    if(rx==0)
+        throw std::runtime_error("No uuid receiver found for message");
 }
 
 void Annotation::SetAutoLabelTimeRange(unsigned long long startTime,
@@ -1436,7 +1450,9 @@ void Annotation::SetAutoLabelTimeRange(unsigned long long startTime,
     QString dataSTr = QString("%0,%1").arg(startTime).arg(endTime);
     requestEv->toUuid = annotUuid;
     requestEv->data = dataSTr;
-    eventLoop->SendEvent(requestEv);
+    unsigned int rx = eventLoop->SendEvent(requestEv);
+    if(rx==0)
+        throw std::runtime_error("No uuid receiver found for message");
 }
 
 QString Annotation::GetAllAnnotationByXml(QUuid annotUuid,
@@ -1447,7 +1463,9 @@ QString Annotation::GetAllAnnotationByXml(QUuid annotUuid,
     std::tr1::shared_ptr<class Event> reqEv(new Event("GET_ALL_ANNOTATION_XML"));
     reqEv->toUuid = annotUuid;
     reqEv->id = eventLoop->GetId();
-    eventLoop->SendEvent(reqEv);
+    unsigned int rx = eventLoop->SendEvent(reqEv);
+    if(rx==0)
+        throw std::runtime_error("No uuid receiver found for message");
 
     //Wait for response
     std::tr1::shared_ptr<class Event> resp = eventReceiver->WaitForEventId(reqEv->id);
@@ -1463,7 +1481,9 @@ std::vector<std::vector<float> > Annotation::GetShape(QUuid annotUuid,
     std::tr1::shared_ptr<class Event> reqEv(new Event("GET_SHAPE"));
     reqEv->id = eventLoop->GetId();
     reqEv->toUuid = annotUuid;
-    eventLoop->SendEvent(reqEv);
+    unsigned int rx = eventLoop->SendEvent(reqEv);
+    if(rx==0)
+        throw std::runtime_error("No uuid receiver found for message");
 
     assert(eventReceiver!=NULL);
     std::tr1::shared_ptr<class Event> response = eventReceiver->WaitForEventId(reqEv->id);
@@ -1501,5 +1521,7 @@ void Annotation::SetShape(QUuid annotUuid,
     std::tr1::shared_ptr<class Event> reqEv(new Event("SET_SHAPE"));
     reqEv->toUuid = annotUuid;
     reqEv->data = xml.toLocal8Bit().constData();
-    eventLoop->SendEvent(reqEv);
+    unsigned int rx = eventLoop->SendEvent(reqEv);
+    if(rx==0)
+        throw std::runtime_error("No uuid receiver found for message");
 }

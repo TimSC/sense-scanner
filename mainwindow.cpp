@@ -408,9 +408,17 @@ void MainWindow::RegenerateSourcesList()
         this->sourcesModel.setRowCount(annotationUuids.size());
     for (int row = 0; row < annotationUuids.size(); ++row)
     {   
-        QString fina = Annotation::GetSourceFilename(annotationUuids[row],
+        QString fina;
+        try
+        {
+            fina = Annotation::GetSourceFilename(annotationUuids[row],
                                               this->eventLoop,
                                               this->eventReceiver);
+        }
+        catch(std::runtime_error err)
+        {
+            fina = "Unknown";
+        }
 
         QFileInfo finaInfo(fina);
 
