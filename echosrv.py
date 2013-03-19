@@ -27,7 +27,8 @@ class Worker:
 		self.tracker = None
 		self.getProgress = False
 		self.aliveClock = time.time()
-		self.aliveMsgEnabled = False
+		self.progressClock = time.time()
+		self.aliveMsgEnabled = True
 		self.childPipeConn = childPipeConn
 		self.workerLog = open("workerLog.txt","wt")
 		self.Run()
@@ -50,16 +51,21 @@ class Worker:
 				self.HandleEvent(event)
 				time.sleep(0.001)
 
-			#Check if tracker requires more training
-			if (not self.paused and self.loadDataFinished and self.progress < 1.) or self.getProgress:
-				assert self.tracker is not None
-
-				if not self.paused and self.training and self.progress < 1.: 
+			#Update tracker and progress as required
+			if self.tracker is not None:
+				if not self.paused: 
 					self.tracker.Update()
-				self.progress = self.tracker.GetProgress()
-				print "PROGRESS="+str(self.progress)
-				self.getProgress = False
 
+			if timeNow - self.progressClock > 1. or self.getProgress:
+				if self.tracker is not None:
+					self.progress = self.tracker.GetProgress()
+					print "PROGRESS="+str(self.progress)
+					self.getProgress = False
+					self.progressClock = timeNow
+				else:
+					print "PROGRESS=0"
+					self.progressClock = timeNow
+				
 			else:
 				time.sleep(0.1)
 
@@ -102,8 +108,9 @@ class Worker:
 				sys.stdout.flush()
 
 			if event[0]=="LOAD_DATA_FINISH":
-				self.loadDataFinished = True
-
+				if self.loadDataFinished:
+					print "Load of data already complete"
+					return
 				if len(self.trainImgs) == 0 and self.tracker is None:
 					print "Error: No images loaded in algorithm process"
 					return
@@ -111,7 +118,8 @@ class Worker:
 					print "Error: No annotated positions loaded into algorithm process"
 					return
 
-				self.training = 1
+				self.loadDataFinished = True
+
 				if self.tracker is None:
 					self.tracker = reltracker.RelTracker()
 					for tree in self.xmlTrees:
@@ -177,8 +185,8 @@ class Worker:
 						return
 
 					im = Image.frombuffer("RGB", (width, height), imgRaw, 'raw', "RGB", 0, 1)
-					if not self.training:
-						#Pre-training image collection
+					if not self.loadDataFinished:
+						#Loading data ready for training
 						print "Store image"
 						self.trainImgs[timestamp] = im
 					self.imgCount += 1
