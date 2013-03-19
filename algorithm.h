@@ -6,6 +6,7 @@
 #include <QtCore/QFile>
 #include <QtCore/QUuid>
 #include <QtCore/QTimer>
+#include <QtCore/QMetaType>
 #include <vector>
 #include "localmutex.h"
 
@@ -19,6 +20,7 @@ class AlgorithmProcess : public QProcess
     * The GUI thread should periodically call update to process event messages.
     */
     Q_OBJECT
+    Q_ENUMS(QProcess::state)
 
 public:
     AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent);
@@ -70,7 +72,7 @@ public slots:
     void StdOutReady();
     void StdErrReady();
 
-    void ProcessStateChanged(QProcess::ProcessState newState);
+    void finishedEvent();
 
 protected:
     int IsStopFlagged();

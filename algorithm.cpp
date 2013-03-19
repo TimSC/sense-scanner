@@ -66,7 +66,7 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
 
     QObject::connect(this, SIGNAL(readyReadStandardOutput()), this, SLOT(StdOutReady()));
     QObject::connect(this, SIGNAL(readyReadStandardError()), this, SLOT(StdErrReady()));
-    QObject::connect(this, SIGNAL(stateChanged(QProcess::state)), this, SLOT(ProcessStateChanged(QProcess::state)));
+    QObject::connect(this, SIGNAL(finished(int)), this, SLOT(finishedEvent()));
 
     QObject::connect(&this->timer, SIGNAL(timeout()), this, SLOT(Update()));
     this->timer.start(10); //in millisec
@@ -343,15 +343,12 @@ void AlgorithmProcess::StdErrReady()
 
 }
 
-void AlgorithmProcess::ProcessStateChanged(QProcess::ProcessState newState)
+void AlgorithmProcess::finishedEvent()
 {
-    if(newState == QProcess::NotRunning)
-    {
-        std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
-        openEv->data = "stopped";
-        openEv->fromUuid = this->uid;
-        this->eventLoop->SendEvent(openEv);
-    }
+    std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
+    openEv->data = "stopped";
+    openEv->fromUuid = this->uid;
+    this->eventLoop->SendEvent(openEv);
 }
 
 void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
