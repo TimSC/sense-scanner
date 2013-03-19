@@ -62,6 +62,7 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
 
     this->eventLoop->AddListener("PAUSE_ALGORITHM", *this->eventReceiver);
     this->eventLoop->AddListener("RUN_ALGORITHM", *this->eventReceiver);
+    this->eventLoop->AddListener("IS_READY_TO_WORK", *this->eventReceiver);
 
     QObject::connect(this, SIGNAL(readyReadStandardOutput()), this, SLOT(StdOutReady()));
     QObject::connect(this, SIGNAL(readyReadStandardError()), this, SLOT(StdErrReady()));
@@ -357,6 +358,15 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
     if(ev->type == "PREDICT_FRAME_REQUEST")
     {
+        if(!this->dataLoaded)
+        {
+            //Cannot predict until start data is loaded
+            std::tr1::shared_ptr<class Event> resultEv(new Event("PREDICTION_FAILED"));
+            resultEv->id = ev->id;
+            this->eventLoop->SendEvent(resultEv);
+            return;
+        }
+
         //Encode request event into a serial data and send to process
         class ProcessingRequestOrResponse *req = (class ProcessingRequestOrResponse *)ev->raw;
         assert(req!=NULL);
@@ -455,6 +465,15 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         std::tr1::shared_ptr<class Event> responseEv(new Event("ALG_STATE"));
         responseEv->id = ev->id;
         responseEv->data = QString::number((int)(this->GetState()), 'd', 0);
+        responseEv->fromUuid = this->uid;
+        this->eventLoop->SendEvent(responseEv);
+    }
+
+    if(ev->type == "IS_READY_TO_WORK")
+    {
+        std::tr1::shared_ptr<class Event> responseEv(new Event("READY_TO_WORK_STATE"));
+        responseEv->id = ev->id;
+        responseEv->data = QString::number((int)this->dataLoaded, 'd', 0);
         responseEv->fromUuid = this->uid;
         this->eventLoop->SendEvent(responseEv);
     }
@@ -830,4 +849,28 @@ AlgorithmProcess::ProcessState AlgorithmProcess::GetState(QUuid algUuid,
 
     assert(resp->type=="ALG_STATE");
     return (AlgorithmProcess::ProcessState)resp->data.toInt();
+}
+
+int AlgorithmProcess::IsReadyToWork(QUuid algUuid,
+                      class EventLoop *eventLoop,
+                      class EventReceiver *eventReceiver)
+{
+    //Ask alg process for state
+    std::tr1::shared_ptr<class Event> requestEv(new Event("IS_READY_TO_WORK"));
+    requestEv->id = eventLoop->GetId();
+    requestEv->toUuid = algUuid;
+    unsigned int rxCount = eventLoop->SendEvent(requestEv);
+
+    if(rxCount==0)
+        throw std::runtime_error("Cannot request prediction from non-existent uuid");
+
+    //Wait for response
+    std::tr1::shared_ptr<class Event> resp = eventReceiver->WaitForEventId(requestEv->id);
+    if(resp->type=="RECEIVER_DELETED")
+        throw std::runtime_error("Receiver deleted");
+    if(resp->type=="REQUEST_ABORTED")
+        throw std::runtime_error("Request aborted");
+
+    assert(resp->type=="READY_TO_WORK_STATE");
+    return resp->data.toInt();
 }

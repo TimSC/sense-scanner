@@ -60,6 +60,10 @@ public:
     //This is safe for the main thread to call, but no other thread may do so
     ProcessState GetState();
 
+    static int IsReadyToWork(QUuid algUuid,
+                          class EventLoop *eventLoop,
+                          class EventReceiver *eventReceiver);
+
 public slots:
     void Update();
 

@@ -40,7 +40,7 @@ void ApplyModel::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("ALG_STATE", *this->eventReceiver);
     this->eventLoop->AddListener("RECEIVER_DELETED", *this->eventReceiver);
     this->eventLoop->AddListener("REQUEST_ABORTED", *this->eventReceiver);
-
+    this->eventLoop->AddListener("READY_TO_WORK_STATE", *this->eventReceiver);
 
 }
 
@@ -136,18 +136,13 @@ void ApplyModel::Update()
     unsigned long long nextTi = 0; //millisec
 
     //Check algorithm is ready to work
-    AlgorithmProcess::ProcessState state = AlgorithmProcess::STOPPED;
-    try
+    int isReadyToWork = AlgorithmProcess::IsReadyToWork(this->algUuid,
+                                    this->eventLoop,
+                                    this->eventReceiver);
+    if(!isReadyToWork)
     {
-    AlgorithmProcess::ProcessState state = AlgorithmProcess::GetState(this->algUuid,
-                          this->eventLoop,
-                          this->eventReceiver);
-    }
-    catch(std::runtime_error err)
-    {
-        //Could not determine state, probably because this uuid does not exist
-        this->issueEnountered = 1;
-        this->issueDescription = "Alg uuid does not exist";
+        this->msleep(1000);
+        return;
     }
 
     //If needed, get the first frame from the video
