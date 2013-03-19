@@ -106,8 +106,8 @@ private:
     class EventReceiver *eventReceiver;
     QTimer *timer;
     int threadCount;
-    class Workspace workspace;
-    class Workspace workspaceAsStored;
+    class Workspace *workspace;
+    class Workspace *workspaceAsStored;
     QStandardItemModel sourcesModel;
     QStandardItemModel processingModel;
     QMenu *annotationMenu;

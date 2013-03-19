@@ -23,6 +23,11 @@ UserActions::~UserActions()
 
 void UserActions::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
+    if(ev->type=="NEW_WORKSPACE")
+    {
+        this->NewWorkspace();
+    }
+
     if(ev->type=="SAVE_WORKSPACE_AS")
     {
         this->SaveAs(ev->data);
@@ -73,6 +78,7 @@ void UserActions::SetEventLoop(class EventLoop *eventLoopIn)
 
     this->eventLoop->AddListener("SAVE_WORKSPACE_AS", *this->eventReceiver);
     this->eventLoop->AddListener("LOAD_WORKSPACE", *this->eventReceiver);
+    this->eventLoop->AddListener("NEW_WORKSPACE", *this->eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_ADDED", *this->eventReceiver);
     this->eventLoop->AddListener("PROCESSING_ADDED", *this->eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_UUIDS", *this->eventReceiver);
@@ -512,4 +518,17 @@ void UserActions::SetMediaInterface(QUuid mediaUuidIn)
 {
 
     this->mediaUuid = mediaUuidIn;
+}
+
+void UserActions::NewWorkspace()
+{
+    int debug = 1;
+    /*
+     *    this->applyModelPool.Clear(); //Clear this first to stop interconnected behaviour
+    this->workspace.ClearAnnotation();
+    this->workspace.ClearProcessing();
+    this->workspaceAsStored = this->workspace;
+    this->RegenerateSourcesList();
+    this->RegenerateProcessingList();
+    */
 }

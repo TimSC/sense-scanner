@@ -446,11 +446,11 @@ void ApplyModelPool::SetEventLoop(class EventLoop *eventLoopIn)
 void ApplyModelPool::Add(QUuid algUuid, QUuid annotUuid, QUuid mediaInterface)
 {
     std::tr1::shared_ptr<class ApplyModel> am(new ApplyModel(annotUuid));
-    this->pool[algUuid] = am;
-    this->pool[algUuid]->SetEventLoop(this->eventLoop);
-    this->pool[algUuid]->SetThreadId(algUuid); //Not sure this is a good idea to share thread IDs!
-    this->pool[algUuid]->SetMediaInterface(mediaInterface);
-    this->pool[algUuid]->Start();
+    this->pool[annotUuid] = am;
+    this->pool[annotUuid]->SetEventLoop(this->eventLoop);
+    this->pool[annotUuid]->SetThreadId(algUuid); //Not sure this is a good idea to share thread IDs!
+    this->pool[annotUuid]->SetMediaInterface(mediaInterface);
+    this->pool[annotUuid]->Start();
 }
 
 void ApplyModelPool::Remove(QUuid uuid)

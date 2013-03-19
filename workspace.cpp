@@ -7,17 +7,19 @@
 #include <iostream>
 using namespace std;
 
-Workspace::Workspace() : QObject()
+Workspace::Workspace(int activeIn) : MessagableThread()
 {
+    this->active = activeIn;
     this->ClearAnnotation();
     this->ClearProcessing();
     this->eventLoop = NULL;
     this->eventReceiver = NULL;
 }
 
-Workspace::Workspace(const Workspace &other) : QObject()
+Workspace::Workspace(int activeIn, const Workspace &other) : MessagableThread()
 {
     this->operator =(other);
+    this->active = activeIn;
 }
 
 Workspace::~Workspace()
@@ -54,9 +56,8 @@ bool Workspace::operator!= (const Workspace &other)
 
 void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
 {
-    this->eventLoop = &eventLoopIn;
-    if(this->eventReceiver!=NULL) delete this->eventReceiver;
-    this->eventReceiver = new EventReceiver(this->eventLoop, __FILE__,__LINE__);
+    MessagableThread::SetEventLoop(&eventLoopIn);
+
     this->eventLoop->AddListener("NEW_ANNOTATION", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ANNOTATION_UUIDS", *this->eventReceiver);
 
@@ -67,9 +68,17 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
     this->eventLoop->AddListener("THREAD_STATUS_CHANGED", *this->eventReceiver);
 }
 
-unsigned int Workspace::AddSource(QUuid uuid)
+unsigned int Workspace::AddSourceFromMain(QUuid uuid)
 {
     this->lock.lock();
+    unsigned int out = this->AddSource(uuid);
+    this->lock.unlock();
+    return out;
+}
+
+unsigned int Workspace::AddSource(QUuid uuid)
+{
+
     std::tr1::shared_ptr<class Annotation> ann(new class Annotation);
 
     TrackingAnnotationData *scenePtr = new TrackingAnnotationData();
@@ -87,16 +96,30 @@ unsigned int Workspace::AddSource(QUuid uuid)
     this->annotationThreads.push_back(annotThread);
     unsigned int out = this->annotations.size();
 
-    this->lock.unlock();
     std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_ANNOTATION_CHANGED"));
     this->eventLoop->SendEvent(changeEv);
 
     return out;
 }
 
-void Workspace::RemoveSource(QUuid uuid)
+void Workspace::RemoveSourceFromMain(QUuid uuid)
 {
     this->lock.lock();
+    try
+    {
+        this->RemoveSource(uuid);
+    }
+    catch(std::runtime_error err)
+    {
+        this->lock.unlock();
+        throw std::runtime_error(err.what());
+    }
+    this->lock.unlock();
+}
+
+void Workspace::RemoveSource(QUuid uuid)
+{
+
     //Find index of uuid
     int ind = -1;
     for(unsigned int i=0;i<this->annotationUuids.size();i++)
@@ -109,10 +132,8 @@ void Workspace::RemoveSource(QUuid uuid)
     }
     if (ind == -1)
     {
-        this->lock.unlock();
         throw std::runtime_error("No such uuid");
     }
-
 
     //Prepare annotation for delete
     std::tr1::shared_ptr<class Annotation> ann = this->annotations[ind];
@@ -125,7 +146,6 @@ void Workspace::RemoveSource(QUuid uuid)
     this->annotations.erase(this->annotations.begin()+ind);
     this->annotationUuids.erase(this->annotationUuids.begin()+ind);
     this->annotationThreads.erase(this->annotationThreads.begin()+ind);
-    this->lock.unlock();
 
     std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_ANNOTATION_CHANGED"));
     this->eventLoop->SendEvent(changeEv);
@@ -290,25 +310,24 @@ void Workspace::ClearAnnotation()
 
 void Workspace::Update()
 {
+    this->lock.lock();
+    //Whatever
+    this->lock.unlock();
 
-    //Process events from application
-    int flushEvents = 1;
-    while(flushEvents)
-    try
-    {
-        assert(this->eventReceiver);
-        std::tr1::shared_ptr<class Event> ev = this->eventReceiver->PopEvent();
-
-        this->HandleEvent(ev);
-    }
-    catch(std::runtime_error e)
-    {
-        flushEvents = 0;
-    }
+    this->msleep(100);
 }
 
 void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
+    this->lock.lock();
+    //If this is not an active workspace, ignore most events
+    if(!this->active)
+    {
+        MessagableThread::HandleEvent(ev);
+        this->lock.unlock();
+        return;
+    }
+
     if(ev->type=="GET_ANNOTATION_UUIDS")
     {
         QList<QUuid> uuids = this->GetAnnotationUuids();
@@ -353,6 +372,7 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
     if(ev->type=="NEW_PROCESSING")
     {
+
         std::tr1::shared_ptr<class AlgorithmProcess> alg(new class AlgorithmProcess(this->eventLoop, this));
         alg->Init();
         alg->SetUid(QUuid(ev->data));
@@ -362,13 +382,14 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         changeEv2->id = ev->id;
         changeEv2->data = ev->data;
         this->eventLoop->SendEvent(changeEv2);
+
     }
 
     if(ev->type=="THREAD_PROGRESS_UPDATE")
     {
         //Check for matching annotation
         QUuid seekUuid = QUuid(ev->fromUuid);
-        this->lock.lock();
+
         for(unsigned int i = 0; i < this->annotationUuids.size(); i++)
         {
             if(seekUuid == this->annotationUuids[i])
@@ -390,7 +411,7 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
                 this->eventLoop->SendEvent(changeEv);
             }
         }
-        this->lock.unlock();
+
     }
 
     if(ev->type=="THREAD_STATUS_CHANGED")
@@ -402,7 +423,7 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
         //Check for matching annotation
         QUuid seekUuid = QUuid(ev->fromUuid);
-        this->lock.lock();
+
         for(unsigned int i = 0; i < this->annotationUuids.size(); i++)
         {
             if(seekUuid == this->annotationUuids[i])
@@ -423,11 +444,9 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
                 this->eventLoop->SendEvent(changeEv);
             }
         }
-        this->lock.unlock();
-
 
     }
-
+    this->lock.unlock();
 }
 
 void Workspace::TerminateThreads()

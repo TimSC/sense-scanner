@@ -16,6 +16,7 @@ public:
 
     int SaveAs(QString fina);
     void Load(QString fina);
+    void NewWorkspace();
     void TrainModel(QList<QUuid> annotationUuids);
 
     void SetMediaInterface(QUuid mediaUuidIn);

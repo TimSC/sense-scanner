@@ -10,8 +10,9 @@
 #include "algorithm.h"
 #include "annotation.h"
 #include "localmutex.h"
+#include "applymodel.h"
 
-class Workspace : public QObject
+class Workspace : public MessagableThread
 {
     /*!
     * Workshape contains all annotation track objects and algorithm process objects.
@@ -21,8 +22,8 @@ class Workspace : public QObject
 
     Q_OBJECT
 public:
-    explicit Workspace();
-    explicit Workspace(const Workspace &other);
+    explicit Workspace(int activeIn);
+    explicit Workspace(int activeIn, const Workspace &other);
     virtual ~Workspace();
 
     Workspace& operator= (const Workspace &other);
@@ -30,9 +31,8 @@ public:
 
     void SetEventLoop(class EventLoop &eventLoopIn);
 
-    //** Sources and annotations
-    unsigned int AddSource(QUuid uuid);
-    void RemoveSource(QUuid uuid);
+    unsigned int AddSourceFromMain(QUuid uuid);
+    void RemoveSourceFromMain(QUuid uuid);
 
     //** Processing
     void AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg);
@@ -65,13 +65,14 @@ public:
     int IsReadyForSave();
 
 protected:
+    //** Sources and annotations
+    unsigned int AddSource(QUuid uuid);
+    void RemoveSource(QUuid uuid);
+
     //Sources and annotation data
     std::vector<std::tr1::shared_ptr<class Annotation> > annotations;
     QList<QUuid> annotationUuids;
     std::vector<std::tr1::shared_ptr<class AnnotThread> > annotationThreads;
-
-    class EventLoop *eventLoop;
-    class EventReceiver *eventReceiver;
 
     //Processing data
     std::vector<std::tr1::shared_ptr<class AlgorithmProcess> > processingList;
@@ -79,6 +80,7 @@ protected:
     QList<QUuid> processingUuids;
     Mutex lock;
     QUuid mediaUuid;
+    int active;
 };
 
 #endif // WORKSPACE_H

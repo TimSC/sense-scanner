@@ -63,9 +63,9 @@ EventReceiver::~EventReceiver()
     cout << "EventReceiver::~EventReceiver()" << endl;
 
     this->mutex.lock();
-    this->RespondToBufferedRequests();
     this->stopping = 1;
     this->mutex.unlock();
+    this->RespondToBufferedRequests();
 
     if(this->el) this->el->RemoveListener(*this);
 }
@@ -250,6 +250,7 @@ void EventReceiver::Stop()
 
 void EventReceiver::RespondToBufferedRequests()
 {
+    this->mutex.lock();
     //For pending messages, response with errors to those waiting for a response
     for(unsigned int i=0;i<this->eventBuffer.size();i++)
     {
@@ -258,9 +259,15 @@ void EventReceiver::RespondToBufferedRequests()
 
         std::tr1::shared_ptr<class Event> err(new Event("RECEIVER_DELETED"));
         err->id = ev->id;
+        err->fromUuid = this->threadId;
+
+        //This mutex stuff is so a receiver and receive events from this response flush
+        this->mutex.unlock();
         this->el->SendEvent(err);
+        this->mutex.lock();
     }
     this->eventBuffer.clear();
+    this->mutex.unlock();
 }
 
 //*****************************************************
