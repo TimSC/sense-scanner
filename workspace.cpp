@@ -74,6 +74,7 @@ bool Workspace::operator!= (const Workspace &other)
 void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
 {
     MessagableThread::SetEventLoop(&eventLoopIn);
+    this->applyModelPool.SetEventLoop(&eventLoopIn);
 
     this->eventLoop->AddListener("NEW_ANNOTATION", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ANNOTATION_UUIDS", *this->eventReceiver);
@@ -167,9 +168,19 @@ void Workspace::RemoveSource(QUuid uuid)
     this->annotationUuids.erase(this->annotationUuids.begin()+ind);
     this->annotationThreads.erase(this->annotationThreads.begin()+ind);
 
+    //Remove helper thread
+    this->applyModelPool.Remove(uuid);
+
     std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_ANNOTATION_CHANGED"));
     this->eventLoop->SendEvent(changeEv);
 
+}
+
+void Workspace::AddHelperThreadFromMain(QUuid algUuid, QUuid annotUuid, QUuid mediaInterface)
+{
+    this->lock.lock();
+    this->applyModelPool.Add(algUuid, annotUuid, mediaInterface);
+    this->lock.unlock();
 }
 
 QList<QUuid> Workspace::GetAnnotationUuids()
@@ -340,6 +351,8 @@ void Workspace::ClearProcessing()
     this->processingList.clear();
     this->processingProgress.clear();
     this->processingUuids.clear();
+
+    this->applyModelPool.Clear();
 
     if(this->eventLoop!=NULL)
     {

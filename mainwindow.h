@@ -117,7 +117,6 @@ private:
     int timeUpdatesEnabled;
     QString defaultFilename;
     UserActions *userActions;
-    ApplyModelPool applyModelPool;
     QMap<QUuid, unsigned long long> predictionProgress;
     QMap<QString, unsigned long long> sourceDuration;
 

@@ -254,8 +254,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->sourcesAlgGui->mainWindow = this;
     this->ui->videoWidget->SetEventLoop(this->eventLoop);
 
-    this->applyModelPool.SetEventLoop(this->eventLoop);
-
     //Set splash screen size and centre on screen
     this->ui->aboutDock->resize(400,400);
     this->ui->aboutDock->setGeometry(
@@ -626,9 +624,6 @@ void MainWindow::RemoveVideo()
         QModelIndex &ind = rowList[i];
         //cout << ind.row() << endl;
 
-		//Remove helper thread for source
-        this->applyModelPool.Remove(annotUuids[ind.row()]);
-
 		//Remove source
         this->workspace->RemoveSourceFromMain(annotUuids[ind.row()]);
     }
@@ -696,7 +691,9 @@ void MainWindow::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         QUuid annotUuid(args[0].c_str());
         QUuid algUuid(args[1].c_str());
         if(!algUuid.isNull())
-            this->applyModelPool.Add(algUuid, annotUuid, this->mediaInterfaceBack->GetUuid());
+            this->workspace->AddHelperThreadFromMain(algUuid,
+                                                     annotUuid,
+                                                     this->mediaInterfaceBack->GetUuid());
     }
     if(ev->type=="MEDIA_DURATION_RESPONSE")
     {
@@ -793,7 +790,6 @@ void MainWindow::LoadWorkspace()
       tr("Load Workspace"), "", tr("Workspaces (*.work)"));
     if(fileName.length() == 0) return;
 
-    this->applyModelPool.Clear();
     this->workspace->ClearAnnotationFromMain();
     this->workspace->ClearProcessingFromMain();
     this->RegenerateSourcesList();
@@ -1075,7 +1071,9 @@ void MainWindow::ApplyModelPressed()
             this->eventLoop->SendEvent(setAlgEv);
 
             //Start thread to apply model
-            this->applyModelPool.Add(QUuid::createUuid(), newAnn, this->mediaInterfaceBack->GetUuid());
+            this->workspace->AddHelperThreadFromMain(QUuid::createUuid(),
+                                                     newAnn,
+                                                     this->mediaInterfaceBack->GetUuid());
         }
     }
 }

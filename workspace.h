@@ -39,6 +39,8 @@ public:
     void AddProcessingFromMain(std::tr1::shared_ptr<class AlgorithmProcess> alg);
     int RemoveProcessingFromMain(QUuid uuid);
 
+    void AddHelperThreadFromMain(QUuid algUuid, QUuid annotUuid, QUuid mediaInterface);
+
     //** Processing
     //std::tr1::shared_ptr<class AlgorithmProcess> GetProcessing(unsigned int num);
     void ProcessingProgressChanged(QUuid uuid, float progress);
@@ -95,6 +97,7 @@ protected:
     int active;
     QObject *parent;
     QList<std::tr1::shared_ptr<class Event> > newAlgEvents;
+    ApplyModelPool applyModelPool;
 };
 
 #endif // WORKSPACE_H
