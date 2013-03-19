@@ -314,8 +314,13 @@ void AlgorithmProcess::Update()
         flushEvents = 0;
     }
 
+    //Get standard output from algorithm process
+    QByteArray ret = this->readAllStandardOutput();
+    this->algOutBuffer.append(ret);
+    this->ProcessAlgOutput();
+
     //Get errors from console error out
-    QByteArray ret = this->readAllStandardError();
+    ret = this->readAllStandardError();
     this->algErrBuffer.append(ret);
 
     while(true)
@@ -330,15 +335,15 @@ void AlgorithmProcess::Update()
 void AlgorithmProcess::StdOutReady()
 {
     //Get standard output from algorithm process
-    QByteArray ret = this->readAllStandardOutput();
+    /*QByteArray ret = this->readAllStandardOutput();
     this->algOutBuffer.append(ret);
-    this->ProcessAlgOutput();
+    this->ProcessAlgOutput();*/
 }
 
 void AlgorithmProcess::StdErrReady()
 {
     //Get errors from console error out
-    QByteArray ret = this->readAllStandardError();
+    /*QByteArray ret = this->readAllStandardError();
     this->algErrBuffer.append(ret);
 
     while(true)
@@ -346,19 +351,19 @@ void AlgorithmProcess::StdErrReady()
         QString err = ReadLineFromBuffer(this->algErrBuffer);
         if(err.length() == 0) break;
         cout << "Algorithm Error: " << err.toLocal8Bit().constData() << endl;
-    }
+    }*/
 }
 
 void AlgorithmProcess::ProcessStateChanged(QProcess::ProcessState newState)
 {
-    if(newState == QProcess::NotRunning)
+    /*if(newState == QProcess::NotRunning)
     {
         std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
         openEv->data = "stopped";
         openEv->fromUuid = this->uid;
         this->eventLoop->SendEvent(openEv);
 
-    }
+    }*/
 
 }
 
