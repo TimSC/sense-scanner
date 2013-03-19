@@ -98,6 +98,7 @@ protected:
     double progress;
     QList<unsigned long long> saveModelRequestIds;
     QTime keepAliveTimer;
+    std::map<unsigned long long, std::tr1::shared_ptr<class Event> > requestsPending;
 };
 
 class ProcessingRequestOrResponse : public Deletable

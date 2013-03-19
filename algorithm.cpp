@@ -164,6 +164,8 @@ void AlgorithmProcess::Unpause()
 
 int AlgorithmProcess::Stop()
 {
+
+    //Stop internal systems
     if(this->state() != QProcess::Running)
         return 0;
     assert(this->initDone);
@@ -356,6 +358,10 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         assert(req!=NULL);
         QSharedPointer<QImage> img = req->img;
         std::vector<std::vector<std::vector<float> > > &pos = req->pos;
+
+        //Store this message as a pending request
+        if(ev->id != 0)
+            this->requestsPending[ev->id] = ev;
 
         QString xml="<predict>\n";
         for(unsigned int i=0;i<pos.size();i++)
@@ -640,6 +646,18 @@ void AlgorithmProcess::ProcessAlgOutput()
         resultEv->raw = response;
         resultEv->id = responseId;
         this->eventLoop->SendEvent(resultEv);
+
+        //Remove this prediction from pending requests
+        if(responseId!=0)
+        {
+            std::map<unsigned long long, std::tr1::shared_ptr<class Event> >::iterator it;
+            it = this->requestsPending.find(responseId);
+            if(it!=this->requestsPending.end())
+            {
+                //Found a previously requested prediction
+                this->requestsPending.erase(it);
+            }
+        }
 
         return;
 
