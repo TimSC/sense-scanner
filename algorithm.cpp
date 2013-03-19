@@ -65,7 +65,7 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
 
     QObject::connect(this, SIGNAL(readyReadStandardOutput()), this, SLOT(StdOutReady()));
     QObject::connect(this, SIGNAL(readyReadStandardError()), this, SLOT(StdErrReady()));
-    QObject::connect(this, SIGNAL(stateChanged(newState)), this, SLOT(ProcessStateChanged(newState)));
+    QObject::connect(this, SIGNAL(stateChanged(QProcess::state)), this, SLOT(ProcessStateChanged(QProcess::state)));
 
     QObject::connect(&this->timer, SIGNAL(timeout()), this, SLOT(Update()));
     this->timer.start(10); //in millisec
@@ -334,37 +334,23 @@ void AlgorithmProcess::Update()
 
 void AlgorithmProcess::StdOutReady()
 {
-    //Get standard output from algorithm process
-    /*QByteArray ret = this->readAllStandardOutput();
-    this->algOutBuffer.append(ret);
-    this->ProcessAlgOutput();*/
+
 }
 
 void AlgorithmProcess::StdErrReady()
 {
-    //Get errors from console error out
-    /*QByteArray ret = this->readAllStandardError();
-    this->algErrBuffer.append(ret);
 
-    while(true)
-    {
-        QString err = ReadLineFromBuffer(this->algErrBuffer);
-        if(err.length() == 0) break;
-        cout << "Algorithm Error: " << err.toLocal8Bit().constData() << endl;
-    }*/
 }
 
 void AlgorithmProcess::ProcessStateChanged(QProcess::ProcessState newState)
 {
-    /*if(newState == QProcess::NotRunning)
+    if(newState == QProcess::NotRunning)
     {
         std::tr1::shared_ptr<class Event> openEv(new Event("THREAD_STATUS_CHANGED"));
         openEv->data = "stopped";
         openEv->fromUuid = this->uid;
         this->eventLoop->SendEvent(openEv);
-
-    }*/
-
+    }
 }
 
 void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
