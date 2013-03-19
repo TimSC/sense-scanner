@@ -757,6 +757,8 @@ int AlgorithmProcess::PredictFrame(QSharedPointer<QImage> img,
                     std::vector<std::vector<float> > &out)
 {
     out.clear();
+    assert(!algUuid.isNull());
+    assert(!annotUuid.isNull());
 
     //Ask alg process to make a prediction
     std::tr1::shared_ptr<class Event> requestEv(new Event("PREDICT_FRAME_REQUEST"));

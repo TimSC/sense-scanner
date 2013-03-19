@@ -72,7 +72,10 @@ void ApplyModel::Update()
                                            this->eventLoop,
                                            this->eventReceiver);
 
-        this->algUuidSet = 1;
+        if(!this->algUuid.isNull())
+            this->algUuidSet = 1;
+        else
+            this->msleep(100);
         this->msleep(1);
         return;
     }

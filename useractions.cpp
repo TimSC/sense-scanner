@@ -314,7 +314,7 @@ void UserActions::Load(QString fina)
                         //Set alg uuid
                         std::tr1::shared_ptr<class Event> newAnnEv4(new Event("SET_ALG_UUID"));
                         newAnnEv4->toUuid = uid;
-                        newAnnEv4->data = xml.toLocal8Bit().constData();
+                        newAnnEv4->data = alg.toString();
                         this->eventLoop->SendEvent(newAnnEv4);
 
                         trackData = trackData.nextSibling();
