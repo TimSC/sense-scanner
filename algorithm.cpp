@@ -533,6 +533,13 @@ void AlgorithmProcess::ProcessAlgOutput()
         }
     }
 
+    if(cmd.left(14)=="ALG_NOT_READY=")
+    {
+        std::tr1::shared_ptr<class Event> resultEv(new Event("PREDICTION_FAILED"));
+        resultEv->id = cmd.mid(14).toULongLong();
+        this->eventLoop->SendEvent(resultEv);
+    }
+
     if(cmd.left(11)=="DATA_BLOCK=")
     {
         QByteArray blockArg = this->ReadLineFromBuffer(this->algOutBuffer,0,1);
@@ -774,13 +781,14 @@ int AlgorithmProcess::PredictFrame(QSharedPointer<QImage> img,
     unsigned int rxCount = eventLoop->SendEvent(requestEv);
     if(rxCount==0)
         throw std::runtime_error("Cannot request prediction from non-existent uuid");
-    cout << "PREDICT_FRAME_REQUEST rx count " << rxCount << endl;
 
     //Wait for response
     try
     {
         std::tr1::shared_ptr<class Event> ev = eventReceiver->WaitForEventId(requestEv->id);
 
+        if(ev->type=="PREDICTION_FAILED")
+            throw std::runtime_error("Prediction failed");
         if(ev->type=="RECEIVER_DELETED")
             throw std::runtime_error("Receiver deleted");
         if(ev->type=="REQUEST_ABORTED")

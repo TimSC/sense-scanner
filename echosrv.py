@@ -298,8 +298,8 @@ class Worker:
 						sys.stdout.write(outXmlEnc)
 						sys.stdout.flush()
 
-					if self.progress < 1.:
-						print "ALG_NOT_READY"
+					else:
+						print "ALG_NOT_READY=",reqId
 
 				print "DATA_BLOCK_PROCESSED"
 
