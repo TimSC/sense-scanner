@@ -372,12 +372,18 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
     //Wait for threads to stop
     cout << "Wait for threads to stop" << endl;
+    int oldThreadCount = -1;
     for(int i=0;i<500;i++)
     {
-        this->Update();
         if(this->threadCount == 0) break;
+        if(oldThreadCount!=this->threadCount)
+            cout << "Waiting for threads: " << this->threadCount << endl;
+        this->Update();
         LocalSleep::msleep(10); //millisec
+        oldThreadCount = this->threadCount;
     }
+
+    this->eventReceiver->Stop();
 
     //If threads still running, terminate them
     this->mediaInterfaceFront->TerminateThread();
@@ -665,9 +671,7 @@ void MainWindow::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
     if(ev->type=="STOP_THREADS")
     {
-        //Prevent this thread from waiting for answers that will
-        //never arrive...
-        this->eventReceiver->Stop();
+
     }
     if(ev->type=="ANNOT_USING_ALG")
     {
