@@ -790,11 +790,15 @@ void MainWindow::LoadWorkspace()
       tr("Load Workspace"), "", tr("Workspaces (*.work)"));
     if(fileName.length() == 0) return;
 
-    this->workspace->ClearAnnotationFromMain();
-    this->workspace->ClearProcessingFromMain();
-    this->RegenerateSourcesList();
-    this->RegenerateProcessingList();
+    //Set video to blank
+    this->DeselectCurrentSource();
     this->defaultFilename = fileName;
+    this->workspaceAsStored->ClearAnnotationFromMain();
+    this->workspaceAsStored->ClearProcessingFromMain();
+
+    //Free memory of old objects
+    std::tr1::shared_ptr<class Event> newWorkspaceEv(new Event("NEW_WORKSPACE"));
+    this->eventLoop->SendEvent(newWorkspaceEv);
 
     //Get video file name from source
     std::tr1::shared_ptr<class Event> loadWorkspaceEv(new Event("LOAD_WORKSPACE"));
