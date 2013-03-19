@@ -152,7 +152,7 @@ class Worker:
 
 					trackerMinimal.PrepareForPickle()
 					trackerStr = pickle.dumps(trackerMinimal, protocol=pickle.HIGHEST_PROTOCOL)
-					trackerMinimal.PostUnPickle()
+					del trackerMinimal
 
 					#fi=open("testpickle.dat","wb")
 					#fi.write(trackerStr)
