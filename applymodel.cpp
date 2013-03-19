@@ -443,10 +443,10 @@ void ApplyModelPool::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop = eventLoopIn;
 }
 
-void ApplyModelPool::Add(QUuid algUuid, QUuid annotUuid, QUuid mediaInterface)
+int ApplyModelPool::Add(QUuid algUuid, QUuid annotUuid, QUuid mediaInterface)
 {
     if(this->pool.find(annotUuid) != this->pool.end())
-        throw std::runtime_error("This annotation already has a helper thread");
+        return 0;
 
     std::tr1::shared_ptr<class ApplyModel> am(new ApplyModel(annotUuid));
     this->pool[annotUuid] = am;
@@ -454,6 +454,7 @@ void ApplyModelPool::Add(QUuid algUuid, QUuid annotUuid, QUuid mediaInterface)
     this->pool[annotUuid]->SetThreadId(algUuid); //Not sure this is a good idea to share thread IDs!
     this->pool[annotUuid]->SetMediaInterface(mediaInterface);
     this->pool[annotUuid]->Start();
+    return 1;
 }
 
 void ApplyModelPool::Remove(QUuid uuid)

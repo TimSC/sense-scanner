@@ -176,11 +176,12 @@ void Workspace::RemoveSource(QUuid uuid)
 
 }
 
-void Workspace::AddHelperThreadFromMain(QUuid algUuid, QUuid annotUuid, QUuid mediaInterface)
+int Workspace::AddHelperThreadFromMain(QUuid algUuid, QUuid annotUuid, QUuid mediaInterface)
 {
     this->lock.lock();
-    this->applyModelPool.Add(algUuid, annotUuid, mediaInterface);
+    int ret = this->applyModelPool.Add(algUuid, annotUuid, mediaInterface);
     this->lock.unlock();
+    return ret;
 }
 
 QList<QUuid> Workspace::GetAnnotationUuids()

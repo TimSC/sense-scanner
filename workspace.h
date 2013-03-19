@@ -39,7 +39,7 @@ public:
     void AddProcessingFromMain(std::tr1::shared_ptr<class AlgorithmProcess> alg);
     int RemoveProcessingFromMain(QUuid uuid);
 
-    void AddHelperThreadFromMain(QUuid algUuid, QUuid annotUuid, QUuid mediaInterface);
+    int AddHelperThreadFromMain(QUuid algUuid, QUuid annotUuid, QUuid mediaInterface);
 
     //** Processing
     //std::tr1::shared_ptr<class AlgorithmProcess> GetProcessing(unsigned int num);
