@@ -334,16 +334,35 @@ void Workspace::ClearAnnotationFromMain()
 
 void Workspace::ClearProcessing()
 {
+    for(unsigned int i=0;i<this->processingList.size();i++)
+        this->processingList[i]->Stop();
+
     this->processingList.clear();
     this->processingProgress.clear();
     this->processingUuids.clear();
+
+    if(this->eventLoop!=NULL)
+    {
+        std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_PROCESSING_CHANGED"));
+        this->eventLoop->SendEvent(changeEv);
+    }
+
 }
 
 void Workspace::ClearAnnotation()
 {
+    for(unsigned int i=0;i<this->annotationThreads.size();i++)
+        this->annotationThreads[i]->Stop();
+
     this->annotations.clear();
     this->annotationThreads.clear();
     this->annotationUuids.clear();
+
+    if(this->eventLoop!=NULL)
+    {
+        std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_ANNOTATION_CHANGED"));
+        this->eventLoop->SendEvent(changeEv);
+    }
 }
 
 void Workspace::Update()

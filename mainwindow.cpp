@@ -761,6 +761,13 @@ void MainWindow::NewWorkspace()
         return;
     }
 
+    //Set video to blank
+    this->DeselectCurrentSource();
+
+    //Set shadow work space
+    this->workspaceAsStored->ClearAnnotationFromMain();
+    this->workspaceAsStored->ClearProcessingFromMain();
+
     //Free memory of old objects
     std::tr1::shared_ptr<class Event> newWorkspaceEv(new Event("NEW_WORKSPACE"));
     this->eventLoop->SendEvent(newWorkspaceEv);
