@@ -44,6 +44,9 @@ public:
     void ProcessingProgressChanged(QUuid uuid, float progress);
     float GetProcessingProgress(QUuid uuid);
 
+    void ClearProcessingFromMain();
+    void ClearAnnotationFromMain();
+
     AlgorithmProcess::ProcessState GetProcessingState(QUuid uuid);
 
     int NumProcessesBlockingShutdown();
@@ -55,8 +58,7 @@ public:
 
     void TerminateThreads();
 
-    void ClearProcessing();
-    void ClearAnnotation();
+
     QList<QUuid> GetProcessingUuids();
     QList<QUuid> GetAnnotationUuids();
 
@@ -74,6 +76,9 @@ protected:
 
     void AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg);
     int RemoveProcessing(QUuid uuid);
+
+    void ClearProcessing();
+    void ClearAnnotation();
 
     //** Sources and annotations
     //Sources and annotation data

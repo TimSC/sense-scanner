@@ -524,7 +524,7 @@ void UserActions::NewWorkspace()
 {
     int debug = 1;
     /*
-     *    this->applyModelPool.Clear(); //Clear this first to stop interconnected behaviour
+    this->applyModelPool.Clear(); //Clear this first to stop interconnected behaviour
     this->workspace.ClearAnnotation();
     this->workspace.ClearProcessing();
     this->workspaceAsStored = this->workspace;

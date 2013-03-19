@@ -83,6 +83,9 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
 
     this->eventLoop->AddListener("THREAD_PROGRESS_UPDATE", *this->eventReceiver);
     this->eventLoop->AddListener("THREAD_STATUS_CHANGED", *this->eventReceiver);
+
+    this->eventLoop->AddListener("NEW_WORKSPACE", *this->eventReceiver);
+
 }
 
 unsigned int Workspace::AddSourceFromMain(QUuid uuid)
@@ -315,22 +318,32 @@ int Workspace::NumProcessesBlockingShutdown()
 
 //************************************************************************
 
-void Workspace::ClearProcessing()
+void Workspace::ClearProcessingFromMain()
 {
     this->lock.lock();
+    this->ClearProcessing();
+    this->lock.unlock();
+}
+
+void Workspace::ClearAnnotationFromMain()
+{
+    this->lock.lock();
+    this->ClearAnnotation();
+    this->lock.unlock();
+}
+
+void Workspace::ClearProcessing()
+{
     this->processingList.clear();
     this->processingProgress.clear();
     this->processingUuids.clear();
-    this->lock.unlock();
 }
 
 void Workspace::ClearAnnotation()
 {
-    this->lock.lock();
     this->annotations.clear();
     this->annotationThreads.clear();
     this->annotationUuids.clear();
-    this->lock.unlock();
 }
 
 void Workspace::Update()
@@ -423,6 +436,12 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type=="NEW_PROCESSING")
     {
         this->newAlgEvents.push_back(ev);
+    }
+
+    if(ev->type=="NEW_WORKSPACE")
+    {
+        this->ClearAnnotation();
+        this->ClearProcessing();
     }
 
     if(ev->type=="THREAD_PROGRESS_UPDATE")

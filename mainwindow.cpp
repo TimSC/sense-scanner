@@ -274,8 +274,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    this->workspace->ClearAnnotation();
-    this->workspace->ClearProcessing();
+    this->workspace->ClearAnnotationFromMain();
+    this->workspace->ClearProcessingFromMain();
 
     delete this->timer;
     this->timer = NULL;
@@ -787,8 +787,8 @@ void MainWindow::LoadWorkspace()
     if(fileName.length() == 0) return;
 
     this->applyModelPool.Clear();
-    this->workspace->ClearAnnotation();
-    this->workspace->ClearProcessing();
+    this->workspace->ClearAnnotationFromMain();
+    this->workspace->ClearProcessingFromMain();
     this->RegenerateSourcesList();
     this->RegenerateProcessingList();
     this->defaultFilename = fileName;
