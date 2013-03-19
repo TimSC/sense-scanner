@@ -28,7 +28,7 @@ class Worker:
 		self.tracker = None
 		self.getProgress = False
 		self.aliveClock = time.time()
-		self.aliveMsgEnabled = True
+		self.aliveMsgEnabled = False
 		self.savedTracker = False
 		self.childPipeConn = childPipeConn
 		self.workerLog = open("workerLog.txt","wt")
@@ -100,9 +100,11 @@ class Worker:
 			#print "Rx",event[0]
 			if event[0]=="RUN":
 				print "NOW_RUNNING"
+				sys.stdout.flush()
 				self.paused = 0
 			if event[0]=="PAUSE":
 				print "NOW_PAUSED"
+				sys.stdout.flush()
 				self.paused = 1
 			if event[0]=="QUIT":
 				self.running = 0
