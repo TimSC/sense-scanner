@@ -18,26 +18,21 @@ class Worker:
 		self.progress = 0.
 		self.running = 1
 		self.paused = 1
-		self.training = 0
 		self.imgCount = 0
 		self.xmlBlocksCount = 0
 		self.xmlTrees = []
 		self.trainImgs = {}
 		self.xmlDataBlocks = []
-		self.modelReady = False
+		self.loadDataFinished = False
 		self.tracker = None
 		self.getProgress = False
 		self.aliveClock = time.time()
 		self.aliveMsgEnabled = False
-		self.savedTracker = False
 		self.childPipeConn = childPipeConn
 		self.workerLog = open("workerLog.txt","wt")
 		self.Run()
 
 	def Run(self):
-
-
-		#random.junk()
 
 		while self.running:
 			timeNow = time.time()
@@ -55,7 +50,8 @@ class Worker:
 				self.HandleEvent(event)
 				time.sleep(0.001)
 
-			if (not self.paused and self.training and self.progress < 1.) or self.getProgress:
+			#Check if tracker requires more training
+			if (not self.paused and self.loadDataFinished and self.progress < 1.) or self.getProgress:
 				assert self.tracker is not None
 
 				if not self.paused and self.training and self.progress < 1.: 
@@ -63,15 +59,6 @@ class Worker:
 				self.progress = self.tracker.GetProgress()
 				print "PROGRESS="+str(self.progress)
 				self.getProgress = False
-
-				#Save training when training is complete
-				if not self.savedTracker and self.tracker.trainingRegressorsCompleteFlag:
-					#tracker.PrepareForPickle()
-					#pickle.dump(tracker,open("tracker.dat","wb"),protocol=-1)
-					#tracker = pickle.load(open("tracker.dat","rb"))
-					#tracker.PostUnPickle()
-					self.savedTracker = True
-
 
 			else:
 				time.sleep(0.1)
@@ -114,15 +101,16 @@ class Worker:
 				#print "ALIVE"
 				sys.stdout.flush()
 
-			if event[0]=="TRAINING_DATA_FINISH":
-				if len(self.trainImgs) == 0 and not self.modelReady:
+			if event[0]=="LOAD_DATA_FINISH":
+				self.loadDataFinished = True
+
+				if len(self.trainImgs) == 0 and self.tracker is None:
 					print "Error: No images loaded in algorithm process"
 					return
-				if len(self.xmlTrees) == 0 and not self.modelReady:
+				if len(self.xmlTrees) == 0 and self.tracker is None:
 					print "Error: No annotated positions loaded into algorithm process"
 					return
 
-				self.modelReady = 1
 				self.training = 1
 				if self.tracker is None:
 					self.tracker = reltracker.RelTracker()
@@ -229,7 +217,6 @@ class Worker:
 						self.tracker = pickle.loads(modelData)
 						self.tracker.PostUnPickle()
 						print self.tracker
-						self.modelReady = True
 					except Exception as exErr:
 						print "Decompression of data failed", str(exErr)
 
@@ -254,7 +241,7 @@ class Worker:
 					#	return
 
 					im = Image.frombuffer("RGB", (width, height), combinedRaw[:imgBytes], 'raw', "RGB", 0, 1)
-					if self.modelReady:
+					if self.loadDataFinished and self.progress >= 1.:
 						#Post-training phase
 						#print "Store image"
 						#im.save("alg.jpg")
@@ -298,7 +285,7 @@ class Worker:
 						sys.stdout.write(outXmlEnc)
 						sys.stdout.flush()
 
-					if self.training and not self.modelReady:
+					if self.progress < 1.:
 						print "ALG_NOT_READY"
 
 				print "DATA_BLOCK_PROCESSED"
@@ -316,6 +303,9 @@ def ReadDataBlock(parentPipeConn, inputlog, fi):
 		fi.write("Attempt to read " +str(si)+"\n")
 		fi.flush()
 	dataBlock = sys.stdin.read(si)
+	if fi is not None:
+		fi.write("Read done\n")
+		fi.flush()
 
 	parentPipeConn.send(["DATA_BLOCK", args, dataBlock])
 

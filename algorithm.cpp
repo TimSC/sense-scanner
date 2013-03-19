@@ -413,7 +413,7 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
     if(ev->type == "TRAINING_DATA_FINISH")
     {
-        this->SendCommand("TRAINING_DATA_FINISH\n");
+        this->SendCommand("LOAD_DATA_FINISH\n");
         this->dataLoaded = 1;
     }
 
@@ -436,6 +436,7 @@ void AlgorithmProcess::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         cout << "Base64 length" << b64bin.size() << endl;
         this->SendRawDataBlock("MODEL\n", b64bin);
 
+        this->SendCommand("LOAD_DATA_FINISH\n");
         this->dataLoaded = 1;
     }
 
