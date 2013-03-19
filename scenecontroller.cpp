@@ -282,11 +282,22 @@ void TrackingSceneController::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEven
     //Get current frame
     std::vector<std::vector<float> > currentFrame;
     unsigned long long getAnnotationTime = 0;
-    int isUsed = this->GetAnnotationBetweenTimestamps(this->frameStartTime,
+    int isUsed = 0;
+    try
+    {
+        isUsed = this->GetAnnotationBetweenTimestamps(this->frameStartTime,
                                                       this->frameEndTime,
                                                       this->frameRequestTime,
                                                       currentFrame,
                                                       getAnnotationTime);
+
+    }
+    catch(std::runtime_error err)
+    {
+        //Error getting annotation
+        return;
+    }
+
     if(!isUsed) return;
 
     if(this->mode == "MOVE" && this->activePoint >= 0 && this->leftDrag)
