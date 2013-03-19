@@ -31,6 +31,7 @@ Workspace::~Workspace()
 
 Workspace& Workspace::operator= (const Workspace &other)
 {
+    this->lock.lock();
     this->annotations.clear();
     for(unsigned int i=0;i<other.annotations.size();i++)
     {
@@ -43,15 +44,30 @@ Workspace& Workspace::operator= (const Workspace &other)
     this->annotationUuids = other.annotationUuids;
     this->processingUuids = other.processingUuids;
 
+    this->lock.unlock();
     return *this;
 }
 
 bool Workspace::operator!= (const Workspace &other)
 {
-    if(this->annotations.size() != other.annotations.size()) return true;
+    this->lock.lock();
+    if(this->annotations.size() != other.annotations.size())
+    {
+        this->lock.unlock();
+        return true;
+    }
     for(unsigned int i=0;i<this->annotations.size();i++)
-        if(*annotations[i] != *other.annotations[i]) return true;
-    if(processingList != other.processingList) return true;
+        if(*annotations[i] != *other.annotations[i])
+        {
+            this->lock.unlock();
+            return true;
+        }
+    if(processingList != other.processingList)
+    {
+        this->lock.unlock();
+        return true;
+    }
+    this->lock.unlock();
     return false;
 }
 

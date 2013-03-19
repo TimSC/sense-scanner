@@ -239,7 +239,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->RegenerateProcessingList();
 
     //this->workspace.Load(tr("/home/tim/test.work"), this->mediaInterfaceBack);
-    this->workspaceAsStored = this->workspace;
+    *this->workspaceAsStored = *this->workspace;
     this->ui->sourcesAlgGui->ui->dataSources->setSelectionMode(QListView::SelectionMode::ExtendedSelection);
     this->RegenerateSourcesList();
 
@@ -311,7 +311,7 @@ QString MainWindow::CheckIfDataShouldBeDiscarded(QString discardMsg)
 {
     //Check if the workspace has been saved, if not
     //prompt the user
-    if(this->workspace != this->workspaceAsStored)
+    if(*this->workspace != *this->workspaceAsStored)
     {
         //Create a dialog to find what the user wants
         class CheckDiscardDataDialog dialog(this, discardMsg);
@@ -798,7 +798,7 @@ void MainWindow::LoadWorkspace()
     loadWorkspaceEv->data = fileName.toLocal8Bit().constData();
     this->eventLoop->SendEvent(loadWorkspaceEv);
 
-    this->workspaceAsStored = this->workspace;
+    *this->workspaceAsStored = *this->workspace;
     this->RegenerateSourcesList();
 }
 
@@ -813,7 +813,7 @@ void MainWindow::SaveWorkspace()
         std::tr1::shared_ptr<class Event> loadWorkspaceEv(new Event("SAVE_WORKSPACE_AS"));
         loadWorkspaceEv->data = this->defaultFilename.toLocal8Bit().constData();
         this->eventLoop->SendEvent(loadWorkspaceEv);
-        this->workspaceAsStored = this->workspace;
+        *this->workspaceAsStored = *this->workspace;
         return;
     }
 
@@ -859,7 +859,7 @@ void MainWindow::SaveAsWorkspace()
     //waitDlg = NULL;
 
     this->defaultFilename = fileName;
-    this->workspaceAsStored = this->workspace;
+    *this->workspaceAsStored = *this->workspace;
 }
 
 void MainWindow::SelectedSourceChanged(const QModelIndex ind)
