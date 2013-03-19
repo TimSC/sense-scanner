@@ -7,8 +7,9 @@
 #include <iostream>
 using namespace std;
 
-Workspace::Workspace(int activeIn) : MessagableThread()
+Workspace::Workspace(int activeIn, QObject *parentIn) : MessagableThread()
 {
+    this->parent = parentIn;
     this->active = activeIn;
     this->ClearAnnotation();
     this->ClearProcessing();
@@ -16,10 +17,11 @@ Workspace::Workspace(int activeIn) : MessagableThread()
     this->eventReceiver = NULL;
 }
 
-Workspace::Workspace(int activeIn, const Workspace &other) : MessagableThread()
+Workspace::Workspace(int activeIn, QObject *parentIn, const Workspace &other) : MessagableThread()
 {
     this->operator =(other);
     this->active = activeIn;
+    this->parent = parentIn;
 }
 
 Workspace::~Workspace()
@@ -162,9 +164,15 @@ QList<QUuid> Workspace::GetAnnotationUuids()
 
 //***********************************************************************
 
-void Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg)
+void Workspace::AddProcessingFromMain(std::tr1::shared_ptr<class AlgorithmProcess> alg)
 {
     this->lock.lock();
+    this->AddProcessing(alg);
+    this->lock.unlock();
+}
+
+void Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg)
+{
     try
     {
         alg->Init();
@@ -176,7 +184,6 @@ void Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg)
         errPopUp->showMessage(err.what());
         errPopUp->exec();
         delete errPopUp;
-        this->lock.unlock();
         return;
     }
 
@@ -189,12 +196,18 @@ void Workspace::AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg)
 
     std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_PROCESSING_CHANGED"));
     this->eventLoop->SendEvent(changeEv);
+}
+
+int Workspace::RemoveProcessingFromMain(QUuid uuid)
+{
+    this->lock.lock();
+    int out = this->RemoveProcessing(uuid);
     this->lock.unlock();
+    return out;
 }
 
 int Workspace::RemoveProcessing(QUuid uuid)
 {
-    this->lock.lock();
 
     //Find index of references processing
     int ind = 0, found = 0;
@@ -208,7 +221,6 @@ int Workspace::RemoveProcessing(QUuid uuid)
     }
     if(!found)
     {
-        this->lock.unlock();
         return -1;
     }
 
@@ -219,7 +231,6 @@ int Workspace::RemoveProcessing(QUuid uuid)
             state!=AlgorithmProcess::READY)
     {
         cout << "Process cannot be removed while it is running" << endl;
-        this->lock.unlock();
         return 0;
     }
 
@@ -233,7 +244,6 @@ int Workspace::RemoveProcessing(QUuid uuid)
     this->processingProgress.erase(this->processingProgress.begin()+ind);
     this->processingUuids.erase(this->processingUuids.begin()+ind);
 
-    this->lock.unlock();
     std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_PROCESSING_CHANGED"));
     this->eventLoop->SendEvent(changeEv);
     return 1;
@@ -317,6 +327,31 @@ void Workspace::Update()
     this->msleep(100);
 }
 
+void Workspace::UpdateFromMain()
+{
+    this->lock.lock();
+
+    //Add processing modules, which needs to be done from the main thread
+    for(unsigned int i=0;i<this->newAlgEvents.size();i++)
+    {
+        std::tr1::shared_ptr<class Event> ev = this->newAlgEvents[i];
+        std::tr1::shared_ptr<class AlgorithmProcess> alg(
+                    new class AlgorithmProcess(this->eventLoop, this->parent));
+        alg->Init();
+        alg->SetUid(QUuid(ev->data));
+        this->AddProcessing(alg);
+
+        std::tr1::shared_ptr<class Event> changeEv2(new Event("PROCESSING_ADDED"));
+        changeEv2->id = ev->id;
+        changeEv2->data = ev->data;
+        this->eventLoop->SendEvent(changeEv2);
+    }
+    this->newAlgEvents.clear();
+
+    this->lock.unlock();
+
+}
+
 void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 {
     this->lock.lock();
@@ -372,17 +407,7 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 
     if(ev->type=="NEW_PROCESSING")
     {
-
-        std::tr1::shared_ptr<class AlgorithmProcess> alg(new class AlgorithmProcess(this->eventLoop, this));
-        alg->Init();
-        alg->SetUid(QUuid(ev->data));
-        this->AddProcessing(alg);
-
-        std::tr1::shared_ptr<class Event> changeEv2(new Event("PROCESSING_ADDED"));
-        changeEv2->id = ev->id;
-        changeEv2->data = ev->data;
-        this->eventLoop->SendEvent(changeEv2);
-
+        this->newAlgEvents.push_back(ev);
     }
 
     if(ev->type=="THREAD_PROGRESS_UPDATE")

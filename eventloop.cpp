@@ -256,6 +256,7 @@ void EventReceiver::RespondToBufferedRequests()
     {
         std::tr1::shared_ptr<class Event> ev = this->eventBuffer[i];
         if(ev->id==0) continue; //This don't need a specific response
+        if(ev->type=="RECEIVER_DELETED") continue; //This don't need a specific response
 
         std::tr1::shared_ptr<class Event> err(new Event("RECEIVER_DELETED"));
         err->id = ev->id;

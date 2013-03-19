@@ -165,11 +165,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Create inter thread message system
     this->eventLoop = new class EventLoop();
-    this->workspace = new class Workspace(1);
+    this->workspace = new class Workspace(1, this);
     this->workspace->SetEventLoop(*this->eventLoop);
     this->workspace->Start();
 
-    this->workspaceAsStored = new class Workspace(0);
+    this->workspaceAsStored = new class Workspace(0, this);
     this->workspaceAsStored->SetEventLoop(*this->eventLoop);
     this->workspaceAsStored->Start();
 
@@ -742,6 +742,8 @@ void MainWindow::Update()
     }
     catch(std::runtime_error e) {flushing = 0;}
 
+    //Some jobs only this thread can do
+    this->workspace->UpdateFromMain();
 }
 
 void MainWindow::NewWorkspace()
@@ -1138,7 +1140,7 @@ void MainWindow::RemoveProcessPressed()
 
 
         //Remove processing from workspace
-        int ret = this->workspace->RemoveProcessing(algUuids[ind.row()]);
+        int ret = this->workspace->RemoveProcessingFromMain(algUuids[ind.row()]);
 
     }
 }

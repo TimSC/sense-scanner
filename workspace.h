@@ -22,8 +22,8 @@ class Workspace : public MessagableThread
 
     Q_OBJECT
 public:
-    explicit Workspace(int activeIn);
-    explicit Workspace(int activeIn, const Workspace &other);
+    explicit Workspace(int activeIn, QObject *parent);
+    explicit Workspace(int activeIn, QObject *parent, const Workspace &other);
     virtual ~Workspace();
 
     Workspace& operator= (const Workspace &other);
@@ -31,12 +31,15 @@ public:
 
     void SetEventLoop(class EventLoop &eventLoopIn);
 
+    //This direct access functions are bit of a hack.
+    //TODO consider removing them and using proper events
     unsigned int AddSourceFromMain(QUuid uuid);
     void RemoveSourceFromMain(QUuid uuid);
 
+    void AddProcessingFromMain(std::tr1::shared_ptr<class AlgorithmProcess> alg);
+    int RemoveProcessingFromMain(QUuid uuid);
+
     //** Processing
-    void AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg);
-    int RemoveProcessing(QUuid uuid);
     //std::tr1::shared_ptr<class AlgorithmProcess> GetProcessing(unsigned int num);
     void ProcessingProgressChanged(QUuid uuid, float progress);
     float GetProcessingProgress(QUuid uuid);
@@ -45,6 +48,7 @@ public:
 
     int NumProcessesBlockingShutdown();
     void Update();
+    void UpdateFromMain();
     virtual void HandleEvent(std::tr1::shared_ptr<class Event> ev);
 
     int HasChanged();
@@ -65,10 +69,13 @@ public:
     int IsReadyForSave();
 
 protected:
-    //** Sources and annotations
     unsigned int AddSource(QUuid uuid);
     void RemoveSource(QUuid uuid);
 
+    void AddProcessing(std::tr1::shared_ptr<class AlgorithmProcess> alg);
+    int RemoveProcessing(QUuid uuid);
+
+    //** Sources and annotations
     //Sources and annotation data
     std::vector<std::tr1::shared_ptr<class Annotation> > annotations;
     QList<QUuid> annotationUuids;
@@ -81,6 +88,8 @@ protected:
     Mutex lock;
     QUuid mediaUuid;
     int active;
+    QObject *parent;
+    QList<std::tr1::shared_ptr<class Event> > newAlgEvents;
 };
 
 #endif // WORKSPACE_H
