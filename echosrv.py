@@ -46,8 +46,8 @@ class Worker:
 				self.aliveClock = timeNow
 
 			#Get all events
-			while childPipeConn.poll():
-				event = childPipeConn.recv()
+			while self.childPipeConn.poll():
+				event = self.childPipeConn.recv()
 				self.HandleEvent(event)
 				time.sleep(0.001)
 
@@ -78,7 +78,7 @@ class Worker:
 			#print "running", self.running
 			sys.stdout.flush()
 	
-		childPipeConn.send("FINISHED")
+		self.childPipeConn.send("FINISHED")
 		print "FINISHED"
 		sys.stdout.flush()
 		self.workerLog.write("Worker thread finishing\n")
