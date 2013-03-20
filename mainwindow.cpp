@@ -335,7 +335,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
         if(userSelection=="STOP")
         {
-            QList<QUuid> uuids = this->workspace->GetProcessingUuids();
+            QList<QUuid> uuids = this->workspace->GetProcessingUuidsFromMain();
             for(unsigned int i=0;i<uuids.size();i++)
             {
                 std::tr1::shared_ptr<class Event> pauseEvent(new Event("PAUSE_ALGORITHM"));
@@ -412,7 +412,7 @@ void MainWindow::RegenerateSourcesList()
     QIcon icon("icons/tool-animator.png");
     if(this->sourcesModel.columnCount()!= 2)
         this->sourcesModel.setColumnCount(2);
-    QList<QUuid> annotationUuids = this->workspace->GetAnnotationUuids();
+    QList<QUuid> annotationUuids = this->workspace->GetAnnotationUuidsFromMain();
 
     if(this->sourcesModel.rowCount() != annotationUuids.size())
         this->sourcesModel.setRowCount(annotationUuids.size());
@@ -513,7 +513,7 @@ void MainWindow::RegenerateProcessingList()
     QIcon icon("icons/kig.png");
     if(this->processingModel.columnCount()!= 2)
         this->processingModel.setColumnCount(2);
-    QList<QUuid> algUuids = this->workspace->GetProcessingUuids();
+    QList<QUuid> algUuids = this->workspace->GetProcessingUuidsFromMain();
     if(this->processingModel.rowCount() != algUuids.size())
         this->processingModel.setRowCount(algUuids.size());
     for (int row = 0; row < algUuids.size(); ++row)
@@ -610,7 +610,7 @@ void MainWindow::ImportVideo()
 void MainWindow::RemoveVideo()
 {
     cout << "remove" << endl;
-    QList<QUuid> annotUuids = this->workspace->GetAnnotationUuids();
+    QList<QUuid> annotUuids = this->workspace->GetAnnotationUuidsFromMain();
     QItemSelectionModel *sourceSelected = this->ui->sourcesAlgGui->ui->dataSources->selectionModel();
     assert(sourceSelected!=NULL);
 
@@ -883,7 +883,7 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
         return;
     }
 
-    QList<QUuid> annotationUuids = this->workspace->GetAnnotationUuids();
+    QList<QUuid> annotationUuids = this->workspace->GetAnnotationUuidsFromMain();
     if(selectedRow < 0 && selectedRow >= annotationUuids.size())
         return;
 
@@ -942,7 +942,7 @@ void MainWindow::TrainModelPressed()
 {
     cout << "TrainModelPressed" << endl;
     QItemSelectionModel *selection = this->ui->sourcesAlgGui->ui->dataSources->selectionModel();
-    QList<QUuid> annotationUuids = this->workspace->GetAnnotationUuids();
+    QList<QUuid> annotationUuids = this->workspace->GetAnnotationUuidsFromMain();
     int countMarkedFrames = 0;
     QModelIndexList selectList = selection->selectedRows(0);
     QList<std::vector<std::string> > seqMarked;
@@ -996,8 +996,8 @@ void MainWindow::ApplyModelPressed()
     assert(srcSelection!=NULL);
     QModelIndexList modelSelList = modelSelection->selectedRows(0);
     QModelIndexList srcSelList = srcSelection->selectedRows(0);
-    QList<QUuid> algUuids = this->workspace->GetProcessingUuids();
-    QList<QUuid> annotationUuids = this->workspace->GetAnnotationUuids();
+    QList<QUuid> algUuids = this->workspace->GetProcessingUuidsFromMain();
+    QList<QUuid> annotationUuids = this->workspace->GetAnnotationUuidsFromMain();
 
     if(srcSelList.size()==0)
     {
@@ -1088,7 +1088,7 @@ void MainWindow::PauseProcessPressed()
 
     QItemSelectionModel *selection = this->ui->sourcesAlgGui->ui->processingView->selectionModel();
     QModelIndexList selectList = selection->selectedRows(0);
-    QList<QUuid> algUuids = this->workspace->GetProcessingUuids();
+    QList<QUuid> algUuids = this->workspace->GetProcessingUuidsFromMain();
     for(unsigned int i=0;i<selectList.size();i++)
     {
         QModelIndex &ind = selectList[i];
@@ -1105,7 +1105,7 @@ void MainWindow::RunProcessPressed()
 
     QItemSelectionModel *selection = this->ui->sourcesAlgGui->ui->processingView->selectionModel();
     QModelIndexList selectList = selection->selectedRows(0);
-    QList<QUuid> algUuids = this->workspace->GetProcessingUuids();
+    QList<QUuid> algUuids = this->workspace->GetProcessingUuidsFromMain();
     for(unsigned int i=0;i<selectList.size();i++)
     {
         QModelIndex &ind = selectList[i];
@@ -1123,7 +1123,7 @@ void MainWindow::RemoveProcessPressed()
 
     QItemSelectionModel *selection = this->ui->sourcesAlgGui->ui->processingView->selectionModel();
     QModelIndexList selectList = selection->selectedRows(0);
-    QList<QUuid> algUuids = this->workspace->GetProcessingUuids();
+    QList<QUuid> algUuids = this->workspace->GetProcessingUuidsFromMain();
 
     for(unsigned int i=0;i<selectList.size();i++)
     {

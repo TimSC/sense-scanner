@@ -186,9 +186,7 @@ int Workspace::AddHelperThreadFromMain(QUuid algUuid, QUuid annotUuid, QUuid med
 
 QList<QUuid> Workspace::GetAnnotationUuids()
 {
-    this->lock.lock();
     QList<QUuid> out = this->annotationUuids;
-    this->lock.unlock();
     return out;
 }
 
@@ -552,8 +550,22 @@ void Workspace::TerminateThreads()
 
 QList<QUuid> Workspace::GetProcessingUuids()
 {
+    QList<QUuid> out = this->processingUuids;
+    return out;
+}
+
+QList<QUuid> Workspace::GetProcessingUuidsFromMain()
+{
     this->lock.lock();
     QList<QUuid> out = this->processingUuids;
+    this->lock.unlock();
+    return out;
+}
+
+QList<QUuid> Workspace::GetAnnotationUuidsFromMain()
+{
+    this->lock.lock();
+    QList<QUuid> out = this->annotationUuids;
     this->lock.unlock();
     return out;
 }
@@ -561,7 +573,6 @@ QList<QUuid> Workspace::GetProcessingUuids()
 void Workspace::SetMediaUuid(QUuid mediaUuidIn)
 {
     this->mediaUuid = mediaUuidIn;
-
 }
 
 void Workspace::AddProcessing(QUuid uid,

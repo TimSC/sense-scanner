@@ -60,15 +60,14 @@ public:
 
     void TerminateThreads();
 
-
-    QList<QUuid> GetProcessingUuids();
-    QList<QUuid> GetAnnotationUuids();
-
     void SetMediaUuid(QUuid mediaUuidIn);
 
     static void AddProcessing(QUuid uid,
                                   class EventLoop *eventLoop,
                                   class EventReceiver *eventReceiver);
+
+    QList<QUuid> GetProcessingUuidsFromMain();
+    QList<QUuid> GetAnnotationUuidsFromMain();
 
     int IsReadyForSave();
 
@@ -81,6 +80,9 @@ protected:
 
     void ClearProcessing();
     void ClearAnnotation();
+
+    QList<QUuid> GetProcessingUuids();
+    QList<QUuid> GetAnnotationUuids();
 
     //** Sources and annotations
     //Sources and annotation data
