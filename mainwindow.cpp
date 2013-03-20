@@ -203,6 +203,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->eventLoop->AddListener("ANNOTATION_SHAPE", *this->eventReceiver);
     this->eventLoop->AddListener("ANNOTATION_ADDED", *this->eventReceiver);
+    this->eventLoop->AddListener("TRAINING_DATA_ERROR", *this->eventReceiver);
 
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop,1);
@@ -691,6 +692,15 @@ void MainWindow::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     {
 
     }
+    if(ev->type=="TRAINING_DATA_ERROR")
+    {
+        if(this->errMsg == NULL)
+            this->errMsg = new QMessageBox(this);
+        this->errMsg->setWindowTitle("Error: Training data problem");
+        this->errMsg->setText(ev->data);
+        this->errMsg->exec();
+    }
+
     if(ev->type=="ANNOT_USING_ALG")
     {
         std::vector<std::string> args = split(ev->data.toLocal8Bit().constData(),',');

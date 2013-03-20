@@ -404,7 +404,13 @@ void UserActions::TrainModel(QList<QUuid> annotationUuids)
         seqMarked.push_back(splitMarked);
         countMarkedFrames += splitMarked.size();
     }
-    assert(countMarkedFrames>0);
+    if(countMarkedFrames==0)
+    {
+        std::tr1::shared_ptr<class Event> errorEv(new Event("TRAINING_DATA_ERROR"));
+        errorEv->data = "No training frames specified";
+        this->eventLoop->SendEvent(errorEv);
+        return;
+    }
 
     //Create processing module and add to workspace
     QUuid newUuid = QUuid::createUuid();
@@ -412,6 +418,7 @@ void UserActions::TrainModel(QList<QUuid> annotationUuids)
                                   this->eventReceiver);
 
     //Configure worker process
+    int countValidFrames = 0;
     QList<QSharedPointer<QImage> > imgs;
     for(unsigned int i=0;i<annotationUuids.size();i++)
     {
@@ -428,8 +435,6 @@ void UserActions::TrainModel(QList<QUuid> annotationUuids)
         //For each annotated frame
         for(unsigned int fr=0;fr<marked.size();fr++)
         {
-            countMarkedFrames ++;
-
             //Get image data and send to process
             cout << marked[fr] << endl;
             unsigned long long startTimestamp = 0, endTimestamp = 0;
@@ -506,7 +511,17 @@ void UserActions::TrainModel(QList<QUuid> annotationUuids)
             foundPosEv->data = annotXml.toUtf8().constData();
             foundPosEv->toUuid = newUuid;
             this->eventLoop->SendEvent(foundPosEv);
+
+            countValidFrames++;
         }
+    }
+
+    if(countValidFrames==0)
+    {
+        std::tr1::shared_ptr<class Event> errorEv(new Event("TRAINING_DATA_ERROR"));
+        errorEv->data = "No valid training data available";
+        this->eventLoop->SendEvent(errorEv);
+        return;
     }
 
     std::tr1::shared_ptr<class Event> trainingFinishEv(new Event("TRAINING_DATA_FINISH"));
