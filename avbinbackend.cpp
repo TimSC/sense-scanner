@@ -255,8 +255,8 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out, int &readPack
     if(this->fi == NULL)
         return 0;
 
-    if(this->firstVideoStream >= 0) return -1;
-    if(this->firstVideoStream < (int)this->timestampOfChannel.size()) return -2;
+    if(this->firstVideoStream < 0) return -1;
+    if(this->firstVideoStream >= (int)this->timestampOfChannel.size()) return -2;
 
     //Apply start offset
     time += this->info.start_time;

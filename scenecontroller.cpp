@@ -983,10 +983,25 @@ void TrackingSceneController::SaveShape()
         fileName.append(".shape");
     }
 
-    std::tr1::shared_ptr<class Event> reqEv(new Event("SAVE_SHAPE"));
-    reqEv->toUuid = this->annotationUuid;
-    reqEv->data = fileName.toLocal8Bit().constData();
-    this->eventLoop->SendEvent(reqEv);
+    //Retrieve shape
+    std::vector<std::vector<int> > links;
+    std::vector<std::vector<float> > shape = Annotation::GetShape(this->annotationUuid,
+                                                          this->eventLoop,
+                                                          this->eventReceiver,
+                                                          links);
+    //Encode as XML
+    QString xml;
+    QTextStream xmlStr(&xml);
+    TrackingAnnotationData::WriteShapeToStream(links, shape, xmlStr);
+
+    //Save data to file
+    QFile f(fileName);
+    f.open( QIODevice::WriteOnly );
+    QTextStream out(&f);
+    out.setCodec("UTF-8");
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;;
+    out << xml;
+    f.close();
 }
 
 void TrackingSceneController::RemovePoint(int index)
