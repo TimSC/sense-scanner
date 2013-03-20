@@ -80,6 +80,7 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
     this->eventLoop->AddListener("GET_ANNOTATION_UUIDS", *this->eventReceiver);
 
     this->eventLoop->AddListener("NEW_PROCESSING", *this->eventReceiver);
+    this->eventLoop->AddListener("REMOVE_PROCESSING", *this->eventReceiver);
     this->eventLoop->AddListener("GET_PROCESSING_UUIDS", *this->eventReceiver);
 
     this->eventLoop->AddListener("THREAD_PROGRESS_UPDATE", *this->eventReceiver);
@@ -250,16 +251,6 @@ int Workspace::RemoveProcessing(QUuid uuid)
     if(!found)
     {
         return -1;
-    }
-
-    //Check process is ready to be removed
-    AlgorithmProcess::ProcessState state = this->processingList[ind]->GetState();
-    if(state!=AlgorithmProcess::STOPPED &&
-            state!=AlgorithmProcess::PAUSED &&
-            state!=AlgorithmProcess::READY)
-    {
-        cout << "Process cannot be removed while it is running" << endl;
-        return 0;
     }
 
     //Stop the process
@@ -475,6 +466,11 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         this->ClearProcessing();
     }
 
+    if(ev->type=="REMOVE_PROCESSING")
+    {
+        this->RemoveProcessing(QUuid(ev->data));
+    }
+
     if(ev->type=="THREAD_PROGRESS_UPDATE")
     {
         //Check for matching annotation
@@ -589,6 +585,17 @@ void Workspace::AddProcessing(QUuid uid,
     //Wait for workspace to register this annotation
     std::tr1::shared_ptr<class Event> response = eventReceiver->WaitForEventId(newAnnEv->id);
     assert(response->type == "PROCESSING_ADDED");
+}
+
+void Workspace::RemoveProcessing(QUuid uid,
+                              class EventLoop *eventLoop,
+                              class EventReceiver *eventReceiver)
+{
+    //Create processing module
+    std::tr1::shared_ptr<class Event> removeEv(new Event("REMOVE_PROCESSING"));
+    removeEv->data = uid.toString();
+    removeEv->id = eventLoop->GetId();
+    eventLoop->SendEvent(removeEv);
 }
 
 int Workspace::IsReadyForSave()

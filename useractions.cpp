@@ -518,6 +518,10 @@ void UserActions::TrainModel(QList<QUuid> annotationUuids)
 
     if(countValidFrames==0)
     {
+        Workspace::RemoveProcessing(newUuid,
+                                      this->eventLoop,
+                                      this->eventReceiver);
+
         std::tr1::shared_ptr<class Event> errorEv(new Event("TRAINING_DATA_ERROR"));
         errorEv->data = "No valid training data available";
         this->eventLoop->SendEvent(errorEv);

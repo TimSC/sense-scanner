@@ -65,6 +65,9 @@ public:
     static void AddProcessing(QUuid uid,
                                   class EventLoop *eventLoop,
                                   class EventReceiver *eventReceiver);
+    static void RemoveProcessing(QUuid uid,
+                                  class EventLoop *eventLoop,
+                                  class EventReceiver *eventReceiver);
 
     QList<QUuid> GetProcessingUuidsFromMain();
     QList<QUuid> GetAnnotationUuidsFromMain();
