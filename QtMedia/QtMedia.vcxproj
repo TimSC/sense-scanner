@@ -117,6 +117,13 @@
     <ClInclude Include="..\videoarea.h" />
     <ClInclude Include="..\videowidget.h" />
     <ClInclude Include="..\workspace.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="QtMedia.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="icon1.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
