@@ -255,9 +255,8 @@ int AvBinBackend::GetFrame(uint64_t time, class DecodedFrame &out, int &readPack
     if(this->fi == NULL)
         return 0;
 
-    assert(this->fi != NULL);
-    assert(this->firstVideoStream >= 0);
-    assert(this->firstVideoStream < (int)this->timestampOfChannel.size());
+    if(this->firstVideoStream >= 0) return -1;
+    if(this->firstVideoStream < (int)this->timestampOfChannel.size()) return -2;
 
     //Apply start offset
     time += this->info.start_time;
@@ -578,7 +577,7 @@ void AvBinBackend::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         response->raw = decodedFrame;
         int readPacketFailed = 0;
         int found = this->GetFrame(ti, *decodedFrame, readPacketFailed);
-        if(found)
+        if(found > 0)
         {
             //Send decoded image as event
             assert(decodedFrame->buff != NULL);
