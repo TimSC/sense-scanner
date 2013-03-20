@@ -423,6 +423,7 @@ void VideoWidget::SetSceneControl(BaseSceneController *sceneControlIn)
     else
     {
         this->ui->graphicsView->setScene(NULL);
+        this->SetSceneControl(new class LogoSceneController(this));
     }
 
 }
