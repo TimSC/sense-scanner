@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Thu Mar 14 11:04:54 2013
+** Created: Wed Mar 20 21:21:51 2013
 **      by: Qt User Interface Compiler version 4.8.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -21,7 +21,6 @@
 #include <QtGui/QMenu>
 #include <QtGui/QMenuBar>
 #include <QtGui/QStatusBar>
-#include <QtGui/QToolBar>
 #include <QtGui/QWidget>
 #include "aboutgui.h"
 #include "sourcealggui.h"
@@ -52,7 +51,6 @@ public:
     QMenu *menuFile;
     QMenu *menuVideo;
     QMenu *menuHelp;
-    QToolBar *mainToolBar;
     QStatusBar *statusBar;
     QDockWidget *aboutDock;
     AboutGui *aboutWidget;
@@ -117,9 +115,6 @@ public:
         menuHelp = new QMenu(menuBar);
         menuHelp->setObjectName(QString::fromUtf8("menuHelp"));
         MainWindow->setMenuBar(menuBar);
-        mainToolBar = new QToolBar(MainWindow);
-        mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
-        MainWindow->addToolBar(Qt::TopToolBarArea, mainToolBar);
         statusBar = new QStatusBar(MainWindow);
         statusBar->setObjectName(QString::fromUtf8("statusBar"));
         MainWindow->setStatusBar(statusBar);

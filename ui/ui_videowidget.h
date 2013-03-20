@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'videowidget.ui'
 **
-** Created: Thu Mar 14 00:11:38 2013
+** Created: Wed Mar 20 21:21:51 2013
 **      by: Qt User Interface Compiler version 4.8.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!

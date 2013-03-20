@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'workspace.h'
 **
-** Created: Thu Mar 14 11:19:57 2013
+** Created: Wed Mar 20 21:22:48 2013
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.3)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -50,7 +50,7 @@ const QMetaObjectExtraData Workspace::staticMetaObjectExtraData = {
 };
 
 const QMetaObject Workspace::staticMetaObject = {
-    { &QObject::staticMetaObject, qt_meta_stringdata_Workspace,
+    { &MessagableThread::staticMetaObject, qt_meta_stringdata_Workspace,
       qt_meta_data_Workspace, &staticMetaObjectExtraData }
 };
 
@@ -68,12 +68,12 @@ void *Workspace::qt_metacast(const char *_clname)
     if (!_clname) return 0;
     if (!strcmp(_clname, qt_meta_stringdata_Workspace))
         return static_cast<void*>(const_cast< Workspace*>(this));
-    return QObject::qt_metacast(_clname);
+    return MessagableThread::qt_metacast(_clname);
 }
 
 int Workspace::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
-    _id = QObject::qt_metacall(_c, _id, _a);
+    _id = MessagableThread::qt_metacall(_c, _id, _a);
     if (_id < 0)
         return _id;
     return _id;
