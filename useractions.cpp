@@ -8,6 +8,7 @@
 #include <QtXml/QtXml>
 #include <iostream>
 #include <assert.h>
+#include "version.h"
 
 using namespace std;
 
@@ -118,7 +119,7 @@ int UserActions::SaveAs(QString fina)
     QTextStream out(&f);
     out.setCodec("UTF-8");
     out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;
-    out << "<workspace>" << endl;
+    out << "<workspace ver=\""<< VERSION_URL << "\">" << endl;
     out << "<sources>" << endl;
 
     //Get list of annotation uuids
