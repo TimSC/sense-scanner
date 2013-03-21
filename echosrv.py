@@ -1,5 +1,5 @@
 import sys, random
-#sys.path = ["python-lib", "site-packages", "."]
+sys.path = ["python-lib", "site-packages", "."]
 import multiprocessing, time, pickle, bz2, base64, os, zlib
 from PIL import Image
 import xml.etree.ElementTree as ET
@@ -30,7 +30,8 @@ class Worker:
 		self.progressClock = time.time()
 		self.aliveMsgEnabled = True
 		self.childPipeConn = childPipeConn
-		self.workerLog = open("workerLog.txt","wt")
+		#self.workerLog = open("workerLog.txt","wt")
+		self.workerLog = None
 		self.Run()
 
 	def Run(self):
@@ -81,8 +82,9 @@ class Worker:
 		self.childPipeConn.send("FINISHED")
 		print "FINISHED"
 		sys.stdout.flush()
-		self.workerLog.write("Worker thread finishing\n")
-		self.workerLog.close()
+		if self.workerLog is not None:
+        		self.workerLog.write("Worker thread finishing\n")
+                	self.workerLog.close()
 
 	def HandleEvent(self, event):
 		if 1:
@@ -335,14 +337,14 @@ if __name__=="__main__":
 		msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
 		msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
-	#fi = None
-	fi = open("log.txt","wt")
+	fi = None
+	#fi = open("log.txt","wt")
 	inputlog = None
 	#inputlog = open("inputlog.dat","wb")
 	
 	if fi is not None:
 		fi.write("READY\n")
-        fi.flush()
+                fi.flush()
 	print "READY"
 	sys.stdout.flush()
 
