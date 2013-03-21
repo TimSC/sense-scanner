@@ -45,6 +45,7 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
     this->initDone = 0;
     this->dataLoaded = 0;
     this->progress = 0.;
+	this->keepAliveTimer = new QTime();
 
     //QString fina = "algout.txt";
     this->eventLoop = eventLoopIn;
@@ -70,7 +71,7 @@ AlgorithmProcess::AlgorithmProcess(class EventLoop *eventLoopIn, QObject *parent
 
     QObject::connect(&this->timer, SIGNAL(timeout()), this, SLOT(Update()));
     this->timer.start(10); //in millisec
-    this->keepAliveTimer.start();
+    this->keepAliveTimer->start();
 }
 
 AlgorithmProcess::~AlgorithmProcess()
@@ -79,6 +80,9 @@ AlgorithmProcess::~AlgorithmProcess()
     if(this->eventReceiver != NULL)
         delete this->eventReceiver;
     this->eventReceiver = NULL;
+	if(this->keepAliveTimer != NULL)
+		delete this->keepAliveTimer;
+	this->keepAliveTimer = NULL;
 }
 
 void AlgorithmProcess::Init()
@@ -290,9 +294,9 @@ void AlgorithmProcess::Update()
     //cout << "AlgorithmProcess::Update()" << endl;
 
     //Do periodic update of keep alive message
-    if(this->keepAliveTimer.elapsed()>1000)
+    if(this->keepAliveTimer->elapsed()>1000)
     {
-        this->keepAliveTimer.restart();
+        this->keepAliveTimer->restart();
         this->SendCommand("KEEPALIVE\n");
     }
 
