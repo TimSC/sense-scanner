@@ -1,6 +1,9 @@
-import sys, random
-sys.path = ["python-lib", "site-packages", "."]
-import multiprocessing, time, pickle, bz2, base64, os, zlib
+import sys
+productionMode = False
+if productionMode:
+	sys.path = ["python-lib", "site-packages", "."]
+
+import multiprocessing, time, pickle, bz2, base64, os, zlib, random
 from PIL import Image
 import xml.etree.ElementTree as ET
 from reltracker import reltracker
