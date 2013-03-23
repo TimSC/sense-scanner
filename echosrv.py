@@ -1,7 +1,7 @@
 import sys
 productionMode = False
-if productionMode:
-	sys.path = ["python-lib", "site-packages", "."]
+#if productionMode:
+#	sys.path = ["python-lib", "site-packages", "."]
 
 import multiprocessing, time, pickle, bz2, base64, os, zlib, random
 from PIL import Image
