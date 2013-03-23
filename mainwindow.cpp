@@ -806,6 +806,9 @@ void MainWindow::NewWorkspace()
     //Set video to blank
     this->DeselectCurrentSource();
 
+	this->workspace->ClearAnnotationFromMain();
+    this->workspace->ClearProcessingFromMain();
+
     //Set shadow work space
     this->workspaceAsStored->ClearAnnotationFromMain();
     this->workspaceAsStored->ClearProcessingFromMain();
@@ -835,6 +838,9 @@ void MainWindow::LoadWorkspace()
     //Set video to blank
     this->DeselectCurrentSource();
     this->defaultFilename = fileName;
+
+	this->workspace->ClearAnnotationFromMain();
+    this->workspace->ClearProcessingFromMain();
     this->workspaceAsStored->ClearAnnotationFromMain();
     this->workspaceAsStored->ClearProcessingFromMain();
 
