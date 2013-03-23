@@ -31,14 +31,24 @@ File sensescanner.exe
 File about.html
 File lgpl-info.txt
 File Kinatomic-Logo.jpg
-File *.dll
+File *.*
 File *.py
+File *.exe
+File *.dll
+File *.manifest
+File *.txt
 File python.exe
-File /r shapes
+File /r DLLs
+File /r Doc
 File /r icons
-File /r python-lib
+File /r include
+File /r Lib
+File /r libs
 File /r reltracker
-File /r site-packages
+File /r Scripts
+File /r shapes
+File /r tcl
+File /r Tools
 
 ; Tell the compiler to write an uninstaller and to look for a "Uninstall" section
 WriteUninstaller $INSTDIR\Uninstall.exe
@@ -57,16 +67,17 @@ SetShellVarContext all
 
 Delete $INSTDIR\Uninstall.exe
 Delete $INSTDIR\*.*
-Delete $INSTDIR\icons\*.*
-Delete $INSTDIR\shapes\*.*
-Delete $INSTDIR\python-lib\*.*
-Delete $INSTDIR\reltracker\*.*
-Delete $INSTDIR\site-packages\*.*
-RMDir $INSTDIR\icons
-RMDir $INSTDIR\shapes
-RMDir /r $INSTDIR\python-lib
+RMDir /r $INSTDIR\DLLs
+RMDir /r $INSTDIR\Doc
+RMDir /r $INSTDIR\icons
+RMDir /r $INSTDIR\include
+RMDir /r $INSTDIR\Lib
+RMDir /r $INSTDIR\libs
 RMDir /r $INSTDIR\reltracker
-RMDir /r $INSTDIR\site-packages
+RMDir /r $INSTDIR\Scripts
+RMDir /r $INSTDIR\shapes
+RMDir /r $INSTDIR\tcl
+RMDir /r $INSTDIR\Tools
 RMDir $INSTDIR
 
 Delete "$SMPROGRAMS\Kinatomic\Sense Scanner.lnk"
