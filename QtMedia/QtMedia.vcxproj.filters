@@ -171,5 +171,11 @@
     <None Include="icon1.ico">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\icons\kinatomic.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="bitmap1.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

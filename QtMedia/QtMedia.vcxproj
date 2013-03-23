@@ -123,6 +123,8 @@
     <ResourceCompile Include="QtMedia.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\icons\kinatomic.ico" />
+    <None Include="bitmap1.bmp" />
     <None Include="icon1.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
