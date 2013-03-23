@@ -97,6 +97,14 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+	static void AddProcessing(QUuid uid,
+                              class EventLoop *eventLoop,
+                              class EventReceiver *eventReceiver);
+
+	static void RemoveProcessing(QUuid uid,
+                              class EventLoop *eventLoop,
+                              class EventReceiver *eventReceiver);
     
 private:
     Ui::MainWindow *ui;

@@ -205,6 +205,9 @@ MainWindow::MainWindow(QWidget *parent) :
     this->eventLoop->AddListener("ANNOTATION_ADDED", *this->eventReceiver);
     this->eventLoop->AddListener("TRAINING_DATA_ERROR", *this->eventReceiver);
 
+	this->eventLoop->AddListener("NEW_PROCESSING", *this->eventReceiver);
+	this->eventLoop->AddListener("REMOVE_PROCESSING", *this->eventReceiver);
+
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop,1);
     this->mediaInterfaceFront->Start();
@@ -737,6 +740,32 @@ void MainWindow::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     {
         this->ui->statusBar->showMessage(tr("Load Complete"),2000);
     }
+
+	if(ev->type=="NEW_PROCESSING")
+	{
+		std::tr1::shared_ptr<class AlgorithmProcess> newProc(new class AlgorithmProcess(this->eventLoop, this));
+		newProc->SetUid(QUuid(ev->data));
+		this->workspace->AddProcessingFromMain(newProc);
+
+		if(ev->id>0)
+		{
+			std::tr1::shared_ptr<class Event> newProcAdded(new Event("PROCESSING_ADDED"));
+			newProcAdded->id = ev->id;
+            this->eventLoop->SendEvent(newProcAdded);
+		}
+	}
+
+	if(ev->type=="REMOVE_PROCESSING")
+	{
+		this->workspace->RemoveProcessingFromMain(QUuid(ev->data));
+
+		if(ev->id>0)
+		{
+			std::tr1::shared_ptr<class Event> newProcAdded(new Event("PROCESSING_REMOVED"));
+			newProcAdded->id = ev->id;
+            this->eventLoop->SendEvent(newProcAdded);
+		}
+	}
 }
 
 void MainWindow::Update()
@@ -781,9 +810,6 @@ void MainWindow::NewWorkspace()
     this->workspaceAsStored->ClearAnnotationFromMain();
     this->workspaceAsStored->ClearProcessingFromMain();
 
-    //Free memory of old objects
-    std::tr1::shared_ptr<class Event> newWorkspaceEv(new Event("NEW_WORKSPACE"));
-    this->eventLoop->SendEvent(newWorkspaceEv);
 }
 
 void MainWindow::LoadWorkspace()
@@ -811,10 +837,6 @@ void MainWindow::LoadWorkspace()
     this->defaultFilename = fileName;
     this->workspaceAsStored->ClearAnnotationFromMain();
     this->workspaceAsStored->ClearProcessingFromMain();
-
-    //Free memory of old objects
-    std::tr1::shared_ptr<class Event> newWorkspaceEv(new Event("NEW_WORKSPACE"));
-    this->eventLoop->SendEvent(newWorkspaceEv);
 
     //Get video file name from source
     std::tr1::shared_ptr<class Event> loadWorkspaceEv(new Event("LOAD_WORKSPACE"));
@@ -1212,6 +1234,32 @@ void MainWindow::resizeEvent(QResizeEvent * event)
    // this->ui->videoWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 }
 
+void MainWindow::AddProcessing(QUuid uid,
+                              class EventLoop *eventLoop,
+                              class EventReceiver *eventReceiver)
+{
+    //Create processing module
+    std::tr1::shared_ptr<class Event> newAnnEv(new Event("NEW_PROCESSING"));
+    QString dataStr = QString("%1").arg(uid.toString());
+    newAnnEv->data = dataStr.toLocal8Bit().constData();
+    newAnnEv->id = eventLoop->GetId();
+    eventLoop->SendEvent(newAnnEv);
+
+    //Wait for workspace to register this annotation
+    std::tr1::shared_ptr<class Event> response = eventReceiver->WaitForEventId(newAnnEv->id);
+    assert(response->type == "PROCESSING_ADDED");
+}
+
+void MainWindow::RemoveProcessing(QUuid uid,
+                              class EventLoop *eventLoop,
+                              class EventReceiver *eventReceiver)
+{
+    //Create processing module
+    std::tr1::shared_ptr<class Event> removeEv(new Event("REMOVE_PROCESSING"));
+    removeEv->data = uid.toString();
+    removeEv->id = eventLoop->GetId();
+    eventLoop->SendEvent(removeEv);
+}
 
 //**********************************
 

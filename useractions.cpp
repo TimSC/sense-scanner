@@ -9,6 +9,7 @@
 #include <iostream>
 #include <assert.h>
 #include "version.h"
+#include "mainwindow.h"
 
 using namespace std;
 
@@ -347,7 +348,7 @@ void UserActions::Load(QString fina)
                     if(uid.isNull()) uid = uid.createUuid();
 
                     //Create processing module                 
-                    Workspace::AddProcessing(uid, this->eventLoop,
+                    MainWindow::AddProcessing(uid, this->eventLoop,
                                                   this->eventReceiver);
 
                     //Send data to algorithm process
@@ -414,7 +415,7 @@ void UserActions::TrainModel(QList<QUuid> annotationUuids)
 
     //Create processing module and add to workspace
     QUuid newUuid = QUuid::createUuid();
-    Workspace::AddProcessing(newUuid, this->eventLoop,
+    MainWindow::AddProcessing(newUuid, this->eventLoop,
                                   this->eventReceiver);
 
     //Configure worker process
@@ -518,7 +519,7 @@ void UserActions::TrainModel(QList<QUuid> annotationUuids)
 
     if(countValidFrames==0)
     {
-        Workspace::RemoveProcessing(newUuid,
+        MainWindow::RemoveProcessing(newUuid,
                                       this->eventLoop,
                                       this->eventReceiver);
 

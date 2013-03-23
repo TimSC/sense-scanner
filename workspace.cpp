@@ -78,16 +78,13 @@ void Workspace::SetEventLoop(class EventLoop &eventLoopIn)
 
     this->eventLoop->AddListener("NEW_ANNOTATION", *this->eventReceiver);
     this->eventLoop->AddListener("GET_ANNOTATION_UUIDS", *this->eventReceiver);
-
-    this->eventLoop->AddListener("NEW_PROCESSING", *this->eventReceiver);
-    this->eventLoop->AddListener("REMOVE_PROCESSING", *this->eventReceiver);
     this->eventLoop->AddListener("GET_PROCESSING_UUIDS", *this->eventReceiver);
 
     this->eventLoop->AddListener("THREAD_PROGRESS_UPDATE", *this->eventReceiver);
     this->eventLoop->AddListener("THREAD_STATUS_CHANGED", *this->eventReceiver);
 
-    this->eventLoop->AddListener("NEW_WORKSPACE", *this->eventReceiver);
-
+    this->eventLoop->AddListener("PROCESSING_ADDED", *this->eventReceiver);
+    this->eventLoop->AddListener("PROCESSING_REMOVED", *this->eventReceiver);
 }
 
 unsigned int Workspace::AddSourceFromMain(QUuid uuid)
@@ -381,23 +378,6 @@ void Workspace::UpdateFromMain()
 {
     this->lock.lock();
 
-    //Add processing modules, which needs to be done from the main thread
-    for(unsigned int i=0;i<this->newAlgEvents.size();i++)
-    {
-        std::tr1::shared_ptr<class Event> ev = this->newAlgEvents[i];
-        std::tr1::shared_ptr<class AlgorithmProcess> alg(
-                    new class AlgorithmProcess(this->eventLoop, this->parent));
-        alg->Init();
-        alg->SetUid(QUuid(ev->data));
-        this->AddProcessing(alg);
-
-        std::tr1::shared_ptr<class Event> changeEv2(new Event("PROCESSING_ADDED"));
-        changeEv2->id = ev->id;
-        changeEv2->data = ev->data;
-        this->eventLoop->SendEvent(changeEv2);
-    }
-    this->newAlgEvents.clear();
-
     this->lock.unlock();
 
 }
@@ -453,22 +433,6 @@ void Workspace::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         changeEv2->id = ev->id;
         changeEv2->data = ev->data;
         this->eventLoop->SendEvent(changeEv2);
-    }
-
-    if(ev->type=="NEW_PROCESSING")
-    {
-        this->newAlgEvents.push_back(ev);
-    }
-
-    if(ev->type=="NEW_WORKSPACE")
-    {
-        this->ClearAnnotation();
-        this->ClearProcessing();
-    }
-
-    if(ev->type=="REMOVE_PROCESSING")
-    {
-        this->RemoveProcessing(QUuid(ev->data));
     }
 
     if(ev->type=="THREAD_PROGRESS_UPDATE")
@@ -569,33 +533,6 @@ QList<QUuid> Workspace::GetAnnotationUuidsFromMain()
 void Workspace::SetMediaUuid(QUuid mediaUuidIn)
 {
     this->mediaUuid = mediaUuidIn;
-}
-
-void Workspace::AddProcessing(QUuid uid,
-                              class EventLoop *eventLoop,
-                              class EventReceiver *eventReceiver)
-{
-    //Create processing module
-    std::tr1::shared_ptr<class Event> newAnnEv(new Event("NEW_PROCESSING"));
-    QString dataStr = QString("%1").arg(uid.toString());
-    newAnnEv->data = dataStr.toLocal8Bit().constData();
-    newAnnEv->id = eventLoop->GetId();
-    eventLoop->SendEvent(newAnnEv);
-
-    //Wait for workspace to register this annotation
-    std::tr1::shared_ptr<class Event> response = eventReceiver->WaitForEventId(newAnnEv->id);
-    assert(response->type == "PROCESSING_ADDED");
-}
-
-void Workspace::RemoveProcessing(QUuid uid,
-                              class EventLoop *eventLoop,
-                              class EventReceiver *eventReceiver)
-{
-    //Create processing module
-    std::tr1::shared_ptr<class Event> removeEv(new Event("REMOVE_PROCESSING"));
-    removeEv->data = uid.toString();
-    removeEv->id = eventLoop->GetId();
-    eventLoop->SendEvent(removeEv);
 }
 
 int Workspace::IsReadyForSave()

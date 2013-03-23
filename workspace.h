@@ -62,13 +62,6 @@ public:
 
     void SetMediaUuid(QUuid mediaUuidIn);
 
-    static void AddProcessing(QUuid uid,
-                                  class EventLoop *eventLoop,
-                                  class EventReceiver *eventReceiver);
-    static void RemoveProcessing(QUuid uid,
-                                  class EventLoop *eventLoop,
-                                  class EventReceiver *eventReceiver);
-
     QList<QUuid> GetProcessingUuidsFromMain();
     QList<QUuid> GetAnnotationUuidsFromMain();
 
@@ -101,7 +94,6 @@ protected:
     QUuid mediaUuid;
     int active;
     QObject *parent;
-    QList<std::tr1::shared_ptr<class Event> > newAlgEvents;
     ApplyModelPool applyModelPool;
 };
 
