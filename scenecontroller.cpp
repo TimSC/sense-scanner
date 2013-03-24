@@ -821,6 +821,8 @@ void TrackingSceneController::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("ANNOTATION_DATA",*eventReceiver);
     this->eventLoop->AddListener("SEEK_RESULT",*eventReceiver);
     this->eventLoop->AddListener("STOP_THREADS",*eventReceiver);
+    this->eventLoop->AddListener("SET_ANNOTATION_DONE",*eventReceiver);
+
 }
 
 void TrackingSceneController::SetAnnotationTrack(QUuid srcUuid)
@@ -935,10 +937,19 @@ void TrackingSceneController::LoadAnnotation()
     inFile.open(QIODevice::ReadOnly | QIODevice::Text);
     QTextStream fileStream(&inFile);
 
+    //Set annotation data
     std::tr1::shared_ptr<class Event> reqEv(new Event("SET_ANNOTATION_BY_XML"));
     reqEv->toUuid = this->annotationUuid;
     reqEv->data = fileStream.readAll();
+    reqEv->id = this->eventLoop->GetId();
     this->eventLoop->SendEvent(reqEv);
+
+    //Wait for this to complete
+    std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(reqEv->id);
+    assert(response->type=="SET_ANNOTATION_DONE");
+
+    //Read back current shape from annotation
+    this->RefreshLinks();
 }
 
 void TrackingSceneController::SaveAnnotation()

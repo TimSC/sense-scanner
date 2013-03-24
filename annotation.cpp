@@ -995,6 +995,15 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         //Load points and links into memory
         QDomElement rootElem = doc.documentElement();
         this->parentAnn->track->ReadAnnotationXml(rootElem);
+
+        //Signal that this is complete
+        if(ev->id>0)
+        {
+            std::tr1::shared_ptr<class Event> responseEv(new Event("SET_ANNOTATION_DONE"));
+            responseEv->id = ev->id;
+            this->eventLoop->SendEvent(responseEv);
+        }
+
     }
     if(ev->type=="GET_SEEK_BACKWARD_TIME")
     {
