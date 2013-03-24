@@ -86,14 +86,27 @@ VideoWidget::~VideoWidget()
     delete ui;
 }
 
-void VideoWidget::SetSource(QUuid src, QString finaIn)
+int VideoWidget::SetSource(QUuid src, QString finaIn, QString &error)
 {
     this->seq = src;
     this->mediaLength = 0;
     this->fina = finaIn;
     int lengthError = 0;
+    int exists = 1;
+    error = "";
 
-    if(!this->seq.isNull() && this->eventLoop!=NULL) try
+    //Check exists
+    QFile vidFile(this->fina);
+    if(this->fina.length() == 0 || !vidFile.exists())
+    {
+        error = "Video file does not exist";
+        cout << qPrintable(error) << endl;
+        lengthError = 1;
+        exists = 0;
+    }
+
+    //Get duration
+    if(exists && !this->seq.isNull() && this->eventLoop!=NULL) try
     {
         this->mediaLength = AvBinMedia::GetMediaDuration(this->fina,
                                             this->seq,
@@ -102,7 +115,8 @@ void VideoWidget::SetSource(QUuid src, QString finaIn)
     }
     catch (std::runtime_error &e)
     {
-        cout << "Warning: could not determine length of video" << endl;
+        error = "Could not determine length of video";
+        cout << qPrintable(error) << endl;
         lengthError = 1;
     }
 
@@ -117,13 +131,14 @@ void VideoWidget::SetSource(QUuid src, QString finaIn)
 
     if(lengthError)
     {
-        throw runtime_error("Error setting source");
+        if(error.length()==0) error = "Unspecified error";
+        return 0;
     }
 
     //Get first frame of video
     this->lastRequestedTimeSet = false;
     //this->SetVisibleAtTime(0);
-
+    return 1;
 }
 
 void VideoWidget::SetVisibleAtTime(long long unsigned ti)

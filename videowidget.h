@@ -48,7 +48,7 @@ public:
     virtual ~VideoWidget();
 
 public slots:
-    void SetSource(QUuid src, QString finaIn);
+    int SetSource(QUuid src, QString finaIn, QString &error);
     void SliderMoved(int newValue);
     void Pause();
     void Play();

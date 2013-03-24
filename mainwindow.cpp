@@ -227,7 +227,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     QString titleStr = QString("Kinatomic Sense Scanner %1").arg(VERSION_STR);
     this->setWindowTitle(titleStr);
-    this->ui->videoWidget->SetSource(this->mediaInterfaceFront->GetUuid(),"");
+    QString errorDesc;
+    this->ui->videoWidget->SetSource(this->mediaInterfaceFront->GetUuid(),"",errorDesc);
 
     QStringList horLabelsAnn;
     horLabelsAnn.push_back("Sources");
@@ -373,7 +374,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
     //Disconnect video widget from media source
     cout << "Disconnect video from source" << endl;
     QUuid nullSrc;
-    this->ui->videoWidget->SetSource(nullSrc,"");
+    QString errorDesc;
+    this->ui->videoWidget->SetSource(nullSrc,"",errorDesc);
 
     //Signal worker threads to stop
     cout << "Signal worker threads to stop" << endl;
@@ -953,16 +955,15 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
     this->annotationMenu = sceneController->MenuFactory(this->menuBar());
 
     //Set widget to use this source
-    try
+    QString errorDesc;
+    int ret = this->ui->videoWidget->SetSource(this->mediaInterfaceFront->GetUuid(), fina, errorDesc);
+
+    if(ret<=0)
     {
-        this->ui->videoWidget->SetSource(this->mediaInterfaceFront->GetUuid(), fina);
-    }
-    catch(std::runtime_error &err)
-    {
-        cout << err.what() << "," << fina.toLocal8Bit().constData() << endl;
+        cout << "Errr opening file," << fina.toLocal8Bit().constData() << endl;
         if(this->errMsg == NULL)
             this->errMsg = new QMessageBox(this);
-        QString errMsgStr = QString("Could not open %1").arg(fina);
+        QString errMsgStr = QString("%1 %2").arg(errorDesc).arg(fina);
         this->errMsg->setWindowTitle("Error opening video");
         this->errMsg->setText(errMsgStr);
         this->errMsg->exec();
