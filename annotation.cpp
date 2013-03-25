@@ -1551,7 +1551,27 @@ void Annotation::SetShape(QUuid annotUuid,
 void TrackingAnnotationData::SaveAnnotationCsv(QString fileName)
 {
 #ifndef DEMO_MODE
+    QFile f(fileName);
+    f.open( QIODevice::WriteOnly );
+    QTextStream out(&f);
+    out.setCodec("Latin-1");
 
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it=this->pos.begin(); it!=this->pos.end(); it++)
+    {
+        unsigned long long timestamp = it->first;
+        std::vector<std::vector<float> > &frame = it->second;
+
+        out << timestamp << ",";
+        for(unsigned int ptNum = 0; ptNum < frame.size(); ptNum++)
+        {
+            std::vector<float> &pt = frame[ptNum];
+            out << pt[0] << "," << pt[1] << ",";
+        }
+        out << endl;
+    }
+    out.flush();
+    f.close();
 #endif
 }
 
