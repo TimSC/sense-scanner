@@ -117,6 +117,10 @@ public slots:
     void LoadAnnotation();
     void SaveAnnotation();
 
+    void SaveAnnotationCsv();
+    void SaveAnnotationMatlab();
+    void SaveAnnotationMM();
+
     void SetAnnotationTrack(QUuid srcUuid);
 
     void SetEventLoop(class EventLoop *eventLoopIn);

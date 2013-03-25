@@ -701,8 +701,18 @@ QMenu *TrackingSceneController::MenuFactory(QMenuBar *menuBar)
     QAction *setShape = new QAction(tr("Set Shape from &Current Frame"), menuBar);
     QAction *resetShape = new QAction(tr("&Reset Shape"), menuBar);
 
-    QAction *loadAnnotation = new QAction(tr("L&oad Annotation"), menuBar);
-    QAction *saveAnnotation = new QAction(tr("S&ave Annotation"), menuBar);
+    QAction *loadAnnotation = new QAction(tr("L&oad Annotation (XML)"), menuBar);
+    QAction *saveAnnotation = new QAction(tr("S&ave Annotation (XML)"), menuBar);
+
+    QAction *saveAnnotationCsv = new QAction(tr("Export Annotation as CSV"), menuBar);
+    QAction *saveAnnotationMatlab = new QAction(tr("Export Annotation for Matlab"), menuBar);
+    QAction *saveAnnotationMM = new QAction(tr("Export Annotation as Matrix Market"), menuBar);
+
+#ifdef DEMO_MODE
+    saveAnnotationCsv->setDisabled(1);
+    saveAnnotationMatlab->setDisabled(1);
+    saveAnnotationMM->setDisabled(1);
+#endif //DEMO_MODE
 
     QMenu *newMenu = menuBar->addMenu(tr("&Annotate"));
     newMenu->addAction(loadShape);
@@ -712,6 +722,10 @@ QMenu *TrackingSceneController::MenuFactory(QMenuBar *menuBar)
     newMenu->addSeparator();
     newMenu->addAction(loadAnnotation);
     newMenu->addAction(saveAnnotation);
+
+    newMenu->addAction(saveAnnotationCsv);
+    newMenu->addAction(saveAnnotationMatlab);
+    newMenu->addAction(saveAnnotationMM);
 
     QObject::connect(loadShape, SIGNAL(triggered()), this, SLOT(LoadShape()));
     QObject::connect(saveShape, SIGNAL(triggered()), this, SLOT(SaveShape()));
@@ -977,6 +991,27 @@ void TrackingSceneController::SaveAnnotation()
     QTextStream fileStream(&outFile);
     fileStream << xml.toUtf8().constData();
     fileStream.flush();
+}
+
+void TrackingSceneController::SaveAnnotationCsv()
+{
+#ifndef DEMO_MODE
+
+#endif
+}
+
+void TrackingSceneController::SaveAnnotationMatlab()
+{
+#ifndef DEMO_MODE
+
+#endif
+}
+
+void TrackingSceneController::SaveAnnotationMM()
+{
+#ifndef DEMO_MODE
+
+#endif
 }
 
 void TrackingSceneController::SaveShape()
