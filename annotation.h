@@ -91,6 +91,10 @@ public:
     unsigned long long GetSeekBackTime(unsigned long long queryTime);
     void RemovePoint(int index);
 
+    void SaveAnnotationCsv(QString fileName);
+    void SaveAnnotationMatlab(QString fileName);
+    void SaveAnnotationMM(QString fileName);
+
     //Keep track of automatically labeled data
     unsigned long long autoLabeledStart;
     unsigned long long autoLabeledEnd;

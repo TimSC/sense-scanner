@@ -734,6 +734,9 @@ QMenu *TrackingSceneController::MenuFactory(QMenuBar *menuBar)
     QObject::connect(loadAnnotation, SIGNAL(triggered()), this, SLOT(LoadAnnotation()));
     QObject::connect(saveAnnotation, SIGNAL(triggered()), this, SLOT(SaveAnnotation()));
 
+    QObject::connect(saveAnnotationCsv, SIGNAL(triggered()), this, SLOT(SaveAnnotationCsv()));
+    QObject::connect(saveAnnotationMatlab, SIGNAL(triggered()), this, SLOT(SaveAnnotationMatlab()));
+    QObject::connect(saveAnnotationMM, SIGNAL(triggered()), this, SLOT(SaveAnnotationMM()));
     return newMenu;
 }
 
@@ -996,21 +999,50 @@ void TrackingSceneController::SaveAnnotation()
 void TrackingSceneController::SaveAnnotationCsv()
 {
 #ifndef DEMO_MODE
-
+    this->ExportAnnotation("CSV","csv");
 #endif
 }
 
 void TrackingSceneController::SaveAnnotationMatlab()
 {
 #ifndef DEMO_MODE
-
+    this->ExportAnnotation("Matlab","mat");
 #endif
 }
 
 void TrackingSceneController::SaveAnnotationMM()
 {
 #ifndef DEMO_MODE
+    this->ExportAnnotation("Matrix Market","mm");
+#endif
+}
 
+void TrackingSceneController::ExportAnnotation(QString type, QString ext)
+{
+#ifndef DEMO_MODE
+    //Get output filename from user
+    QString fileName = QFileDialog::getSaveFileName(0,
+                                                    QString("Save Annotation Track as %1").arg(type),
+                                                    "",
+                                                    QString("%1 (*.%2)").arg(type).arg(ext));
+    if(fileName.length() == 0) return;
+
+    //If no file extension is set, use .csv as the extension
+    QFileInfo fi(fileName);
+    QString csuffix = fi.completeSuffix();
+    if(csuffix.size()==0)
+    {
+        fileName.append(".");
+        fileName.append(ext);
+    }
+
+    //Trigger export
+    std::tr1::shared_ptr<class Event> reqEv(new Event("EXPORT_ANNOTATION"));
+    reqEv->toUuid = this->annotationUuid;
+    reqEv->data = fileName;
+    reqEv->buffer = type.toLocal8Bit();
+    reqEv->id = this->eventLoop->GetId();
+    this->eventLoop->SendEvent(reqEv);
 #endif
 }
 

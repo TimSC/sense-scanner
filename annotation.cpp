@@ -758,6 +758,8 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("GET_AUTO_LABELED_END", *this->eventReceiver);
     this->eventLoop->AddListener("FOUND_FRAME", *this->eventReceiver);
     this->eventLoop->AddListener("SET_AUTO_LABEL_RANGE", *this->eventReceiver);
+
+    this->eventLoop->AddListener("EXPORT_ANNOTATION", *this->eventReceiver);
 }
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
@@ -1103,6 +1105,17 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         assert(this->parentAnn!=NULL);
         assert(this->parentAnn->track!=NULL);
         this->parentAnn->track->RemovePoint(index);
+    }
+    if(ev->type=="EXPORT_ANNOTATION")
+    {
+        #ifndef DEMO_MODE
+        if(ev->buffer=="CSV")
+            this->parentAnn->track->SaveAnnotationCsv(ev->data);
+        if(ev->buffer=="CSV")
+            this->parentAnn->track->SaveAnnotationMatlab(ev->data);
+        if(ev->buffer=="CSV")
+            this->parentAnn->track->SaveAnnotationMM(ev->data);
+        #endif
     }
 
     }
@@ -1533,4 +1546,25 @@ void Annotation::SetShape(QUuid annotUuid,
     unsigned int rx = eventLoop->SendEvent(reqEv);
     if(rx==0)
         throw std::runtime_error("No uuid receiver found for message");
+}
+
+void TrackingAnnotationData::SaveAnnotationCsv(QString fileName)
+{
+#ifndef DEMO_MODE
+
+#endif
+}
+
+void TrackingAnnotationData::SaveAnnotationMatlab(QString fileName)
+{
+#ifndef DEMO_MODE
+
+#endif
+}
+
+void TrackingAnnotationData::SaveAnnotationMM(QString fileName)
+{
+#ifndef DEMO_MODE
+
+#endif
 }
