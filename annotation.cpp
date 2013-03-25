@@ -9,6 +9,7 @@ using namespace std;
 #include "qblowfish/src/qblowfish.h"
 #include "scenecontroller.h"
 #include "version.h"
+#include <matio.h>
 
 #define TO_MILLISEC(x) (unsigned long long)(x / 1000. + 0.5)
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
@@ -1578,7 +1579,13 @@ void TrackingAnnotationData::SaveAnnotationCsv(QString fileName)
 void TrackingAnnotationData::SaveAnnotationMatlab(QString fileName)
 {
 #ifndef DEMO_MODE
+    mat_t    *matfp;
+    matvar_t *matvar;
 
+    matfp = Mat_Open(fileName.toLocal8Bit().constData(),MAT_ACC_RDONLY);
+    if ( NULL == matfp ) {
+        cout << "Error opening MAT file" << qPrintable(fileName) << endl;
+    }
 #endif
 }
 

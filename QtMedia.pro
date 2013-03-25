@@ -66,3 +66,4 @@ RESOURCES +=
 #unix|win32: LIBS += -lvlc
 unix|win32: LIBS += -lavbin
 unix|win32: LIBS += -lpthread
+unix|win32: LIBS += -lmatio
