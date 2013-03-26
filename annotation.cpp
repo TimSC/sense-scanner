@@ -1562,6 +1562,7 @@ void TrackingAnnotationData::SaveAnnotationCsv(QString fileName)
     {
         unsigned long long timestamp = it->first;
         std::vector<std::vector<float> > &frame = it->second;
+        if (frame.size() == 0) continue;
 
         out << timestamp << ",";
         for(unsigned int ptNum = 0; ptNum < frame.size(); ptNum++)
@@ -1576,16 +1577,69 @@ void TrackingAnnotationData::SaveAnnotationCsv(QString fileName)
 #endif
 }
 
-void TrackingAnnotationData::SaveAnnotationMatlab(QString fileName)
+int TrackingAnnotationData::SaveAnnotationMatlab(QString fileName)
 {
 #ifndef DEMO_MODE
-    mat_t    *matfp;
-    matvar_t *matvar;
+    if(this->pos.size()==0) return 0;
 
-    matfp = Mat_Open(fileName.toLocal8Bit().constData(),MAT_ACC_RDONLY);
+    mat_t    *matfp = NULL;
+    matvar_t *matvar = NULL;
+
+    //Open output file for writing via matio
+    matfp = Mat_Open(fileName.toLocal8Bit().constData(),MAT_ACC_RDWR);
     if ( NULL == matfp ) {
         cout << "Error opening MAT file" << qPrintable(fileName) << endl;
+        return 0;
     }
+
+    //Allocate array in fortran format and initialise to zero
+    unsigned int numFrames = 0;
+    unsigned int numPoints = 0;
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it=this->pos.begin(); it!=this->pos.end(); it++)
+    {
+        if(it->second.size()==0) continue; //Skip empty frames
+        if(it->second.size() > numPoints)
+            numPoints = it->second.size();
+        numFrames++;
+    }
+    double *a = new double[numFrames*numPoints*2];
+    for(unsigned int i=0;i<numFrames*numPoints*2;i++)
+        a[i] = 0.;
+
+    //Copy positions into local array
+    unsigned int countFrame = 0;
+    for(it=this->pos.begin(); it!=this->pos.end(); it++)
+    {
+        if(it->second.size()==0) continue; //Skip empty frames
+        unsigned long long timestamp = it->first;
+        std::vector<std::vector<float> > &frame = it->second;
+        for(unsigned int i=0;i<frame.size();i++)
+        {
+            unsigned int indx=0, indy=0;
+            indx = countFrame + numFrames * 2 * i;
+            indy = countFrame + numFrames * ((2 * i) + 1);
+            assert(indx >= 0 && indx < numFrames*numPoints*2);
+            assert(indy >= 0 && indy < numFrames*numPoints*2);
+            a[indx] = frame[i][0];
+            a[indy] = frame[i][1];
+        }
+
+        countFrame ++;
+    }
+
+    //Write array to output file
+    int dims[2] = {numFrames,numPoints*2};
+    int compress = 0;
+    matvar = Mat_VarCreate("pos",MAT_C_DOUBLE,MAT_T_DOUBLE,2,dims,a,0);
+    Mat_VarWrite(matfp, matvar, compress);
+
+    //Deallocate temporary memory
+    Mat_VarFree(matvar);
+    Mat_Close(matfp);
+    delete [] a;
+    a = NULL;
+    return 1;
 #endif
 }
 

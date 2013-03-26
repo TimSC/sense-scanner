@@ -92,7 +92,7 @@ public:
     void RemovePoint(int index);
 
     void SaveAnnotationCsv(QString fileName);
-    void SaveAnnotationMatlab(QString fileName);
+    int SaveAnnotationMatlab(QString fileName);
     void SaveAnnotationMM(QString fileName);
 
     //Keep track of automatically labeled data
