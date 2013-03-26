@@ -1658,21 +1658,17 @@ void TrackingAnnotationData::SaveAnnotationExcel(QString fileName)
     QTextStream out(&f);
     out.setCodec("UTF-8");
 
-    /*std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    //Count valid frames and points
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    unsigned int numFrames = 0;
+    unsigned int numPoints = 0;
     for(it=this->pos.begin(); it!=this->pos.end(); it++)
     {
-        unsigned long long timestamp = it->first;
-        std::vector<std::vector<float> > &frame = it->second;
-        if (frame.size() == 0) continue;
-
-        out << timestamp << ",";
-        for(unsigned int ptNum = 0; ptNum < frame.size(); ptNum++)
-        {
-            std::vector<float> &pt = frame[ptNum];
-            out << pt[0] / 1000. << "," << pt[1] << ",";
-        }
-        out << endl;
-    }*/
+        if(it->second.size()==0) continue; //Skip empty frames
+        if(it->second.size() > numPoints)
+            numPoints = it->second.size();
+        numFrames++;
+    }
 
     out << "<?xml version=\"1.0\"?>" << endl;
     out << "<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"" << endl;
@@ -1681,16 +1677,33 @@ void TrackingAnnotationData::SaveAnnotationExcel(QString fileName)
     out << " xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\"" << endl;
     out << " xmlns:html=\"http://www.w3.org/TR/REC-html40\">" << endl;
     out << " <Worksheet ss:Name=\"Sheet1\">" << endl;
-    out << "  <Table ss:ExpandedColumnCount=\"2\" ss:ExpandedRowCount=\"2\" x:FullColumns=\"1\"" << endl;
+    out << "  <Table ss:ExpandedColumnCount=\""<<(numPoints*2+1)<< "\"";
+    out << "   ss:ExpandedRowCount=\""<<(numFrames+1)<<"\" x:FullColumns=\"1\"" << endl;
     out << "   x:FullRows=\"1\">" << endl;
     out << "   <Row>" << endl;
-    out << "    <Cell><Data ss:Type=\"String\">Name</Data></Cell>" << endl;
-    out << "    <Cell><Data ss:Type=\"String\">Example</Data></Cell>" << endl;
+    out << "    <Cell><Data ss:Type=\"String\">Timestamp</Data></Cell>" << endl;
+    for(unsigned int i=0;i<numPoints;i++)
+    {
+        out << "    <Cell><Data ss:Type=\"String\">"<<i<<"x</Data></Cell>" << endl;
+        out << "    <Cell><Data ss:Type=\"String\">"<<i<<"y</Data></Cell>" << endl;
+    }
     out << "   </Row>" << endl;
-    out << "   <Row>" << endl;
-    out << "    <Cell><Data ss:Type=\"String\">Value</Data></Cell>" << endl;
-    out << "    <Cell><Data ss:Type=\"Number\">123</Data></Cell>" << endl;
-    out << "   </Row>" << endl;
+
+    for(it=this->pos.begin(); it!=this->pos.end(); it++)
+    {
+        if(it->second.size()==0) continue; //Skip empty frames
+        unsigned long long timestamp = it->first;
+        std::vector<std::vector<float> > &frame = it->second;
+        out << "   <Row>" << endl;
+        out << "    <Cell><Data ss:Type=\"Number\">"<<(timestamp/1000.)<<"</Data></Cell>" << endl;
+        for(unsigned int i=0;i<frame.size();i++)
+        {
+            out << "    <Cell><Data ss:Type=\"Number\">"<<frame[i][0]<<"</Data></Cell>" << endl;
+            out << "    <Cell><Data ss:Type=\"Number\">"<<frame[i][1]<<"</Data></Cell>" << endl;
+        }
+        out << "   </Row>" << endl;
+    }
+
     out << "  </Table>" << endl;
     out << " </Worksheet>" << endl;
     out << "</Workbook>" << endl;
