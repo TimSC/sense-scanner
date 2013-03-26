@@ -119,7 +119,7 @@ public slots:
 
     void SaveAnnotationCsv();
     void SaveAnnotationMatlab();
-    void SaveAnnotationMM();
+    void SaveAnnotationExcel();
     void ExportAnnotation(QString type, QString ext);
 
     void SetAnnotationTrack(QUuid srcUuid);

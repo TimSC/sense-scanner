@@ -1114,8 +1114,8 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             this->parentAnn->track->SaveAnnotationCsv(ev->data);
         if(ev->buffer=="mat")
             this->parentAnn->track->SaveAnnotationMatlab(ev->data);
-        if(ev->buffer=="mm")
-            this->parentAnn->track->SaveAnnotationMM(ev->data);
+        if(ev->buffer=="xls")
+            this->parentAnn->track->SaveAnnotationExcel(ev->data);
         #endif
     }
 
@@ -1650,9 +1650,52 @@ int TrackingAnnotationData::SaveAnnotationMatlab(QString fileName)
 #endif
 }
 
-void TrackingAnnotationData::SaveAnnotationMM(QString fileName)
+void TrackingAnnotationData::SaveAnnotationExcel(QString fileName)
 {
 #ifndef DEMO_MODE
+    QFile f(fileName);
+    f.open( QIODevice::WriteOnly );
+    QTextStream out(&f);
+    out.setCodec("UTF-8");
 
+    /*std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it=this->pos.begin(); it!=this->pos.end(); it++)
+    {
+        unsigned long long timestamp = it->first;
+        std::vector<std::vector<float> > &frame = it->second;
+        if (frame.size() == 0) continue;
+
+        out << timestamp << ",";
+        for(unsigned int ptNum = 0; ptNum < frame.size(); ptNum++)
+        {
+            std::vector<float> &pt = frame[ptNum];
+            out << pt[0] / 1000. << "," << pt[1] << ",";
+        }
+        out << endl;
+    }*/
+
+    out << "<?xml version=\"1.0\"?>" << endl;
+    out << "<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"" << endl;
+    out << " xmlns:o=\"urn:schemas-microsoft-com:office:office\"" << endl;
+    out << " xmlns:x=\"urn:schemas-microsoft-com:office:excel\"" << endl;
+    out << " xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\"" << endl;
+    out << " xmlns:html=\"http://www.w3.org/TR/REC-html40\">" << endl;
+    out << " <Worksheet ss:Name=\"Sheet1\">" << endl;
+    out << "  <Table ss:ExpandedColumnCount=\"2\" ss:ExpandedRowCount=\"2\" x:FullColumns=\"1\"" << endl;
+    out << "   x:FullRows=\"1\">" << endl;
+    out << "   <Row>" << endl;
+    out << "    <Cell><Data ss:Type=\"String\">Name</Data></Cell>" << endl;
+    out << "    <Cell><Data ss:Type=\"String\">Example</Data></Cell>" << endl;
+    out << "   </Row>" << endl;
+    out << "   <Row>" << endl;
+    out << "    <Cell><Data ss:Type=\"String\">Value</Data></Cell>" << endl;
+    out << "    <Cell><Data ss:Type=\"Number\">123</Data></Cell>" << endl;
+    out << "   </Row>" << endl;
+    out << "  </Table>" << endl;
+    out << " </Worksheet>" << endl;
+    out << "</Workbook>" << endl;
+
+    out.flush();
+    f.close();
 #endif
 }

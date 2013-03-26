@@ -706,7 +706,7 @@ QMenu *TrackingSceneController::MenuFactory(QMenuBar *menuBar)
 
     QAction *saveAnnotationCsv = new QAction(tr("Export Annotation as CSV"), menuBar);
     QAction *saveAnnotationMatlab = new QAction(tr("Export Annotation for Matlab"), menuBar);
-    QAction *saveAnnotationMM = new QAction(tr("Export Annotation as Matrix Market"), menuBar);
+    QAction *saveAnnotationExcel = new QAction(tr("Export Annotation for Excel"), menuBar);
 
 #ifdef DEMO_MODE
     saveAnnotationCsv->setDisabled(1);
@@ -725,7 +725,7 @@ QMenu *TrackingSceneController::MenuFactory(QMenuBar *menuBar)
 
     newMenu->addAction(saveAnnotationCsv);
     newMenu->addAction(saveAnnotationMatlab);
-    newMenu->addAction(saveAnnotationMM);
+    newMenu->addAction(saveAnnotationExcel);
 
     QObject::connect(loadShape, SIGNAL(triggered()), this, SLOT(LoadShape()));
     QObject::connect(saveShape, SIGNAL(triggered()), this, SLOT(SaveShape()));
@@ -736,7 +736,7 @@ QMenu *TrackingSceneController::MenuFactory(QMenuBar *menuBar)
 
     QObject::connect(saveAnnotationCsv, SIGNAL(triggered()), this, SLOT(SaveAnnotationCsv()));
     QObject::connect(saveAnnotationMatlab, SIGNAL(triggered()), this, SLOT(SaveAnnotationMatlab()));
-    QObject::connect(saveAnnotationMM, SIGNAL(triggered()), this, SLOT(SaveAnnotationMM()));
+    QObject::connect(saveAnnotationExcel, SIGNAL(triggered()), this, SLOT(SaveAnnotationExcel()));
     return newMenu;
 }
 
@@ -1010,10 +1010,10 @@ void TrackingSceneController::SaveAnnotationMatlab()
 #endif
 }
 
-void TrackingSceneController::SaveAnnotationMM()
+void TrackingSceneController::SaveAnnotationExcel()
 {
 #ifndef DEMO_MODE
-    this->ExportAnnotation("Matrix Market","mm");
+    this->ExportAnnotation("Excel","xls");
 #endif
 }
 

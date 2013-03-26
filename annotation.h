@@ -93,7 +93,7 @@ public:
 
     void SaveAnnotationCsv(QString fileName);
     int SaveAnnotationMatlab(QString fileName);
-    void SaveAnnotationMM(QString fileName);
+    void SaveAnnotationExcel(QString fileName);
 
     //Keep track of automatically labeled data
     unsigned long long autoLabeledStart;
