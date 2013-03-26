@@ -1568,7 +1568,7 @@ void TrackingAnnotationData::SaveAnnotationCsv(QString fileName)
         for(unsigned int ptNum = 0; ptNum < frame.size(); ptNum++)
         {
             std::vector<float> &pt = frame[ptNum];
-            out << pt[0] << "," << pt[1] << ",";
+            out << pt[0] / 1000. << "," << pt[1] << ",";
         }
         out << endl;
     }
@@ -1583,7 +1583,6 @@ int TrackingAnnotationData::SaveAnnotationMatlab(QString fileName)
     if(this->pos.size()==0) return 0;
 
     mat_t    *matfp = NULL;
-    matvar_t *matvar = NULL;
 
     //Open output file for writing via matio
     matfp = Mat_Open(fileName.toLocal8Bit().constData(),MAT_ACC_RDWR);
@@ -1606,6 +1605,9 @@ int TrackingAnnotationData::SaveAnnotationMatlab(QString fileName)
     double *a = new double[numFrames*numPoints*2];
     for(unsigned int i=0;i<numFrames*numPoints*2;i++)
         a[i] = 0.;
+    double *ti = new double[numFrames];
+    for(unsigned int i=0;i<numFrames;i++)
+        ti[i] = 0.;
 
     //Copy positions into local array
     unsigned int countFrame = 0;
@@ -1624,6 +1626,7 @@ int TrackingAnnotationData::SaveAnnotationMatlab(QString fileName)
             a[indx] = frame[i][0];
             a[indy] = frame[i][1];
         }
+        ti[countFrame] = it->first / 1000.;
 
         countFrame ++;
     }
@@ -1631,8 +1634,12 @@ int TrackingAnnotationData::SaveAnnotationMatlab(QString fileName)
     //Write array to output file
     int dims[2] = {numFrames,numPoints*2};
     int compress = 0;
-    matvar = Mat_VarCreate("pos",MAT_C_DOUBLE,MAT_T_DOUBLE,2,dims,a,0);
+    matvar_t *matvar = Mat_VarCreate("pos",MAT_C_DOUBLE,MAT_T_DOUBLE,2,dims,a,0);
     Mat_VarWrite(matfp, matvar, compress);
+
+    int dimsTi[2] = {numFrames,1};
+    matvar_t *matvar2 = Mat_VarCreate("times",MAT_C_DOUBLE,MAT_T_DOUBLE,2,dimsTi,ti,0);
+    Mat_VarWrite(matfp, matvar2, compress);
 
     //Deallocate temporary memory
     Mat_VarFree(matvar);
