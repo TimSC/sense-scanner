@@ -1040,7 +1040,7 @@ void TrackingSceneController::ExportAnnotation(QString type, QString ext)
     std::tr1::shared_ptr<class Event> reqEv(new Event("EXPORT_ANNOTATION"));
     reqEv->toUuid = this->annotationUuid;
     reqEv->data = fileName;
-    reqEv->buffer = type.toLocal8Bit();
+    reqEv->buffer = ext.toLocal8Bit();
     reqEv->id = this->eventLoop->GetId();
     this->eventLoop->SendEvent(reqEv);
 #endif

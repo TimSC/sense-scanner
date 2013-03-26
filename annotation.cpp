@@ -1110,11 +1110,11 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type=="EXPORT_ANNOTATION")
     {
         #ifndef DEMO_MODE
-        if(ev->buffer=="CSV")
+        if(ev->buffer=="csv")
             this->parentAnn->track->SaveAnnotationCsv(ev->data);
-        if(ev->buffer=="CSV")
+        if(ev->buffer=="mat")
             this->parentAnn->track->SaveAnnotationMatlab(ev->data);
-        if(ev->buffer=="CSV")
+        if(ev->buffer=="mm")
             this->parentAnn->track->SaveAnnotationMM(ev->data);
         #endif
     }
