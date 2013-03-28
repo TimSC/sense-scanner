@@ -12,6 +12,7 @@
 #include "localmutex.h"
 #include "useractions.h"
 #include "applymodel.h"
+#include "version.h"
 
 namespace Ui {
 class MainWindow;
@@ -127,6 +128,7 @@ private:
     UserActions *userActions;
     QMap<QUuid, unsigned long long> predictionProgress;
     QMap<QString, unsigned long long> sourceDuration;
+    class Registration registration;
 
 public slots:
     void ImportVideo();

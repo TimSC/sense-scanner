@@ -273,6 +273,12 @@ MainWindow::MainWindow(QWidget *parent) :
     //this->resize(800,700);
     //this->ui->sourcesAlgGui->setMaximumSize(300,16777215);
     //this->ui->videoDock->resize(1000,1000);
+
+    int licenseOk = registration.ReadLicense();
+    std::map<std::string, std::string> verifiedInfo = registration.GetInfo();
+    if(verifiedInfo.find("licensee") != verifiedInfo.end())
+        cout << "Licensed to " << verifiedInfo["licensee"] << endl;
+
 }
 
 MainWindow::~MainWindow()
