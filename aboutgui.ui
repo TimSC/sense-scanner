@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>384</width>
+    <height>409</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,12 +15,23 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <widget class="QTextBrowser" name="licenseInfo">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>40</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="WebViewErrCheck" name="webView">
      <property name="url">
       <url>
        <string>about:blank</string>
       </url>
      </property>
+     <zorder>licenseInfo</zorder>
     </widget>
    </item>
   </layout>

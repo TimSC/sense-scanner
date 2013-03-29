@@ -10,6 +10,7 @@
 #include "localsleep.h"
 #include "scenecontroller.h"
 #include "version.h"
+#include "aboutgui.h"
 #include <QtGui/QFileDialog>
 #include <QtCore/QThread>
 #include <QtGui/QDialogButtonBox>
@@ -277,10 +278,23 @@ MainWindow::MainWindow(QWidget *parent) :
     int licenseOk = registration.ReadLicense();
     std::map<std::string, std::string> verifiedInfo = registration.GetInfo();
     if(verifiedInfo.find("licensee") != verifiedInfo.end())
-        cout << "Licensed to " << verifiedInfo["licensee"] << endl;
+    {
+        QString licenseeText = "Licensed to: ";
+        licenseeText.append(verifiedInfo["licensee"].c_str());
+        cout << qPrintable(licenseeText) << endl;
+        this->ui->aboutWidget->SetLicensee(licenseeText);
+    }
+    if(licenseOk == 0)
+    {
+        this->ui->aboutWidget->SetLicensee("Demonstration Mode");
+    }
+    if(licenseOk == -1)
+    {
+        this->ui->aboutWidget->SetLicensee("Invalid key file");
+    }
+
     this->demoMode = (licenseOk<=0);
     this->workspace->SetDemoMode(this->demoMode);
-
 }
 
 MainWindow::~MainWindow()

@@ -7,11 +7,19 @@ AboutGui::AboutGui(QWidget *parent) :
     ui(new Ui::AboutGui)
 {
     ui->setupUi(this);
+    this->licensee = tr("test");
+    this->ui->licenseInfo->setText(this->licensee);
 }
 
 AboutGui::~AboutGui()
 {
     delete ui;
+}
+
+void AboutGui::SetLicensee(QString text)
+{
+    this->licensee = text;
+    this->ui->licenseInfo->setText(this->licensee);
 }
 
 //***********************************
