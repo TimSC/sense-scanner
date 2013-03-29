@@ -118,7 +118,8 @@ Registration::~Registration()
 int Registration::ReadLicense()
 {
     QFile fi("xmllicense.xml");
-    fi.open(QIODevice::ReadOnly);
+    int ret = fi.open(QIODevice::ReadOnly);
+    if(ret==false) return 0;
     QDomDocument doc("mydocument");
     QString errorMsg;
     QString fiStr = fi.readAll();
@@ -188,8 +189,8 @@ int Registration::ReadLicense()
     //Check licensee information
     int infoOk = VerifyLicense(infoStr, infosig.toLocal8Bit().constData(), key.toLocal8Bit().constData());
     int keyOk = VerifyLicense(key.toLocal8Bit().constData(), keysig.toLocal8Bit().constData(), this->masterPubKey);
-    if(!infoOk) return 0;
-    if(!keyOk) return 0;
+    if(!infoOk) return -1;
+    if(!keyOk) return -2;
     this->verifiedInfo = info;
     return 1;
 }
