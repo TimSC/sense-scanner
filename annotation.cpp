@@ -765,6 +765,7 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("SET_AUTO_LABEL_RANGE", *this->eventReceiver);
 
     this->eventLoop->AddListener("EXPORT_ANNOTATION", *this->eventReceiver);
+    this->eventLoop->AddListener("SET_DEMO_MODE", *this->eventReceiver);
 }
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
@@ -1121,6 +1122,12 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             this->parentAnn->track->SaveAnnotationExcel(ev->data);
     }
 
+    }
+
+    //This message is not specifically addressed but should be processed
+    if(ev->type=="SET_DEMO_MODE")
+    {
+        this->demoMode = ev->data.toInt();
     }
 
     this->msleep(5);

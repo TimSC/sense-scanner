@@ -15,6 +15,7 @@ Workspace::Workspace(int activeIn, QObject *parentIn) : MessagableThread()
     this->ClearProcessing();
     this->eventLoop = NULL;
     this->eventReceiver = NULL;
+    this->demoMode = 1;
 }
 
 Workspace::Workspace(int activeIn, QObject *parentIn, const Workspace &other) : MessagableThread()
@@ -117,6 +118,10 @@ unsigned int Workspace::AddSource(QUuid uuid)
 
     std::tr1::shared_ptr<class Event> changeEv(new Event("WORKSPACE_ANNOTATION_CHANGED"));
     this->eventLoop->SendEvent(changeEv);
+
+    std::tr1::shared_ptr<class Event> demoEv(new Event("SET_DEMO_MODE"));
+    demoEv->data = QString::number(this->demoMode);
+    this->eventLoop->SendEvent(demoEv);
 
     return out;
 }
@@ -553,4 +558,9 @@ int Workspace::IsReadyForSave()
     }
     this->lock.unlock();
     return 1;
+}
+
+void Workspace::SetDemoMode(int mode)
+{
+    this->demoMode = mode;
 }

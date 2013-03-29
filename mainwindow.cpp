@@ -278,6 +278,8 @@ MainWindow::MainWindow(QWidget *parent) :
     std::map<std::string, std::string> verifiedInfo = registration.GetInfo();
     if(verifiedInfo.find("licensee") != verifiedInfo.end())
         cout << "Licensed to " << verifiedInfo["licensee"] << endl;
+    this->demoMode = (licenseOk<=0);
+    this->workspace->SetDemoMode(this->demoMode);
 
 }
 
@@ -956,6 +958,10 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
     sceneController->SetEventLoop(this->eventLoop);
     this->ui->videoWidget->SetSceneControl(sceneController);
     this->ui->videoWidget->SetAnnotationTrack(annotationUuids[selectedRow]);
+
+    //Set demo mode as needed
+    sceneController->SetDemoMode(this->demoMode);
+
     //Update window menus
     assert(sceneController!=NULL);
     this->annotationMenu = sceneController->MenuFactory(this->menuBar());
@@ -966,7 +972,7 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
 
     if(ret<=0)
     {
-        cout << "Errr opening file," << fina.toLocal8Bit().constData() << endl;
+        cout << "Err opening file," << fina.toLocal8Bit().constData() << endl;
         if(this->errMsg == NULL)
             this->errMsg = new QMessageBox(this);
         QString errMsgStr = QString("%1 %2").arg(errorDesc).arg(fina);
@@ -1272,13 +1278,4 @@ void MainWindow::RemoveProcessing(QUuid uid,
     removeEv->data = uid.toString();
     removeEv->id = eventLoop->GetId();
     eventLoop->SendEvent(removeEv);
-}
-
-//**********************************
-
-std::map<std::string, std::string> MainWindow::GetRegistrationInfo(class EventLoop *eventLoop,
-                                                                   class EventReceiver *eventReceiver)
-{
-
-
 }

@@ -130,6 +130,8 @@ public slots:
     void RefreshCurrentPos();
     void RefreshLinks();
     void Update();
+    void SetDemoMode(int mode);
+
 protected:
 
     int GetAnnotationBetweenTimestamps(unsigned long long startTime,
@@ -170,6 +172,10 @@ protected:
 
     QUuid annotationUuid;
     int demoMode;
+
+    QAction *saveAnnotationCsv;
+    QAction *saveAnnotationMatlab;
+    QAction *saveAnnotationExcel;
 };
 
 

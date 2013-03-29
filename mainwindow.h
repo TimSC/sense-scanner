@@ -129,6 +129,7 @@ private:
     QMap<QUuid, unsigned long long> predictionProgress;
     QMap<QString, unsigned long long> sourceDuration;
     class Registration registration;
+    int demoMode;
 
 public slots:
     void ImportVideo();
@@ -162,9 +163,6 @@ public slots:
 
     void ShowSourcesPressed();
     void FitVideoToWindow();
-
-    static std::map<std::string, std::string> GetRegistrationInfo(class EventLoop *eventLoop,
-                                                                  class EventReceiver *eventReceiver);
 
 protected:
     void resizeEvent(QResizeEvent * event);

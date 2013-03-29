@@ -66,6 +66,7 @@ public:
     QList<QUuid> GetAnnotationUuidsFromMain();
 
     int IsReadyForSave();
+    void SetDemoMode(int mode);
 
 protected:
     unsigned int AddSource(QUuid uuid);
@@ -95,6 +96,7 @@ protected:
     int active;
     QObject *parent;
     ApplyModelPool applyModelPool;
+    int demoMode;
 };
 
 #endif // WORKSPACE_H

@@ -168,6 +168,9 @@ TrackingSceneController::TrackingSceneController(QObject *parent) : BaseSceneCon
     this->mousex = 0.f;
     this->mousey = 0.f;
     this->markFrameButton = NULL;
+    this->saveAnnotationCsv = NULL;
+    this->saveAnnotationMatlab = NULL;
+    this->saveAnnotationExcel = NULL;
 
     this->annotationControls = NULL;
     this->eventLoop = NULL;
@@ -1112,6 +1115,17 @@ void TrackingSceneController::Update()
     {
         flushEvents = 0;
     }
+}
+
+void TrackingSceneController::SetDemoMode(int mode)
+{
+    this->demoMode = mode;
+    if(this->saveAnnotationCsv != NULL)
+        this->saveAnnotationCsv->setDisabled(mode);
+    if(this->saveAnnotationMatlab != NULL)
+        this->saveAnnotationMatlab->setDisabled(mode);
+    if(this->saveAnnotationExcel != NULL)
+        this->saveAnnotationExcel->setDisabled(mode);
 }
 
 //*****************************************************************************
