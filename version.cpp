@@ -119,13 +119,14 @@ int Registration::ReadLicense()
 {
     QDomDocument doc("mydocument");
     QString errorMsg;
+    assert(this->settings != NULL);
     /*QFile fi("xmllicense.xml");
     int ret = fi.open(QIODevice::ReadOnly);
     if(ret==false) return 0;
 
     QString fiStr = fi.readAll();
 
-    assert(this->settings != NULL);
+
     this->settings->setValue("license", fiStr);*/
     QString fiStr = this->settings->value("license", "").toString();
 
