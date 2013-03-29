@@ -1223,10 +1223,19 @@ void MainWindow::RegisterPressed()
       tr("Select License Key File"), "", tr("License Key Files (*.xml)"));
     if(fileName.length() == 0) return;
 
-    this->registration.SetLicenseFromFile(fileName);
+    int ret = this->registration.SetLicenseFromFile(fileName);
 
     this->UpdateRegisterationState();
     this->ui->aboutDock->show();
+
+    if(ret > 0)
+    {
+        if(this->errMsg == NULL)
+            this->errMsg = new QMessageBox(this);
+        this->errMsg->setWindowTitle("License Accepted");
+        this->errMsg->setText("Please restart sense scanner for the new license to take effect.");
+        this->errMsg->exec();
+    }
 
 }
 
