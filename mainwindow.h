@@ -7,6 +7,7 @@
 #include <QtGui/QGraphicsScene>
 #include <QtCore/QThread>
 #include <QtCore/QTimer>
+#include <QtCore/QSettings>
 #include "avbinmedia.h"
 #include "workspace.h"
 #include "localmutex.h"
@@ -130,6 +131,7 @@ private:
     QMap<QString, unsigned long long> sourceDuration;
     class Registration registration;
     int demoMode;
+    QSettings *settings;
 
 public slots:
     void ImportVideo();

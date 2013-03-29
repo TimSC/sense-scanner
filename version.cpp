@@ -105,7 +105,7 @@ Registration::Registration()
             "J377T0x/9ZdJBP7nEz4lIkHqJ4Fgu/3HUUDRx0KA+RUrelfaVfqFxpOm8forbVBzvUffiSM7"
             "ZdnP1nMqU5AzVC+RQtfIq/qc69YPOUuFEbWbubu/lQIBEQ==";
 
-
+    this->settings = NULL;
 
 }
 
@@ -117,12 +117,18 @@ Registration::~Registration()
 
 int Registration::ReadLicense()
 {
-    QFile fi("xmllicense.xml");
-    int ret = fi.open(QIODevice::ReadOnly);
-    if(ret==false) return 0;
     QDomDocument doc("mydocument");
     QString errorMsg;
+    /*QFile fi("xmllicense.xml");
+    int ret = fi.open(QIODevice::ReadOnly);
+    if(ret==false) return 0;
+
     QString fiStr = fi.readAll();
+
+    assert(this->settings != NULL);
+    this->settings->setValue("license", fiStr);*/
+    QString fiStr = this->settings->value("license", "").toString();
+
     if (!doc.setContent(fiStr, &errorMsg))
     {
         cout << "Xml Error: "<< errorMsg.toLocal8Bit().constData() << endl;

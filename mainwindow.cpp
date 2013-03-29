@@ -158,6 +158,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->annotationMenu = NULL;
     this->errMsg = NULL;
     this->avbinVerChecked = 0;
+    this->settings = new QSettings("kinatomic","sense-scanner", this);
+    this->registration.settings = this->settings;
 
     //Set the window icon
     QIcon windowIcon("icons/Kinatomic-Icon50.png");
@@ -328,6 +330,9 @@ MainWindow::~MainWindow()
 
 	delete this->eventLoop;
     this->eventLoop = NULL;
+
+    delete this->settings;
+    this->settings = NULL;
 
     delete ui;
 }
