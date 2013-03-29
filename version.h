@@ -18,6 +18,9 @@ public:
     virtual ~Registration();
 
     int ReadLicense();
+    int ReadLicense(QString fiStr);
+    int SetLicenseFromFile(QString filename);
+
     std::map<std::string, std::string> GetInfo();
 
     QSettings *settings;

@@ -1235,6 +1235,18 @@ void MainWindow::AboutPressed()
     this->ui->aboutDock->show();
 }
 
+void MainWindow::RegisterPressed()
+{
+    //Get filename from user
+    QString fileName = QFileDialog::getOpenFileName(this,
+      tr("Select License Key File"), "", tr("License Key Files (*.xml)"));
+    if(fileName.length() == 0) return;
+
+    this->registration.SetLicenseFromFile(fileName);
+
+    this->ui->aboutDock->show();
+}
+
 void MainWindow::ShowSourcesPressed()
 {
     this->ui->sourcesAlgDock->show();

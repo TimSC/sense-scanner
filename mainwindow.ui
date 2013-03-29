@@ -33,7 +33,7 @@
      <x>0</x>
      <y>0</y>
      <width>699</width>
-     <height>23</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -63,6 +63,7 @@
     <addaction name="actionKinatomic_Home_Page"/>
     <addaction name="separator"/>
     <addaction name="actionAbout"/>
+    <addaction name="actionRegister"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuVideo"/>
@@ -156,6 +157,11 @@
   <action name="actionShow_Sources">
    <property name="text">
     <string>Show Sources</string>
+   </property>
+  </action>
+  <action name="actionRegister">
+   <property name="text">
+    <string>Register</string>
    </property>
   </action>
   <zorder>aboutDock</zorder>
@@ -363,6 +369,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionRegister</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>RegisterPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>349</x>
+     <y>247</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>ImportVideo()</slot>
@@ -383,5 +405,6 @@
   <slot>GetSupport()</slot>
   <slot>GetKinatomicHomePage()</slot>
   <slot>FitVideoToWindow()</slot>
+  <slot>RegisterPressed()</slot>
  </slots>
 </ui>

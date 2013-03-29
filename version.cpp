@@ -117,18 +117,15 @@ Registration::~Registration()
 
 int Registration::ReadLicense()
 {
+    assert(this->settings != NULL);
+    QString fiStr = this->settings->value("license", "").toString();
+    return this->ReadLicense(fiStr);
+}
+
+int Registration::ReadLicense(QString fiStr)
+{
     QDomDocument doc("mydocument");
     QString errorMsg;
-    assert(this->settings != NULL);
-    /*QFile fi("xmllicense.xml");
-    int ret = fi.open(QIODevice::ReadOnly);
-    if(ret==false) return 0;
-
-    QString fiStr = fi.readAll();
-
-
-    this->settings->setValue("license", fiStr);*/
-    QString fiStr = this->settings->value("license", "").toString();
 
     if (!doc.setContent(fiStr, &errorMsg))
     {
@@ -200,6 +197,21 @@ int Registration::ReadLicense()
     if(!keyOk) return -2;
     this->verifiedInfo = info;
     return 1;
+}
+
+int Registration::SetLicenseFromFile(QString filename)
+{
+    QFile fi(filename);
+    int ret = fi.open(QIODevice::ReadOnly);
+    if(ret==false) return 0;
+    QString fiStr = fi.readAll();
+
+    int ret2 = this->ReadLicense(fiStr);
+
+    if(1) //ret2 > 0
+        this->settings->setValue("license", fiStr);
+
+    return ret2;
 }
 
 std::map<string, string> Registration::GetInfo()
