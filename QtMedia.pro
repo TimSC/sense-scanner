@@ -24,7 +24,6 @@ SOURCES += main.cpp\
     workspace.cpp \
     algorithm.cpp \
     annotation.cpp \
-    qblowfish/src/qblowfish.cpp \
     sourcealggui.cpp \
     aboutgui.cpp \
     useractions.cpp \
