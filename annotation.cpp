@@ -7,10 +7,14 @@
 #include <assert.h>
 #include <iostream>
 using namespace std;
-#include "qblowfish/src/qblowfish.h"
 #include "scenecontroller.h"
 #include "version.h"
 #include <matio.h>
+#include <crypto++/aes.h>
+#include <crypto++/modes.h>
+#include <crypto++/osrng.h>
+#include <crypto++/ripemd.h>
+using namespace CryptoPP;
 
 #define TO_MILLISEC(x) (unsigned long long)(x / 1000. + 0.5)
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
@@ -306,11 +310,21 @@ void TrackingAnnotationData::ReadDemoFramesXml(QDomElement &elem)
     QByteArray encData = QByteArray::fromBase64(content.toLocal8Bit().constData());
     int test3 = encData.length();
 
-    QByteArray secretKey(SECRET_KEY);
-    QBlowfish bf(secretKey);
-    bf.setPaddingEnabled(true);
+    QByteArray iv = encData.left(AES::BLOCKSIZE);
+    QByteArray encXml = encData.mid(AES::BLOCKSIZE);
+    int testx = encXml.length();
 
-    QByteArray encryptedBa = bf.decrypted(encData);
+    //Hash the pass phrase to create 128 bit key
+    string hashedPass;
+    RIPEMD128 hash;
+    StringSource(SECRET_KEY, true, new HashFilter(hash, new StringSink(hashedPass)));
+
+    //Decrypt xml
+    byte tmpBuff[encXml.length()];
+    CFB_Mode<AES>::Decryption cfbDecryption((const unsigned char*)hashedPass.c_str(), hashedPass.length(), (byte *)iv.constData());
+    cfbDecryption.ProcessData(tmpBuff, (byte *)encXml.constData(), encXml.length());
+    QByteArray encryptedBa((char *)tmpBuff, encXml.length());
+
     QString framesXml = QString::fromUtf8(encryptedBa);
 
     QDomDocument doc("mydocument");
@@ -386,11 +400,28 @@ void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out, int demoMode)
     else
     {
         out << "<demoframe>" << endl;
-        QByteArray secretKey(SECRET_KEY);
 
-        QBlowfish bf(secretKey);
-        bf.setPaddingEnabled(true);
-        QByteArray encryptedBa = bf.encrypted(frameXmlStr.toUtf8());
+        //Hash the pass phrase to create 128 bit key
+        string hashedPass;
+        RIPEMD128 hash;
+        StringSource(SECRET_KEY, true, new HashFilter(hash, new StringSink(hashedPass)));
+
+        // Generate a random IV
+        AutoSeededRandomPool rng;
+        byte iv[AES::BLOCKSIZE];
+        rng.GenerateBlock(iv, AES::BLOCKSIZE);
+
+        //Encrypt xml
+        QByteArray frameXmlStrUtf8 = frameXmlStr.toUtf8();
+        CFB_Mode<AES>::Encryption cfbEncryption((const unsigned char*)hashedPass.c_str(), hashedPass.length(), iv);
+        byte encPrivKey[frameXmlStrUtf8.length()];
+        cfbEncryption.ProcessData(encPrivKey, (const byte*)frameXmlStrUtf8.constData(), frameXmlStrUtf8.length());
+        QByteArray encryptedXml((char *)encPrivKey, frameXmlStrUtf8.length());
+
+        int testx = encryptedXml.length();
+        QByteArray encryptedBa((char *)iv, AES::BLOCKSIZE);
+        encryptedBa.append(encryptedXml);
+
         QByteArray encBase64 = encryptedBa.toBase64();
         for(int pos=0;pos<encBase64.length();pos+=512)
             out << encBase64.mid(pos,512) << endl;
