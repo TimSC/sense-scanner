@@ -277,26 +277,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //this->ui->sourcesAlgGui->setMaximumSize(300,16777215);
     //this->ui->videoDock->resize(1000,1000);
 
-    int licenseOk = registration.ReadLicense();
-    std::map<std::string, std::string> verifiedInfo = registration.GetInfo();
-    if(verifiedInfo.find("licensee") != verifiedInfo.end())
-    {
-        QString licenseeText = "Licensed to: ";
-        licenseeText.append(verifiedInfo["licensee"].c_str());
-        cout << qPrintable(licenseeText) << endl;
-        this->ui->aboutWidget->SetLicensee(licenseeText);
-    }
-    if(licenseOk == 0)
-    {
-        this->ui->aboutWidget->SetLicensee("Demonstration Mode");
-    }
-    if(licenseOk == -1)
-    {
-        this->ui->aboutWidget->SetLicensee("Invalid key file");
-    }
-
-    this->demoMode = (licenseOk<=0);
-    this->workspace->SetDemoMode(this->demoMode);
+    this->UpdateRegisterationState();
 }
 
 MainWindow::~MainWindow()
@@ -1244,7 +1225,34 @@ void MainWindow::RegisterPressed()
 
     this->registration.SetLicenseFromFile(fileName);
 
+    this->UpdateRegisterationState();
     this->ui->aboutDock->show();
+
+}
+
+void MainWindow::UpdateRegisterationState()
+{
+    int licenseOk = this->registration.ReadLicense();
+    std::map<std::string, std::string> verifiedInfo = this->registration.GetInfo();
+    if(verifiedInfo.find("licensee") != verifiedInfo.end())
+    {
+        QString licenseeText = "Licensed to: ";
+        licenseeText.append(verifiedInfo["licensee"].c_str());
+        cout << qPrintable(licenseeText) << endl;
+        this->ui->aboutWidget->SetLicensee(licenseeText);
+    }
+    if(licenseOk == 0)
+        this->ui->aboutWidget->SetLicensee("Demonstration Mode");
+    if(licenseOk == -1)
+        this->ui->aboutWidget->SetLicensee("Invalid key file (info)");
+    if(licenseOk == -2)
+        this->ui->aboutWidget->SetLicensee("Invalid key file (key)");
+    if(licenseOk == -3)
+        this->ui->aboutWidget->SetLicensee("Error parsing license key file");
+
+    this->demoMode = (licenseOk<=0);
+    this->workspace->SetDemoMode(this->demoMode);
+
 }
 
 void MainWindow::ShowSourcesPressed()

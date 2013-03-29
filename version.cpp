@@ -191,8 +191,17 @@ int Registration::ReadLicense(QString fiStr)
     }
 
     //Check licensee information
-    int infoOk = VerifyLicense(infoStr, infosig.toLocal8Bit().constData(), key.toLocal8Bit().constData());
-    int keyOk = VerifyLicense(key.toLocal8Bit().constData(), keysig.toLocal8Bit().constData(), this->masterPubKey);
+    int infoOk = 0, keyOk = 0;
+    try
+    {
+        infoOk = VerifyLicense(infoStr, infosig.toLocal8Bit().constData(), key.toLocal8Bit().constData());
+        keyOk = VerifyLicense(key.toLocal8Bit().constData(), keysig.toLocal8Bit().constData(), this->masterPubKey);
+    }
+    catch(Exception err)
+    {
+        return -3;
+    }
+
     if(!infoOk) return -1;
     if(!keyOk) return -2;
     this->verifiedInfo = info;

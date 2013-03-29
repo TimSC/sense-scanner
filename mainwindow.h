@@ -166,6 +166,7 @@ public slots:
 
     void ShowSourcesPressed();
     void FitVideoToWindow();
+    void UpdateRegisterationState();
 
 protected:
     void resizeEvent(QResizeEvent * event);
