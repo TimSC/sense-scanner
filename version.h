@@ -9,7 +9,6 @@
 #define VERSION_URL "post-v1beta3"
 
 //#define RELEASE_MODE
-//#define DEMO_MODE
 
 class Registration
 {

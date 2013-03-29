@@ -151,6 +151,7 @@ void BaseSceneController::Redraw()
 
 TrackingSceneController::TrackingSceneController(QObject *parent) : BaseSceneController(parent)
 {
+    this->demoMode = 1;
     this->mode = "MOVE";
     this->mouseOver = false;
     this->frameStartTime = 0;
@@ -708,11 +709,12 @@ QMenu *TrackingSceneController::MenuFactory(QMenuBar *menuBar)
     QAction *saveAnnotationMatlab = new QAction(tr("Export Annotation for Matlab"), menuBar);
     QAction *saveAnnotationExcel = new QAction(tr("Export Annotation for Excel"), menuBar);
 
-#ifdef DEMO_MODE
-    saveAnnotationCsv->setDisabled(1);
-    saveAnnotationMatlab->setDisabled(1);
-    saveAnnotationMM->setDisabled(1);
-#endif //DEMO_MODE
+    if(this->demoMode)
+    {
+        saveAnnotationCsv->setDisabled(1);
+        saveAnnotationMatlab->setDisabled(1);
+        saveAnnotationExcel->setDisabled(1);
+    }
 
     QMenu *newMenu = menuBar->addMenu(tr("&Annotate"));
     newMenu->addAction(loadShape);

@@ -169,6 +169,7 @@ protected:
     QWidget *annotationControls;
 
     QUuid annotationUuid;
+    int demoMode;
 };
 
 

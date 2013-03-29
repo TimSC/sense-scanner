@@ -3,6 +3,7 @@
 #include "avbinmedia.h"
 #include "localsleep.h"
 #include "videowidget.h"
+#include "mainwindow.h"
 #include <assert.h>
 #include <iostream>
 using namespace std;
@@ -358,7 +359,7 @@ int TrackingAnnotationData::FrameFromXml(QString &xml,
     return 1;
 }
 
-void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out)
+void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out, int demoMode)
 {
     out << "\t<tracking>" << endl;
     this->WriteShapeToStream(this->links, this->shape, out);
@@ -378,23 +379,25 @@ void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out)
     }
     frameXml << "\t</frameset>" << endl;
 
-#ifndef DEMO_MODE
-    out << frameXmlStr;
-#else
-    out << "<demoframe>" << endl;
-    QByteArray secretKey(SECRET_KEY);
+    if(!demoMode)
+    {
+        out << frameXmlStr;
+    }
+    else
+    {
+        out << "<demoframe>" << endl;
+        QByteArray secretKey(SECRET_KEY);
 
-    QBlowfish bf(secretKey);
-    bf.setPaddingEnabled(true);
-    QByteArray encryptedBa = bf.encrypted(frameXmlStr.toUtf8());
-    QByteArray encBase64 = encryptedBa.toBase64();
-    for(int pos=0;pos<encBase64.length();pos+=512)
-        out << encBase64.mid(pos,512) << endl;
-    //out << encBase64 << endl;
+        QBlowfish bf(secretKey);
+        bf.setPaddingEnabled(true);
+        QByteArray encryptedBa = bf.encrypted(frameXmlStr.toUtf8());
+        QByteArray encBase64 = encryptedBa.toBase64();
+        for(int pos=0;pos<encBase64.length();pos+=512)
+            out << encBase64.mid(pos,512) << endl;
+        //out << encBase64 << endl;
 
-    out << "</demoframe>" << endl;
-
-#endif //DEMO_MODE
+        out << "</demoframe>" << endl;
+    }
 
     //Save frame start and end times
     out << "\t<available to=\""<< this->frameTimesEnd << "\">" << endl;
@@ -717,6 +720,7 @@ AnnotThread::AnnotThread(class Annotation *annIn) : MessagableThread()
     this->parentAnn = annIn;
     this->frameTimesEnd = 0;
     this->frameTimesSet = false;
+    this->demoMode = 1;
 }
 
 AnnotThread::~AnnotThread()
@@ -976,7 +980,7 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     {
         QString xml;
         QTextStream xmlStr(&xml);
-        this->parentAnn->track->WriteAnnotationXml(xmlStr);
+        this->parentAnn->track->WriteAnnotationXml(xmlStr, demoMode);
 
         std::tr1::shared_ptr<class Event> responseEv(new Event("ANNOTATION_DATA"));
         responseEv->fromUuid = this->parentAnn->GetAnnotUid();
@@ -1109,14 +1113,12 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     }
     if(ev->type=="EXPORT_ANNOTATION")
     {
-        #ifndef DEMO_MODE
-        if(ev->buffer=="csv")
+        if(!this->demoMode && ev->buffer=="csv")
             this->parentAnn->track->SaveAnnotationCsv(ev->data);
-        if(ev->buffer=="mat")
+        if(!this->demoMode && ev->buffer=="mat")
             this->parentAnn->track->SaveAnnotationMatlab(ev->data);
-        if(ev->buffer=="xls")
+        if(!this->demoMode && ev->buffer=="xls")
             this->parentAnn->track->SaveAnnotationExcel(ev->data);
-        #endif
     }
 
     }
@@ -1712,3 +1714,4 @@ void TrackingAnnotationData::SaveAnnotationExcel(QString fileName)
     f.close();
 #endif
 }
+

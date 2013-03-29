@@ -58,7 +58,7 @@ public:
                              double &tiOut);
 
     void ReadAnnotationXml(QDomElement &elem);
-    void WriteAnnotationXml(QTextStream &out);
+    void WriteAnnotationXml(QTextStream &out, int demoMode);
     void ReadFramesXml(QDomElement &elem);
     void ReadDemoFramesXml(QDomElement &elem);
 
@@ -148,6 +148,7 @@ protected:
     std::map<unsigned long, unsigned long> frameTimes;
     unsigned long frameTimesEnd;
     bool frameTimesSet;
+    int demoMode;
 };
 
 class Annotation

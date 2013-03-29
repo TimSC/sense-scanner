@@ -163,6 +163,9 @@ public slots:
     void ShowSourcesPressed();
     void FitVideoToWindow();
 
+    static std::map<std::string, std::string> GetRegistrationInfo(class EventLoop *eventLoop,
+                                                                  class EventReceiver *eventReceiver);
+
 protected:
     void resizeEvent(QResizeEvent * event);
 };

@@ -1276,4 +1276,9 @@ void MainWindow::RemoveProcessing(QUuid uid,
 
 //**********************************
 
+std::map<std::string, std::string> MainWindow::GetRegistrationInfo(class EventLoop *eventLoop,
+                                                                   class EventReceiver *eventReceiver)
+{
 
+
+}
