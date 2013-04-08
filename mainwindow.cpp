@@ -1259,9 +1259,32 @@ void MainWindow::UpdateRegisterationState()
     if(licenseOk == -3)
         this->ui->aboutWidget->SetLicensee("Error parsing license key file");
 
-    this->demoMode = (licenseOk<=0);
-    this->workspace->SetDemoMode(this->demoMode);
+    if(licenseOk<=0)
+    {
+        this->demoMode = 1;
+        this->workspace->SetDemoMode(this->demoMode);
+        return;
+    }
 
+    //Check the specific function is enabled
+    this->demoMode = 1;
+    int train=0, predict = 0;
+    if(verifiedInfo.find("functions") != verifiedInfo.end())
+    {
+        std::vector<std::string> funcs = split(verifiedInfo["functions"].c_str(),',');
+        for(unsigned int i=0; i < funcs.size(); i++)
+        {
+            QString funcStr(funcs[i].c_str());
+            if(funcStr.trimmed() == "relative-tracking-train")
+                train = 1;
+            if(funcStr.trimmed() == "relative-tracking-predict")
+                predict = 1;
+            if(train && predict)
+                this->demoMode = 0;
+        }
+
+    }
+    this->workspace->SetDemoMode(this->demoMode);
 }
 
 void MainWindow::ShowSourcesPressed()
