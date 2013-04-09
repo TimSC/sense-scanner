@@ -57,9 +57,6 @@
     <ClCompile Include="..\moc_scenecontroller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\qblowfish\src\qblowfish.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\algorithm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

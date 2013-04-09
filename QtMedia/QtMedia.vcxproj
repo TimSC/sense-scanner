@@ -87,7 +87,6 @@
     <ClCompile Include="..\moc_sourcealggui.cpp" />
     <ClCompile Include="..\moc_videowidget.cpp" />
     <ClCompile Include="..\moc_workspace.cpp" />
-    <ClCompile Include="..\qblowfish\src\qblowfish.cpp" />
     <ClCompile Include="..\scenecontroller.cpp" />
     <ClCompile Include="..\shapegui.cpp" />
     <ClCompile Include="..\sourcealggui.cpp" />
