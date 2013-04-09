@@ -37,8 +37,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Dev\Lib;C:\Dev\Lib\matio-1.5.1\src;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Dev\Lib\crypto++\Win32\Output\Release;C:\Dev\Lib\matio-1.5.1\visual_studio\Release;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Dev\Lib\matio-1.5.1\visual_studio;C:\Dev\Lib;C:\Dev\Lib\matio-1.5.1\src;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Dev\Lib\crypto++\Win32\Output\Debug;C:\Dev\Lib\matio-1.5.1\visual_studio\Release;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>C:\Dev\Lib\matio-1.5.1\visual_studio;C:\Dev\Lib;C:\Dev\Lib\matio-1.5.1\src;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include</IncludePath>
+    <LibraryPath>C:\Dev\Lib\crypto++\Win32\Output\Release;C:\Dev\Lib\matio-1.5.1\visual_studio\Release;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -66,7 +70,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>QtGui4.lib;QtCore4.lib;QtWebKit4.lib;QtXml4.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>QtGui4.lib;QtCore4.lib;QtWebKit4.lib;QtXml4.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;cryptlib.lib;libmatio.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Dev\Lib\Qt\4.8.3\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
