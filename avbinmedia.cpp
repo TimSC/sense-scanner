@@ -141,6 +141,7 @@ int AvBinMedia::OpenFile(QString fina)
     this->eventLoop->SendEvent(openEv);
 
     std::tr1::shared_ptr<class Event> ev = this->eventReceiver->WaitForEventId(evid);
+    assert(ev->type=="AVBIN_OPEN_RESULT");
     return ev->data.toInt();
 }
 
@@ -171,6 +172,12 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         return;
     }
 
+    if(ev->type == "AVBIN_OPEN_RESULT")
+    {
+
+
+    }
+
     if(ev->type == "AVBIN_FRAME_RESPONSE")
     {
         //Ignore this event
@@ -190,7 +197,21 @@ void AvBinMedia::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     if(ev->type == "GET_MEDIA_DURATION")
     {
         if(ev->data != this->currentFina)
+        try
+        {
             this->ChangeVidSource(ev->data);
+        }
+        catch(std::runtime_error err)
+        {
+            //Failure in changing source, return error
+            std::tr1::shared_ptr<class Event> responseEv(new Event("MEDIA_DURATION_RESPONSE"));
+            responseEv->toUuid = ev->fromUuid;
+            responseEv->fromUuid = this->uuid;
+            responseEv->id = ev->id;
+            responseEv->buffer = this->currentFina.toUtf8();
+            responseEv->data = "FAILED";
+            this->eventLoop->SendEvent(responseEv);
+        }
 
         std::tr1::shared_ptr<class Event> requestEv(new Event("AVBIN_GET_DURATION"));
         requestEv->toUuid = this->uuid;
@@ -327,8 +348,10 @@ void AvBinMedia::ChangeVidSource(QString fina)
     int ret = this->OpenFile(fina.toLocal8Bit().constData());
     this->currentFina = fina;
     if(ret==0)
+    {
+        this->currentFina = "";
         throw std::runtime_error("Error opening file");
-
+    }
 }
 
 QUuid AvBinMedia::GetUuid()
@@ -352,6 +375,11 @@ unsigned long long AvBinMedia::GetMediaDuration(QString fina,
 
     std::tr1::shared_ptr<class Event> response = eventReceiver->WaitForEventId(requestEv->id);
     assert(response->type == "MEDIA_DURATION_RESPONSE");
+    if(response->data == "FAILED")
+    {
+        throw std::runtime_error("Could not determine duration");
+    }
+
     unsigned long long out = response->data.toULongLong();
     return out;
 

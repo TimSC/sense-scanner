@@ -16,9 +16,12 @@ class AboutGui : public QWidget
 public:
     explicit AboutGui(QWidget *parent = 0);
     ~AboutGui();
+
+    void SetLicensee(QString text);
     
 private:
     Ui::AboutGui *ui;
+    QString licensee;
 };
 
 class WebViewErrCheck : public QWebView

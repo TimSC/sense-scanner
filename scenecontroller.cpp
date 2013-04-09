@@ -151,6 +151,7 @@ void BaseSceneController::Redraw()
 
 TrackingSceneController::TrackingSceneController(QObject *parent) : BaseSceneController(parent)
 {
+    this->demoMode = 1;
     this->mode = "MOVE";
     this->mouseOver = false;
     this->frameStartTime = 0;
@@ -167,6 +168,9 @@ TrackingSceneController::TrackingSceneController(QObject *parent) : BaseSceneCon
     this->mousex = 0.f;
     this->mousey = 0.f;
     this->markFrameButton = NULL;
+    this->saveAnnotationCsv = NULL;
+    this->saveAnnotationMatlab = NULL;
+    this->saveAnnotationExcel = NULL;
 
     this->annotationControls = NULL;
     this->eventLoop = NULL;
@@ -701,8 +705,19 @@ QMenu *TrackingSceneController::MenuFactory(QMenuBar *menuBar)
     QAction *setShape = new QAction(tr("Set Shape from &Current Frame"), menuBar);
     QAction *resetShape = new QAction(tr("&Reset Shape"), menuBar);
 
-    QAction *loadAnnotation = new QAction(tr("L&oad Annotation"), menuBar);
-    QAction *saveAnnotation = new QAction(tr("S&ave Annotation"), menuBar);
+    QAction *loadAnnotation = new QAction(tr("L&oad Annotation (XML)"), menuBar);
+    QAction *saveAnnotation = new QAction(tr("S&ave Annotation (XML)"), menuBar);
+
+    QAction *saveAnnotationCsv = new QAction(tr("Export Annotation as CSV"), menuBar);
+    QAction *saveAnnotationMatlab = new QAction(tr("Export Annotation for Matlab"), menuBar);
+    QAction *saveAnnotationExcel = new QAction(tr("Export Annotation for Excel"), menuBar);
+
+    if(this->demoMode)
+    {
+        saveAnnotationCsv->setDisabled(1);
+        saveAnnotationMatlab->setDisabled(1);
+        saveAnnotationExcel->setDisabled(1);
+    }
 
     QMenu *newMenu = menuBar->addMenu(tr("&Annotate"));
     newMenu->addAction(loadShape);
@@ -713,6 +728,10 @@ QMenu *TrackingSceneController::MenuFactory(QMenuBar *menuBar)
     newMenu->addAction(loadAnnotation);
     newMenu->addAction(saveAnnotation);
 
+    newMenu->addAction(saveAnnotationCsv);
+    newMenu->addAction(saveAnnotationMatlab);
+    newMenu->addAction(saveAnnotationExcel);
+
     QObject::connect(loadShape, SIGNAL(triggered()), this, SLOT(LoadShape()));
     QObject::connect(saveShape, SIGNAL(triggered()), this, SLOT(SaveShape()));
     QObject::connect(setShape, SIGNAL(triggered()), this, SLOT(SetShapeFromCurentFrame()));
@@ -720,6 +739,9 @@ QMenu *TrackingSceneController::MenuFactory(QMenuBar *menuBar)
     QObject::connect(loadAnnotation, SIGNAL(triggered()), this, SLOT(LoadAnnotation()));
     QObject::connect(saveAnnotation, SIGNAL(triggered()), this, SLOT(SaveAnnotation()));
 
+    QObject::connect(saveAnnotationCsv, SIGNAL(triggered()), this, SLOT(SaveAnnotationCsv()));
+    QObject::connect(saveAnnotationMatlab, SIGNAL(triggered()), this, SLOT(SaveAnnotationMatlab()));
+    QObject::connect(saveAnnotationExcel, SIGNAL(triggered()), this, SLOT(SaveAnnotationExcel()));
     return newMenu;
 }
 
@@ -821,6 +843,8 @@ void TrackingSceneController::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("ANNOTATION_DATA",*eventReceiver);
     this->eventLoop->AddListener("SEEK_RESULT",*eventReceiver);
     this->eventLoop->AddListener("STOP_THREADS",*eventReceiver);
+    this->eventLoop->AddListener("SET_ANNOTATION_DONE",*eventReceiver);
+
 }
 
 void TrackingSceneController::SetAnnotationTrack(QUuid srcUuid)
@@ -935,10 +959,19 @@ void TrackingSceneController::LoadAnnotation()
     inFile.open(QIODevice::ReadOnly | QIODevice::Text);
     QTextStream fileStream(&inFile);
 
+    //Set annotation data
     std::tr1::shared_ptr<class Event> reqEv(new Event("SET_ANNOTATION_BY_XML"));
     reqEv->toUuid = this->annotationUuid;
     reqEv->data = fileStream.readAll();
+    reqEv->id = this->eventLoop->GetId();
     this->eventLoop->SendEvent(reqEv);
+
+    //Wait for this to complete
+    std::tr1::shared_ptr<class Event> response = this->eventReceiver->WaitForEventId(reqEv->id);
+    assert(response->type=="SET_ANNOTATION_DONE");
+
+    //Read back current shape from annotation
+    this->RefreshLinks();
 }
 
 void TrackingSceneController::SaveAnnotation()
@@ -966,6 +999,56 @@ void TrackingSceneController::SaveAnnotation()
     QTextStream fileStream(&outFile);
     fileStream << xml.toUtf8().constData();
     fileStream.flush();
+}
+
+void TrackingSceneController::SaveAnnotationCsv()
+{
+#ifndef DEMO_MODE
+    this->ExportAnnotation("CSV","csv");
+#endif
+}
+
+void TrackingSceneController::SaveAnnotationMatlab()
+{
+#ifndef DEMO_MODE
+    this->ExportAnnotation("Matlab","mat");
+#endif
+}
+
+void TrackingSceneController::SaveAnnotationExcel()
+{
+#ifndef DEMO_MODE
+    this->ExportAnnotation("Excel","xls");
+#endif
+}
+
+void TrackingSceneController::ExportAnnotation(QString type, QString ext)
+{
+#ifndef DEMO_MODE
+    //Get output filename from user
+    QString fileName = QFileDialog::getSaveFileName(0,
+                                                    QString("Save Annotation Track as %1").arg(type),
+                                                    "",
+                                                    QString("%1 (*.%2)").arg(type).arg(ext));
+    if(fileName.length() == 0) return;
+
+    //If no file extension is set, use .csv as the extension
+    QFileInfo fi(fileName);
+    QString csuffix = fi.completeSuffix();
+    if(csuffix.size()==0)
+    {
+        fileName.append(".");
+        fileName.append(ext);
+    }
+
+    //Trigger export
+    std::tr1::shared_ptr<class Event> reqEv(new Event("EXPORT_ANNOTATION"));
+    reqEv->toUuid = this->annotationUuid;
+    reqEv->data = fileName;
+    reqEv->buffer = ext.toLocal8Bit();
+    reqEv->id = this->eventLoop->GetId();
+    this->eventLoop->SendEvent(reqEv);
+#endif
 }
 
 void TrackingSceneController::SaveShape()
@@ -1032,6 +1115,17 @@ void TrackingSceneController::Update()
     {
         flushEvents = 0;
     }
+}
+
+void TrackingSceneController::SetDemoMode(int mode)
+{
+    this->demoMode = mode;
+    if(this->saveAnnotationCsv != NULL)
+        this->saveAnnotationCsv->setDisabled(mode);
+    if(this->saveAnnotationMatlab != NULL)
+        this->saveAnnotationMatlab->setDisabled(mode);
+    if(this->saveAnnotationExcel != NULL)
+        this->saveAnnotationExcel->setDisabled(mode);
 }
 
 //*****************************************************************************

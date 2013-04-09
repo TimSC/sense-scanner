@@ -58,7 +58,7 @@ public:
                              double &tiOut);
 
     void ReadAnnotationXml(QDomElement &elem);
-    void WriteAnnotationXml(QTextStream &out);
+    void WriteAnnotationXml(QTextStream &out, int demoMode);
     void ReadFramesXml(QDomElement &elem);
     void ReadDemoFramesXml(QDomElement &elem);
 
@@ -90,6 +90,10 @@ public:
     unsigned long long GetSeekForwardTime(unsigned long long queryTime);
     unsigned long long GetSeekBackTime(unsigned long long queryTime);
     void RemovePoint(int index);
+
+    void SaveAnnotationCsv(QString fileName);
+    int SaveAnnotationMatlab(QString fileName);
+    void SaveAnnotationExcel(QString fileName);
 
     //Keep track of automatically labeled data
     unsigned long long autoLabeledStart;
@@ -144,6 +148,7 @@ protected:
     std::map<unsigned long, unsigned long> frameTimes;
     unsigned long frameTimesEnd;
     bool frameTimesSet;
+    int demoMode;
 };
 
 class Annotation

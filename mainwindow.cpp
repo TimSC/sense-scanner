@@ -10,6 +10,7 @@
 #include "localsleep.h"
 #include "scenecontroller.h"
 #include "version.h"
+#include "aboutgui.h"
 #include <QtGui/QFileDialog>
 #include <QtCore/QThread>
 #include <QtGui/QDialogButtonBox>
@@ -157,6 +158,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->annotationMenu = NULL;
     this->errMsg = NULL;
     this->avbinVerChecked = 0;
+    this->settings = new QSettings("kinatomic","sense-scanner", this);
+    this->registration.settings = this->settings;
 
     //Set the window icon
     QIcon windowIcon("icons/Kinatomic-Icon50.png");
@@ -227,7 +230,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     QString titleStr = QString("Kinatomic Sense Scanner %1").arg(VERSION_STR);
     this->setWindowTitle(titleStr);
-    this->ui->videoWidget->SetSource(this->mediaInterfaceFront->GetUuid(),"");
+    QString errorDesc;
+    this->ui->videoWidget->SetSource(this->mediaInterfaceFront->GetUuid(),"",errorDesc);
 
     QStringList horLabelsAnn;
     horLabelsAnn.push_back("Sources");
@@ -272,6 +276,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //this->resize(800,700);
     //this->ui->sourcesAlgGui->setMaximumSize(300,16777215);
     //this->ui->videoDock->resize(1000,1000);
+
+    this->UpdateRegisterationState();
 }
 
 MainWindow::~MainWindow()
@@ -305,6 +311,9 @@ MainWindow::~MainWindow()
 
 	delete this->eventLoop;
     this->eventLoop = NULL;
+
+    delete this->settings;
+    this->settings = NULL;
 
     delete ui;
 }
@@ -373,7 +382,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
     //Disconnect video widget from media source
     cout << "Disconnect video from source" << endl;
     QUuid nullSrc;
-    this->ui->videoWidget->SetSource(nullSrc,"");
+    QString errorDesc;
+    this->ui->videoWidget->SetSource(nullSrc,"",errorDesc);
 
     //Signal worker threads to stop
     cout << "Signal worker threads to stop" << endl;
@@ -948,21 +958,24 @@ void MainWindow::SelectedSourceChanged(int selectedRow)
     sceneController->SetEventLoop(this->eventLoop);
     this->ui->videoWidget->SetSceneControl(sceneController);
     this->ui->videoWidget->SetAnnotationTrack(annotationUuids[selectedRow]);
+
+    //Set demo mode as needed
+    sceneController->SetDemoMode(this->demoMode);
+
     //Update window menus
     assert(sceneController!=NULL);
     this->annotationMenu = sceneController->MenuFactory(this->menuBar());
 
     //Set widget to use this source
-    try
+    QString errorDesc;
+    int ret = this->ui->videoWidget->SetSource(this->mediaInterfaceFront->GetUuid(), fina, errorDesc);
+
+    if(ret<=0)
     {
-        this->ui->videoWidget->SetSource(this->mediaInterfaceFront->GetUuid(), fina);
-    }
-    catch(std::runtime_error &err)
-    {
-        cout << err.what() << "," << fina.toLocal8Bit().constData() << endl;
+        cout << "Err opening file," << fina.toLocal8Bit().constData() << endl;
         if(this->errMsg == NULL)
             this->errMsg = new QMessageBox(this);
-        QString errMsgStr = QString("Could not open %1").arg(fina);
+        QString errMsgStr = QString("%1 %2").arg(errorDesc).arg(fina);
         this->errMsg->setWindowTitle("Error opening video");
         this->errMsg->setText(errMsgStr);
         this->errMsg->exec();
@@ -1203,6 +1216,77 @@ void MainWindow::AboutPressed()
     this->ui->aboutDock->show();
 }
 
+void MainWindow::RegisterPressed()
+{
+    //Get filename from user
+    QString fileName = QFileDialog::getOpenFileName(this,
+      tr("Select License Key File"), "", tr("License Key Files (*.xml)"));
+    if(fileName.length() == 0) return;
+
+    int ret = this->registration.SetLicenseFromFile(fileName);
+
+    this->UpdateRegisterationState();
+    this->ui->aboutDock->show();
+
+    if(ret > 0)
+    {
+        if(this->errMsg == NULL)
+            this->errMsg = new QMessageBox(this);
+        this->errMsg->setWindowTitle("License Accepted");
+        this->errMsg->setText("Please restart sense scanner for the new license to take effect.");
+        this->errMsg->exec();
+    }
+
+}
+
+void MainWindow::UpdateRegisterationState()
+{
+    int licenseOk = this->registration.ReadLicense();
+    std::map<std::string, std::string> verifiedInfo = this->registration.GetInfo();
+    if(verifiedInfo.find("licensee") != verifiedInfo.end())
+    {
+        QString licenseeText = "Licensed to: ";
+        licenseeText.append(verifiedInfo["licensee"].c_str());
+        cout << qPrintable(licenseeText) << endl;
+        this->ui->aboutWidget->SetLicensee(licenseeText);
+    }
+    if(licenseOk == 0)
+        this->ui->aboutWidget->SetLicensee("Demonstration Mode");
+    if(licenseOk == -1)
+        this->ui->aboutWidget->SetLicensee("Invalid key file (info)");
+    if(licenseOk == -2)
+        this->ui->aboutWidget->SetLicensee("Invalid key file (key)");
+    if(licenseOk == -3)
+        this->ui->aboutWidget->SetLicensee("Error parsing license key file");
+
+    if(licenseOk<=0)
+    {
+        this->demoMode = 1;
+        this->workspace->SetDemoMode(this->demoMode);
+        return;
+    }
+
+    //Check the specific function is enabled
+    this->demoMode = 1;
+    int train=0, predict = 0;
+    if(verifiedInfo.find("functions") != verifiedInfo.end())
+    {
+        std::vector<std::string> funcs = split(verifiedInfo["functions"].c_str(),',');
+        for(unsigned int i=0; i < funcs.size(); i++)
+        {
+            QString funcStr(funcs[i].c_str());
+            if(funcStr.trimmed() == "relative-tracking-train")
+                train = 1;
+            if(funcStr.trimmed() == "relative-tracking-predict")
+                predict = 1;
+            if(train && predict)
+                this->demoMode = 0;
+        }
+
+    }
+    this->workspace->SetDemoMode(this->demoMode);
+}
+
 void MainWindow::ShowSourcesPressed()
 {
     this->ui->sourcesAlgDock->show();
@@ -1266,7 +1350,3 @@ void MainWindow::RemoveProcessing(QUuid uid,
     removeEv->id = eventLoop->GetId();
     eventLoop->SendEvent(removeEv);
 }
-
-//**********************************
-
-

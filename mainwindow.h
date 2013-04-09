@@ -7,11 +7,13 @@
 #include <QtGui/QGraphicsScene>
 #include <QtCore/QThread>
 #include <QtCore/QTimer>
+#include <QtCore/QSettings>
 #include "avbinmedia.h"
 #include "workspace.h"
 #include "localmutex.h"
 #include "useractions.h"
 #include "applymodel.h"
+#include "version.h"
 
 namespace Ui {
 class MainWindow;
@@ -127,6 +129,9 @@ private:
     UserActions *userActions;
     QMap<QUuid, unsigned long long> predictionProgress;
     QMap<QString, unsigned long long> sourceDuration;
+    class Registration registration;
+    int demoMode;
+    QSettings *settings;
 
 public slots:
     void ImportVideo();
@@ -157,9 +162,11 @@ public slots:
     void GetSupport();
     void GetKinatomicHomePage();
     void AboutPressed();
+    void RegisterPressed();
 
     void ShowSourcesPressed();
     void FitVideoToWindow();
+    void UpdateRegisterationState();
 
 protected:
     void resizeEvent(QResizeEvent * event);

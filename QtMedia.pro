@@ -24,12 +24,12 @@ SOURCES += main.cpp\
     workspace.cpp \
     algorithm.cpp \
     annotation.cpp \
-    qblowfish/src/qblowfish.cpp \
     sourcealggui.cpp \
     aboutgui.cpp \
     useractions.cpp \
     applymodel.cpp \
-    shapegui.cpp
+    shapegui.cpp \
+    version.cpp
 
 HEADERS  += mainwindow.h \
     videowidget.h \
@@ -66,3 +66,5 @@ RESOURCES +=
 #unix|win32: LIBS += -lvlc
 unix|win32: LIBS += -lavbin
 unix|win32: LIBS += -lpthread
+unix|win32: LIBS += -lmatio
+unix|win32: LIBS += -lcrypto++

@@ -3,12 +3,18 @@
 #include "avbinmedia.h"
 #include "localsleep.h"
 #include "videowidget.h"
+#include "mainwindow.h"
 #include <assert.h>
 #include <iostream>
 using namespace std;
-#include "qblowfish/src/qblowfish.h"
 #include "scenecontroller.h"
 #include "version.h"
+#include <matio.h>
+#include <crypto++/aes.h>
+#include <crypto++/modes.h>
+#include <crypto++/osrng.h>
+#include <crypto++/ripemd.h>
+using namespace CryptoPP;
 
 #define TO_MILLISEC(x) (unsigned long long)(x / 1000. + 0.5)
 #define ROUND_TIMESTAMP(x) (unsigned long long)(x+0.5)
@@ -304,11 +310,21 @@ void TrackingAnnotationData::ReadDemoFramesXml(QDomElement &elem)
     QByteArray encData = QByteArray::fromBase64(content.toLocal8Bit().constData());
     int test3 = encData.length();
 
-    QByteArray secretKey(SECRET_KEY);
-    QBlowfish bf(secretKey);
-    bf.setPaddingEnabled(true);
+    QByteArray iv = encData.left(AES::BLOCKSIZE);
+    QByteArray encXml = encData.mid(AES::BLOCKSIZE);
+    int testx = encXml.length();
 
-    QByteArray encryptedBa = bf.decrypted(encData);
+    //Hash the pass phrase to create 128 bit key
+    string hashedPass;
+    RIPEMD128 hash;
+    StringSource(SECRET_KEY, true, new HashFilter(hash, new StringSink(hashedPass)));
+
+    //Decrypt xml
+    byte tmpBuff[encXml.length()];
+    CFB_Mode<AES>::Decryption cfbDecryption((const unsigned char*)hashedPass.c_str(), hashedPass.length(), (byte *)iv.constData());
+    cfbDecryption.ProcessData(tmpBuff, (byte *)encXml.constData(), encXml.length());
+    QByteArray encryptedBa((char *)tmpBuff, encXml.length());
+
     QString framesXml = QString::fromUtf8(encryptedBa);
 
     QDomDocument doc("mydocument");
@@ -357,7 +373,7 @@ int TrackingAnnotationData::FrameFromXml(QString &xml,
     return 1;
 }
 
-void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out)
+void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out, int demoMode)
 {
     out << "\t<tracking>" << endl;
     this->WriteShapeToStream(this->links, this->shape, out);
@@ -377,23 +393,42 @@ void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out)
     }
     frameXml << "\t</frameset>" << endl;
 
-#ifndef DEMO_MODE
-    out << frameXmlStr;
-#else
-    out << "<demoframe>" << endl;
-    QByteArray secretKey(SECRET_KEY);
+    if(!demoMode)
+    {
+        out << frameXmlStr;
+    }
+    else
+    {
+        out << "<demoframe>" << endl;
 
-    QBlowfish bf(secretKey);
-    bf.setPaddingEnabled(true);
-    QByteArray encryptedBa = bf.encrypted(frameXmlStr.toUtf8());
-    QByteArray encBase64 = encryptedBa.toBase64();
-    for(int pos=0;pos<encBase64.length();pos+=512)
-        out << encBase64.mid(pos,512) << endl;
-    //out << encBase64 << endl;
+        //Hash the pass phrase to create 128 bit key
+        string hashedPass;
+        RIPEMD128 hash;
+        StringSource(SECRET_KEY, true, new HashFilter(hash, new StringSink(hashedPass)));
 
-    out << "</demoframe>" << endl;
+        // Generate a random IV
+        AutoSeededRandomPool rng;
+        byte iv[AES::BLOCKSIZE];
+        rng.GenerateBlock(iv, AES::BLOCKSIZE);
 
-#endif //DEMO_MODE
+        //Encrypt xml
+        QByteArray frameXmlStrUtf8 = frameXmlStr.toUtf8();
+        CFB_Mode<AES>::Encryption cfbEncryption((const unsigned char*)hashedPass.c_str(), hashedPass.length(), iv);
+        byte encPrivKey[frameXmlStrUtf8.length()];
+        cfbEncryption.ProcessData(encPrivKey, (const byte*)frameXmlStrUtf8.constData(), frameXmlStrUtf8.length());
+        QByteArray encryptedXml((char *)encPrivKey, frameXmlStrUtf8.length());
+
+        int testx = encryptedXml.length();
+        QByteArray encryptedBa((char *)iv, AES::BLOCKSIZE);
+        encryptedBa.append(encryptedXml);
+
+        QByteArray encBase64 = encryptedBa.toBase64();
+        for(int pos=0;pos<encBase64.length();pos+=512)
+            out << encBase64.mid(pos,512) << endl;
+        //out << encBase64 << endl;
+
+        out << "</demoframe>" << endl;
+    }
 
     //Save frame start and end times
     out << "\t<available to=\""<< this->frameTimesEnd << "\">" << endl;
@@ -716,6 +751,7 @@ AnnotThread::AnnotThread(class Annotation *annIn) : MessagableThread()
     this->parentAnn = annIn;
     this->frameTimesEnd = 0;
     this->frameTimesSet = false;
+    this->demoMode = 1;
 }
 
 AnnotThread::~AnnotThread()
@@ -758,6 +794,9 @@ void AnnotThread::SetEventLoop(class EventLoop *eventLoopIn)
     this->eventLoop->AddListener("GET_AUTO_LABELED_END", *this->eventReceiver);
     this->eventLoop->AddListener("FOUND_FRAME", *this->eventReceiver);
     this->eventLoop->AddListener("SET_AUTO_LABEL_RANGE", *this->eventReceiver);
+
+    this->eventLoop->AddListener("EXPORT_ANNOTATION", *this->eventReceiver);
+    this->eventLoop->AddListener("SET_DEMO_MODE", *this->eventReceiver);
 }
 
 void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
@@ -973,7 +1012,7 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
     {
         QString xml;
         QTextStream xmlStr(&xml);
-        this->parentAnn->track->WriteAnnotationXml(xmlStr);
+        this->parentAnn->track->WriteAnnotationXml(xmlStr, demoMode);
 
         std::tr1::shared_ptr<class Event> responseEv(new Event("ANNOTATION_DATA"));
         responseEv->fromUuid = this->parentAnn->GetAnnotUid();
@@ -995,6 +1034,15 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         //Load points and links into memory
         QDomElement rootElem = doc.documentElement();
         this->parentAnn->track->ReadAnnotationXml(rootElem);
+
+        //Signal that this is complete
+        if(ev->id>0)
+        {
+            std::tr1::shared_ptr<class Event> responseEv(new Event("SET_ANNOTATION_DONE"));
+            responseEv->id = ev->id;
+            this->eventLoop->SendEvent(responseEv);
+        }
+
     }
     if(ev->type=="GET_SEEK_BACKWARD_TIME")
     {
@@ -1095,7 +1143,22 @@ void AnnotThread::HandleEvent(std::tr1::shared_ptr<class Event> ev)
         assert(this->parentAnn->track!=NULL);
         this->parentAnn->track->RemovePoint(index);
     }
+    if(ev->type=="EXPORT_ANNOTATION")
+    {
+        if(!this->demoMode && ev->buffer=="csv")
+            this->parentAnn->track->SaveAnnotationCsv(ev->data);
+        if(!this->demoMode && ev->buffer=="mat")
+            this->parentAnn->track->SaveAnnotationMatlab(ev->data);
+        if(!this->demoMode && ev->buffer=="xls")
+            this->parentAnn->track->SaveAnnotationExcel(ev->data);
+    }
 
+    }
+
+    //This message is not specifically addressed but should be processed
+    if(ev->type=="SET_DEMO_MODE")
+    {
+        this->demoMode = ev->data.toInt();
     }
 
     this->msleep(5);
@@ -1525,3 +1588,168 @@ void Annotation::SetShape(QUuid annotUuid,
     if(rx==0)
         throw std::runtime_error("No uuid receiver found for message");
 }
+
+void TrackingAnnotationData::SaveAnnotationCsv(QString fileName)
+{
+#ifndef DEMO_MODE
+    QFile f(fileName);
+    f.open( QIODevice::WriteOnly );
+    QTextStream out(&f);
+    out.setCodec("Latin-1");
+
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it=this->pos.begin(); it!=this->pos.end(); it++)
+    {
+        unsigned long long timestamp = it->first;
+        std::vector<std::vector<float> > &frame = it->second;
+        if (frame.size() == 0) continue;
+
+        out << timestamp << ",";
+        for(unsigned int ptNum = 0; ptNum < frame.size(); ptNum++)
+        {
+            std::vector<float> &pt = frame[ptNum];
+            out << pt[0] / 1000. << "," << pt[1] << ",";
+        }
+        out << endl;
+    }
+    out.flush();
+    f.close();
+#endif
+}
+
+int TrackingAnnotationData::SaveAnnotationMatlab(QString fileName)
+{
+#ifndef DEMO_MODE
+    if(this->pos.size()==0) return 0;
+
+    mat_t    *matfp = NULL;
+
+    //Open output file for writing via matio
+    matfp = Mat_Open(fileName.toLocal8Bit().constData(),MAT_ACC_RDWR);
+    if ( NULL == matfp ) {
+        cout << "Error opening MAT file" << qPrintable(fileName) << endl;
+        return 0;
+    }
+
+    //Allocate array in fortran format and initialise to zero
+    unsigned int numFrames = 0;
+    unsigned int numPoints = 0;
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    for(it=this->pos.begin(); it!=this->pos.end(); it++)
+    {
+        if(it->second.size()==0) continue; //Skip empty frames
+        if(it->second.size() > numPoints)
+            numPoints = it->second.size();
+        numFrames++;
+    }
+    double *a = new double[numFrames*numPoints*2];
+    for(unsigned int i=0;i<numFrames*numPoints*2;i++)
+        a[i] = 0.;
+    double *ti = new double[numFrames];
+    for(unsigned int i=0;i<numFrames;i++)
+        ti[i] = 0.;
+
+    //Copy positions into local array
+    unsigned int countFrame = 0;
+    for(it=this->pos.begin(); it!=this->pos.end(); it++)
+    {
+        if(it->second.size()==0) continue; //Skip empty frames
+        unsigned long long timestamp = it->first;
+        std::vector<std::vector<float> > &frame = it->second;
+        for(unsigned int i=0;i<frame.size();i++)
+        {
+            unsigned int indx=0, indy=0;
+            indx = countFrame + numFrames * 2 * i;
+            indy = countFrame + numFrames * ((2 * i) + 1);
+            assert(indx >= 0 && indx < numFrames*numPoints*2);
+            assert(indy >= 0 && indy < numFrames*numPoints*2);
+            a[indx] = frame[i][0];
+            a[indy] = frame[i][1];
+        }
+        ti[countFrame] = it->first / 1000.;
+
+        countFrame ++;
+    }
+
+    //Write array to output file
+    int dims[2] = {numFrames,numPoints*2};
+    int compress = 0;
+    matvar_t *matvar = Mat_VarCreate("pos",MAT_C_DOUBLE,MAT_T_DOUBLE,2,dims,a,0);
+    Mat_VarWrite(matfp, matvar, compress);
+
+    int dimsTi[2] = {numFrames,1};
+    matvar_t *matvar2 = Mat_VarCreate("times",MAT_C_DOUBLE,MAT_T_DOUBLE,2,dimsTi,ti,0);
+    Mat_VarWrite(matfp, matvar2, compress);
+
+    //Deallocate temporary memory
+    Mat_VarFree(matvar);
+    Mat_Close(matfp);
+    delete [] a;
+    a = NULL;
+    return 1;
+#endif
+}
+
+void TrackingAnnotationData::SaveAnnotationExcel(QString fileName)
+{
+#ifndef DEMO_MODE
+    QFile f(fileName);
+    f.open( QIODevice::WriteOnly );
+    QTextStream out(&f);
+    out.setCodec("UTF-8");
+
+    //Count valid frames and points
+    std::map<unsigned long long, std::vector<std::vector<float> > >::iterator it;
+    unsigned int numFrames = 0;
+    unsigned int numPoints = 0;
+    for(it=this->pos.begin(); it!=this->pos.end(); it++)
+    {
+        if(it->second.size()==0) continue; //Skip empty frames
+        if(it->second.size() > numPoints)
+            numPoints = it->second.size();
+        numFrames++;
+    }
+
+    out << "<?xml version=\"1.0\"?>" << endl;
+    out << "<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"" << endl;
+    out << " xmlns:o=\"urn:schemas-microsoft-com:office:office\"" << endl;
+    out << " xmlns:x=\"urn:schemas-microsoft-com:office:excel\"" << endl;
+    out << " xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\"" << endl;
+    out << " xmlns:html=\"http://www.w3.org/TR/REC-html40\">" << endl;
+    out << " <Worksheet ss:Name=\"Sheet1\">" << endl;
+    out << "  <Table ss:ExpandedColumnCount=\""<<(numPoints*2+1)<< "\"";
+    out << "   ss:ExpandedRowCount=\""<<(numFrames+1)<<"\" x:FullColumns=\"1\"" << endl;
+    out << "   x:FullRows=\"1\">" << endl;
+    out << "   <Row>" << endl;
+    out << "    <Cell><Data ss:Type=\"String\">Timestamp</Data></Cell>" << endl;
+    for(unsigned int i=0;i<numPoints;i++)
+    {
+        out << "    <Cell><Data ss:Type=\"String\">"<<i<<"x</Data></Cell>" << endl;
+        out << "    <Cell><Data ss:Type=\"String\">"<<i<<"y</Data></Cell>" << endl;
+    }
+    out << "   </Row>" << endl;
+
+    for(it=this->pos.begin(); it!=this->pos.end(); it++)
+    {
+        if(it->second.size()==0) continue; //Skip empty frames
+        unsigned long long timestamp = it->first;
+        std::vector<std::vector<float> > &frame = it->second;
+        out << "   <Row>" << endl;
+        out << "    <Cell><Data ss:Type=\"Number\">"<<(timestamp/1000.)<<"</Data></Cell>" << endl;
+        for(unsigned int i=0;i<frame.size();i++)
+        {
+            out << "    <Cell><Data ss:Type=\"Number\">"<<frame[i][0]<<"</Data></Cell>" << endl;
+            out << "    <Cell><Data ss:Type=\"Number\">"<<frame[i][1]<<"</Data></Cell>" << endl;
+        }
+        out << "   </Row>" << endl;
+    }
+
+    out << "  </Table>" << endl;
+    out << " </Worksheet>" << endl;
+    out << "</Workbook>" << endl;
+
+    out.flush();
+    f.close();
+#endif
+}
+

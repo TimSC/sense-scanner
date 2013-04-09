@@ -117,6 +117,11 @@ public slots:
     void LoadAnnotation();
     void SaveAnnotation();
 
+    void SaveAnnotationCsv();
+    void SaveAnnotationMatlab();
+    void SaveAnnotationExcel();
+    void ExportAnnotation(QString type, QString ext);
+
     void SetAnnotationTrack(QUuid srcUuid);
 
     void SetEventLoop(class EventLoop *eventLoopIn);
@@ -125,6 +130,8 @@ public slots:
     void RefreshCurrentPos();
     void RefreshLinks();
     void Update();
+    void SetDemoMode(int mode);
+
 protected:
 
     int GetAnnotationBetweenTimestamps(unsigned long long startTime,
@@ -164,6 +171,11 @@ protected:
     QWidget *annotationControls;
 
     QUuid annotationUuid;
+    int demoMode;
+
+    QAction *saveAnnotationCsv;
+    QAction *saveAnnotationMatlab;
+    QAction *saveAnnotationExcel;
 };
 
 
