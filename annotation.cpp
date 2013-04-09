@@ -320,10 +320,11 @@ void TrackingAnnotationData::ReadDemoFramesXml(QDomElement &elem)
     StringSource(SECRET_KEY, true, new HashFilter(hash, new StringSink(hashedPass)));
 
     //Decrypt xml
-    byte tmpBuff[encXml.length()];
+    byte *tmpBuff = new byte[encXml.length()];
     CFB_Mode<AES>::Decryption cfbDecryption((const unsigned char*)hashedPass.c_str(), hashedPass.length(), (byte *)iv.constData());
     cfbDecryption.ProcessData(tmpBuff, (byte *)encXml.constData(), encXml.length());
     QByteArray encryptedBa((char *)tmpBuff, encXml.length());
+	delete [] tmpBuff;
 
     QString framesXml = QString::fromUtf8(encryptedBa);
 
@@ -414,9 +415,10 @@ void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out, int demoMode)
         //Encrypt xml
         QByteArray frameXmlStrUtf8 = frameXmlStr.toUtf8();
         CFB_Mode<AES>::Encryption cfbEncryption((const unsigned char*)hashedPass.c_str(), hashedPass.length(), iv);
-        byte encPrivKey[frameXmlStrUtf8.length()];
+        byte *encPrivKey = new byte[frameXmlStrUtf8.length()];
         cfbEncryption.ProcessData(encPrivKey, (const byte*)frameXmlStrUtf8.constData(), frameXmlStrUtf8.length());
         QByteArray encryptedXml((char *)encPrivKey, frameXmlStrUtf8.length());
+		delete [] encPrivKey;
 
         int testx = encryptedXml.length();
         QByteArray encryptedBa((char *)iv, AES::BLOCKSIZE);
@@ -1672,12 +1674,12 @@ int TrackingAnnotationData::SaveAnnotationMatlab(QString fileName)
     }
 
     //Write array to output file
-    int dims[2] = {numFrames,numPoints*2};
-    int compress = 0;
+    size_t dims[2] = {numFrames,numPoints*2};
+    matio_compression compress = MAT_COMPRESSION_NONE;
     matvar_t *matvar = Mat_VarCreate("pos",MAT_C_DOUBLE,MAT_T_DOUBLE,2,dims,a,0);
     Mat_VarWrite(matfp, matvar, compress);
 
-    int dimsTi[2] = {numFrames,1};
+    size_t dimsTi[2] = {numFrames,1};
     matvar_t *matvar2 = Mat_VarCreate("times",MAT_C_DOUBLE,MAT_T_DOUBLE,2,dimsTi,ti,0);
     Mat_VarWrite(matfp, matvar2, compress);
 

@@ -36,7 +36,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>C:\Dev\Lib;C:\Dev\Lib\matio-1.5.1\src;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Dev\Lib\crypto++\Win32\Output\Release;C:\Dev\Lib\matio-1.5.1\visual_studio\Release;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -47,7 +50,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Dev\Lib\Qt\4.8.3\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>QtGuid4.lib;QtCored4.lib;QtWebKitd4.lib;QtXmld4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>QtGuid4.lib;QtCored4.lib;QtWebKitd4.lib;QtXmld4.lib;cryptlib.lib;libmatio.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -91,6 +94,7 @@
     <ClCompile Include="..\shapegui.cpp" />
     <ClCompile Include="..\sourcealggui.cpp" />
     <ClCompile Include="..\useractions.cpp" />
+    <ClCompile Include="..\version.cpp" />
     <ClCompile Include="..\videoarea.cpp" />
     <ClCompile Include="..\videowidget.cpp" />
     <ClCompile Include="..\workspace.cpp" />
