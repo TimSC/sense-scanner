@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'videowidget.h'
 **
-** Created: Wed Mar 20 21:22:45 2013
+** Created: Mon Apr 8 19:26:45 2013
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.3)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -105,30 +105,31 @@ static const uint qt_meta_data_VideoWidget[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-      24,   13,   12,   12, 0x0a,
-      58,   49,   12,   12, 0x0a,
-      75,   12,   12,   12, 0x0a,
-      83,   12,   12,   12, 0x0a,
-      90,   12,   12,   12, 0x0a,
-     101,   12,   12,   12, 0x0a,
-     115,   12,   12,   12, 0x0a,
-     177,  129,   12,   12, 0x0a,
-     277,  262,   12,   12, 0x0a,
-     323,  315,   12,   12, 0x0a,
-     349,   12,   12,   12, 0x0a,
-     369,  363,   12,   12, 0x0a,
-     394,  389,   12,   12, 0x0a,
-     425,  413,   12,   12, 0x0a,
-     453,  450,   12,   12, 0x0a,
+      34,   17,   13,   12, 0x0a,
+      77,   68,   12,   12, 0x0a,
+      94,   12,   12,   12, 0x0a,
+     102,   12,   12,   12, 0x0a,
+     109,   12,   12,   12, 0x0a,
+     120,   12,   12,   12, 0x0a,
+     134,   12,   12,   12, 0x0a,
+     196,  148,   12,   12, 0x0a,
+     296,  281,   12,   12, 0x0a,
+     342,  334,   12,   12, 0x0a,
+     368,   12,   12,   12, 0x0a,
+     388,  382,   12,   12, 0x0a,
+     413,  408,   12,   12, 0x0a,
+     444,  432,   12,   12, 0x0a,
+     472,  469,   12,   12, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_VideoWidget[] = {
-    "VideoWidget\0\0src,finaIn\0"
-    "SetSource(QUuid,QString)\0newValue\0"
-    "SliderMoved(int)\0Pause()\0Play()\0"
-    "SeekBack()\0SeekForward()\0TimerUpdate()\0"
+    "VideoWidget\0\0int\0src,finaIn,error\0"
+    "SetSource(QUuid,QString,QString&)\0"
+    "newValue\0SliderMoved(int)\0Pause()\0"
+    "Play()\0SeekBack()\0SeekForward()\0"
+    "TimerUpdate()\0"
     "fr,startTimestamp,endTimestamp,requestTimestamp\0"
     "AsyncFrameReceived(QImage&,unsigned long long,unsigned long long,unsig"
     "ned long long)\0"
@@ -146,7 +147,8 @@ void VideoWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         Q_ASSERT(staticMetaObject.cast(_o));
         VideoWidget *_t = static_cast<VideoWidget *>(_o);
         switch (_id) {
-        case 0: _t->SetSource((*reinterpret_cast< QUuid(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
+        case 0: { int _r = _t->SetSource((*reinterpret_cast< QUuid(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QString(*)>(_a[3])));
+            if (_a[0]) *reinterpret_cast< int*>(_a[0]) = _r; }  break;
         case 1: _t->SliderMoved((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 2: _t->Pause(); break;
         case 3: _t->Play(); break;

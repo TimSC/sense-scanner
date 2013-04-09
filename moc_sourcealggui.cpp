@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'sourcealggui.h'
 **
-** Created: Mon Mar 11 16:17:24 2013
+** Created: Mon Apr 8 19:26:56 2013
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.3)
 **
 ** WARNING! All changes made in this file will be lost!

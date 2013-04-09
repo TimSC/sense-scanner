@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'aboutgui.ui'
 **
-** Created: Thu Mar 14 11:04:54 2013
+** Created: Mon Apr 8 19:25:41 2013
 **      by: Qt User Interface Compiler version 4.8.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -15,6 +15,7 @@
 #include <QtGui/QApplication>
 #include <QtGui/QButtonGroup>
 #include <QtGui/QHeaderView>
+#include <QtGui/QTextBrowser>
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QWidget>
 #include <QtWebKit/QWebView>
@@ -26,18 +27,26 @@ class Ui_AboutGui
 {
 public:
     QVBoxLayout *verticalLayout;
+    QTextBrowser *licenseInfo;
     WebViewErrCheck *webView;
 
     void setupUi(QWidget *AboutGui)
     {
         if (AboutGui->objectName().isEmpty())
             AboutGui->setObjectName(QString::fromUtf8("AboutGui"));
-        AboutGui->resize(400, 300);
+        AboutGui->resize(384, 409);
         verticalLayout = new QVBoxLayout(AboutGui);
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        licenseInfo = new QTextBrowser(AboutGui);
+        licenseInfo->setObjectName(QString::fromUtf8("licenseInfo"));
+        licenseInfo->setMaximumSize(QSize(16777215, 40));
+
+        verticalLayout->addWidget(licenseInfo);
+
         webView = new WebViewErrCheck(AboutGui);
         webView->setObjectName(QString::fromUtf8("webView"));
         webView->setUrl(QUrl(QString::fromUtf8("about:blank")));
+        licenseInfo->raise();
 
         verticalLayout->addWidget(webView);
 

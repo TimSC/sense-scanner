@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'scenecontroller.h'
 **
-** Created: Tue Mar 12 18:59:52 2013
+** Created: Mon Apr 8 19:26:48 2013
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.3)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -84,7 +84,7 @@ static const uint qt_meta_data_TrackingSceneController[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-      19,   14, // methods
+      24,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -106,11 +106,16 @@ static const uint qt_meta_data_TrackingSceneController[] = {
      233,   24,   24,   24, 0x0a,
      257,   24,   24,   24, 0x0a,
      274,   24,   24,   24, 0x0a,
-     299,  291,   24,   24, 0x0a,
-     337,  325,   24,   24, 0x0a,
-     362,   24,   24,   24, 0x0a,
-     382,   24,   24,   24, 0x0a,
-     397,   24,   24,   24, 0x0a,
+     291,   24,   24,   24, 0x0a,
+     311,   24,   24,   24, 0x0a,
+     334,   24,   24,   24, 0x0a,
+     365,  356,   24,   24, 0x0a,
+     407,  399,   24,   24, 0x0a,
+     445,  433,   24,   24, 0x0a,
+     470,   24,   24,   24, 0x0a,
+     490,   24,   24,   24, 0x0a,
+     505,   24,   24,   24, 0x0a,
+     519,  514,   24,   24, 0x0a,
 
        0        // eod
 };
@@ -124,10 +129,13 @@ static const char qt_meta_stringdata_TrackingSceneController[] = {
     "LoadShape(QString)\0SaveShape()\0"
     "SetShapeFromCurentFrame()\0"
     "ResetCurentFrameShape()\0LoadAnnotation()\0"
-    "SaveAnnotation()\0srcUuid\0"
-    "SetAnnotationTrack(QUuid)\0eventLoopIn\0"
-    "SetEventLoop(EventLoop*)\0RefreshCurrentPos()\0"
-    "RefreshLinks()\0Update()\0"
+    "SaveAnnotation()\0SaveAnnotationCsv()\0"
+    "SaveAnnotationMatlab()\0SaveAnnotationExcel()\0"
+    "type,ext\0ExportAnnotation(QString,QString)\0"
+    "srcUuid\0SetAnnotationTrack(QUuid)\0"
+    "eventLoopIn\0SetEventLoop(EventLoop*)\0"
+    "RefreshCurrentPos()\0RefreshLinks()\0"
+    "Update()\0mode\0SetDemoMode(int)\0"
 };
 
 void TrackingSceneController::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -150,11 +158,16 @@ void TrackingSceneController::qt_static_metacall(QObject *_o, QMetaObject::Call 
         case 11: _t->ResetCurentFrameShape(); break;
         case 12: _t->LoadAnnotation(); break;
         case 13: _t->SaveAnnotation(); break;
-        case 14: _t->SetAnnotationTrack((*reinterpret_cast< QUuid(*)>(_a[1]))); break;
-        case 15: _t->SetEventLoop((*reinterpret_cast< EventLoop*(*)>(_a[1]))); break;
-        case 16: _t->RefreshCurrentPos(); break;
-        case 17: _t->RefreshLinks(); break;
-        case 18: _t->Update(); break;
+        case 14: _t->SaveAnnotationCsv(); break;
+        case 15: _t->SaveAnnotationMatlab(); break;
+        case 16: _t->SaveAnnotationExcel(); break;
+        case 17: _t->ExportAnnotation((*reinterpret_cast< QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
+        case 18: _t->SetAnnotationTrack((*reinterpret_cast< QUuid(*)>(_a[1]))); break;
+        case 19: _t->SetEventLoop((*reinterpret_cast< EventLoop*(*)>(_a[1]))); break;
+        case 20: _t->RefreshCurrentPos(); break;
+        case 21: _t->RefreshLinks(); break;
+        case 22: _t->Update(); break;
+        case 23: _t->SetDemoMode((*reinterpret_cast< int(*)>(_a[1]))); break;
         default: ;
         }
     }
@@ -192,9 +205,9 @@ int TrackingSceneController::qt_metacall(QMetaObject::Call _c, int _id, void **_
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 19)
+        if (_id < 24)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 19;
+        _id -= 24;
     }
     return _id;
 }

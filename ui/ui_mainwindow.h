@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Wed Mar 20 21:21:51 2013
+** Created: Mon Apr 8 19:25:41 2013
 **      by: Qt User Interface Compiler version 4.8.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -44,6 +44,7 @@ public:
     QAction *actionShow;
     QAction *actionKinatomic_Home_Page;
     QAction *actionShow_Sources;
+    QAction *actionRegister;
     QWidget *centralWidget;
     QHBoxLayout *horizontalLayout;
     VideoWidget *videoWidget;
@@ -88,6 +89,8 @@ public:
         actionKinatomic_Home_Page->setObjectName(QString::fromUtf8("actionKinatomic_Home_Page"));
         actionShow_Sources = new QAction(MainWindow);
         actionShow_Sources->setObjectName(QString::fromUtf8("actionShow_Sources"));
+        actionRegister = new QAction(MainWindow);
+        actionRegister->setObjectName(QString::fromUtf8("actionRegister"));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         horizontalLayout = new QHBoxLayout(centralWidget);
@@ -107,7 +110,7 @@ public:
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 699, 23));
+        menuBar->setGeometry(QRect(0, 0, 699, 25));
         menuFile = new QMenu(menuBar);
         menuFile->setObjectName(QString::fromUtf8("menuFile"));
         menuVideo = new QMenu(menuBar);
@@ -151,6 +154,7 @@ public:
         menuHelp->addAction(actionKinatomic_Home_Page);
         menuHelp->addSeparator();
         menuHelp->addAction(actionAbout);
+        menuHelp->addAction(actionRegister);
 
         retranslateUi(MainWindow);
         QObject::connect(actionImport_Video, SIGNAL(activated()), MainWindow, SLOT(ImportVideo()));
@@ -164,6 +168,7 @@ public:
         QObject::connect(actionGetSupport, SIGNAL(activated()), MainWindow, SLOT(GetSupport()));
         QObject::connect(actionKinatomic_Home_Page, SIGNAL(activated()), MainWindow, SLOT(GetKinatomicHomePage()));
         QObject::connect(actionShow_Sources, SIGNAL(activated()), MainWindow, SLOT(ShowSourcesPressed()));
+        QObject::connect(actionRegister, SIGNAL(activated()), MainWindow, SLOT(RegisterPressed()));
 
         QMetaObject::connectSlotsByName(MainWindow);
     } // setupUi
@@ -184,6 +189,7 @@ public:
         actionShow->setText(QApplication::translate("MainWindow", "Show", 0, QApplication::UnicodeUTF8));
         actionKinatomic_Home_Page->setText(QApplication::translate("MainWindow", "Kinatomic Home Page", 0, QApplication::UnicodeUTF8));
         actionShow_Sources->setText(QApplication::translate("MainWindow", "Show Sources", 0, QApplication::UnicodeUTF8));
+        actionRegister->setText(QApplication::translate("MainWindow", "Register", 0, QApplication::UnicodeUTF8));
         menuFile->setTitle(QApplication::translate("MainWindow", "File", 0, QApplication::UnicodeUTF8));
         menuVideo->setTitle(QApplication::translate("MainWindow", "Video", 0, QApplication::UnicodeUTF8));
         menuHelp->setTitle(QApplication::translate("MainWindow", "Help", 0, QApplication::UnicodeUTF8));
