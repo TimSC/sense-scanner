@@ -425,9 +425,9 @@ void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out, int demoMode)
         encryptedBa.append(encryptedXml);
 
         QByteArray encBase64 = encryptedBa.toBase64();
-        for(int pos=0;pos<encBase64.length();pos+=512)
-            out << encBase64.mid(pos,512) << endl;
-        //out << encBase64 << endl;
+        //for(int pos=0;pos<encBase64.length();pos+=512)
+        //    out << encBase64.mid(pos,512) << endl;
+        out << encBase64 << endl;
 
         out << "</demoframe>" << endl;
     }
