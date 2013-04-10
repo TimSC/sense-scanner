@@ -201,10 +201,12 @@ int UserActions::SaveAs(QString fina)
             //Encode as XML binary blob
             QByteArray modelBase64 = ev->buffer.toBase64();
             out << "<model uid=\""<< processingUuids[i] <<"\">" << endl;
-            for(unsigned int pos=0;pos<modelBase64.length();pos+=512)
+			out << modelBase64;
+
+            /*for(unsigned int pos=0;pos<modelBase64.length();pos+=512)
             {
                 out << modelBase64.mid(pos, 512) << endl;
-            }
+            }*/
             out << "</model>" << endl;
         }
         catch(std::runtime_error err)
@@ -341,7 +343,9 @@ void UserActions::Load(QString fina)
                     QDomElement modelEle = modelNode.toElement(); // try to convert the node to an element.
                     if(modelEle.tagName() != "model") {modelNode = modelNode.nextSibling(); continue;}
 
-                    QByteArray modelData = QByteArray::fromBase64(modelEle.text().toLocal8Bit().constData());
+					QString modelEleStr(modelEle.text());
+					unsigned based64len = modelEleStr.length();
+                    QByteArray modelData = QByteArray::fromBase64(modelEleStr.toLocal8Bit().constData());
 
                     QString uidStr = modelEle.attribute("uid");
                     QUuid uid(uidStr);

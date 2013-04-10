@@ -165,13 +165,27 @@ class Worker:
 					trackerStr = pickle.dumps(trackerMinimal, protocol=pickle.HIGHEST_PROTOCOL)
 					del trackerMinimal
 
+                                        if self.workerLog is not None:
+                                                self.workerLog.write("Model pickled "+str(len(trackerStr))+"\n")
+                                		self.workerLog.flush()
+
 					#fi=open("testpickle.dat","wb")
 					#fi.write(trackerStr)
 					#fi.close()
 
 					#modelData = "bz2".encode("ascii")+bz2.compress(trackerStr)
 					modelData = "raw".encode("ascii")+trackerStr
+
+                                        if self.workerLog is not None:
+                                                self.workerLog.write("Model with header "+str(len(modelData))+"\n")
+                                		self.workerLog.flush()
+					
 					modelDataB64 = base64.b64encode(modelData)
+
+					if self.workerLog is not None:
+                                                self.workerLog.write("Base64 enc Model "+str(len(modelDataB64))+"\n")
+                                		self.workerLog.flush()
+
 					print "DATA_BLOCK={0}".format(len(modelDataB64))
 					sys.stdout.write("MODEL\n")
 					sys.stdout.flush()
@@ -224,10 +238,20 @@ class Worker:
 					#	print pid, x, y
 
 				if args[0]=="MODEL":
+                                        if self.workerLog is not None:
+                                                self.workerLog.write("Base64 size "+str(len(event[2]))+"\n")
+                                		self.workerLog.flush()
+                                        
 					binModel = base64.b64decode(event[2])
 					modelFormat = binModel[:3]
+
+					if self.workerLog is not None:
+                                                self.workerLog.write("Model size (inc 3 byte header) "+str(len(binModel))+"\n")
+                                		self.workerLog.flush()
+
 					print "Loading model from string", len(event[2]), modelFormat
-					print "Uncompressed size", len(binModel)
+					print "Compressed size", len(binModel)
+					
 					try:
 						modelData = None
 						if modelFormat == "bz2":
@@ -236,10 +260,25 @@ class Worker:
 							modelData = binModel[3:]
 						if modelFormat == "zlb":
 							modelData = zlib.decompress(binModel[3:])
-						assert modelData is not None
+						if modelFormat is None:
+                                                        raise Exception("Model type"+str(modelData))
+
+						if self.workerLog is not None:
+                                                        self.workerLog.write("Model uncompressed "+str(len(modelData))+"\n")
+                                			self.workerLog.flush()
 						
 						self.tracker = pickle.loads(modelData)
+
+						if self.workerLog is not None:
+                                                        self.workerLog.write("Model unpickled "+str(self.workerLog)+"\n")
+                                			self.workerLog.flush()
+						
 						self.tracker.PostUnPickle()
+
+						if self.workerLog is not None:
+                                                        self.workerLog.write("Model post-unpickled "+str(self.workerLog)+"\n")
+                                			self.workerLog.flush()
+                                			
 						print self.tracker
 						if self.workerLog is not None:
                                                         self.workerLog.write("Model loaded ok\n")
@@ -249,7 +288,7 @@ class Worker:
                                                 print "ERROR_LOADING_MODEL"
 						print "Decompression of data failed", str(exErr)
                                                 if self.workerLog is not None:
-                                                        self.workerLog.write("Error: Decompression of data failed\n")
+                                                        self.workerLog.write("Error: Decompression of data failed:"+str(exErr)+"\n")
                                 			self.workerLog.flush()
 
 				if args[0] == "RGB_IMAGE_AND_XML":
