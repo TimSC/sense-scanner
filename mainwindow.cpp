@@ -210,6 +210,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	this->eventLoop->AddListener("NEW_PROCESSING", *this->eventReceiver);
 	this->eventLoop->AddListener("REMOVE_PROCESSING", *this->eventReceiver);
+	this->eventLoop->AddListener("ERROR_TO_USER", *this->eventReceiver);
 
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop,1);
@@ -775,6 +776,15 @@ void MainWindow::HandleEvent(std::tr1::shared_ptr<class Event> ev)
 			newProcAdded->id = ev->id;
             this->eventLoop->SendEvent(newProcAdded);
 		}
+	}
+
+	if(ev->type=="ERROR_TO_USER")
+	{
+		if(this->errMsg == NULL)
+            this->errMsg = new QMessageBox(this);
+        this->errMsg->setWindowTitle("Error");
+        this->errMsg->setText(ev->data);
+        this->errMsg->exec();
 	}
 }
 

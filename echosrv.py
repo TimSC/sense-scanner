@@ -246,6 +246,7 @@ class Worker:
                                                         self.workerLog.write(str(self.tracker)+"\n")
                                 			self.workerLog.flush()
 					except Exception as exErr:
+                                                print "ERROR_LOADING_MODEL"
 						print "Decompression of data failed", str(exErr)
                                                 if self.workerLog is not None:
                                                         self.workerLog.write("Error: Decompression of data failed\n")

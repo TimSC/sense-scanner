@@ -542,6 +542,17 @@ void AlgorithmProcess::ProcessAlgOutput()
         return;
     }
 
+	if(cmd=="ERROR_LOADING_MODEL")
+    {
+		//Display error to user
+		std::tr1::shared_ptr<class Event> responseEv(new Event("ERROR_TO_USER"));
+        responseEv->data = "An error occured loading the model";
+        responseEv->fromUuid = this->uid;
+        this->eventLoop->SendEvent(responseEv);
+
+		this->Stop();
+	}
+
     if(cmd=="INTERNAL_ERROR")
     {
 
