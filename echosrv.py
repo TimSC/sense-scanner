@@ -33,8 +33,10 @@ class Worker:
 		self.progressClock = time.time()
 		self.aliveMsgEnabled = True
 		self.childPipeConn = childPipeConn
-		#self.workerLog = open("workerLog.txt","wt")
-		self.workerLog = None
+		try:
+        		self.workerLog = open("workerLog.txt","wt")
+                except IOError:
+                        self.workerLog = None
 		self.Run()
 
 	def Run(self):
@@ -59,7 +61,11 @@ class Worker:
 			if self.tracker is not None:
 				if not self.paused: 
 					self.tracker.Update()
-
+                        else:
+                                if self.workerLog is not None:
+                                        self.workerLog.write("Error: Null Tracker\n")
+					self.workerLog.flush()     
+                                                
 			if timeNow - self.progressClock > 1. or self.getProgress:
 				if self.tracker is not None:
 					self.progress = self.tracker.GetProgress()
@@ -235,8 +241,15 @@ class Worker:
 						self.tracker = pickle.loads(modelData)
 						self.tracker.PostUnPickle()
 						print self.tracker
+						if self.workerLog is not None:
+                                                        self.workerLog.write("Model loaded ok\n")
+                                                        self.workerLog.write(str(self.tracker)+"\n")
+                                			self.workerLog.flush()
 					except Exception as exErr:
 						print "Decompression of data failed", str(exErr)
+                                                if self.workerLog is not None:
+                                                        self.workerLog.write("Error: Decompression of data failed\n")
+                                			self.workerLog.flush()
 
 				if args[0] == "RGB_IMAGE_AND_XML":
 					#Decode image from raw data block
@@ -340,8 +353,10 @@ if __name__=="__main__":
 		msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
 		msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
-	fi = None
-	#fi = open("log.txt","wt")
+        try:
+        	fi = open("log.txt","wt")
+        except IOError:
+                fi = None
 	inputlog = None
 	#inputlog = open("inputlog.dat","wb")
 	
