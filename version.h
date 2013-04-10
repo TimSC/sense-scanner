@@ -9,7 +9,7 @@
 #define VERSION_STR "v1.0"
 #define VERSION_URL "v1.0"
 
-#define RELEASE_MODE
+//#define RELEASE_MODE
 
 class Registration
 {

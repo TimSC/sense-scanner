@@ -303,6 +303,7 @@ void TrackingAnnotationData::ReadFramesXml(QDomElement &elem)
 
 void TrackingAnnotationData::ReadDemoFramesXml(QDomElement &elem)
 {
+
     QString content = elem.text();
     int test = content.length();
     QString test2 = elem.tagName();
@@ -321,12 +322,15 @@ void TrackingAnnotationData::ReadDemoFramesXml(QDomElement &elem)
 
     //Decrypt xml
     byte *tmpBuff = new byte[encXml.length()];
-    CFB_Mode<AES>::Decryption cfbDecryption((const unsigned char*)hashedPass.c_str(), hashedPass.length(), (byte *)iv.constData());
-    cfbDecryption.ProcessData(tmpBuff, (byte *)encXml.constData(), encXml.length());
-    QByteArray encryptedBa((char *)tmpBuff, encXml.length());
+	{
+	//This is better allocated on the heap on windows release build otherwise there are secblock.h problems
+    CFB_Mode<AES>::Decryption *cfbDecryption = new CFB_Mode<AES>::Decryption((const unsigned char*)hashedPass.c_str(), hashedPass.length(), (byte *)iv.constData());
+    cfbDecryption->ProcessData(tmpBuff, (byte *)encXml.constData(), encXml.length());
+	delete cfbDecryption;
+	}
+	QByteArray encryptedBa((char *)tmpBuff, encXml.length());
+	QString framesXml = QString::fromUtf8(encryptedBa);
 	delete [] tmpBuff;
-
-    QString framesXml = QString::fromUtf8(encryptedBa);
 
     QDomDocument doc("mydocument");
     QString errorMsg;
@@ -338,6 +342,9 @@ void TrackingAnnotationData::ReadDemoFramesXml(QDomElement &elem)
     //Load points and links into memory
     QDomElement rootElem = doc.documentElement();
     this->ReadFramesXml(rootElem);
+	
+
+	
 }
 
 void TrackingAnnotationData::FrameToXml(std::vector<std::vector<float> > &frame,
@@ -414,9 +421,13 @@ void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out, int demoMode)
 
         //Encrypt xml
         QByteArray frameXmlStrUtf8 = frameXmlStr.toUtf8();
-        CFB_Mode<AES>::Encryption cfbEncryption((const unsigned char*)hashedPass.c_str(), hashedPass.length(), iv);
-        byte *encPrivKey = new byte[frameXmlStrUtf8.length()];
-        cfbEncryption.ProcessData(encPrivKey, (const byte*)frameXmlStrUtf8.constData(), frameXmlStrUtf8.length());
+		byte *encPrivKey = new byte[frameXmlStrUtf8.length()];
+		{
+		//Allocate this on the heap to be on the safe side. Might otherwise be a problem on windows release build.
+        CFB_Mode<AES>::Encryption *cfbEncryption = new CFB_Mode<AES>::Encryption((const unsigned char*)hashedPass.c_str(), hashedPass.length(), iv);
+        cfbEncryption->ProcessData(encPrivKey, (const byte*)frameXmlStrUtf8.constData(), frameXmlStrUtf8.length());
+		delete cfbEncryption;
+		}
         QByteArray encryptedXml((char *)encPrivKey, frameXmlStrUtf8.length());
 		delete [] encPrivKey;
 
