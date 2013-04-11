@@ -270,13 +270,13 @@ class Worker:
 						self.tracker = pickle.loads(modelData)
 
 						if self.workerLog is not None:
-                                                        self.workerLog.write("Model unpickled "+str(self.workerLog)+"\n")
+                                                        self.workerLog.write("Model unpickled "+str(self.tracker)+"\n")
                                 			self.workerLog.flush()
 						
-						self.tracker.PostUnPickle()
+						self.tracker.PostUnPickle(self.workerLog)
 
 						if self.workerLog is not None:
-                                                        self.workerLog.write("Model post-unpickled "+str(self.workerLog)+"\n")
+                                                        self.workerLog.write("Model post-unpickled "+str(self.tracker)+"\n")
                                 			self.workerLog.flush()
                                 			
 						print self.tracker
