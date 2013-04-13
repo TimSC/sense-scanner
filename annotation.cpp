@@ -1685,12 +1685,21 @@ int TrackingAnnotationData::SaveAnnotationMatlab(QString fileName)
     }
 
     //Write array to output file
-    size_t dims[2] = {numFrames,numPoints*2};
+
+#if defined MAT_COMPRESSION_NONE
+    //Newer matio API
     matio_compression compress = MAT_COMPRESSION_NONE;
+    size_t dims[2] = {numFrames,numPoints*2};
+    size_t dimsTi[2] = {numFrames,1};
+#else
+    //Older matio API
+    matio_compression compress = COMPRESSION_NONE;
+    int dims[2] = {numFrames,numPoints*2};
+    int dimsTi[2] = {numFrames,1};
+#endif
     matvar_t *matvar = Mat_VarCreate("pos",MAT_C_DOUBLE,MAT_T_DOUBLE,2,dims,a,0);
     Mat_VarWrite(matfp, matvar, compress);
 
-    size_t dimsTi[2] = {numFrames,1};
     matvar_t *matvar2 = Mat_VarCreate("times",MAT_C_DOUBLE,MAT_T_DOUBLE,2,dimsTi,ti,0);
     Mat_VarWrite(matfp, matvar2, compress);
 

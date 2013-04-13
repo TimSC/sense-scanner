@@ -6,8 +6,8 @@
 #include <map>
 #include <QtCore/QSettings>
 
-#define VERSION_STR "v1.0"
-#define VERSION_URL "v1.0"
+#define VERSION_STR "dev"
+#define VERSION_URL "dev-post-v1.0"
 
 //#define RELEASE_MODE
 
