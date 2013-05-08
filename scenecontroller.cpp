@@ -400,8 +400,14 @@ void TrackingSceneController::mousePressEvent(QGraphicsSceneMouseEvent *mouseEve
     if(this->mode == "MOVE" && button==Qt::LeftButton)
     {
         int nearestPoint = this->NearestPoint(pos.x(), pos.y(), currentFrame);
+
+
         this->activePoint = nearestPoint;
         this->Redraw();
+
+        std::tr1::shared_ptr<class Event> moveEv(new Event("MOVING_POINT_STARTED"));
+        moveEv->data = QString::number(this->activePoint);
+        this->eventLoop->SendEvent(moveEv);
     }
 
     if(this->mode == "ADD_POINT" && button==Qt::LeftButton)
