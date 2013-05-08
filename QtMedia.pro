@@ -29,7 +29,8 @@ SOURCES += main.cpp\
     useractions.cpp \
     applymodel.cpp \
     shapegui.cpp \
-    version.cpp
+    version.cpp \
+    imagesequence.cpp
 
 HEADERS  += mainwindow.h \
     videowidget.h \
@@ -51,7 +52,8 @@ HEADERS  += mainwindow.h \
     useractions.h \
     applymodel.h \
     shapegui.h \
-    version.h
+    version.h \
+    imagesequence.h
 
 FORMS    += mainwindow.ui \
     videowidget.ui \

@@ -303,6 +303,7 @@ void TrackingAnnotationData::ReadFramesXml(QDomElement &elem)
 
 void TrackingAnnotationData::ReadDemoFramesXml(QDomElement &elem)
 {
+
     QString content = elem.text();
     int test = content.length();
     QString test2 = elem.tagName();
@@ -320,12 +321,16 @@ void TrackingAnnotationData::ReadDemoFramesXml(QDomElement &elem)
     StringSource(SECRET_KEY, true, new HashFilter(hash, new StringSink(hashedPass)));
 
     //Decrypt xml
-    byte tmpBuff[encXml.length()];
-    CFB_Mode<AES>::Decryption cfbDecryption((const unsigned char*)hashedPass.c_str(), hashedPass.length(), (byte *)iv.constData());
-    cfbDecryption.ProcessData(tmpBuff, (byte *)encXml.constData(), encXml.length());
-    QByteArray encryptedBa((char *)tmpBuff, encXml.length());
-
-    QString framesXml = QString::fromUtf8(encryptedBa);
+    byte *tmpBuff = new byte[encXml.length()];
+	{
+	//This is better allocated on the heap on windows release build otherwise there are secblock.h problems
+    CFB_Mode<AES>::Decryption *cfbDecryption = new CFB_Mode<AES>::Decryption((const unsigned char*)hashedPass.c_str(), hashedPass.length(), (byte *)iv.constData());
+    cfbDecryption->ProcessData(tmpBuff, (byte *)encXml.constData(), encXml.length());
+	delete cfbDecryption;
+	}
+	QByteArray encryptedBa((char *)tmpBuff, encXml.length());
+	QString framesXml = QString::fromUtf8(encryptedBa);
+	delete [] tmpBuff;
 
     QDomDocument doc("mydocument");
     QString errorMsg;
@@ -337,6 +342,9 @@ void TrackingAnnotationData::ReadDemoFramesXml(QDomElement &elem)
     //Load points and links into memory
     QDomElement rootElem = doc.documentElement();
     this->ReadFramesXml(rootElem);
+	
+
+	
 }
 
 void TrackingAnnotationData::FrameToXml(std::vector<std::vector<float> > &frame,
@@ -413,19 +421,24 @@ void TrackingAnnotationData::WriteAnnotationXml(QTextStream &out, int demoMode)
 
         //Encrypt xml
         QByteArray frameXmlStrUtf8 = frameXmlStr.toUtf8();
-        CFB_Mode<AES>::Encryption cfbEncryption((const unsigned char*)hashedPass.c_str(), hashedPass.length(), iv);
-        byte encPrivKey[frameXmlStrUtf8.length()];
-        cfbEncryption.ProcessData(encPrivKey, (const byte*)frameXmlStrUtf8.constData(), frameXmlStrUtf8.length());
+		byte *encPrivKey = new byte[frameXmlStrUtf8.length()];
+		{
+		//Allocate this on the heap to be on the safe side. Might otherwise be a problem on windows release build.
+        CFB_Mode<AES>::Encryption *cfbEncryption = new CFB_Mode<AES>::Encryption((const unsigned char*)hashedPass.c_str(), hashedPass.length(), iv);
+        cfbEncryption->ProcessData(encPrivKey, (const byte*)frameXmlStrUtf8.constData(), frameXmlStrUtf8.length());
+		delete cfbEncryption;
+		}
         QByteArray encryptedXml((char *)encPrivKey, frameXmlStrUtf8.length());
+		delete [] encPrivKey;
 
         int testx = encryptedXml.length();
         QByteArray encryptedBa((char *)iv, AES::BLOCKSIZE);
         encryptedBa.append(encryptedXml);
 
         QByteArray encBase64 = encryptedBa.toBase64();
-        for(int pos=0;pos<encBase64.length();pos+=512)
-            out << encBase64.mid(pos,512) << endl;
-        //out << encBase64 << endl;
+        //for(int pos=0;pos<encBase64.length();pos+=512)
+        //    out << encBase64.mid(pos,512) << endl;
+        out << encBase64 << endl;
 
         out << "</demoframe>" << endl;
     }
@@ -1672,12 +1685,21 @@ int TrackingAnnotationData::SaveAnnotationMatlab(QString fileName)
     }
 
     //Write array to output file
+
+#if defined MAT_COMPRESSION_NONE
+    //Newer matio API
+    matio_compression compress = MAT_COMPRESSION_NONE;
+    size_t dims[2] = {numFrames,numPoints*2};
+    size_t dimsTi[2] = {numFrames,1};
+#else
+    //Older matio API
+    matio_compression compress = COMPRESSION_NONE;
     int dims[2] = {numFrames,numPoints*2};
-    int compress = 0;
+    int dimsTi[2] = {numFrames,1};
+#endif
     matvar_t *matvar = Mat_VarCreate("pos",MAT_C_DOUBLE,MAT_T_DOUBLE,2,dims,a,0);
     Mat_VarWrite(matfp, matvar, compress);
 
-    int dimsTi[2] = {numFrames,1};
     matvar_t *matvar2 = Mat_VarCreate("times",MAT_C_DOUBLE,MAT_T_DOUBLE,2,dimsTi,ti,0);
     Mat_VarWrite(matfp, matvar2, compress);
 

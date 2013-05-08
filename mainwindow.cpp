@@ -210,7 +210,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	this->eventLoop->AddListener("NEW_PROCESSING", *this->eventReceiver);
 	this->eventLoop->AddListener("REMOVE_PROCESSING", *this->eventReceiver);
-    this->eventLoop->AddListener("MOVING_POINT_STARTED", *this->eventReceiver);
+	this->eventLoop->AddListener("ERROR_TO_USER", *this->eventReceiver);
+	this->eventLoop->AddListener("MOVING_POINT_STARTED", *this->eventReceiver);
 
     //Create file reader worker thread
     this->mediaInterfaceFront = new class AvBinMedia(this->eventLoop,1);
@@ -777,13 +778,6 @@ void MainWindow::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             this->eventLoop->SendEvent(newProcAdded);
 		}
 	}
-
-    if(ev->type=="MOVING_POINT_STARTED")
-    {
-        QString msg(tr("Moving point "));
-        msg.append(ev->data);
-        this->ui->statusBar->showMessage(msg);
-    }
 }
 
 void MainWindow::Update()
