@@ -778,6 +778,13 @@ void MainWindow::HandleEvent(std::tr1::shared_ptr<class Event> ev)
             this->eventLoop->SendEvent(newProcAdded);
 		}
 	}
+
+    if(ev->type=="MOVING_POINT_STARTED")
+    {
+        QString msg(tr("Moving point "));
+        msg.append(ev->data);
+        this->ui->statusBar->showMessage(msg);
+    }
 }
 
 void MainWindow::Update()
