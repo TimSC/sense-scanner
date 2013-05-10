@@ -629,6 +629,34 @@ void MainWindow::ImportVideo()
 
 }
 
+void MainWindow::ImportImageSequence()
+{
+    //Get filename from user
+    QString fileName = QFileDialog::getOpenFileName(this,
+      tr("Import Image Sequence"), "", tr("Image Files (*.png *.jpg *.jpeg *.gif)"));
+    if(fileName.length() == 0) return;
+
+    QUuid uid = QUuid::createUuid();
+
+    //Create annotation track
+    std::tr1::shared_ptr<class Event> newAnnEv(new Event("NEW_ANNOTATION"));
+    QString dataStr = QString("%1").arg(uid.toString());
+    newAnnEv->data = dataStr.toLocal8Bit().constData();
+    newAnnEv->id = this->eventLoop->GetId();
+    this->eventLoop->SendEvent(newAnnEv);
+
+    //Wait for annotation to be ready
+    std::tr1::shared_ptr<class Event> res =
+            this->eventReceiver->WaitForEventId(newAnnEv->id);
+
+    //Set source
+    std::tr1::shared_ptr<class Event> newAnnEv2(new Event("SET_SOURCE_FILENAME"));
+    newAnnEv2->data = fileName.toLocal8Bit().constData();
+    newAnnEv2->toUuid = uid;
+    int rxcount = this->eventLoop->SendEvent(newAnnEv2);
+
+}
+
 void MainWindow::RemoveVideo()
 {
     cout << "remove" << endl;

@@ -33,7 +33,7 @@
      <x>0</x>
      <y>0</y>
      <width>699</width>
-     <height>25</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -46,6 +46,7 @@
     <addaction name="actionSave_Workspace_As"/>
     <addaction name="separator"/>
     <addaction name="actionImport_Video"/>
+    <addaction name="actionImport_Image_Sequence"/>
    </widget>
    <widget class="QMenu" name="menuVideo">
     <property name="title">
@@ -162,6 +163,11 @@
   <action name="actionRegister">
    <property name="text">
     <string>Register</string>
+   </property>
+  </action>
+  <action name="actionImport_Image_Sequence">
+   <property name="text">
+    <string>Import Image Sequence</string>
    </property>
   </action>
   <zorder>aboutDock</zorder>
@@ -385,6 +391,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionImport_Image_Sequence</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ImportImageSequence()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>349</x>
+     <y>247</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>ImportVideo()</slot>
@@ -406,5 +428,6 @@
   <slot>GetKinatomicHomePage()</slot>
   <slot>FitVideoToWindow()</slot>
   <slot>RegisterPressed()</slot>
+  <slot>ImportImageSequence()</slot>
  </slots>
 </ui>

@@ -135,6 +135,7 @@ private:
 
 public slots:
     void ImportVideo();
+    void ImportImageSequence();
     void RemoveVideo();
     void TrainModelPressed();
     void ApplyModelPressed();
