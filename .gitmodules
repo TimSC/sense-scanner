@@ -2,6 +2,3 @@
 	path = reltracker
 	url = https://github.com/TimSC/reltracker.git
 
-[submodule "PartsBasedDetectorMod"]
-	path = PartsBasedDetectorMod
-	url = https://github.com/TimSC/PartsBasedDetectorMod.git
